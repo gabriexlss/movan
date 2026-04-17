@@ -1,0 +1,77 @@
+Trabalho de Conclusão de Curso: Sistema de Gerenciamento de Transporte Escolar e Controle Financeiro
+
+Sobre o cliente:
+->Tio Renê, pai de um dos integrantes do TCC
+->motorista de transporte escolar 
+
+Descrição do Tema:  
+O cliente precisa de um sistema de organização e gerenciamento das crianças (endereço, documentação, contato, etc.) e gestão das finanças para seu trabalho de transporte escolar. 
+
+Motivo da escolha do TCC:
+Escolhemos esse tema por diversos motivos, dois destes sendo, a proximidade que temos do cliente e a necessidade dele pois o cliente atualmente necessita de utilizar de várias plataformas de diferentes empresas para realizar as suas tarefas diárias como empreendedor e motorista do próprio transporte escolar.
+
+Solução dos problemas/Problemas no nosso cliente:
+O nosso software visa simplificar a administração do empreendedorismo do nosso cliente, facilitando o acesso a informações como nomes e endereço dos clientes e controle financeiro.Diante desse contexto, este trabalho de conclusão de curso tem como justificativa a necessidade de centralizar e simplificar essas atividades. Atualmente, Tio Renê utiliza diferentes meios e plataformas para gerenciar seu negócio, o que torna o processo mais complexo, suscetível a erros e menos eficiente. Assim, torna-se relevante o desenvolvimento de uma ferramenta que integre essas funções em um único sistema, facilitando o seu dia a dia como empreendedor. 
+
+Beneficios do tema:
+Nosso projeto pode beneficiar diversos motoristas de transporte escolar de todas as regiões, já que ele não é pensado especificamente para um unico cliente e sim para um problema comum nessa essa área de trabalho.
+
+Funcionalidades do sistema:
+Entre elas, destaca-se o planejamento de rotas por meio de integração com um mapa baseado no Leaflet, permitindo que o motorista visualize o melhor caminho até a casa de seus clientes e acompanhe as condições de trânsito em tempo real. Dessa forma, será possível otimizar os trajetos realizados diariamente, economizando tempo e combustível. Além disso, o sistema contará com uma área de gerenciamento de clientes, onde o motorista poderá cadastrar novos alunos, acessar dados importantes, realizar atualizações, excluir registros e manter todas as informações organizadas em um único ambiente digital. A plataforma também permitirá a geração e envio de contratos para novos clientes, facilitando o processo de formalização do serviço prestado. Outro recurso importante será o controle financeiro, que auxiliará o motorista na organização de pagamentos e no acompanhamento geral das finanças relacionadas ao transporte escolar. Com essas ferramentas, o sistema busca tornar a gestão do negócio mais simples, prática e eficiente
+
+Objetivo do nosso projeto:
+Nesse sentido, o objetivo de nosso projeto é desenvolver uma plataforma web denominada Movan, voltada para o gerenciamento de serviços de transporte escolar. O sistema será projetado inicialmente com base nas necessidades específicas do Tio Renê, buscando resolver problemas relacionados à organização de clientes, planejamento de rotas e controle financeiro. Para isso, a plataforma reunirá, de forma integrada, funcionalidades essenciais que permitam ao motorista acessar informações importantes, organizar atendimentos e acompanhar aspectos financeiros de maneira prática. 
+
+/////////////////////////////////////////////////////////////////////////////
+INTRODUÇÃO: 
+	Nos últimos anos, pequenos empreendedores brasileiros têm investido na informatização e em novas ferramentas digitais. De acordo com o Sebrae, 44% dos micro e pequenos negócios já usam aplicativos e sites em suas operações diárias (SEBRAE, 2025), esse processo é essencial para elevar a competitividade, agilizar tarefas e cortar custos. No entanto, essa realidade ainda não é plenamente aplicada em todos os setores, no transporte escolar, por exemplo, muitos profissionais ainda realizam a organização do trabalho de forma manual. Esse é o caso do motorista de transporte escolar Tio Renê, cliente deste projeto, que enfrenta dificuldades no controle de informação dos alunos, na organização de rotas e na gestão financeira de seu serviço. 
+	Diante desse contexto, este trabalho de conclusão de curso tem como justificativa a necessidade de centralizar e simplificar essas atividades. Atualmente, Tio Renê utiliza diferentes meios e plataformas para gerenciar seu negócio, o que torna o processo mais complexo, suscetível a erros e menos eficiente. Assim, torna-se relevante o desenvolvimento de uma ferramenta que integre essas funções em um único sistema, facilitando o seu dia a dia como empreendedor. 
+	Nesse sentido, o objetivo de nosso projeto é desenvolver uma plataforma web denominada Movan, voltada para o gerenciamento de serviços de transporte escolar. O sistema será projetado inicialmente com base nas necessidades específicas do Tio Renê, buscando resolver problemas relacionados à organização de clientes, planejamento de rotas e controle financeiro. Para isso, a plataforma reunirá, de forma integrada, funcionalidades essenciais que permitam ao motorista acessar informações importantes, organizar atendimentos e acompanhar aspectos financeiros de maneira prática. 
+Embora o sistema seja desenvolvido a partir do estudo de caso do cliente, o Movan não se limita ao seu uso individual. A proposta é que a plataforma possa ser utilizada por outros motoristas de transporte escolar que enfrentam desafios semelhantes, ampliando seu impacto e aplicabilidade. Dessa forma, o projeto busca contribuir para a modernização desse setor, oferecendo uma solução acessível e adaptável a diferentes realidades profissionais. 
+	Por fim, espera-se que o desenvolvimento desse projeto demonstre como a tecnologia pode atuar como aliada de pequenos empreendedores, promovendo maior eficiência na gestão dos seus negócios e, além disso, incentivar a adoção de ferramentas digitais no setor de transporte escolar, evidenciando os benefícios da organização, integração de informações e otimização de processos no cotidiano desses profissionais. 
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+PROBLEMATIZAÇÃO:
+	Atualmente, muitos profissionais que atuam no transporte escolar enfrentam dificuldades relacionadas à organização de suas atividades diárias, principalmente quando não utilizam sistemas integrados para auxiliar na gestão do seu trabalho. No caso do cliente deste projeto, Tio Renê, essas dificuldades se tornam evidentes no controle das informações dos alunos, na organização das rotas e na administração financeira de seu serviço.
+	Um dos principais problemas identificados está na forma como os dados dos clientes são armazenados. Informações importantes como endereço, contato e documentação das crianças ficam distribuídas em diferentes meios, o que dificulta o acesso rápido e organizado a esses dados. Isso pode gerar atrasos, falhas de comunicação e até mesmo perda de informações relevantes para a prestação do serviço. 
+	Ademais, a organização das rotas é realizada de forma pouco otimizada, sem o auxílio de uma ferramenta que considere fatores como trânsito em tempo real e melhor trajeto. Essa situação pode resultar em percursos mais longos, maior gasto de combustível e atrasos no transporte dos alunos, impactando diretamente na qualidade do serviço oferecido. 
+	Por fim, outra dificuldade encontrada é no controle financeiro, que atualmente não é feito de maneira centralizada. A utilização de diferentes plataformas ou métodos manuais torna o processo mais confuso e sujeito a erros, dificultado o acompanhamento de pagamentos, despesas e lucros.
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+OBJETIVOS:
+1.Objetivo geral:
+	Desenvolver uma plataforma web chamada Movan, com a finalidade de centralizar e otimizar o gerenciamento de serviços de transporte escolar, bem como divulgar os serviços prestados.
+
+2.Objetivos específicos: 
+	Desenvolver uma interface simples, intuitiva e acessível, facilitando a utilização do sistema por usuários com diferentes níveis de familiaridade com a tecnologia;
+	Cadastrar dados importantes de responsáveis e alunos, permitindo o acesso a informações importantes de maneira organizada;
+	Implementar o planejamento de rotas com integração a serviços de mapas;
+	Possibilitar a assinatura de contratos; 
+	Permitir a verificação de pagamentos;
+	Viabilizar o controle de finanças relacionadas ao transporte escolar;
+	Auxiliar na divulgação do serviço do Tio Renê por meio de nossa plataforma; 
+	Estruturar o sistema de forma que possa ser utilizado por outros profissionais da área; 
+	Realizar testes com base na necessidade do cliente, a fim de garantir que a solução desenvolvida atenda de forma eficiente aos problemas identificados.
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+JUSTIFICATIVA:
+	A modernização e a otimização da gestão de serviços de transporte escolar tornam-se cada vez mais necessárias diante das exigências atuais por maior eficiência, organização e qualidade na prestação de serviços. Nesse contexto, destaca-se a importância da utilização de sistemas integrados, capazes de centralizar informações e automatizar tarefas. A ausência dessas ferramentas pode resultar em perda de dados e dificuldades na organização das atividades, evidenciando a necessidade de soluções tecnológicas que atendam às demandas desse setor.
+	Diante dessas necessidades, justifica-se o desenvolvimento do sistema Movan, uma plataforma web voltada à gestão de serviços de transporte escolar. O sistema irá integrar funcionalidades como cadastro de clientes, planejamento de rotas com base em dados de trânsito em tempo real e controle financeiro. Dessa forma, busca-se proporcionar maior organização, agilidade no acesso às informações e maior confiabilidade na gestão dos dados.
+	Além disso, o desenvolvimento deste projeto também se justifica pela oportunidade de aplicar, na prática, os conhecimentos adquiridos ao longo do curso técnico de Desenvolvimento de Sistemas, envolvendo conceitos de programação, banco de dados e lógica. Dessa forma, o trabalho contribui não apenas para a solução de um problema real, relacionado ao nosso cliente tio Renê, mas também para a consolidação do aprendizado dos integrantes do grupo.   
+///////////////////////////////////////////////////////////////////////////// 
+
+///////////////////////////////////////////////////////////////////////////// 
+HIPÓTESES:
+	Parte-se da hipótese de que o desenvolvimento da plataforma web Movan contribuirá significativamente para a melhoria da gestão dos serviços de transporte escolar, especialmente no caso do cliente Tio Renê, ao atender os objetivos específicos propostos. 
+	Espera-se que, ao desenvolver uma interface simples, intuitiva e acessível, o sistema facilite sua utilização, mesmo por usuários com pouca familiaridade com tecnologia, promovendo maior autonomia do motorista na gestão do seu negócio. Dessa forma, o cadastro organizado de dados de responsáveis e alunos deverá permitir o acesso rápido e eficiente às informações, reduzindo erros e melhorando a comunicação com os clientes. 
+	Além disso, a implementação do planejamento de rotas com integração a serviços de mapas possibilitará a otimização dos trajetos, resultando na economia de tempo e combustível, além da redução de atrasos. A funcionalidade de assinaturas de contratos deverá tornar o processo de formalização mais ágil e seguro, enquanto a verificação de pagamentos e o controle financeiro permitirão uma melhor organização das finanças, proporcionando maior clareza sobre lucros e despesas. 
+	Outro ponto relevante é que a plataforma poderá auxiliar na divulgação do serviço do cliente, ampliando sua visibilidade e potencial de captação de novos clientes. Ademais, ao estruturar o sistema de forma adaptável, espera-se que ele possa ser utilizado por outros profissionais da área, ampliando seu impacto. 
+	Por fim, a realização de testes com base nas necessidades do cliente contribuirá para garantir que o sistema atenda de forma eficiente às demandas identificadas, tendo como resultado esperado uma solução prática, confiável e adequada a realidade do transporte escolar. 
+///////////////////////////////////////////////////////////////////////////// 
+
+
+
+
