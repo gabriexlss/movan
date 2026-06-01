@@ -3,19 +3,15 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import './App.css'
 
 import Header from './components/header'
+import Footer from './components/footer'
 
 function App() {
 
   return (
-    <>
     <BrowserRouter>
-      <Routes>
-        <Route path="*" element={<Header />} />
-        {/* <Route path="*" element={<DivElemento />} />
-        <Route path="*" element={<Footer />} /> */}
-      </Routes>
+        <Header />
+        <Footer />
     </BrowserRouter>
-    </>
   )
 }
 
