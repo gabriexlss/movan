@@ -1,0 +1,46 @@
+.header{
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.blue-stain{
+    width: 100%;
+    display: block;
+}
+
+.yellow-stain{
+    position: absolute;
+    right: 0;
+    top: 15%;
+    width: 57.53%;
+    height: auto;
+}
+
+.texto-titulo{
+    position: absolute;
+    text-align: center;
+    top: 53%;
+    left: 20%;
+    transform: translate(-50%, -50%);
+    color: #FFC33A;
+}
+
+h1, #movan{
+    font-size: 18pt;
+    font-family: 'TAN Nimbus';
+    font-weight: normal;
+    line-height: 1;
+
+    #movan-span{
+        color: #FFFFFF;
+    }
+}
+
+p, #subtitulo{
+    text-align: center;
+    font-family: 'Bree Serif', serif;
+    font-size: 9pt;
+    font-weight: lighter;
+    color: #FFFFFF;
+}

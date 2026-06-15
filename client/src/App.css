@@ -1,0 +1,37 @@
+@font-face {
+  font-family: 'Bree Serif';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/Bree_Serif/BreeSerif-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Merriweather Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/Merriweather_Sans/static/MerriweatherSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/Poppins/Poppins-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'TAN Nimbus';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/TAN-Nimbus/TAN-NIMBUS.woff') format('woff');
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #FFFFFF;
+}
