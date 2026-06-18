@@ -1,7 +1,7 @@
 {
-  "name": "server-base",
+  "name": "movan-server",
   "version": "1.0.0",
-  "description": "Boilerplate/base template for Express + TypeScript API",
+  "description": "Backend API for Movan application",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {

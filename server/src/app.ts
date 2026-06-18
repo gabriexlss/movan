@@ -4,7 +4,7 @@ import mainRoutes from './mainRoutes.js';
 
 const app: Application = express();
 
-// Processa as origens do CORS a partir do .env, coloquei um try pra tentar previnir erros
+// Processa as origens do CORS a partir do .env (com tratamento de erro para evitar crash)
 const allowedOrigins = (() => {
   const originEnv = process.env['CORS_ORIGEM'];
   if (!originEnv) return [];
@@ -14,7 +14,7 @@ const allowedOrigins = (() => {
     // Caso não seja um JSON válido (ex: uma única string), retorna a string diretamente
     return originEnv;
   }
-});
+})();
 
 // Habilita o básico de CORS permitindo as origens configuradas
 app.use(cors({

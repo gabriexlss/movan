@@ -6,7 +6,7 @@ import { Router } from 'express';
 const router = Router();
 
 // Exemplo de teste de rota
-router.use('/health', (req, res) => {
+router.get('/health', (req, res) => {
     res.status(200).json({ message: 'OK' });
 });
 
