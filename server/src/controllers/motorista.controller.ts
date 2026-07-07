@@ -29,10 +29,9 @@ export const controllerMotorista = {
             const valores = [nome, cnpj, email, senhahash]
             
             // finalmente pega os dados e faz o insert no banco de dados
+            await database.query(query, valores)
             return res.status(201).json({
-                msg: "Motorista criado com sucesso!",
-                query,
-                valores
+                msg: "Motorista criado com sucesso!"
             })
         }catch(erro){
             // tratamento de dados, basicamente da uma mensagem no console do servidor com o erro onde nenhum usuario ve e pro usuario manda uma msg bonitinha
