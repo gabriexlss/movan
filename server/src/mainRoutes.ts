@@ -1,13 +1,14 @@
 import { Router } from 'express';
-
-// Exemplo de importação de rota
-// import exampleRoute from './routes/example.route.js';
+import rotasMotorista from './routes/motorista.route.js';
 
 const router = Router();
 
-// Exemplo de teste de rota
+// Rota de teste para verificar se o servidor está funcionando corretamente
 router.get('/health', (req, res) => {
     res.status(200).json({ message: 'OK' });
 });
+
+// Rota para os endpoints relacionados aos motoristas(usuario)
+router.use('/motorista', rotasMotorista);
 
 export default router;
