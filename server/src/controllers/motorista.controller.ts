@@ -21,7 +21,7 @@ export const controllerMotorista = {
         const {nome, cnpj, email, senha} = dadosBrutos.data
         
         // transformando em hash a senha original do usuario
-        const senhahash = bcrypt.hash(senha, 10)
+        const senhahash = await bcrypt.hash(senha, 10)
         
         //salvando arquivos no banco de dados
         try{
