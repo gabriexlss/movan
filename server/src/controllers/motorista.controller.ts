@@ -20,6 +20,24 @@ export const controllerMotorista = {
         // separando os dados
         const {nome, cnpj, email, senha} = dadosBrutos.data
         
+        try{
+            // checando se esse email ja existe no banco de dados
+            const query = "SELECT id FROM motorista WHERE email = $1"
+            const valores = [email]
+            const { rows } = await database.query(query, valores)
+
+            if(rows.length > 0){
+                return res.status(409).json({
+                    msg: "Este Email já esta cadastrado no movan."
+                })
+            }
+        }catch(erro){
+            console.error("Erro ao verificar se usuario já existe, ", erro)
+            return res.status(500).json({
+                msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
+            })
+        }
+
         // transformando em hash a senha original do usuario
         const senhahash = await bcrypt.hash(senha, 10)
         
