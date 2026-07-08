@@ -2,20 +2,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './footer.css';
 
-import {ReactComponent as iconHome} from '../assets/media/icons/icon-home.svg';
-import {ReactComponent as iconFinanceiro} from '../assets/media/icons/icon-carteira.svg';
-import {ReactComponent as iconClientes} from '../assets/media/icons/icon-clientes.svg';
-import {ReactComponent as iconRotas} from '../assets/media/icons/icon-routes.svg';
-import {ReactComponent as iconPerfil} from '../assets/media/icons/icon-perfil.svg';
+import { GoHome } from 'react-icons/go';
+import { MdOutlineAccountBalanceWallet } from 'react-icons/md';
+import { BsFillPeopleFill } from 'react-icons/bs';
+import { MdAltRoute } from 'react-icons/md';
+import { CgProfile } from 'react-icons/cg';
 
 const footer = () => {
 
     const navFooter = [
-        {to: '/', label: 'Home', icon: iconHome},
-        {to: '/financeiro', label: 'Financeiro', icon: iconFinanceiro},
-        {to: '/rota', label: 'Rota', icon: iconRotas},
-        {to: '/clientes', label: 'Clientes', icon: iconClientes},
-        {to: '/perfil', label: 'Perfil', icon: iconPerfil}
+        {to: '/', label: 'Home', icon: GoHome},
+        {to: '/financeiro', label: 'Financeiro', icon: MdOutlineAccountBalanceWallet},
+        {to: '/rota', label: 'Rota', icon: MdAltRoute},
+        {to: '/clientes', label: 'Clientes', icon: BsFillPeopleFill},
+        {to: '/perfil', label: 'Perfil', icon: CgProfile}
     ];
 
     return (

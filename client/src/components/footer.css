@@ -5,6 +5,7 @@
     position: fixed;
     bottom: 0;
     box-shadow: 10px 10px 10px 12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
 }
 
 nav{
@@ -31,11 +32,38 @@ nav{
     font-weight: 900;
     color: #7A7A7A;
 
-    padding-top: 15px;
+    margin-top: 15px;
     transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.footer-link::before{
+    content: '';
+    position: absolute;
+    top: -5px;
+    width: 70%;
+    height: 2px;
+    border-radius: 2px;
+    background-color: #0D47A1;
+
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+.footer-link:hover::before{
+    transform: scaleX(1);
 }
 
 .footer-link:hover{
     transform: scale(1.1);
     color: #0D47A1;
+}
+
+.footer-link:focus{
+    transform: scale(1.1);
+    color: #0D47A1;
+}
+
+.footer-link:focus::before{
+    transform: scaleX(1);
 }
