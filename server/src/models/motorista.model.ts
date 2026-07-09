@@ -8,7 +8,8 @@ export const MotoristaSchema = z.object({
     nome: z.string("Não é uma String").min(3, "Nome muito Curto").max(50, "Nome muito Longo"),
     senha: z.string("Não é uma String"),
     verificado: z.boolean("Não é um Booleano"),
-    data_exclusao: z.string("Não é uma String").datetime("Não é uma Data Valida").nullish()
+    data_exclusao: z.string("Não é uma String").datetime("Não é uma Data Valida").nullish(),
+    login: z.string("Não é uma String").min(3, "Credenciais de Login muito curtas").max(255, "Credenciais de Login muito longas")
 });
 // Modelo Referente a Criação do Motorista
 export const CriarMotoristaSchema = MotoristaSchema.pick({
@@ -17,4 +18,9 @@ export const CriarMotoristaSchema = MotoristaSchema.pick({
     email: true,
     senha: true
 });
+export const LoginMotoristaSchema = MotoristaSchema.pick({
+    login: true,
+    senha: true
+})
+export type LoginMotorista = z.infer<typeof LoginMotoristaSchema>
 export type CriarMotorista = z.infer<typeof CriarMotoristaSchema>

@@ -1,12 +1,11 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema } from "../models/motorista.model.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
 import { gerarCodigo } from "../utils/mandarCodigo.js"
 
 // Função pra verificar email ou cnpj
 const verificarEmailouCNPJ = async (dado: string, tipo: string) => {
-
     // verifica se ambos os dados foram enviados
     if(!dado || !tipo) throw new Error("Algum dos dados está faltante")
         
@@ -15,15 +14,14 @@ const verificarEmailouCNPJ = async (dado: string, tipo: string) => {
             const query = `SELECT id FROM motorista WHERE ${tipo} = $1`
             const valores = [dado]
             const { rows } = await database.query(query, valores)
-
             if(rows.length > 0){
-                return false
+                const id = rows[0].id
+                return id
             }
+            return undefined
         }catch(erro){
-            console.error("Erro ao verificar se usuario já existe, ", erro)
             throw new Error("Erro ao verificar no Banco de Dados", { cause: erro })
         }
-        return true
 }
 
 // Criando o Controller do motorista
@@ -47,13 +45,13 @@ export const controllerMotorista = {
         // Verifica se Email ou CNPJ ja estão cadastrados
         try{
             const responseEmail = await verificarEmailouCNPJ(email, "email")
-            if(!responseEmail) {
+            if(responseEmail) {
                 return res.status(409).json({
                     msg: "Email Já Cadastrado no Movan."
                 })
             }
             const responseCnpj = await verificarEmailouCNPJ(cnpj, "cnpj")
-            if(!responseCnpj) {
+            if(responseCnpj) {
                 return res.status(409).json({
                     msg: "CNPJ Já Cadastrado no Movan."
                 })
@@ -86,7 +84,7 @@ export const controllerMotorista = {
 
         try{
             // enviar o email com o codigo pro usuario
-            const response = await gerarCodigo(email, "criar", userId)
+            const response = await gerarCodigo(email, "criação", userId)
             if(!response) throw new Error
             return res.status(201).json({
                 msg: "Motorista criado com sucesso!"
@@ -105,5 +103,56 @@ export const controllerMotorista = {
                 msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
             })
         }
+    },
+    // Controller para realizar o login do motorista usando cnpj ou email
+    loginMotorista: async (req: Request, res: Response) => {
+        // Dados esperados: senha, cnpj ou email
+        const dados = LoginMotoristaSchema.safeParse(req.body)
+
+        // Validação pra ver se todos os dados são validos
+        if(!dados.success){
+            return res.status(400).json({
+                msg: "Dados Invalidos para login do motorista",
+                erro: dados.error.format()
+            })
+        }
+        // Separando os dados já validados em constantes individuais
+        const {login, senha } = dados.data
+
+        let id: number | undefined // variavel pra guardar o id do usuario encontrado, caso ele seja encontrado.
+
+        // Com a Credencial de login, primeiro tenta ver se ela é um cnpj e tenta achar algum cliente com esse cnpj
+        try{
+            const response = await verificarEmailouCNPJ(login, "cnpj")
+            if(response) id = response
+        }catch(erro){
+            console.error("Erro ao Verificar Credencial do usuario, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
+            })
+        }
+        if(!id){
+            // Com a Credencial de login, agora tenta ver se é um email ja que não é um cnpj
+        try{
+            const response = await verificarEmailouCNPJ(login, "email")
+            if(response) id = response
+        }catch(erro){
+            console.error("Erro ao Verificar Credencial do usuario, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
+            })
+        }
+        }
+
+        // Agora que ambos email e cnpj foram checados, se nenhum deles tiver sido verdadeiro é pq o usuario não existe
+        if(!id){
+            return res.status(404).json({
+                msg: "Nenhum Usuario Encontrado com o Email ou CNPJ Fornecidos"
+            })
+        }
+
+        return res.status(200).json({
+            msg: "Até aqui, tudo ok, ID: ", id
+        })
     }
 }
