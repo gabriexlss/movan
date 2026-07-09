@@ -3,6 +3,7 @@ import { CriarMotoristaSchema, LoginMotoristaSchema } from "../models/motorista.
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
 import { gerarCodigo } from "../utils/mandarCodigo.js"
+import jwt from "jsonwebtoken"
 
 // Função pra verificar email ou cnpj
 const verificarEmailouCNPJ = async (dado: string, tipo: string) => {
@@ -151,8 +152,38 @@ export const controllerMotorista = {
             })
         }
 
-        return res.status(200).json({
-            msg: "Até aqui, tudo ok, ID: ", id
+        // Pega o hash de senha usando o id do usuario e guarda numa variavel
+        try{
+            const query = "SELECT senha FROM motorista WHERE id = $1"
+            const valores = [id]
+
+            const { rows } = await database.query(query, valores)
+            const hashNoBanco = rows[0].senha
+
+            // Compara a senha digitada pelo usuario com a senha salva no banco de dados e retorna true ou false
+            const senhaValida = await bcrypt.compare(senha, hashNoBanco)
+
+            if(!senhaValida){
+                return res.status(400).json({
+                    msg: "Senha Invalida"
+                })
+            }
+        }catch(erro){
+            console.error("Erro ao puxar hash de senha salva no banco de dados, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
+            })
+        }
+        // se chegou até aqui, o usuario foi encontrado e sua senha é valida, então só dar seu cookie.
+        const token = jwt.sign({id}, `${process.env['SEGREDO_JWT']}`, {expiresIn: '30d'})
+
+        return res.status(200).cookie('token', token, {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
+        }).json({
+            msg: "Login Realizado com Sucesso."
         })
     }
 }
