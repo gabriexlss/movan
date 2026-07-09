@@ -2,9 +2,8 @@ import { Link } from 'react-router-dom';
 import './footer.css';
 
 import { GoHome } from 'react-icons/go';
-import { MdOutlineAccountBalanceWallet } from 'react-icons/md';
+import { MdAltRoute, MdOutlineAccountBalanceWallet } from 'react-icons/md';
 import { BsFillPeopleFill } from 'react-icons/bs';
-import { MdAltRoute } from 'react-icons/md';
 import { CgProfile } from 'react-icons/cg';
 
 const footer = () => {
