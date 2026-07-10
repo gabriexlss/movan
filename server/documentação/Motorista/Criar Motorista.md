@@ -36,4 +36,4 @@ Endpoint referente a criação do motorista, ou, usuário.
 ## Status
 - 201: Motorista Criado com sucesso
 - 400: Dados Faltando ou enviados de forma incorreta
-- 500: Erro na hora de salvar no banco de dados
+- 500: Erro na hora de salvar no banco de dados por Erro interno do servidor, se der esse status me manda mensagem
