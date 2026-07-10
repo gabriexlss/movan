@@ -96,7 +96,7 @@ export const controllerMotorista = {
             try{
                 const query = "DELETE FROM motorista WHERE id = $1"
                 const valores = [userId]
-                database.query(query, valores)
+                await database.query(query, valores)
             }catch(erro){
                 console.error("ERRO AO DELETAR USUARIO, ERRO: ", erro)
             }

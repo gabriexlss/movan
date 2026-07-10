@@ -29,7 +29,7 @@ export const gerarCodigo = async (email: string, tipo: string, id: number) => {
             from: "Movan <noreply@movan.org>",
             to: email,
             subject: "Código de Verificação do Movan",
-            html: `<p>Olá! Seu código de verificação do movan é</p> <br> <b><h2>${codigo}<h2><b>`,
+            html: `<p>Olá! Seu código de verificação do Movan é:</p><h2><b>${codigo}</b></h2>`,
         });
         if(response.error) throw new Error(response.error.message)
     }catch(erro: unknown){
