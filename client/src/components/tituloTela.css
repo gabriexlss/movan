@@ -1,0 +1,22 @@
+.TituloTela-container{
+    margin-top: 1.5rem;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.titulo{
+    color: #07368A;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+}
+
+.subtitulo{
+    color: #7A7A7A;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: 0.75rem;
+    margin-top: 0.1rem;
+}
+

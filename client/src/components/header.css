@@ -12,22 +12,22 @@
 .yellow-stain{
     position: absolute;
     right: 0;
-    top: 15%;
-    width: 57.53%;
+    top: 0.75rem;
+    width: 15rem;
     height: auto;
 }
 
 .texto-titulo{
     position: absolute;
     text-align: center;
-    top: 53%;
-    left: 20%;
+    top: 2.75rem;
+    left: 5rem;
     transform: translate(-50%, -50%);
     color: #FFC33A;
 }
 
 h1, #movan{
-    font-size: 18pt;
+    font-size: 1.5rem;
     font-family: 'TAN Nimbus';
     font-weight: normal;
     line-height: 1;
@@ -40,7 +40,7 @@ h1, #movan{
 p, #subtitulo{
     text-align: center;
     font-family: 'Bree Serif', serif;
-    font-size: 9pt;
+    font-size: 0.75rem;
     font-weight: lighter;
     color: #FFFFFF;
 }
