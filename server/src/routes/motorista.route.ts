@@ -18,4 +18,6 @@ router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {
         verificado
     })
 })
+// Rota para enviar um codigo (ou reenviar) tanto pra criação de conta quanto pra recuperação da conta
+router.post('/codigo/:tipo', middlewareAutenticar, controllerMotorista.enviarCodigo)
 export default router;

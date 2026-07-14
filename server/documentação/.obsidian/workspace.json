@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "1d2727cc1982a944",
+        "id": "704d97c51ad27e21",
         "type": "tabs",
         "children": [
           {
-            "id": "6d0c6adf018e1977",
+            "id": "b8067b5f3e2ef0b5",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Motorista/Criar Motorista.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "Nova aba"
+              "title": "Criar Motorista"
             }
           }
         ]
@@ -30,19 +34,6 @@
         "id": "e79d5fe131dfe590",
         "type": "tabs",
         "children": [
-          {
-            "id": "ea55160a16e6095e",
-            "type": "leaf",
-            "state": {
-              "type": "file-explorer",
-              "state": {
-                "sortOrder": "alphabetical",
-                "autoReveal": false
-              },
-              "icon": "lucide-folder-closed",
-              "title": "Explorador de arquivos"
-            }
-          },
           {
             "id": "2009dc5c3048339f",
             "type": "leaf",
@@ -68,6 +59,19 @@
               "state": {},
               "icon": "lucide-bookmark",
               "title": "Marcadores"
+            }
+          },
+          {
+            "id": "cbdc5a1725025fb6",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de arquivos"
             }
           }
         ]
@@ -176,12 +180,13 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "6d0c6adf018e1977",
+  "active": "b8067b5f3e2ef0b5",
   "lastOpenFiles": [
+    "Motorista.md",
+    "2026-07-14.md",
     "Motorista/Login do Motorista.md",
     "Health.md",
     "Bem-vindo.md",
-    "Motorista.md",
     "Motorista/Criar Motorista.md",
     "Motorista"
   ]

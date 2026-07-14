@@ -192,5 +192,38 @@ export const controllerMotorista = {
         }).json({
             msg: "Login Realizado com Sucesso."
         })
+    },
+    enviarCodigo: async (req: Request, res: Response) => {
+        const id = req.userId
+        const { tipo } = req.params
+        if(!tipo) {
+            return res.status(400).json({
+                msg: "Erro Interno do Servidor.",
+                erro: "Falta de tipo nos parametros da requisição"
+            })
+        }
+        if(tipo !== "criação" && tipo !== "recuperação"){
+            return res.status(400).json({
+                msg: "Erro Interno do Servidor",
+                erro: "Tipo não corresponde nem a criação nem a recuperação de conta"
+            })
+        }
+        try{
+            const query = "SELECT email FROM motorista WHERE id = $1"
+            const valores = [id]
+
+            const { rows } = await database.query(query, valores)
+            const email = rows[0].email
+            const response = await gerarCodigo(email, tipo, id)
+            if(!response) throw new Error("Erro ao Enviar o codigo de verificação")
+            return res.status(200).json({
+                msg: `Código para ${tipo} da conta enviado com sucesso.`
+            })
+        }catch(erro){
+            console.error("Erro na rota de enviarCodigo, Erro:", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
     }
 }
