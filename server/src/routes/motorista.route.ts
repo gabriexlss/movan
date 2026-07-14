@@ -11,9 +11,11 @@ router.post('/login', controllerMotorista.loginMotorista)
 
 router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {
     const id = req.userId
+    const verificado = req.verificado
     return res.status(200).json({
         msg: "deu certo",
-        id
+        id,
+        verificado
     })
 })
 export default router;
