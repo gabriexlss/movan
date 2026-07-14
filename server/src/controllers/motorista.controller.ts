@@ -6,7 +6,7 @@ import { gerarCodigo } from "../utils/mandarCodigo.js"
 import jwt from "jsonwebtoken"
 
 // Função pra verificar email ou cnpj
-const verificarEmailouCNPJ = async (dado: string, tipo: string) => {
+const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
     // verifica se ambos os dados foram enviados
     if(!dado || !tipo) throw new Error("Algum dos dados está faltante")
         
@@ -164,7 +164,7 @@ export const controllerMotorista = {
             const senhaValida = await bcrypt.compare(senha, hashNoBanco)
 
             if(!senhaValida){
-                return res.status(400).json({
+                return res.status(401).json({
                     msg: "Senha Invalida"
                 })
             }
@@ -175,7 +175,14 @@ export const controllerMotorista = {
             })
         }
         // se chegou até aqui, o usuario foi encontrado e sua senha é valida, então só dar seu cookie.
-        const token = jwt.sign({id}, `${process.env['SEGREDO_JWT']}`, {expiresIn: '30d'})
+        const segredoJWT = process.env['SEGREDO_JWT']
+        if(!segredoJWT){
+            console.error("Segredo JWT Ausente no ENV")
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
+        const token = jwt.sign({id}, segredoJWT, {expiresIn: '30d'})
 
         return res.status(200).cookie('token', token, {
             httpOnly: true,
