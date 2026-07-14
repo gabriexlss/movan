@@ -22,6 +22,16 @@ export const gerarCodigo = async (email: string, tipo: string, id: number) => {
     }catch(erro){
         throw new Error("Erro ao Salvar Codigo no Banco de Dados", { cause: erro });
     }
+    // Define o codigo html para enviar o email
+    let htmlcod:string
+    switch(tipo){
+        case "criação": htmlcod = `<p>Olá! Seu código de verificação para criar sua conta do Movan é:</p><h2><b>${codigo}</b></h2>`
+        break
+        case "recuperação": htmlcod = `<p>Olá! Seu código de verificação para recuperar sua senha do Movan é:</p><h2><b>${codigo}</b></h2>`
+        break
+        default: throw new Error("tipo invalido")
+    }
+
     // Manda o Email com o codigo pro destinatario
     try{
         const resend = new Resend(process.env['RESEND_API_KEY']);
@@ -29,7 +39,7 @@ export const gerarCodigo = async (email: string, tipo: string, id: number) => {
             from: "Movan <noreply@movan.org>",
             to: email,
             subject: "Código de Verificação do Movan",
-            html: `<p>Olá! Seu código de verificação do Movan é:</p><h2><b>${codigo}</b></h2>`,
+            html: htmlcod,
         });
         if(response.error) throw new Error(response.error.message)
     }catch(erro: unknown){
