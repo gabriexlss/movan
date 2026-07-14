@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import mainRoutes from './mainRoutes.js';
+import cookieParser from 'cookie-parser';
 
 const app: Application = express();
 
@@ -22,6 +23,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true
 }));
+// Necessario para o servidor conseguir ler cookies
+app.use(cookieParser())
 
 // Necessário para o servidor conseguir ler o corpo das requisições (req.body) em JSON
 app.use(express.json());
