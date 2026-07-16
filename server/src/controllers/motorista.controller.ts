@@ -193,9 +193,13 @@ export const controllerMotorista = {
             msg: "Login Realizado com Sucesso."
         })
     },
+    // rota para pegar o id do usuario logado e o tipo de codigo que ele quer receber (criação ou recuperação)
     enviarCodigo: async (req: Request, res: Response) => {
         const id = req.userId
+        // pega o tipo de codigo que ele quer enviar por meio das parametros da rota, tipo motorista/codigo/criação
         const { tipo } = req.params
+
+        // se o tipo não for indicado ou não for nem criação ou recuperação, dá erro de bad request
         if(!tipo) {
             return res.status(400).json({
                 msg: "Erro Interno do Servidor.",
@@ -209,11 +213,13 @@ export const controllerMotorista = {
             })
         }
         try{
+            // pega o email do motorista por meio do ID
             const query = "SELECT email FROM motorista WHERE id = $1"
             const valores = [id]
-
             const { rows } = await database.query(query, valores)
+            // coloca o email na constante email
             const email = rows[0].email
+            // manda o codigo pro usuario e gera e salva o codigo no banco de dados
             const response = await gerarCodigo(email, tipo, id)
             if(!response) throw new Error("Erro ao Enviar o codigo de verificação")
             return res.status(200).json({
