@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { CriarMotoristaSchema, LoginMotoristaSchema } from "../models/motorista.model.js"
+import { validarCodigo } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
 import { gerarCodigo } from "../utils/mandarCodigo.js"
@@ -229,6 +230,81 @@ export const controllerMotorista = {
             console.error("Erro na rota de enviarCodigo, Erro:", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor"
+            })
+        }
+    },
+    verificarConta: async (req: Request, res: Response) => {
+        const dadosBrutos = validarCodigo.safeParse(req.body)
+        const id = req.userId
+        const verificado = req.verificado
+
+        // Verifica se a conta já foi verificada anteriormente, se sim, não tem motivo para ser verificada dnv
+        if(verificado){
+            return res.status(400).json({
+                msg: "Conta já verificada."
+            })
+        }
+
+        //checa se o código enviado é valido
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Invalidos para verificação da conta",
+                erro: dadosBrutos.error.format()
+            });
+        }
+        // separa em uma constante comum
+        const { cod } = dadosBrutos.data
+
+        // pega o codigo em hash do usuario
+        try{
+            /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
+            apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
+            e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
+            const query = `SELECT cod
+            FROM cod_verificacao
+            WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3
+            ORDER BY data_criacao DESC 
+            LIMIT 1`
+            const dataAtual = new Date().toISOString();
+            const valores = [id, "criação", dataAtual]
+            const { rows } = await database.query(query, valores)
+            
+            // Se não receber nenhum resultado, nenhum código foi enviado ao usuario.
+            if(rows.length < 1){
+                return res.status(401).json({
+                    msg: "Código digitado invalido ou expirado."
+                })
+            }
+            // salva o hash de codigo numa constante
+            const codigoHash = rows[0].cod
+
+            // checa se bate.
+            const codigoValido = await bcrypt.compare(cod, codigoHash)
+
+            // se o codigo não for valido, da um não autorizado pro nosso filhão
+            if(!codigoValido){
+                return res.status(401).json({
+                    msg: "Código digitado invalido ou expirado."
+                })
+            }
+        }catch(erro){
+            console.error("Erro na hora de buscar hash no banco de dados, erro:", erro)
+            return res.status(500).json({
+                msg: "Erro interno do servidor ao verificar sua conta."
+            })
+        }
+        // se o usuario chegou até aqui, então o codigo dele é valido, só verificar a conta dele
+        try{
+            const query = "UPDATE motorista SET verificado = $1 WHERE id = $2"
+            const valores = [true, id]
+            await database.query(query, valores)
+            return res.status(200).json({
+                msg: "Conta Verificada com Sucesso."
+            })
+        }catch(erro){
+            console.error("Erro ao salvar o status de verificado como true no banco de dados, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro interno do servidor ao verificar sua conta."
             })
         }
     }

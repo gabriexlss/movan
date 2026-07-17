@@ -20,4 +20,8 @@ router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {
 })
 // Rota para enviar um codigo (ou reenviar) tanto pra criação de conta quanto pra recuperação da conta
 router.post('/codigo/:tipo', middlewareAutenticar, controllerMotorista.enviarCodigo)
+
+// Rota para verificar a conta do motorista por meio do codigo enviado ao email.
+router.post('/verificar', middlewareAutenticar, controllerMotorista.verificarConta)
+
 export default router;
