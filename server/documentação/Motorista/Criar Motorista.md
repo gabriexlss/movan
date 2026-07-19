@@ -3,10 +3,10 @@ Endpoint referente a criação do motorista, ou, usuário.
 - Rota: /motorista/criar
 - Tipo: POST
 ## Dados Esperados
-- "nome": String, máximo de 50 e minimo de 3
+- "nome": String, máximo de 200 e minimo de 3
 - "cnpj": String, 14 caracteres(sem máscara. apenas números) 
-- "senha": String
-- "email": String, Formato de Email, minimo de 3 e máximo de 255
+- "senha": String, máximo de 100
+- "email": String, Formato de Email, minimo de 3 e máximo de 150
 #### Exemplo
 ``` JSON
 {
