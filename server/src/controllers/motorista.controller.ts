@@ -6,6 +6,16 @@ import bcrypt from "bcrypt"
 import { gerarCodigo } from "../utils/mandarCodigo.js"
 import jwt from "jsonwebtoken"
 
+// Constante de query global para servir pro verificar conta e recuperar senha.
+/* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
+            apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
+            e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
+            const queryCodigoVerificacao = `SELECT cod
+            FROM cod_verificacao
+            WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3
+            ORDER BY data_criacao DESC 
+            LIMIT 1`
+
 // Função pra verificar email ou cnpj
 const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
     // verifica se ambos os dados foram enviados
@@ -66,12 +76,12 @@ export const controllerMotorista = {
         }
 
         // transformando em hash a senha original do usuario
-        const senhahash = await bcrypt.hash(senha, 10)
+        const senhaHash = await bcrypt.hash(senha, 10)
         
         //salvando arquivos no banco de dados
         try{
             const query = "INSERT INTO motorista (nome, cnpj, email, senha) VALUES ($1, $2, $3, $4) RETURNING id"
-            const valores = [nome, cnpj, email, senhahash]
+            const valores = [nome, cnpj, email, senhaHash]
             
             // finalmente pega os dados e faz o insert no banco de dados
             const { rows } = await database.query(query, valores)
@@ -261,17 +271,9 @@ export const controllerMotorista = {
 
         // pega o codigo em hash do usuario
         try{
-            /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
-            apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
-            e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
-            const query = `SELECT cod
-            FROM cod_verificacao
-            WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3
-            ORDER BY data_criacao DESC 
-            LIMIT 1`
             const dataAtual = new Date().toISOString();
             const valores = [id, "criação", dataAtual]
-            const { rows } = await database.query(query, valores)
+            const { rows } = await database.query(queryCodigoVerificacao, valores)
             
             // Se não receber nenhum resultado, nenhum código foi enviado ao usuario.
             if(rows.length < 1){
@@ -352,6 +354,85 @@ export const controllerMotorista = {
             })
         }catch(erro){
             console.error("Erro ao enviar código para recuperação de conta, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor ao Recuperar senha."
+            })
+        }
+    },
+    // Rota para verificar o código de recuperação de senha e permitir que o usuário altere a senha
+    recuperarSenha: async (req: Request, res: Response) => {
+        let id:number
+        const dadosBrutos = RecuperarSenhaSchema.safeParse(req.body)
+
+        // Validação dos dados
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para recuperação de senha.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        const { email, cod, senha:novaSenha} = dadosBrutos.data
+
+        // checar se o email existe novamente só pra desencargo de consciencia, já que a conta pode ter sido deletada no processo.
+        try{
+            const response = await verificarEmailouCNPJ(email, "email")
+            if(!response) {
+                return res.status(404).json({
+                    msg: "Nenhuma conta encontrada com o email fornecido"
+                })
+            }
+            id = response
+        }catch(erro){
+            console.error("Erro ao verificar email para recuperar de senha, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor ao Recuperar senha."
+            })
+        }
+        // beleza, conta existe, agora verificar código se bate com o banco de dados. 
+        try{
+            const dataAtual = new Date().toISOString();
+            const valores = [id, "recuperação", dataAtual]
+            const { rows } = await database.query(queryCodigoVerificacao, valores)
+            
+            // Se não receber nenhum resultado, nenhum código foi enviado ao usuario.
+            if(rows.length < 1){
+                return res.status(401).json({
+                    msg: "Código digitado invalido ou expirado."
+                })
+            }
+            // salva o hash de codigo numa constante
+            const codigoHash = rows[0].cod
+
+            // checa se bate.
+            const codigoValido = await bcrypt.compare(cod, codigoHash)
+
+            // se o codigo não for valido, da um não autorizado pro nosso filhão
+            if(!codigoValido){
+                return res.status(401).json({
+                    msg: "Código digitado invalido ou expirado."
+                })
+            }
+        }catch(erro){
+            console.error("Erro na hora de buscar hash no banco de dados, erro:", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor ao Recuperar senha."
+            })
+        }
+        // Se chegou até aqui, o codigo é valido, só substituir a senha antiga pela nova.
+        try{
+            // transformando em hash a senha original do usuario
+            const senhaHash = await bcrypt.hash(novaSenha, 10)
+
+            const query = "UPDATE motorista SET senha = $1 WHERE id = $2"
+            const valores = [senhaHash, id]
+            await database.query(query, valores)
+
+            // senha recuperada. só retornar
+            return res.status(200).json({
+                msg: "Senha Recuperada com Sucesso!"
+            })
+        }catch(erro){
+            console.error("Erro ao salvar senha nova do usúario na tabela, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor ao Recuperar senha."
             })
