@@ -1,15 +1,13 @@
 Endpoint referente ao envio (ou reenvio) de código de verificação para o e-mail do motorista.
 ## Rota URL
-- Rota: /motorista/codigo/:tipo
+- Rota: /motorista/codigo
 - Tipo: POST
 - *Nota: Rota protegida. Necessário o cookie `token` de autenticação.*
 ## Dados Esperados
-- **Parâmetro de Rota (URL)**:
-  - `:tipo`: String, deve ser exatamente `criação` ou `recuperação`
 - **Cabeçalho (Cookie)**:
   - `token`: String (JWT da sessão)
 #### Exemplo
-Requisição POST para `/motorista/codigo/criação` com o cookie `token` devidamente configurado.
+Requisição POST para `/motorista/codigo` com o cookie `token` devidamente configurado.
 ## Respostas
 - "msg": mensagem com o sucesso ou erro da solicitação, exemplo: msg: "Código para criação da conta enviado com sucesso."
 - "erro": descrição do erro no caso de parâmetros enviados incorretamente na rota.

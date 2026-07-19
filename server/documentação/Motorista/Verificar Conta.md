@@ -1,6 +1,6 @@
 Endpoint referente à verificação da conta do motorista por meio do código enviado ao e-mail.
 ## Rota URL
-- Rota: /motorista/verificar
+- Rota: /motorista/verificar-conta
 - Tipo: POST
 - *Nota: Rota protegida. Necessário o cookie `token` de autenticação.*
 ## Dados Esperados
@@ -25,7 +25,7 @@ Endpoint referente à verificação da conta do motorista por meio do código en
         "_errors": [],
         "cod": {
             "_errors": [
-                "O Código não é tem que ter exatamente 6 digitos"
+                "O Código tem que ter exatamente 6 digitos"
             ]
         }
     }

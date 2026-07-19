@@ -1,7 +1,8 @@
 import { z } from 'zod';
+import { validarCodigoSchema } from './codigo_verificacao.js'
 
 // Modelo global pro motorista (usuario)
-export const MotoristaSchema = z.object({
+const MotoristaSchema = z.object({
     id: z.number("Não é um Numero Válido").int().positive(),
     cnpj: z.string("Não é uma String").length(14, "CNPJ Invalido"),
     email: z.string("Não é uma String").min(3, "Email muito curto").max(150, "Email Muito Longo").email("Email Invalido"),
@@ -22,5 +23,15 @@ export const LoginMotoristaSchema = MotoristaSchema.pick({
     login: true,
     senha: true
 })
+export const RecuperarSenhaSchema = z.object({
+    email: MotoristaSchema.shape.email,
+    cod: validarCodigoSchema.shape.cod,
+    senha: MotoristaSchema.shape.senha
+})
+export const CodigoRecuperarSenhaSchema = MotoristaSchema.pick({
+    email: true
+})
+export type RecuperarSenha = z.infer<typeof RecuperarSenhaSchema>
 export type LoginMotorista = z.infer<typeof LoginMotoristaSchema>
 export type CriarMotorista = z.infer<typeof CriarMotoristaSchema>
+export type EnviarCodigoRecuperarSenha = z.infer<typeof CodigoRecuperarSenhaSchema>

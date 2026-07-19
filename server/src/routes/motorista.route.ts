@@ -22,6 +22,8 @@ router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {
 router.post('/codigo/:tipo', middlewareAutenticar, controllerMotorista.enviarCodigo)
 
 // Rota para verificar a conta do motorista por meio do codigo enviado ao email.
-router.post('/verificar', middlewareAutenticar, controllerMotorista.verificarConta)
+router.post('/verificar-conta', middlewareAutenticar, controllerMotorista.verificarConta)
+
+router.post('/recuperar-conta/enviar-codigo', controllerMotorista.enviarCodigoRecuperarSenha)
 
 export default router;

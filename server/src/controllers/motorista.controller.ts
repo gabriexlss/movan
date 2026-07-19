@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema } from "../models/motorista.model.js"
-import { validarCodigo } from "../models/codigo_verificacao.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema } from "../models/motorista.model.js"
+import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
 import { gerarCodigo } from "../utils/mandarCodigo.js"
@@ -194,11 +194,14 @@ export const controllerMotorista = {
             msg: "Login Realizado com Sucesso."
         })
     },
-    // rota para pegar o id do usuario logado e o tipo de codigo que ele quer receber (criação ou recuperação)
+    // rota para pegar o id do usuario logado e o tipo de codigo que ele quer receber (por enquanto somente criação)
     enviarCodigo: async (req: Request, res: Response) => {
         const id = req.userId
+
         // pega o tipo de codigo que ele quer enviar por meio das parametros da rota, tipo motorista/codigo/criação
-        const { tipo } = req.params
+        // como só tem criação por enquanto, o dado já sera enviado por codig 
+        // const { tipo } = req.params
+        const tipo = "criação"
 
         // se o tipo não for indicado ou não for nem criação ou recuperação, dá erro de bad request
         if(!tipo) {
@@ -233,8 +236,9 @@ export const controllerMotorista = {
             })
         }
     },
+    // rota para verificar a conta do motorista
     verificarConta: async (req: Request, res: Response) => {
-        const dadosBrutos = validarCodigo.safeParse(req.body)
+        const dadosBrutos = validarCodigoSchema.safeParse(req.body)
         const id = req.userId
         const verificado = req.verificado
 
@@ -305,6 +309,51 @@ export const controllerMotorista = {
             console.error("Erro ao salvar o status de verificado como true no banco de dados, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro interno do servidor ao verificar sua conta."
+            })
+        }
+    },
+    // Rota para recuperar a senha do usúario usando o código e o email
+    enviarCodigoRecuperarSenha: async (req: Request, res: Response) => {
+        let id: number
+        // pega os dados do body
+        const dadosBrutos = CodigoRecuperarSenhaSchema.safeParse(req.body)
+        
+        //Validação
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para recuperação de senha.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        const { email } = dadosBrutos.data
+        // Agora que o usuario chegou aqui, só vamos checar se esse email existe
+        try{
+            const response = await verificarEmailouCNPJ(email, "email")
+            if(!response) {
+                return res.status(404).json({
+                    msg: "Nenhuma conta encontrada com o email fornecido"
+                })
+            }
+            id = response
+        }catch(erro){
+            console.error("Erro ao verificar se email para enviar codigo de recuperação de senha, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor ao Recuperar senha."
+            })
+        }
+        // se ja chegou aqui, a conta existe e já temos um id de conta, então hora de enviar o código
+        try{
+            const response = await gerarCodigo(email, "recuperação", id)
+            if(!response) throw new Error("Erro Desconhecido ao mandar código.")
+
+            // deu tudo certo, só retornar.
+            return res.status(200).json({
+                msg: "Código de recuperação enviado com sucesso."
+            })
+        }catch(erro){
+            console.error("Erro ao enviar código para recuperação de conta, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor ao Recuperar senha."
             })
         }
     }
