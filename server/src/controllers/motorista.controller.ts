@@ -8,13 +8,17 @@ import jwt from "jsonwebtoken"
 
 // Constante de query global para servir pro verificar conta e recuperar senha.
 /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
-            apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
-            e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
-            const queryCodigoVerificacao = `SELECT cod
-            FROM cod_verificacao
-            WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3
-            ORDER BY data_criacao DESC 
-            LIMIT 1`
+apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
+e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
+const queryCodigoVerificacao = `SELECT id, cod
+    FROM cod_verificacao
+    WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3 AND data_uso IS NULL
+    ORDER BY data_criacao DESC 
+    LIMIT 1`
+
+// Constante global de query para atualizar a data de uso de codigo
+const queryAtualizarUsoCodigo = "UPDATE cod_verificacao SET data_uso = now() WHERE id = $1"
+        
 
 // Função pra verificar email ou cnpj
 const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
@@ -36,6 +40,37 @@ const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
         }
 }
 
+const validarCodigo = async (id:number, tipo: "criação" | "recuperação", cod:string) => {
+    const dataAtual = new Date().toISOString();
+    const valores = [id, tipo, dataAtual]
+
+    try{
+            const { rows } = await database.query(queryCodigoVerificacao, valores)
+            
+            // Se não receber nenhum resultado, nenhum código foi enviado ao usuario.
+            if(rows.length < 1){
+                console.log("Nenhum código encontrado para o motorista:", id, "com o tipo:", tipo, "e código:", cod)
+                return null
+            }
+            // salva o hash de codigo numa constante
+            const codigoHash = rows[0].cod
+
+            // salva o id do codigo numa variavel
+            const idCodigo:number = rows[0].id
+
+            // checa se bate.
+            const codigoValido = await bcrypt.compare(cod, codigoHash)
+
+            // se o codigo não for valido, da um não autorizado pro nosso filhão
+            if(!codigoValido){
+                return null
+            }
+            return idCodigo
+        }catch(erro){
+            console.error("Erro na hora de buscar hash no banco de dados, erro:", erro)
+            throw new Error("Erro interno do servidor ao verificar sua conta.", { cause: erro })
+        }
+}
 // Criando o Controller do motorista
 export const controllerMotorista = {
     // Controller pra criar um novo motorista vulgo usuario
@@ -269,41 +304,23 @@ export const controllerMotorista = {
         // separa em uma constante comum
         const { cod } = dadosBrutos.data
 
-        // pega o codigo em hash do usuario
         try{
-            const dataAtual = new Date().toISOString();
-            const valores = [id, "criação", dataAtual]
-            const { rows } = await database.query(queryCodigoVerificacao, valores)
-            
-            // Se não receber nenhum resultado, nenhum código foi enviado ao usuario.
-            if(rows.length < 1){
+            const idCodigo = await validarCodigo(id, "criação", cod)
+            if(idCodigo === null){
                 return res.status(401).json({
                     msg: "Código digitado invalido ou expirado."
                 })
             }
-            // salva o hash de codigo numa constante
-            const codigoHash = rows[0].cod
-
-            // checa se bate.
-            const codigoValido = await bcrypt.compare(cod, codigoHash)
-
-            // se o codigo não for valido, da um não autorizado pro nosso filhão
-            if(!codigoValido){
-                return res.status(401).json({
-                    msg: "Código digitado invalido ou expirado."
-                })
-            }
-        }catch(erro){
-            console.error("Erro na hora de buscar hash no banco de dados, erro:", erro)
-            return res.status(500).json({
-                msg: "Erro interno do servidor ao verificar sua conta."
-            })
-        }
-        // se o usuario chegou até aqui, então o codigo dele é valido, só verificar a conta dele
-        try{
+            // se o usuario chegou até aqui, então o codigo dele é valido, só verificar a conta dele
             const query = "UPDATE motorista SET verificado = $1 WHERE id = $2"
             const valores = [true, id]
             await database.query(query, valores)
+
+            // marca uma data de uso pro codigo antigo
+            const valorCodigo = [idCodigo]
+            await database.query(queryAtualizarUsoCodigo, valorCodigo)
+
+            // retorna
             return res.status(200).json({
                 msg: "Conta Verificada com Sucesso."
             })
@@ -388,44 +405,28 @@ export const controllerMotorista = {
                 msg: "Erro Interno do Servidor ao Recuperar senha."
             })
         }
-        // beleza, conta existe, agora verificar código se bate com o banco de dados. 
+        
         try{
-            const dataAtual = new Date().toISOString();
-            const valores = [id, "recuperação", dataAtual]
-            const { rows } = await database.query(queryCodigoVerificacao, valores)
+            // beleza, conta existe, agora verificar código se bate com o banco de dados. 
+            const idCodigo = await validarCodigo(id, "recuperação", cod)
+            if(idCodigo === null){
+                return res.status(401).json({
+                    msg: "Código digitado invalido ou expirado."
+                })
+            }
             
-            // Se não receber nenhum resultado, nenhum código foi enviado ao usuario.
-            if(rows.length < 1){
-                return res.status(401).json({
-                    msg: "Código digitado invalido ou expirado."
-                })
-            }
-            // salva o hash de codigo numa constante
-            const codigoHash = rows[0].cod
-
-            // checa se bate.
-            const codigoValido = await bcrypt.compare(cod, codigoHash)
-
-            // se o codigo não for valido, da um não autorizado pro nosso filhão
-            if(!codigoValido){
-                return res.status(401).json({
-                    msg: "Código digitado invalido ou expirado."
-                })
-            }
-        }catch(erro){
-            console.error("Erro na hora de buscar hash no banco de dados, erro:", erro)
-            return res.status(500).json({
-                msg: "Erro Interno do Servidor ao Recuperar senha."
-            })
-        }
-        // Se chegou até aqui, o codigo é valido, só substituir a senha antiga pela nova.
-        try{
+            // Se chegou até aqui, o codigo é valido, só substituir a senha antiga pela nova.
             // transformando em hash a senha original do usuario
             const senhaHash = await bcrypt.hash(novaSenha, 10)
 
+            // atualiza a senha do motorista
             const query = "UPDATE motorista SET senha = $1 WHERE id = $2"
             const valores = [senhaHash, id]
             await database.query(query, valores)
+
+            // marca uma data de uso pro codigo antigo
+            const valorCodigo = [idCodigo]
+            await database.query(queryAtualizarUsoCodigo, valorCodigo)
 
             // senha recuperada. só retornar
             return res.status(200).json({
