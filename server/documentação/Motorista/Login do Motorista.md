@@ -4,7 +4,7 @@ Endpoint referente ao login do motorista, ou, usuário.
 - Tipo: POST
 ## Dados Esperados
 - "login": String, minimo de 3 e máximo de 255 (pode ser o E-mail ou o CNPJ do motorista)
-- "senha": String
+- "senha": String, máximo de 100
 #### Exemplo
 ``` JSON
 {
