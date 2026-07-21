@@ -239,6 +239,16 @@ export const controllerMotorista = {
             msg: "Login Realizado com Sucesso."
         })
     },
+    // Controller para deslogar o motorista
+    deslogarConta: async (req: Request, res: Response) => {
+        return res.status(200).clearCookie("token", {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'strict'
+        }).json({
+            msg: "Logout realizado com sucesso."
+        })
+    },
     // rota para pegar o id do usuario logado e o tipo de codigo que ele quer receber (por enquanto somente criação)
     enviarCodigo: async (req: Request, res: Response) => {
         const id = req.userId

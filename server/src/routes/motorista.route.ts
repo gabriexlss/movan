@@ -33,4 +33,7 @@ router.post('/recuperar-conta/enviar-codigo', controllerMotorista.enviarCodigoRe
 // rota que com o código enviado, realiza a recuperação da senha
 router.post('/recuperar-conta/recuperar', controllerMotorista.recuperarSenha)
 
+// rota delete para destruir o cookie de sessão que realiza o login, efetivamente efetuando um logout
+router.delete('/logout', controllerMotorista.deslogarConta)
+
 export default router;
