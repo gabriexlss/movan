@@ -31,6 +31,10 @@ export const RecuperarSenhaSchema = z.object({
 export const CodigoRecuperarSenhaSchema = MotoristaSchema.pick({
     email: true
 })
+export const DeletarMotoristaSchema = MotoristaSchema.pick({
+    senha: true
+})
+export type DeletarMotorista = z.infer<typeof DeletarMotoristaSchema>
 export type RecuperarSenha = z.infer<typeof RecuperarSenhaSchema>
 export type LoginMotorista = z.infer<typeof LoginMotoristaSchema>
 export type CriarMotorista = z.infer<typeof CriarMotoristaSchema>

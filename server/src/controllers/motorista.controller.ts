@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, DeletarMotoristaSchema } from "../models/motorista.model.js"
 import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
@@ -198,13 +198,14 @@ export const controllerMotorista = {
             })
         }
 
-        // Pega o hash de senha usando o id do usuario e guarda numa variavel
+        // Pega o hash de senha e a data de exclusão usando o id do usuario e guarda numa variavel
         try{
-            const query = "SELECT senha FROM motorista WHERE id = $1"
+            const query = "SELECT senha, data_exclusao FROM motorista WHERE id = $1"
             const valores = [id]
 
             const { rows } = await database.query(query, valores)
             const hashNoBanco = rows[0].senha
+            const data_exclusao:Date|null = rows[0].data_exclusao
 
             // Compara a senha digitada pelo usuario com a senha salva no banco de dados e retorna true ou false
             const senhaValida = await bcrypt.compare(senha, hashNoBanco)
@@ -213,6 +214,12 @@ export const controllerMotorista = {
                 return res.status(401).json({
                     msg: "Senha Invalida"
                 })
+            }
+            // verifica se a conta está agendada para exclusão. se sim, cancela.
+            if(data_exclusao){
+                const query = "UPDATE motorista SET data_exclusao = NULL WHERE id = $1"
+                const valores = [id]
+                await database.query(query, valores)
             }
         }catch(erro){
             console.error("Erro ao puxar hash de senha salva no banco de dados, erro: ", erro)
@@ -446,6 +453,60 @@ export const controllerMotorista = {
             console.error("Erro ao salvar senha nova do usúario na tabela, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor ao Recuperar senha."
+            })
+        }
+    },
+    // controller para efetivar o soft delete da conta.
+    deletarConta: async (req: Request, res: Response) => {
+        const id = req.userId
+        const dadosBrutos = DeletarMotoristaSchema.safeParse(req.body)
+
+        // Checagem basica pra ver se o usuario digitou a senha e se ela é valida
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Senha para deletar a conta ausente ou inválida.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // separa a senha numa variavel
+        const { senha } = dadosBrutos.data
+
+        try{
+            // pega o hash de senha do usuario no bd
+            const queryBuscarSenha = "SELECT senha FROM motorista WHERE id = $1"
+            const valoresBuscarSenha = [id]
+            const { rows:ResultadoBuscarSenha } = await database.query(queryBuscarSenha, valoresBuscarSenha)
+
+            if(ResultadoBuscarSenha.length < 1) throw new Error("Não achou nenhum campo com o ID.")
+            const senhaHash = ResultadoBuscarSenha[0].senha
+
+            // ve se a senha digitada bate com a senha do banco de dados
+            const senhaValida = await bcrypt.compare(senha, senhaHash)
+
+            if(!senhaValida){
+                return res.status(401).json({
+                    msg: "Senha Invalida."
+                })
+            }
+
+            // senha valida, então agr so aplicar o delete do garoto
+            const queryAplicarDelete = "UPDATE motorista SET data_exclusao = now() WHERE id = $1"
+            const valoresAplicarDlete = [id]
+            await database.query(queryAplicarDelete, valoresAplicarDlete)
+
+            // Data de exclusão colocada (soft delete) ent agora só apagar a sessão dele e retornar
+
+            return res.status(200).clearCookie("token", {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'strict'
+        }).json({
+            msg: "Conta agendada para exclusão com sucesso."
+        })
+        }catch(erro){
+            console.error("Erro ao Deletar conta do usúario, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         }
     }

@@ -36,4 +36,7 @@ router.post('/recuperar-conta/recuperar', controllerMotorista.recuperarSenha)
 // rota delete para destruir o cookie de sessão que realiza o login, efetivamente efetuando um logout
 router.delete('/logout', controllerMotorista.deslogarConta)
 
+// rota delete para realizar o soft delete da sua conta. a agendando para encerramento permanente após 30 dias.
+router.delete('/encerrar-conta', middlewareAutenticar ,controllerMotorista.deletarConta)
+
 export default router;
