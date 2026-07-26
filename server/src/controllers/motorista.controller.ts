@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, DeletarMotoristaSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema } from "../models/motorista.model.js"
 import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
@@ -40,7 +40,7 @@ const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
         }
 }
 
-const validarCodigo = async (id:number, tipo: "criação" | "recuperação", cod:string) => {
+const validarCodigo = async (id:number, tipo: "criação" | "recuperação" | "edição", cod:string, email?: string) => {
     const dataAtual = new Date().toISOString();
     const valores = [id, tipo, dataAtual]
 
@@ -59,7 +59,8 @@ const validarCodigo = async (id:number, tipo: "criação" | "recuperação", cod
             const idCodigo:number = rows[0].id
 
             // checa se bate.
-            const codigoValido = await bcrypt.compare(cod, codigoHash)
+            const codigoParaValidar = tipo === "edição" ? `${cod}:${email}` : cod
+            const codigoValido = await bcrypt.compare(codigoParaValidar, codigoHash)
 
             // se o codigo não for valido, da um não autorizado pro nosso filhão
             if(!codigoValido){
@@ -393,6 +394,40 @@ export const controllerMotorista = {
             })
         }
     },
+    // Rota para enviar um código para o novo email antes de alterá-lo.
+    enviarCodigoEditarEmail: async (req: Request, res: Response) => {
+        const id = req.userId
+        const dadosBrutos = CodigoEditarEmailSchema.safeParse(req.body)
+
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para alterar email.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        const { email } = dadosBrutos.data
+
+        try{
+            const idEmail = await verificarEmailouCNPJ(email, "email")
+            if(idEmail){
+                return res.status(409).json({
+                    msg: "Email Já Cadastrado no Movan."
+                })
+            }
+
+            const response = await gerarCodigo(email, "edição", id)
+            if(!response) throw new Error("Erro Desconhecido ao mandar código.")
+
+            return res.status(200).json({
+                msg: "Código para alteração de email enviado com sucesso."
+            })
+        }catch(erro){
+            console.error("Erro ao enviar código para alteração de email, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor ao alterar email."
+            })
+        }
+    },
     // Rota para verificar o código de recuperação de senha e permitir que o usuário altere a senha
     recuperarSenha: async (req: Request, res: Response) => {
         let id:number
@@ -507,6 +542,99 @@ export const controllerMotorista = {
             console.error("Erro ao Deletar conta do usúario, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // Controller para editar os dados do motorista, como nome, email e cnpj
+    editarConta: async (req: Request, res: Response) => {
+        // pegando id da requisição como sempre
+        const id = req.userId
+
+        // tratando os dados usando o mesmo modelo de criação, mas com o metodo partial pra todos os dados virarem opcionais.
+        const dadosBrutos = EditarMotoristaSchema.safeParse(req.body)
+
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados invalidos para editar conta.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // determina se tal dado veio ou não e coloca a clausula dele
+        const { nome, email, cnpj, senha, cod } = dadosBrutos.data
+        // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
+        const campos: string[] = []
+        const valores: (string|number)[] = []
+        let quantidadeCampos:number = 0
+
+        if(nome){
+            campos.push(`nome = $${valores.length + 1}`)
+            valores.push(nome)
+            quantidadeCampos++
+        }
+        if(email){
+            try{
+                const idEmail = await verificarEmailouCNPJ(email, "email")
+                if(idEmail){
+                    return res.status(409).json({
+                        msg: "Email Já Cadastrado no Movan."
+                    })
+                }
+
+                const idCodigo = await validarCodigo(id, "edição", cod!, email)
+                if(idCodigo === null){
+                    return res.status(401).json({
+                        msg: "Código digitado invalido ou expirado."
+                    })
+                }
+
+                await database.query(queryAtualizarUsoCodigo, [idCodigo])
+            }catch(erro){
+                console.error("Erro ao validar código para alterar email, erro: ", erro)
+                return res.status(500).json({
+                    msg: "Erro Interno do Servidor ao alterar email."
+                })
+            }
+            campos.push(`email = $${valores.length + 1}`)
+            valores.push(email)
+            quantidadeCampos++
+        }
+        if(cnpj){
+            campos.push(`cnpj = $${valores.length + 1}`)
+            valores.push(cnpj)
+            quantidadeCampos++
+        }
+        if(senha){
+            campos.push(`senha = $${valores.length + 1}`)
+
+            // transforma a senha em hash
+            const senhaHash = await bcrypt.hash(senha, 10)
+            valores.push(senhaHash)
+            quantidadeCampos++
+        }
+
+        // se nenhum campo tiver sido enviado, manda embora
+        if(quantidadeCampos < 1){
+            return res.status(400).json({
+                msg: "Pelo menos um campo é necessario para realizar a edição."
+            })
+        }
+        try{
+            const query = `
+            UPDATE motorista
+            SET ${campos.join(", ")}
+            WHERE id = $${valores.length + 1}
+            `
+            valores.push(id)
+            await database.query(query, valores)
+
+            //se chegou aqui, tudo ocorreu bem. hora de retornar.
+            return res.status(200).json({
+                msg: `${quantidadeCampos} Campos editados com sucesso.`
+            })
+        }catch(erro){
+            console.error("Erro ao editar dados do usuario, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
             })
         }
     }
