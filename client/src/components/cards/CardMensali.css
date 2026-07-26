@@ -1,0 +1,80 @@
+.containerMensalidade{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0rem;
+    margin: 1.2rem 0 0.5rem 0;
+    align-self: center;
+
+    width: 100%;
+    height: 8vh;
+}
+
+.mensalidadeItem{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+
+    width: 28%;
+    height: 100%;
+    border-radius: 10px;
+
+    font-family: 'Poppins', sans-serif;
+}
+
+.tituloMensalidade{
+    font-family: 'Poppins', sans-serif;
+    font-size: .55rem;
+    font-weight: 700;
+}
+
+.quantidadeMensalidade{
+    font-size: 1.25rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.BtnVerMensalidade{
+    width: 90%;
+    height: 1.5rem;
+    background-color: #0D47A1;
+    color: #F8F5F5;
+    font-family: 'Poppins', sans-serif;
+    font-size: .6rem;
+    font-weight: 100;
+    text-decoration: none;
+    text-align: center;
+    line-height: 1.5rem;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: .5rem;
+
+    position: relative;
+    overflow: hidden;
+    align-self: center;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+.BtnVerMensalidade::after{
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #083075b7;
+    transform: translate(-50%, -50%) scale(0);  
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.BtnVerMensalidade:active::after{
+    transform: translate(-50%, -50%) scale(20);
+    opacity: 0;
+    transition: .7s;
+}

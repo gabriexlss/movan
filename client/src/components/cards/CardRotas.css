@@ -53,6 +53,8 @@
     position: relative;
     overflow: hidden;
     align-self: center;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
 .BtnVerRotas::after{
@@ -65,12 +67,12 @@
     border-radius: 50%;
     background-color: #083075b7;
     transform: translate(-50%, -50%) scale(0);  
-    transition: left 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     opacity: 1;
 }
 
 .BtnVerRotas:active::after{
-    transform: translate(-50%, -50%) scale(50);
+    transform: translate(-50%, -50%) scale(20);
     opacity: 0;
     transition: .7s;
 }
