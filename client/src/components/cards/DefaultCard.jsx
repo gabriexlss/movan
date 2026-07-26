@@ -1,9 +1,10 @@
 import './DefaultCard.css';
 
-const DefaultCard = ({ title }) => {
+const DefaultCard = ({ title, children }) => {
     return (
         <section className="card">
-            <div className="card-header">{title}</div>
+            <h1 className="card-header">{title}</h1>
+            {children}
         </section>
     )
 }

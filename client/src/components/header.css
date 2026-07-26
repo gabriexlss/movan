@@ -1,20 +1,12 @@
 .header{
     position: relative;
-    width: 100%;
+    width: 100vw;
     overflow: hidden;
 }
 
-.blue-stain{
-    width: 100%;
+.stain{
+    width: 100vw;
     display: block;
-}
-
-.yellow-stain{
-    position: absolute;
-    right: 0;
-    top: 0.75rem;
-    width: 15rem;
-    height: auto;
 }
 
 .texto-titulo{

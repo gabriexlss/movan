@@ -5,7 +5,9 @@ import './App.css'
 import Header from './components/header'
 import Footer from './components/footer'
 import TituloTela from './components/tituloTela'
-import DefaultCard from './components/cards/DefaultCard'
+import CardHorarios from './components/cards/CardHorarios'
+import CardRotas from './components/cards/CardRotas'
+import CardMensali from './components/cards/CardMensali'
 
 function App() {
 
@@ -14,7 +16,9 @@ function App() {
         <Header />
         <TituloTela title="Olá, Motorista!" subtitle="Sexta-feira, 12 de setembro" />
         <main>
-          <DefaultCard title="Card 1" />
+          <CardHorarios />
+          <CardRotas />
+          <CardMensali />
         </main>
         <Footer />
     </BrowserRouter>
