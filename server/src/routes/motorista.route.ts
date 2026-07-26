@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Response, Request } from "express";
 const router = Router();
 import { controllerMotorista } from "../controllers/motorista.controller.js"
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
-import { Response, Request } from "express"
 
 // Rota de teste pra checar o cookie.
 router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction} from "express"
+import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
 import { database } from "../db/postgre.js"
 
