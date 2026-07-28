@@ -88,7 +88,6 @@ export const controllerMotorista = {
         }
         // separando os dados
         const {nome, cnpj, email, senha} = dadosBrutos.data
-        let userId: number
 
         // Verifica se Email ou CNPJ ja estão cadastrados
         try{
@@ -107,49 +106,47 @@ export const controllerMotorista = {
         } catch(erro){
             console.error("Erro ao verificar se dados ja estão cadastrados, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
+                msg: "Erro Interno do Servidor"
             })
         }
 
         // transformando em hash a senha original do usuario
         const senhaHash = await bcrypt.hash(senha, 10)
-        
-        //salvando arquivos no banco de dados
+
+        // eu começo uma transação com o banco de dados pra efetuar multiplas operações que dependam uma da outra.
+        const cliente = await database.connect()
         try{
+            // inicio a transação
+            await cliente.query('BEGIN')
+
+            //salvando arquivos no banco de dados
             const query = "INSERT INTO motorista (nome, cnpj, email, senha) VALUES ($1, $2, $3, $4) RETURNING id"
             const valores = [nome, cnpj, email, senhaHash]
             
             // finalmente pega os dados e faz o insert no banco de dados
-            const { rows } = await database.query(query, valores)
-            userId = rows[0].id
-        }catch(erro){
-            // tratamento de dados, basicamente da uma mensagem no console do servidor com o erro onde nenhum usuario ve e pro usuario manda uma msg bonitinha
-            console.error("Erro ao criar usúario, ", erro)
-            return res.status(500).json({
-                msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
-            })
-        }
+            const { rows } = await cliente.query(query, valores)
+            const id = rows[0].id
 
-        try{
             // enviar o email com o codigo pro usuario
-            const response = await gerarCodigo(email, "criação", userId)
+            const response = await gerarCodigo(email, "criação", id, cliente)
             if(!response) throw new Error
+
+            // se tudo ocorrer bem, manda de volta e confirmo as alterações
+            await cliente.query('COMMIT')
             return res.status(201).json({
                 msg: "Motorista criado com sucesso!"
             })
         }catch(erro){
             // Se não foi possivel enviar o codigo, apaga o usuario
             console.error("Erro na Hora de mandar o codigo, erro:", erro)
-            try{
-                const query = "DELETE FROM motorista WHERE id = $1"
-                const valores = [userId]
-                await database.query(query, valores)
-            }catch(erro){
-                console.error("ERRO AO DELETAR USUARIO, ERRO: ", erro)
-            }
+            // usa a transação pra dar rollback
+            await cliente.query('ROLLBACK')
             return res.status(500).json({
-                msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
+                msg: "Erro Interno do Servidor."
             })
+        }finally{
+            // libero a conexão
+            cliente.release()
         }
     },
     // Controller para realizar o login do motorista usando cnpj ou email
@@ -397,8 +394,17 @@ export const controllerMotorista = {
     // Rota para enviar um código para o novo email antes de alterá-lo.
     enviarCodigoEditarEmail: async (req: Request, res: Response) => {
         const id = req.userId
+        const verificado = req.verificado
         const dadosBrutos = CodigoEditarEmailSchema.safeParse(req.body)
 
+        // verifica se a conta dele está verificada, se não, manda embora
+        if(!verificado){
+            return res.status(401).json({
+                msg: "Conta desativada. impossivel obter dados."
+            })
+        }
+
+        // verifica se os dados são validos
         if(!dadosBrutos.success){
             return res.status(400).json({
                 msg: "Dados Inválidos para alterar email.",
@@ -549,6 +555,14 @@ export const controllerMotorista = {
     editarConta: async (req: Request, res: Response) => {
         // pegando id da requisição como sempre
         const id = req.userId
+        const verificado = req.verificado
+
+        // verifica se a conta dele está verificada, se não, manda embora
+        if(!verificado){
+            return res.status(401).json({
+                msg: "Conta desativada. impossivel obter dados."
+            })
+        }
 
         // tratando os dados usando o mesmo modelo de criação, mas com o metodo partial pra todos os dados virarem opcionais.
         const dadosBrutos = EditarMotoristaSchema.safeParse(req.body)
@@ -661,7 +675,7 @@ export const controllerMotorista = {
         // verifica se a conta dele está verificada, se não, manda embora
         if(!verificado){
             return res.status(401).json({
-                msg: "Conta desativada. impossivel obter dados."
+                msg: "Conta não verificada. impossivel obter dados."
             })
         }
 

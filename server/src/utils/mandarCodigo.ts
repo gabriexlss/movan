@@ -2,8 +2,9 @@ import crypto from "crypto"
 import bcrypt from "bcrypt"
 import { database } from "../db/postgre.js"
 import { Resend } from "resend"
+import { PoolClient } from "pg";
 
-export const gerarCodigo = async (email: string, tipo: "criação" | "recuperação" | "edição", id: number) => {
+export const gerarCodigo = async (email: string, tipo: "criação" | "recuperação" | "edição", id: number, cliente?: PoolClient) => {
     // Gera um numero unico e salva no banco de dados
     const codigo = crypto.randomInt(100000, 999999).toString();
     // Para edição, o hash também guarda o vínculo do código com o novo email.
@@ -20,7 +21,11 @@ export const gerarCodigo = async (email: string, tipo: "criação" | "recuperaç
         const query = "INSERT INTO cod_verificacao (cod, tipo, motorista_id) VALUES ($1, $2, $3)"
         const valores = [codigoHash, tipo, id];
 
-        await database.query(query, valores)
+        if(cliente){
+            await cliente.query(query,valores)
+        }else {
+            await database.query(query, valores)
+        }
     }catch(erro){
         throw new Error("Erro ao Salvar Codigo no Banco de Dados", { cause: erro });
     }
