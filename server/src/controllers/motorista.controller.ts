@@ -152,41 +152,33 @@ export const controllerMotorista = {
     // Controller para realizar o login do motorista usando cnpj ou email
     loginMotorista: async (req: Request, res: Response) => {
         // Dados esperados: senha, cnpj ou email
-        const dados = LoginMotoristaSchema.safeParse(req.body)
+        const dadosBrutos = LoginMotoristaSchema.safeParse(req.body)
 
         // Validação pra ver se todos os dados são validos
-        if(!dados.success){
+        if(!dadosBrutos.success){
             return res.status(400).json({
                 msg: "Dados Invalidos para login do motorista",
-                erro: dados.error.format()
+                erro: dadosBrutos.error.format()
             })
         }
         // Separando os dados já validados em constantes individuais
-        const {login, senha } = dados.data
+        const {login, senha } = dadosBrutos.data
 
-        let id: number | undefined // variavel pra guardar o id do usuario encontrado, caso ele seja encontrado.
+        let id: number | null // variavel pra guardar o id do usuario encontrado, caso ele seja encontrado.
 
-        // Com a Credencial de login, primeiro tenta ver se ela é um cnpj e tenta achar algum cliente com esse cnpj
         try{
-            const response = await verificarEmailouCNPJ(login, "cnpj")
-            if(response) id = response
+            // Com a Credencial de login, primeiro tenta ver se ela é um cnpj e tenta achar algum cliente com esse cnpj
+            id = await verificarEmailouCNPJ(login, "cnpj")
+
+            // agora tenta verificar se é um email se não tiver achado nenhuma conta com o cpf
+            if(!id){
+                id = await verificarEmailouCNPJ(login, "cnpj")
+            }
         }catch(erro){
-            console.error("Erro ao Verificar Credencial do usuario, erro: ", erro)
+            console.error("Erro ao encontrar conta usando email ou cnpj no login, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
+                msg: "Erro Interno do Servidor."
             })
-        }
-        if(!id){
-            // Com a Credencial de login, agora tenta ver se é um email ja que não é um cnpj
-        try{
-            const response = await verificarEmailouCNPJ(login, "email")
-            if(response) id = response
-        }catch(erro){
-            console.error("Erro ao Verificar Credencial do usuario, erro: ", erro)
-            return res.status(500).json({
-                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
-            })
-        }
         }
 
         // Agora que ambos email e cnpj foram checados, se nenhum deles tiver sido verdadeiro é pq o usuario não existe
@@ -199,9 +191,8 @@ export const controllerMotorista = {
         // Pega o hash de senha e a data de exclusão usando o id do usuario e guarda numa variavel
         try{
             const query = "SELECT senha, data_exclusao FROM motorista WHERE id = $1"
-            const valores = [id]
+            const { rows } = await database.query(query, [id])
 
-            const { rows } = await database.query(query, valores)
             const hashNoBanco = rows[0].senha
             const data_exclusao:Date|null = rows[0].data_exclusao
 
@@ -216,13 +207,12 @@ export const controllerMotorista = {
             // verifica se a conta está agendada para exclusão. se sim, cancela.
             if(data_exclusao){
                 const query = "UPDATE motorista SET data_exclusao = NULL WHERE id = $1"
-                const valores = [id]
-                await database.query(query, valores)
+                await database.query(query, [id])
             }
         }catch(erro){
             console.error("Erro ao puxar hash de senha salva no banco de dados, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
+                msg: "Erro Interno do Servidor."
             })
         }
         // se chegou até aqui, o usuario foi encontrado e sua senha é valida, então só dar seu cookie.
