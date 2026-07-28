@@ -1,4 +1,4 @@
-import DefaultCard from './DefaultCard';
+import DefaultCard from '../DefaultCard';
 import './CardMensali.css';
 import { Link } from 'react-router-dom';
 
@@ -18,6 +18,10 @@ const CardMensali = ({ title, children }) => {
                         <p className="tituloMensalidade" style={{color: mensalidade.cor}}>{mensalidade.nome}</p>
                     </div>
                 ))}
+            </div>
+
+            <div className="proximaParc">
+                    <p>Próxima Parcela: <span>15/03 - aluno</span></p>
             </div>
 
             <Link to="/financeiro" className="BtnVerMensalidade">Ver Detalhes</Link>
