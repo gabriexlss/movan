@@ -172,7 +172,7 @@ export const controllerMotorista = {
 
             // agora tenta verificar se é um email se não tiver achado nenhuma conta com o cpf
             if(!id){
-                id = await verificarEmailouCNPJ(login, "cnpj")
+                id = await verificarEmailouCNPJ(login, "email")
             }
         }catch(erro){
             console.error("Erro ao encontrar conta usando email ou cnpj no login, erro: ", erro)
