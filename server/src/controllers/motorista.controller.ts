@@ -651,5 +651,36 @@ export const controllerMotorista = {
                 msg: "Erro Interno do Servidor"
             })
         }
+    },
+    // controller para obter os dados do motorista
+    obterDados: async (req: Request, res: Response) => {
+        // pega o id e o status de verificado do cookie
+        const id = req.userId
+        const verificado = req.verificado
+
+        // verifica se a conta dele está verificada, se não, manda embora
+        if(!verificado){
+            return res.status(401).json({
+                msg: "Conta desativada. impossivel obter dados."
+            })
+        }
+
+        // pega os dados do motorista e envia de volta
+        try{
+            const query  = "SELECT id, nome, email, cnpj, data_exclusao, verificado FROM motorista WHERE id = $1"
+            const { rows } = await database.query(query, [id])
+            if(rows.length < 1) throw new Error("Nenhum dado retornado.")
+
+            const motorista = rows[0]
+
+            return res.status(200).json({
+                motorista
+            })
+        }catch(erro){
+            console.error("Erro ao obter dados do motorista, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
     }
 }

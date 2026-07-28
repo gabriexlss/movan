@@ -44,4 +44,7 @@ router.delete('/encerrar-conta', middlewareAutenticar ,controllerMotorista.delet
 // rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
 router.patch('/editar', middlewareAutenticar, controllerMotorista.editarConta)
 
+// rota get para obter todos os dados do motorista
+router.get('/dados', middlewareAutenticar, controllerMotorista.obterDados)
+
 export default router;
