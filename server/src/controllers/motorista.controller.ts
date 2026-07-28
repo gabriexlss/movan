@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken"
 /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
 apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
 e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
-const queryCodigoVerificacao = `SELECT id, cod
+const queryCodigoVerificacao = `SELECT id, cod'
     FROM cod_verificacao
     WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3 AND data_uso IS NULL
     ORDER BY data_criacao DESC 
@@ -599,6 +599,20 @@ export const controllerMotorista = {
             quantidadeCampos++
         }
         if(cnpj){
+            try{
+                // verifica se o cnpj pro qual ele quer trocar não está em uso.
+                const idCNPJ = await verificarEmailouCNPJ(cnpj, "cnpj")
+                if(idCNPJ){
+                    return res.status(401).json({
+                        msg: "Cnpj já cadastrado no Movan."
+                    })
+                }
+            }catch(erro){
+                console.error("Erro ao validar código para alterar email, erro: ", erro)
+                return res.status(500).json({
+                    msg: "Erro Interno do Servidor ao alterar cnpj"
+                })
+            }
             campos.push(`cnpj = $${valores.length + 1}`)
             valores.push(cnpj)
             quantidadeCampos++
