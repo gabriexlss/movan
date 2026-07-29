@@ -1,18 +1,7 @@
-import { Router, Response, Request } from "express";
+import { Router } from "express";
 const router = Router();
 import { controllerMotorista } from "../controllers/motorista.controller.js"
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
-
-// Rota de teste pra checar o cookie.
-router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {
-    const id = req.userId
-    const verificado = req.verificado
-    return res.status(200).json({
-        msg: "Autenticação realizada com sucesso.",
-        id,
-        verificado
-    })
-})
 
 // Rota pra criar um motorista
 router.post('/criar', controllerMotorista.criarMotorista)
