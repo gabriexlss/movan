@@ -319,8 +319,7 @@ export const controllerMotorista = {
             await database.query(query, valores)
 
             // marca uma data de uso pro codigo antigo
-            const valorCodigo = [idCodigo]
-            await database.query(queryAtualizarUsoCodigo, valorCodigo)
+            await database.query(queryAtualizarUsoCodigo, [idCodigo])
 
             // retorna
             return res.status(200).json({
@@ -335,7 +334,6 @@ export const controllerMotorista = {
     },
     // Rota para recuperar a senha do usúario usando o código e o email
     enviarCodigoRecuperarSenha: async (req: Request, res: Response) => {
-        let id: number
         // pega os dados do body
         const dadosBrutos = CodigoRecuperarSenhaSchema.safeParse(req.body)
         
@@ -349,21 +347,13 @@ export const controllerMotorista = {
         const { email } = dadosBrutos.data
         // Agora que o usuario chegou aqui, só vamos checar se esse email existe
         try{
-            const response = await verificarEmailouCNPJ(email, "email")
-            if(!response) {
+            const id = await verificarEmailouCNPJ(email, "email")
+            if(!id) {
                 return res.status(404).json({
                 msg: "Nenhuma conta encontrada com o e-mail informado."
                 })
             }
-            id = response
-        }catch(erro){
-            console.error("Erro ao verificar se email para enviar codigo de recuperação de senha, erro: ", erro)
-            return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
-            })
-        }
         // se ja chegou aqui, a conta existe e já temos um id de conta, então hora de enviar o código
-        try{
             const response = await gerarCodigo(email, "recuperação", id)
             if(!response) throw new Error("Não foi possível enviar o código de recuperação.")
 
@@ -423,7 +413,7 @@ export const controllerMotorista = {
     },
     // Rota para verificar o código de recuperação de senha e permitir que o usuário altere a senha
     recuperarSenha: async (req: Request, res: Response) => {
-        let id:number
+        // dados esperados: email, cod, nova senha
         const dadosBrutos = RecuperarSenhaSchema.safeParse(req.body)
 
         // Validação dos dados
@@ -437,21 +427,12 @@ export const controllerMotorista = {
 
         // checar se o email existe novamente só pra desencargo de consciencia, já que a conta pode ter sido deletada no processo.
         try{
-            const response = await verificarEmailouCNPJ(email, "email")
-            if(!response) {
+            const id = await verificarEmailouCNPJ(email, "email")
+            if(!id) {
                 return res.status(404).json({
                 msg: "Nenhuma conta encontrada com o e-mail informado."
                 })
             }
-            id = response
-        }catch(erro){
-            console.error("Erro ao verificar email para recuperar de senha, erro: ", erro)
-            return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
-            })
-        }
-        
-        try{
             // beleza, conta existe, agora verificar código se bate com o banco de dados. 
             const idCodigo = await validarCodigo(id, "recuperação", cod)
             if(idCodigo === null){
@@ -459,7 +440,6 @@ export const controllerMotorista = {
                     msg: "Código inválido ou expirado."
                 })
             }
-            
             // Se chegou até aqui, o codigo é valido, só substituir a senha antiga pela nova.
             // transformando em hash a senha original do usuario
             const senhaHash = await bcrypt.hash(novaSenha, 10)
@@ -478,7 +458,7 @@ export const controllerMotorista = {
                 msg: "Senha alterada com sucesso."
             })
         }catch(erro){
-            console.error("Erro ao salvar senha nova do usúario na tabela, erro: ", erro)
+            console.error("Erro ao salvar senha nova do usuário, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -516,14 +496,11 @@ export const controllerMotorista = {
                     msg: "Senha inválida."
                 })
             }
-
             // senha valida, então agr so aplicar o delete do garoto
             const queryAplicarDelete = "UPDATE motorista SET data_exclusao = now() WHERE id = $1"
-            const valoresAplicarDlete = [id]
-            await database.query(queryAplicarDelete, valoresAplicarDlete)
+            await database.query(queryAplicarDelete, [id])
 
             // Data de exclusão colocada (soft delete) ent agora só apagar a sessão dele e retornar
-
             return res.status(200).clearCookie("token", {
             httpOnly: true,
             secure: process.env['NODE_ENV'] === 'production',
@@ -550,7 +527,6 @@ export const controllerMotorista = {
                 msg: "Conta não verificada. Não é possível editar os dados."
             })
         }
-
         // tratando os dados usando o mesmo modelo de criação, mas com o metodo partial pra todos os dados virarem opcionais.
         const dadosBrutos = EditarMotoristaSchema.safeParse(req.body)
 
@@ -565,12 +541,10 @@ export const controllerMotorista = {
         // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
         const campos: string[] = []
         const valores: (string|number)[] = []
-        let quantidadeCampos:number = 0
 
         if(nome){
             campos.push(`nome = $${valores.length + 1}`)
             valores.push(nome)
-            quantidadeCampos++
         }
         if(email){
             try{
@@ -597,7 +571,6 @@ export const controllerMotorista = {
             }
             campos.push(`email = $${valores.length + 1}`)
             valores.push(email)
-            quantidadeCampos++
         }
         if(cnpj){
             try{
@@ -616,7 +589,6 @@ export const controllerMotorista = {
             }
             campos.push(`cnpj = $${valores.length + 1}`)
             valores.push(cnpj)
-            quantidadeCampos++
         }
         if(senha){
             campos.push(`senha = $${valores.length + 1}`)
@@ -624,11 +596,10 @@ export const controllerMotorista = {
             // transforma a senha em hash
             const senhaHash = await bcrypt.hash(senha, 10)
             valores.push(senhaHash)
-            quantidadeCampos++
         }
 
         // se nenhum campo tiver sido enviado, manda embora
-        if(quantidadeCampos < 1){
+        if(campos.length < 1){
             return res.status(400).json({
                 msg: "Informe pelo menos um campo para editar a conta."
             })
@@ -644,9 +615,9 @@ export const controllerMotorista = {
 
             //se chegou aqui, tudo ocorreu bem. hora de retornar.
             return res.status(200).json({
-                msg: quantidadeCampos === 1
+                msg: campos.length === 1
                     ? "1 campo editado com sucesso."
-                    : `${quantidadeCampos} campos editados com sucesso.`
+                    : `${campos.length} campos editados com sucesso.`
             })
         }catch(erro){
             console.error("Erro ao editar dados do usuario, erro: ", erro)
