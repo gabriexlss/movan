@@ -1,4 +1,4 @@
-import DefaultCard from './DefaultCard';
+import DefaultCard from '../DefaultCard';
 import './CardHorarios.css';
 
 import { TbSunFilled } from "react-icons/tb";

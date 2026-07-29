@@ -1,6 +1,5 @@
 import DefaultCard from '../DefaultCard';
 import './CardMensali.css';
-import { Link } from 'react-router-dom';
 
 const CardMensali = ({ title, children }) => {
     const mensalidade = [
@@ -10,7 +9,7 @@ const CardMensali = ({ title, children }) => {
     ];
 
     return (
-        <DefaultCard title="Mensalidades">
+        <DefaultCard title="Mensalidades" link="/financeiro">
             <div className="containerMensalidade">
                 {mensalidade.map((mensalidade) => (
                     <div className="mensalidadeItem" key={mensalidade.nome} style={{backgroundColor: mensalidade.corf, color: mensalidade.cor}}>
@@ -20,12 +19,9 @@ const CardMensali = ({ title, children }) => {
                 ))}
             </div>
 
-            <div className="proximaParc">
-                    <p>Próxima Parcela: <span>15/03 - aluno</span></p>
+            <div className="proximaMensa">
+                    <p>Próxima Mensalidade: <span>15/03 - aluno</span></p>
             </div>
-
-            <Link to="/financeiro" className="BtnVerMensalidade">Ver Detalhes</Link>
-
         </DefaultCard>
     );
 }

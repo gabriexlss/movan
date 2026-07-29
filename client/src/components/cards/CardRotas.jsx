@@ -1,5 +1,4 @@
-import DefaultCard from './DefaultCard';
-import { Link } from 'react-router-dom';
+import DefaultCard from '../DefaultCard';
 import './CardRotas.css';
 
 import { RiGraduationCapLine } from "react-icons/ri";
@@ -10,9 +9,8 @@ const CardRotas = ({ title, children }) => {
 				{ nome: "Escola 2", horario: "tarde" },
 				{ nome: "Escola 3", horario: "noite" }
 			];
-
 	return(
-		<DefaultCard title="Rotas Diárias">
+		<DefaultCard title="Rotas Diárias" link="/rota">
 
 			<div className="containerEscolas">
 				{escolas.map((escola) => (
@@ -21,14 +19,11 @@ const CardRotas = ({ title, children }) => {
 
 						<div className="textoEscola">
 							<p>{escola.nome}</p>
-							<span>horário: {escola.horario}</span>
+							<span>{"horário: " +escola.horario}</span>
 						</div>
 					</div>
 				))}
 			</div>
-			
-			<Link to="/rota" className="BtnVerRotas">Ver Rotas no Mapa</Link>
-
 		</DefaultCard>
 	);
 }

@@ -1,0 +1,33 @@
+.financeiro-container{
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 1.7rem;
+    margin-bottom: 1.5rem;
+}
+
+.texto-financ{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 3rem;
+}
+
+.texto-financ h1{
+    font-family: 'Poppins', sans-serif;
+    font-size: .8rem;
+    font-weight: 600;
+    text-align: start;
+}
+
+.texto-financ p{
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color:#7A7A7A;
+    text-align: start;
+}

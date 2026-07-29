@@ -2,7 +2,7 @@
     display: flex;
     justify-content: space-around;
     gap: .5rem;
-    margin: 1.4rem 0.5rem 1.7rem 0.5rem;
+    margin: 1.4rem 0.5rem 1.5rem 0.5rem;
     align-self: center;
 }
 
@@ -34,45 +34,4 @@
 .textoEscola span{
     font-size: .7rem;
     color: #7a7a7a;
-}
-
-.BtnVerRotas{
-    width: 90%;
-    height: 1.5rem;
-    background-color: #0D47A1;
-    color: #F8F5F5;
-    font-family: 'Poppins', sans-serif;
-    font-size: .6rem;
-    font-weight: 100;
-    text-decoration: none;
-    text-align: center;
-    line-height: 1.5rem;
-    border-radius: 10px;
-    border: none;
-
-    position: relative;
-    overflow: hidden;
-    align-self: center;
-
-    -webkit-tap-highlight-color: transparent;
-}
-
-.BtnVerRotas::after{
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #083075b7;
-    transform: translate(-50%, -50%) scale(0);  
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 1;
-}
-
-.BtnVerRotas:active::after{
-    transform: translate(-50%, -50%) scale(20);
-    opacity: 0;
-    transition: .7s;
 }

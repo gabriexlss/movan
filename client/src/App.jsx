@@ -8,6 +8,8 @@ import TituloTela from './components/tituloTela'
 import CardHorarios from './components/cards/CardHorarios'
 import CardRotas from './components/cards/CardRotas'
 import CardMensali from './components/cards/CardMensali'
+import CardFinanc from './components/cards/CardFinanc'
+import CardAluno from './components/cards/CardAluno'
 
 function App() {
 
@@ -19,6 +21,8 @@ function App() {
           <CardHorarios />
           <CardRotas />
           <CardMensali />
+          <CardFinanc />
+          <CardAluno />
         </main>
         <Footer />
     </BrowserRouter>
