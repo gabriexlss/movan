@@ -16,6 +16,7 @@ Nome, CNPJ e senha são opcionais. Para alterar o e-mail, primeiro solicite o c�
 O código expira em cinco minutos, só pode ser usado uma vez e é válido somente para o e-mail ao qual foi enviado.
 
 - 200: Dados alterados com sucesso.
-- 400: Dados inválidos ou código ausente ao alterar e-mail.
-- 401: Código inválido ou expirado.
+- 400: Dados inválidos, código ausente, inválido ou expirado ao alterar o e-mail.
+- 401: Token de autenticação ausente ou inválido.
+- 403: Conta não verificada.
 - 409: E-mail já cadastrado.

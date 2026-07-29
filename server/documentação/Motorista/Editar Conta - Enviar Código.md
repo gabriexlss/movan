@@ -14,5 +14,7 @@ Corpo da requisição:
 
 - 200: Código enviado com sucesso.
 - 400: E-mail inválido.
+- 401: Token de autenticação ausente ou inválido.
+- 403: Conta não verificada.
 - 409: E-mail já cadastrado.
 - 500: Erro interno ao enviar o código.

@@ -1,4 +1,4 @@
-Endpoint referente a criação do motorista, ou, usuário. 
+Endpoint para criar uma conta de motorista.
 ## Rota URL
 - Rota: /motorista/criar
 - Tipo: POST
@@ -17,12 +17,12 @@ Endpoint referente a criação do motorista, ou, usuário.
 }
 ```
 ## Respostas
-- "msg":  mensagem com o sucesso ou erro da solicitação, exemplo: msg: "Motorista criado com sucesso!"
-- "erro": no caso da falha da validação dos dados enviados, será exibido esse objeto com os erros e em qual campo.
+- "msg": mensagem que descreve o resultado da solicitação. Exemplo: "Conta criada com sucesso."
+- "erro": objeto retornado quando a validação dos dados falha; indica os erros de cada campo.
 #### Exemplo
 ``` JSON
 {
-    "msg": "Dados Invalidos para criação do motorista",
+    "msg": "Dados inválidos para criar a conta.",
     "erro": {
         "_errors": [],
         "nome": {
@@ -34,6 +34,7 @@ Endpoint referente a criação do motorista, ou, usuário.
 }
 ```
 ## Status
-- 201: Motorista Criado com sucesso
-- 400: Dados Faltando ou enviados de forma incorreta
-- 500: Erro na hora de salvar no banco de dados por Erro interno do servidor, se der esse status me manda mensagem
+- 201: Conta criada com sucesso.
+- 400: Dados ausentes ou inválidos.
+- 409: E-mail ou CNPJ já cadastrado.
+- 500: Erro interno no servidor.

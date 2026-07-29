@@ -15,12 +15,12 @@ Endpoint referente à verificação da conta do motorista por meio do código en
 }
 ```
 ## Respostas
-- "msg": mensagem com o sucesso ou erro da solicitação, exemplo: msg: "Conta Verificada com Sucesso."
-- "erro": no caso da falha da validação dos dados enviados, será exibido esse objeto com os erros e em qual campo.
+- "msg": mensagem que descreve o resultado da solicitação. Exemplo: "Conta verificada com sucesso."
+- "erro": objeto retornado quando a validação dos dados falha; indica os erros de cada campo.
 #### Exemplo (Erro de Validação)
 ``` JSON
 {
-    "msg": "Dados Invalidos para verificação da conta",
+    "msg": "Dados inválidos para verificar a conta.",
     "erro": {
         "_errors": [],
         "cod": {
@@ -32,7 +32,8 @@ Endpoint referente à verificação da conta do motorista por meio do código en
 }
 ```
 ## Status
-- 200: Conta Verificada com Sucesso
-- 400: Dados de requisição inválidos ou conta já verificada anteriormente
-- 401: Código inválido/expirado ou token de autenticação ausente/inválido
-- 500: Erro interno no servidor ao atualizar o banco de dados
+- 200: Conta verificada com sucesso.
+- 400: Dados da requisição ou código inválidos.
+- 401: Token de autenticação ausente ou inválido.
+- 409: Conta já verificada.
+- 500: Erro interno no servidor.

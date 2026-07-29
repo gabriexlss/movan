@@ -13,7 +13,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
     // se o cookie nao estiver presente, retorna imediatamente
     if(!token){
         return res.status(401).json({
-            msg: "Acesso Negado. Você Precisa Estar Logado para Acessar Isso."
+            msg: "Acesso negado. Faça login para continuar."
         })
     }
     // verifica a assinatura do jwt dentro do cookie
@@ -21,7 +21,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         if(!segredoJWT){
             console.error("Segredo JWT Ausente no ENV")
             return res.status(500).json({
-                msg: "Erro Interno do Servidor"
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     try{
@@ -33,8 +33,8 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
             const valores = [id]
             const{ rows } = await database.query(query, valores)
             if(rows.length < 1){
-                return res.status(401).json({
-                    msg: "Usuario não encontrado"
+                return res.status(404).json({
+                    msg: "Usuário não encontrado."
                 })
             }
             // pega o verificado e coloca dentro da requisição atual
@@ -42,7 +42,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         }catch(erro){
             console.error("Erro ao verificar se usuario existe, erro:", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor ao verificar identidade"
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
         // pega o id e coloca dentro da requisição atual
@@ -56,7 +56,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         return
     }catch{
         return res.status(401).json({
-            msg: "Acesso Negado. Você Precisa Estar Logado para Acessar Isso."
+            msg: "Acesso negado. Faça login para continuar."
         })
     }
 }
