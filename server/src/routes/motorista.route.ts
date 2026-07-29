@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Response, Request } from "express";
 const router = Router();
 import { controllerMotorista } from "../controllers/motorista.controller.js"
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
-import { Response, Request } from "express"
 
 // Rota de teste pra checar o cookie.
 router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {
@@ -32,5 +31,17 @@ router.post('/recuperar-conta/enviar-codigo', controllerMotorista.enviarCodigoRe
 
 // rota que com o código enviado, realiza a recuperação da senha
 router.post('/recuperar-conta/recuperar', controllerMotorista.recuperarSenha)
+
+// rota para enviar um código ao novo email antes de alterá-lo
+router.post('/editar/enviar-codigo', middlewareAutenticar, controllerMotorista.enviarCodigoEditarEmail)
+
+// rota delete para destruir o cookie de sessão que realiza o login, efetivamente efetuando um logout
+router.delete('/logout', controllerMotorista.deslogarConta)
+
+// rota delete para realizar o soft delete da sua conta. a agendando para encerramento permanente após 30 dias.
+router.delete('/encerrar-conta', middlewareAutenticar ,controllerMotorista.deletarConta)
+
+// rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
+router.patch('/editar', middlewareAutenticar, controllerMotorista.editarConta)
 
 export default router;

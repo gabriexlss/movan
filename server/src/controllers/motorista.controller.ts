@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema } from "../models/motorista.model.js"
 import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken"
 /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
 apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
 e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
-const queryCodigoVerificacao = `SELECT id, cod
+const queryCodigoVerificacao = `SELECT id, cod'
     FROM cod_verificacao
     WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3 AND data_uso IS NULL
     ORDER BY data_criacao DESC 
@@ -40,7 +40,7 @@ const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
         }
 }
 
-const validarCodigo = async (id:number, tipo: "criação" | "recuperação", cod:string) => {
+const validarCodigo = async (id:number, tipo: "criação" | "recuperação" | "edição", cod:string, email?: string) => {
     const dataAtual = new Date().toISOString();
     const valores = [id, tipo, dataAtual]
 
@@ -59,7 +59,8 @@ const validarCodigo = async (id:number, tipo: "criação" | "recuperação", cod
             const idCodigo:number = rows[0].id
 
             // checa se bate.
-            const codigoValido = await bcrypt.compare(cod, codigoHash)
+            const codigoParaValidar = tipo === "edição" ? `${cod}:${email}` : cod
+            const codigoValido = await bcrypt.compare(codigoParaValidar, codigoHash)
 
             // se o codigo não for valido, da um não autorizado pro nosso filhão
             if(!codigoValido){
@@ -198,13 +199,14 @@ export const controllerMotorista = {
             })
         }
 
-        // Pega o hash de senha usando o id do usuario e guarda numa variavel
+        // Pega o hash de senha e a data de exclusão usando o id do usuario e guarda numa variavel
         try{
-            const query = "SELECT senha FROM motorista WHERE id = $1"
+            const query = "SELECT senha, data_exclusao FROM motorista WHERE id = $1"
             const valores = [id]
 
             const { rows } = await database.query(query, valores)
             const hashNoBanco = rows[0].senha
+            const data_exclusao:Date|null = rows[0].data_exclusao
 
             // Compara a senha digitada pelo usuario com a senha salva no banco de dados e retorna true ou false
             const senhaValida = await bcrypt.compare(senha, hashNoBanco)
@@ -213,6 +215,12 @@ export const controllerMotorista = {
                 return res.status(401).json({
                     msg: "Senha Invalida"
                 })
+            }
+            // verifica se a conta está agendada para exclusão. se sim, cancela.
+            if(data_exclusao){
+                const query = "UPDATE motorista SET data_exclusao = NULL WHERE id = $1"
+                const valores = [id]
+                await database.query(query, valores)
             }
         }catch(erro){
             console.error("Erro ao puxar hash de senha salva no banco de dados, erro: ", erro)
@@ -237,6 +245,16 @@ export const controllerMotorista = {
             maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
         }).json({
             msg: "Login Realizado com Sucesso."
+        })
+    },
+    // Controller para deslogar o motorista
+    deslogarConta: async (req: Request, res: Response) => {
+        return res.status(200).clearCookie("token", {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'strict'
+        }).json({
+            msg: "Logout realizado com sucesso."
         })
     },
     // rota para pegar o id do usuario logado e o tipo de codigo que ele quer receber (por enquanto somente criação)
@@ -376,6 +394,40 @@ export const controllerMotorista = {
             })
         }
     },
+    // Rota para enviar um código para o novo email antes de alterá-lo.
+    enviarCodigoEditarEmail: async (req: Request, res: Response) => {
+        const id = req.userId
+        const dadosBrutos = CodigoEditarEmailSchema.safeParse(req.body)
+
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para alterar email.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        const { email } = dadosBrutos.data
+
+        try{
+            const idEmail = await verificarEmailouCNPJ(email, "email")
+            if(idEmail){
+                return res.status(409).json({
+                    msg: "Email Já Cadastrado no Movan."
+                })
+            }
+
+            const response = await gerarCodigo(email, "edição", id)
+            if(!response) throw new Error("Erro Desconhecido ao mandar código.")
+
+            return res.status(200).json({
+                msg: "Código para alteração de email enviado com sucesso."
+            })
+        }catch(erro){
+            console.error("Erro ao enviar código para alteração de email, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor ao alterar email."
+            })
+        }
+    },
     // Rota para verificar o código de recuperação de senha e permitir que o usuário altere a senha
     recuperarSenha: async (req: Request, res: Response) => {
         let id:number
@@ -436,6 +488,167 @@ export const controllerMotorista = {
             console.error("Erro ao salvar senha nova do usúario na tabela, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor ao Recuperar senha."
+            })
+        }
+    },
+    // controller para efetivar o soft delete da conta.
+    deletarConta: async (req: Request, res: Response) => {
+        const id = req.userId
+        const dadosBrutos = DeletarMotoristaSchema.safeParse(req.body)
+
+        // Checagem basica pra ver se o usuario digitou a senha e se ela é valida
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Senha para deletar a conta ausente ou inválida.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // separa a senha numa variavel
+        const { senha } = dadosBrutos.data
+
+        try{
+            // pega o hash de senha do usuario no bd
+            const queryBuscarSenha = "SELECT senha FROM motorista WHERE id = $1"
+            const valoresBuscarSenha = [id]
+            const { rows:ResultadoBuscarSenha } = await database.query(queryBuscarSenha, valoresBuscarSenha)
+
+            if(ResultadoBuscarSenha.length < 1) throw new Error("Não achou nenhum campo com o ID.")
+            const senhaHash = ResultadoBuscarSenha[0].senha
+
+            // ve se a senha digitada bate com a senha do banco de dados
+            const senhaValida = await bcrypt.compare(senha, senhaHash)
+
+            if(!senhaValida){
+                return res.status(401).json({
+                    msg: "Senha Invalida."
+                })
+            }
+
+            // senha valida, então agr so aplicar o delete do garoto
+            const queryAplicarDelete = "UPDATE motorista SET data_exclusao = now() WHERE id = $1"
+            const valoresAplicarDlete = [id]
+            await database.query(queryAplicarDelete, valoresAplicarDlete)
+
+            // Data de exclusão colocada (soft delete) ent agora só apagar a sessão dele e retornar
+
+            return res.status(200).clearCookie("token", {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'strict'
+        }).json({
+            msg: "Conta agendada para exclusão com sucesso."
+        })
+        }catch(erro){
+            console.error("Erro ao Deletar conta do usúario, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // Controller para editar os dados do motorista, como nome, email e cnpj
+    editarConta: async (req: Request, res: Response) => {
+        // pegando id da requisição como sempre
+        const id = req.userId
+
+        // tratando os dados usando o mesmo modelo de criação, mas com o metodo partial pra todos os dados virarem opcionais.
+        const dadosBrutos = EditarMotoristaSchema.safeParse(req.body)
+
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados invalidos para editar conta.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // determina se tal dado veio ou não e coloca a clausula dele
+        const { nome, email, cnpj, senha, cod } = dadosBrutos.data
+        // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
+        const campos: string[] = []
+        const valores: (string|number)[] = []
+        let quantidadeCampos:number = 0
+
+        if(nome){
+            campos.push(`nome = $${valores.length + 1}`)
+            valores.push(nome)
+            quantidadeCampos++
+        }
+        if(email){
+            try{
+                const idEmail = await verificarEmailouCNPJ(email, "email")
+                if(idEmail){
+                    return res.status(409).json({
+                        msg: "Email Já Cadastrado no Movan."
+                    })
+                }
+
+                const idCodigo = await validarCodigo(id, "edição", cod!, email)
+                if(idCodigo === null){
+                    return res.status(401).json({
+                        msg: "Código digitado invalido ou expirado."
+                    })
+                }
+
+                await database.query(queryAtualizarUsoCodigo, [idCodigo])
+            }catch(erro){
+                console.error("Erro ao validar código para alterar email, erro: ", erro)
+                return res.status(500).json({
+                    msg: "Erro Interno do Servidor ao alterar email."
+                })
+            }
+            campos.push(`email = $${valores.length + 1}`)
+            valores.push(email)
+            quantidadeCampos++
+        }
+        if(cnpj){
+            try{
+                // verifica se o cnpj pro qual ele quer trocar não está em uso.
+                const idCNPJ = await verificarEmailouCNPJ(cnpj, "cnpj")
+                if(idCNPJ){
+                    return res.status(401).json({
+                        msg: "Cnpj já cadastrado no Movan."
+                    })
+                }
+            }catch(erro){
+                console.error("Erro ao validar código para alterar email, erro: ", erro)
+                return res.status(500).json({
+                    msg: "Erro Interno do Servidor ao alterar cnpj"
+                })
+            }
+            campos.push(`cnpj = $${valores.length + 1}`)
+            valores.push(cnpj)
+            quantidadeCampos++
+        }
+        if(senha){
+            campos.push(`senha = $${valores.length + 1}`)
+
+            // transforma a senha em hash
+            const senhaHash = await bcrypt.hash(senha, 10)
+            valores.push(senhaHash)
+            quantidadeCampos++
+        }
+
+        // se nenhum campo tiver sido enviado, manda embora
+        if(quantidadeCampos < 1){
+            return res.status(400).json({
+                msg: "Pelo menos um campo é necessario para realizar a edição."
+            })
+        }
+        try{
+            const query = `
+            UPDATE motorista
+            SET ${campos.join(", ")}
+            WHERE id = $${valores.length + 1}
+            `
+            valores.push(id)
+            await database.query(query, valores)
+
+            //se chegou aqui, tudo ocorreu bem. hora de retornar.
+            return res.status(200).json({
+                msg: `${quantidadeCampos} Campos editados com sucesso.`
+            })
+        }catch(erro){
+            console.error("Erro ao editar dados do usuario, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
             })
         }
     }

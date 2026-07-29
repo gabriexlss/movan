@@ -31,7 +31,22 @@ export const RecuperarSenhaSchema = z.object({
 export const CodigoRecuperarSenhaSchema = MotoristaSchema.pick({
     email: true
 })
+export const CodigoEditarEmailSchema = MotoristaSchema.pick({
+    email: true
+})
+export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
+    cod: validarCodigoSchema.shape.cod.optional()
+}).refine((dados) => !dados.email || !!dados.cod, {
+    message: "O código é obrigatório para alterar o email.",
+    path: ["cod"]
+})
+export const DeletarMotoristaSchema = MotoristaSchema.pick({
+    senha: true
+})
+export type DeletarMotorista = z.infer<typeof DeletarMotoristaSchema>
 export type RecuperarSenha = z.infer<typeof RecuperarSenhaSchema>
 export type LoginMotorista = z.infer<typeof LoginMotoristaSchema>
 export type CriarMotorista = z.infer<typeof CriarMotoristaSchema>
 export type EnviarCodigoRecuperarSenha = z.infer<typeof CodigoRecuperarSenhaSchema>
+export type EnviarCodigoEditarEmail = z.infer<typeof CodigoEditarEmailSchema>
+export type EditarMotorista = z.infer<typeof EditarMotoristaSchema>

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import rotasMotorista from './routes/motorista.route.js';
+import rotasSistema from './routes/system.route.js'
 
 const router = Router();
 
@@ -10,5 +11,8 @@ router.get('/health', (req, res) => {
 
 // Rota para os endpoints relacionados aos motoristas(usuario)
 router.use('/motorista', rotasMotorista);
+
+// Rota para os endpoints relacionados ao sistema como manutenção e administração
+router.use('/system', rotasSistema)
 
 export default router;
