@@ -11,17 +11,15 @@ Endpoint referente ao envio (ou reenvio) de código de verificação para o e-ma
 #### Exemplo
 Requisição POST para `/motorista/codigo/criação` com o cookie `token` devidamente configurado.
 ## Respostas
-- "msg": mensagem com o sucesso ou erro da solicitação, exemplo: msg: "Código para criação da conta enviado com sucesso."
-- "erro": descrição do erro no caso de parâmetros enviados incorretamente na rota.
+- "msg": mensagem que descreve o resultado da solicitação. Exemplo: "Código para criação da conta enviado com sucesso."
 #### Exemplo (Erro de Parâmetro Inválido)
 ``` JSON
 {
-    "msg": "Erro Interno do Servidor",
-    "erro": "Tipo não corresponde nem a criação nem a recuperação de conta"
+    "msg": "Tipo de código inválido."
 }
 ```
 ## Status
-- 200: Código enviado com sucesso para o e-mail cadastrado
-- 400: Parâmetro `:tipo` inválido na rota
-- 401: Acesso negado por token ausente ou inválido
-- 500: Erro ao enviar o código ou ao consultar o banco de dados
+- 200: Código enviado com sucesso para o e-mail cadastrado.
+- 400: Parâmetro `:tipo` ausente ou inválido.
+- 401: Acesso negado por token ausente ou inválido.
+- 500: Erro interno no servidor.

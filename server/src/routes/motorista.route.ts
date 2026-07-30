@@ -1,18 +1,7 @@
-import { Router, Response, Request } from "express";
+import { Router } from "express";
 const router = Router();
 import { controllerMotorista } from "../controllers/motorista.controller.js"
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
-
-// Rota de teste pra checar o cookie.
-router.get('/teste', middlewareAutenticar, (req: Request, res: Response) => {
-    const id = req.userId
-    const verificado = req.verificado
-    return res.status(200).json({
-        msg: "deu certo",
-        id,
-        verificado
-    })
-})
 
 // Rota pra criar um motorista
 router.post('/criar', controllerMotorista.criarMotorista)
@@ -43,5 +32,8 @@ router.delete('/encerrar-conta', middlewareAutenticar ,controllerMotorista.delet
 
 // rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
 router.patch('/editar', middlewareAutenticar, controllerMotorista.editarConta)
+
+// rota get para obter todos os dados do motorista
+router.get('/dados', middlewareAutenticar, controllerMotorista.obterDados)
 
 export default router;

@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken"
 /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
 apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
 e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
-const queryCodigoVerificacao = `SELECT id, cod'
+const queryCodigoVerificacao = `SELECT id, cod
     FROM cod_verificacao
     WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3 AND data_uso IS NULL
     ORDER BY data_criacao DESC 
@@ -82,129 +82,117 @@ export const controllerMotorista = {
         //checa se os dados enviados são validos
         if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Dados Invalidos para criação do motorista",
+                msg: "Dados inválidos para criar a conta.",
                 erro: dadosBrutos.error.format()
             });
         }
         // separando os dados
         const {nome, cnpj, email, senha} = dadosBrutos.data
-        let userId: number
 
         // Verifica se Email ou CNPJ ja estão cadastrados
         try{
             const responseEmail = await verificarEmailouCNPJ(email, "email")
             if(responseEmail) {
                 return res.status(409).json({
-                    msg: "Email Já Cadastrado no Movan."
+                    msg: "E-mail já cadastrado no Movan."
                 })
             }
             const responseCnpj = await verificarEmailouCNPJ(cnpj, "cnpj")
             if(responseCnpj) {
                 return res.status(409).json({
-                    msg: "CNPJ Já Cadastrado no Movan."
+                    msg: "CNPJ já cadastrado no Movan."
                 })
             }
         } catch(erro){
             console.error("Erro ao verificar se dados ja estão cadastrados, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
 
         // transformando em hash a senha original do usuario
         const senhaHash = await bcrypt.hash(senha, 10)
-        
-        //salvando arquivos no banco de dados
+
+        // eu começo uma transação com o banco de dados pra efetuar multiplas operações que dependam uma da outra.
+        const cliente = await database.connect()
         try{
+            // inicio a transação
+            await cliente.query('BEGIN')
+
+            //salvando arquivos no banco de dados
             const query = "INSERT INTO motorista (nome, cnpj, email, senha) VALUES ($1, $2, $3, $4) RETURNING id"
             const valores = [nome, cnpj, email, senhaHash]
             
             // finalmente pega os dados e faz o insert no banco de dados
-            const { rows } = await database.query(query, valores)
-            userId = rows[0].id
-        }catch(erro){
-            // tratamento de dados, basicamente da uma mensagem no console do servidor com o erro onde nenhum usuario ve e pro usuario manda uma msg bonitinha
-            console.error("Erro ao criar usúario, ", erro)
-            return res.status(500).json({
-                msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
-            })
-        }
+            const { rows } = await cliente.query(query, valores)
+            const id = rows[0].id
 
-        try{
             // enviar o email com o codigo pro usuario
-            const response = await gerarCodigo(email, "criação", userId)
+            const response = await gerarCodigo(email, "criação", id, cliente)
             if(!response) throw new Error
+
+            // se tudo ocorrer bem, manda de volta e confirmo as alterações
+            await cliente.query('COMMIT')
             return res.status(201).json({
-                msg: "Motorista criado com sucesso!"
+                msg: "Conta criada com sucesso."
             })
         }catch(erro){
             // Se não foi possivel enviar o codigo, apaga o usuario
             console.error("Erro na Hora de mandar o codigo, erro:", erro)
-            try{
-                const query = "DELETE FROM motorista WHERE id = $1"
-                const valores = [userId]
-                await database.query(query, valores)
-            }catch(erro){
-                console.error("ERRO AO DELETAR USUARIO, ERRO: ", erro)
-            }
+            // usa a transação pra dar rollback
+            await cliente.query('ROLLBACK')
             return res.status(500).json({
-                msg: "Erro ao criar seu usuario, tente novamente mais tarde ou entre em contato."
+                msg: "Ocorreu um erro interno no servidor."
             })
+        }finally{
+            // libero a conexão
+            cliente.release()
         }
     },
     // Controller para realizar o login do motorista usando cnpj ou email
     loginMotorista: async (req: Request, res: Response) => {
         // Dados esperados: senha, cnpj ou email
-        const dados = LoginMotoristaSchema.safeParse(req.body)
+        const dadosBrutos = LoginMotoristaSchema.safeParse(req.body)
 
         // Validação pra ver se todos os dados são validos
-        if(!dados.success){
+        if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Dados Invalidos para login do motorista",
-                erro: dados.error.format()
+                msg: "Dados inválidos para fazer login.",
+                erro: dadosBrutos.error.format()
             })
         }
         // Separando os dados já validados em constantes individuais
-        const {login, senha } = dados.data
+        const {login, senha } = dadosBrutos.data
 
-        let id: number | undefined // variavel pra guardar o id do usuario encontrado, caso ele seja encontrado.
+        let id: number | null // variavel pra guardar o id do usuario encontrado, caso ele seja encontrado.
 
-        // Com a Credencial de login, primeiro tenta ver se ela é um cnpj e tenta achar algum cliente com esse cnpj
         try{
-            const response = await verificarEmailouCNPJ(login, "cnpj")
-            if(response) id = response
+            // Com a Credencial de login, primeiro tenta ver se ela é um cnpj e tenta achar algum cliente com esse cnpj
+            id = await verificarEmailouCNPJ(login, "cnpj")
+
+            // agora tenta verificar se é um email se não tiver achado nenhuma conta com o cpf
+            if(!id){
+                id = await verificarEmailouCNPJ(login, "email")
+            }
         }catch(erro){
-            console.error("Erro ao Verificar Credencial do usuario, erro: ", erro)
+            console.error("Erro ao encontrar conta usando email ou cnpj no login, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
+                msg: "Ocorreu um erro interno no servidor."
             })
-        }
-        if(!id){
-            // Com a Credencial de login, agora tenta ver se é um email ja que não é um cnpj
-        try{
-            const response = await verificarEmailouCNPJ(login, "email")
-            if(response) id = response
-        }catch(erro){
-            console.error("Erro ao Verificar Credencial do usuario, erro: ", erro)
-            return res.status(500).json({
-                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
-            })
-        }
         }
 
         // Agora que ambos email e cnpj foram checados, se nenhum deles tiver sido verdadeiro é pq o usuario não existe
         if(!id){
-            return res.status(404).json({
-                msg: "Nenhum Usuario Encontrado com o Email ou CNPJ Fornecidos"
+            return res.status(401).json({
+                msg: "E-mail, CNPJ ou senha inválidos."
             })
         }
 
         // Pega o hash de senha e a data de exclusão usando o id do usuario e guarda numa variavel
         try{
             const query = "SELECT senha, data_exclusao FROM motorista WHERE id = $1"
-            const valores = [id]
+            const { rows } = await database.query(query, [id])
 
-            const { rows } = await database.query(query, valores)
             const hashNoBanco = rows[0].senha
             const data_exclusao:Date|null = rows[0].data_exclusao
 
@@ -213,19 +201,18 @@ export const controllerMotorista = {
 
             if(!senhaValida){
                 return res.status(401).json({
-                    msg: "Senha Invalida"
+                    msg: "E-mail, CNPJ ou senha inválidos."
                 })
             }
             // verifica se a conta está agendada para exclusão. se sim, cancela.
             if(data_exclusao){
                 const query = "UPDATE motorista SET data_exclusao = NULL WHERE id = $1"
-                const valores = [id]
-                await database.query(query, valores)
+                await database.query(query, [id])
             }
         }catch(erro){
             console.error("Erro ao puxar hash de senha salva no banco de dados, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro ao fazer Login. Tente Novamente mais Tarde."
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
         // se chegou até aqui, o usuario foi encontrado e sua senha é valida, então só dar seu cookie.
@@ -233,7 +220,7 @@ export const controllerMotorista = {
         if(!segredoJWT){
             console.error("Segredo JWT Ausente no ENV")
             return res.status(500).json({
-                msg: "Erro Interno do Servidor"
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
         const token = jwt.sign({id}, segredoJWT, {expiresIn: '30d'})
@@ -244,7 +231,7 @@ export const controllerMotorista = {
             sameSite: 'strict',
             maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
         }).json({
-            msg: "Login Realizado com Sucesso."
+            msg: "Login realizado com sucesso."
         })
     },
     // Controller para deslogar o motorista
@@ -269,33 +256,30 @@ export const controllerMotorista = {
         // se o tipo não for indicado ou não for nem criação ou recuperação, dá erro de bad request
         if(!tipo) {
             return res.status(400).json({
-                msg: "Erro Interno do Servidor.",
-                erro: "Falta de tipo nos parametros da requisição"
+                msg: "O tipo do código não foi informado."
             })
         }
         if(tipo !== "criação" && tipo !== "recuperação"){
             return res.status(400).json({
-                msg: "Erro Interno do Servidor",
-                erro: "Tipo não corresponde nem a criação nem a recuperação de conta"
+                msg: "Tipo de código inválido."
             })
         }
         try{
             // pega o email do motorista por meio do ID
             const query = "SELECT email FROM motorista WHERE id = $1"
-            const valores = [id]
-            const { rows } = await database.query(query, valores)
+            const { rows } = await database.query(query, [id])
             // coloca o email na constante email
             const email = rows[0].email
             // manda o codigo pro usuario e gera e salva o codigo no banco de dados
             const response = await gerarCodigo(email, tipo, id)
-            if(!response) throw new Error("Erro ao Enviar o codigo de verificação")
+            if(!response) throw new Error("Não foi possível enviar o código de verificação.")
             return res.status(200).json({
                 msg: `Código para ${tipo} da conta enviado com sucesso.`
             })
         }catch(erro){
-            console.error("Erro na rota de enviarCodigo, Erro:", erro)
+            console.error("Erro ao enviar código, erro:", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor"
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     },
@@ -307,7 +291,7 @@ export const controllerMotorista = {
 
         // Verifica se a conta já foi verificada anteriormente, se sim, não tem motivo para ser verificada dnv
         if(verificado){
-            return res.status(400).json({
+            return res.status(409).json({
                 msg: "Conta já verificada."
             })
         }
@@ -315,7 +299,7 @@ export const controllerMotorista = {
         //checa se o código enviado é valido
         if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Dados Invalidos para verificação da conta",
+                msg: "Dados inválidos para verificar a conta.",
                 erro: dadosBrutos.error.format()
             });
         }
@@ -325,8 +309,8 @@ export const controllerMotorista = {
         try{
             const idCodigo = await validarCodigo(id, "criação", cod)
             if(idCodigo === null){
-                return res.status(401).json({
-                    msg: "Código digitado invalido ou expirado."
+                return res.status(400).json({
+                    msg: "Código inválido ou expirado."
                 })
             }
             // se o usuario chegou até aqui, então o codigo dele é valido, só verificar a conta dele
@@ -335,53 +319,43 @@ export const controllerMotorista = {
             await database.query(query, valores)
 
             // marca uma data de uso pro codigo antigo
-            const valorCodigo = [idCodigo]
-            await database.query(queryAtualizarUsoCodigo, valorCodigo)
+            await database.query(queryAtualizarUsoCodigo, [idCodigo])
 
             // retorna
             return res.status(200).json({
-                msg: "Conta Verificada com Sucesso."
+                msg: "Conta verificada com sucesso."
             })
         }catch(erro){
             console.error("Erro ao salvar o status de verificado como true no banco de dados, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro interno do servidor ao verificar sua conta."
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     },
     // Rota para recuperar a senha do usúario usando o código e o email
     enviarCodigoRecuperarSenha: async (req: Request, res: Response) => {
-        let id: number
         // pega os dados do body
         const dadosBrutos = CodigoRecuperarSenhaSchema.safeParse(req.body)
         
         //Validação
         if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Dados Inválidos para recuperação de senha.",
+                msg: "Dados inválidos para recuperação de senha.",
                 erro: dadosBrutos.error.format()
             })
         }
         const { email } = dadosBrutos.data
         // Agora que o usuario chegou aqui, só vamos checar se esse email existe
         try{
-            const response = await verificarEmailouCNPJ(email, "email")
-            if(!response) {
+            const id = await verificarEmailouCNPJ(email, "email")
+            if(!id) {
                 return res.status(404).json({
-                    msg: "Nenhuma conta encontrada com o email fornecido"
+                msg: "Nenhuma conta encontrada com o e-mail informado."
                 })
             }
-            id = response
-        }catch(erro){
-            console.error("Erro ao verificar se email para enviar codigo de recuperação de senha, erro: ", erro)
-            return res.status(500).json({
-                msg: "Erro Interno do Servidor ao Recuperar senha."
-            })
-        }
         // se ja chegou aqui, a conta existe e já temos um id de conta, então hora de enviar o código
-        try{
             const response = await gerarCodigo(email, "recuperação", id)
-            if(!response) throw new Error("Erro Desconhecido ao mandar código.")
+            if(!response) throw new Error("Não foi possível enviar o código de recuperação.")
 
             // deu tudo certo, só retornar.
             return res.status(200).json({
@@ -390,18 +364,27 @@ export const controllerMotorista = {
         }catch(erro){
             console.error("Erro ao enviar código para recuperação de conta, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor ao Recuperar senha."
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     },
     // Rota para enviar um código para o novo email antes de alterá-lo.
     enviarCodigoEditarEmail: async (req: Request, res: Response) => {
         const id = req.userId
+        const verificado = req.verificado
         const dadosBrutos = CodigoEditarEmailSchema.safeParse(req.body)
 
+        // verifica se a conta dele está verificada, se não, manda embora
+        if(!verificado){
+            return res.status(403).json({
+                msg: "Conta não verificada. Não é possível alterar o e-mail."
+            })
+        }
+
+        // verifica se os dados são validos
         if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Dados Inválidos para alterar email.",
+                msg: "Dados inválidos para alterar o e-mail.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -411,32 +394,32 @@ export const controllerMotorista = {
             const idEmail = await verificarEmailouCNPJ(email, "email")
             if(idEmail){
                 return res.status(409).json({
-                    msg: "Email Já Cadastrado no Movan."
+                    msg: "E-mail já cadastrado no Movan."
                 })
             }
 
             const response = await gerarCodigo(email, "edição", id)
-            if(!response) throw new Error("Erro Desconhecido ao mandar código.")
+            if(!response) throw new Error("Não foi possível enviar o código de alteração de e-mail.")
 
             return res.status(200).json({
-                msg: "Código para alteração de email enviado com sucesso."
+                msg: "Código para alteração de e-mail enviado com sucesso."
             })
         }catch(erro){
             console.error("Erro ao enviar código para alteração de email, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor ao alterar email."
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     },
     // Rota para verificar o código de recuperação de senha e permitir que o usuário altere a senha
     recuperarSenha: async (req: Request, res: Response) => {
-        let id:number
+        // dados esperados: email, cod, nova senha
         const dadosBrutos = RecuperarSenhaSchema.safeParse(req.body)
 
         // Validação dos dados
         if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Dados Inválidos para recuperação de senha.",
+                msg: "Dados inválidos para recuperação de senha.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -444,29 +427,19 @@ export const controllerMotorista = {
 
         // checar se o email existe novamente só pra desencargo de consciencia, já que a conta pode ter sido deletada no processo.
         try{
-            const response = await verificarEmailouCNPJ(email, "email")
-            if(!response) {
+            const id = await verificarEmailouCNPJ(email, "email")
+            if(!id) {
                 return res.status(404).json({
-                    msg: "Nenhuma conta encontrada com o email fornecido"
+                msg: "Nenhuma conta encontrada com o e-mail informado."
                 })
             }
-            id = response
-        }catch(erro){
-            console.error("Erro ao verificar email para recuperar de senha, erro: ", erro)
-            return res.status(500).json({
-                msg: "Erro Interno do Servidor ao Recuperar senha."
-            })
-        }
-        
-        try{
             // beleza, conta existe, agora verificar código se bate com o banco de dados. 
             const idCodigo = await validarCodigo(id, "recuperação", cod)
             if(idCodigo === null){
-                return res.status(401).json({
-                    msg: "Código digitado invalido ou expirado."
+                return res.status(400).json({
+                    msg: "Código inválido ou expirado."
                 })
             }
-            
             // Se chegou até aqui, o codigo é valido, só substituir a senha antiga pela nova.
             // transformando em hash a senha original do usuario
             const senhaHash = await bcrypt.hash(novaSenha, 10)
@@ -482,12 +455,12 @@ export const controllerMotorista = {
 
             // senha recuperada. só retornar
             return res.status(200).json({
-                msg: "Senha Recuperada com Sucesso!"
+                msg: "Senha alterada com sucesso."
             })
         }catch(erro){
-            console.error("Erro ao salvar senha nova do usúario na tabela, erro: ", erro)
+            console.error("Erro ao salvar senha nova do usuário, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor ao Recuperar senha."
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     },
@@ -499,7 +472,7 @@ export const controllerMotorista = {
         // Checagem basica pra ver se o usuario digitou a senha e se ela é valida
         if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Senha para deletar a conta ausente ou inválida.",
+                msg: "Senha para excluir a conta ausente ou inválida.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -520,17 +493,14 @@ export const controllerMotorista = {
 
             if(!senhaValida){
                 return res.status(401).json({
-                    msg: "Senha Invalida."
+                    msg: "Senha inválida."
                 })
             }
-
             // senha valida, então agr so aplicar o delete do garoto
             const queryAplicarDelete = "UPDATE motorista SET data_exclusao = now() WHERE id = $1"
-            const valoresAplicarDlete = [id]
-            await database.query(queryAplicarDelete, valoresAplicarDlete)
+            await database.query(queryAplicarDelete, [id])
 
             // Data de exclusão colocada (soft delete) ent agora só apagar a sessão dele e retornar
-
             return res.status(200).clearCookie("token", {
             httpOnly: true,
             secure: process.env['NODE_ENV'] === 'production',
@@ -541,7 +511,7 @@ export const controllerMotorista = {
         }catch(erro){
             console.error("Erro ao Deletar conta do usúario, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     },
@@ -549,13 +519,20 @@ export const controllerMotorista = {
     editarConta: async (req: Request, res: Response) => {
         // pegando id da requisição como sempre
         const id = req.userId
+        const verificado = req.verificado
 
+        // verifica se a conta dele está verificada, se não, manda embora
+        if(!verificado){
+            return res.status(403).json({
+                msg: "Conta não verificada. Não é possível editar os dados."
+            })
+        }
         // tratando os dados usando o mesmo modelo de criação, mas com o metodo partial pra todos os dados virarem opcionais.
         const dadosBrutos = EditarMotoristaSchema.safeParse(req.body)
 
         if(!dadosBrutos.success){
             return res.status(400).json({
-                msg: "Dados invalidos para editar conta.",
+                msg: "Dados inválidos para editar a conta.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -564,26 +541,24 @@ export const controllerMotorista = {
         // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
         const campos: string[] = []
         const valores: (string|number)[] = []
-        let quantidadeCampos:number = 0
 
         if(nome){
             campos.push(`nome = $${valores.length + 1}`)
             valores.push(nome)
-            quantidadeCampos++
         }
         if(email){
             try{
                 const idEmail = await verificarEmailouCNPJ(email, "email")
                 if(idEmail){
                     return res.status(409).json({
-                        msg: "Email Já Cadastrado no Movan."
+                        msg: "E-mail já cadastrado no Movan."
                     })
                 }
 
                 const idCodigo = await validarCodigo(id, "edição", cod!, email)
                 if(idCodigo === null){
-                    return res.status(401).json({
-                        msg: "Código digitado invalido ou expirado."
+                    return res.status(400).json({
+                        msg: "Código inválido ou expirado."
                     })
                 }
 
@@ -591,31 +566,29 @@ export const controllerMotorista = {
             }catch(erro){
                 console.error("Erro ao validar código para alterar email, erro: ", erro)
                 return res.status(500).json({
-                    msg: "Erro Interno do Servidor ao alterar email."
+                msg: "Ocorreu um erro interno no servidor."
                 })
             }
             campos.push(`email = $${valores.length + 1}`)
             valores.push(email)
-            quantidadeCampos++
         }
         if(cnpj){
             try{
                 // verifica se o cnpj pro qual ele quer trocar não está em uso.
                 const idCNPJ = await verificarEmailouCNPJ(cnpj, "cnpj")
                 if(idCNPJ){
-                    return res.status(401).json({
-                        msg: "Cnpj já cadastrado no Movan."
+                    return res.status(409).json({
+                        msg: "CNPJ já cadastrado no Movan."
                     })
                 }
             }catch(erro){
                 console.error("Erro ao validar código para alterar email, erro: ", erro)
                 return res.status(500).json({
-                    msg: "Erro Interno do Servidor ao alterar cnpj"
+                msg: "Ocorreu um erro interno no servidor."
                 })
             }
             campos.push(`cnpj = $${valores.length + 1}`)
             valores.push(cnpj)
-            quantidadeCampos++
         }
         if(senha){
             campos.push(`senha = $${valores.length + 1}`)
@@ -623,13 +596,12 @@ export const controllerMotorista = {
             // transforma a senha em hash
             const senhaHash = await bcrypt.hash(senha, 10)
             valores.push(senhaHash)
-            quantidadeCampos++
         }
 
         // se nenhum campo tiver sido enviado, manda embora
-        if(quantidadeCampos < 1){
+        if(campos.length < 1){
             return res.status(400).json({
-                msg: "Pelo menos um campo é necessario para realizar a edição."
+                msg: "Informe pelo menos um campo para editar a conta."
             })
         }
         try{
@@ -643,12 +615,46 @@ export const controllerMotorista = {
 
             //se chegou aqui, tudo ocorreu bem. hora de retornar.
             return res.status(200).json({
-                msg: `${quantidadeCampos} Campos editados com sucesso.`
+                msg: campos.length === 1
+                    ? "1 campo editado com sucesso."
+                    : `${campos.length} campos editados com sucesso.`
             })
         }catch(erro){
             console.error("Erro ao editar dados do usuario, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor"
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+    },
+    // controller para obter os dados do motorista
+    obterDados: async (req: Request, res: Response) => {
+        // pega o id e o status de verificado do cookie
+        const id = req.userId
+        const verificado = req.verificado
+
+        // verifica se a conta dele está verificada, se não, manda embora
+        if(!verificado){
+            return res.status(403).json({
+                msg: "Conta não verificada. Não é possível obter os dados."
+            })
+        }
+
+        // pega os dados do motorista e envia de volta
+        try{
+            const query  = "SELECT id, nome, email, cnpj, data_exclusao, verificado FROM motorista WHERE id = $1"
+            const { rows } = await database.query(query, [id])
+            if(rows.length < 1) throw new Error("Nenhum dado retornado.")
+
+            const motorista = rows[0]
+
+            return res.status(200).json({
+                msg: "Dados da conta obtidos com sucesso.",
+                motorista
+            })
+        }catch(erro){
+            console.error("Erro ao obter dados do motorista, erro: ", erro)
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
             })
         }
     }

@@ -1,9 +1,9 @@
-Endpoint referente ao login do motorista, ou, usuário. 
+Endpoint para fazer login na conta do motorista.
 ## Rota URL
 - Rota: /motorista/login
 - Tipo: POST
 ## Dados Esperados
-- "login": String, minimo de 3 e máximo de 255 (pode ser o E-mail ou o CNPJ do motorista)
+- "login": String, mínimo de 3 e máximo de 255 caracteres (pode ser o e-mail ou o CNPJ do motorista)
 - "senha": String, máximo de 100
 #### Exemplo
 ``` JSON
@@ -13,12 +13,12 @@ Endpoint referente ao login do motorista, ou, usuário.
 }
 ```
 ## Respostas
-- "msg": mensagem com o sucesso ou erro da solicitação, exemplo: msg: "Login Realizado com Sucesso."
-- "erro": no caso da falha da validação dos dados enviados, será exibido esse objeto com os erros e em qual campo.
+- "msg": mensagem que descreve o resultado da solicitação. Exemplo: "Login realizado com sucesso."
+- "erro": objeto retornado quando a validação dos dados falha; indica os erros de cada campo.
 #### Exemplo
 ``` JSON
 {
-    "msg": "Dados Invalidos para login do motorista",
+    "msg": "Dados inválidos para fazer login.",
     "erro": {
         "_errors": [],
         "login": {
@@ -30,7 +30,7 @@ Endpoint referente ao login do motorista, ou, usuário.
 }
 ```
 ## Status
-- 200: Login Realizado com Sucesso
-- 400: Dados Faltando, enviados de forma incorreta ou Senha Invalida
-- 404: Nenhum Usuario Encontrado com o Email ou CNPJ Fornecidos
-- 500: Erro interno do servidor, se der esse status me manda mensagem
+- 200: Login realizado com sucesso.
+- 400: Dados ausentes ou inválidos.
+- 401: E-mail, CNPJ ou senha inválidos.
+- 500: Erro interno no servidor.

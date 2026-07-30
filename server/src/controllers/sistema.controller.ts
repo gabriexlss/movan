@@ -10,7 +10,7 @@ export const controllerSistema = {
                 AND data_exclusao <= CURRENT_DATE - INTERVAL '30 days'`
             const response = await database.query(query)
             return res.status(200).json({
-                msg: `Limpeza concluida! ${response.rowCount} usúarios deletados`
+                msg: `Limpeza concluida! ${response.rowCount} usuarios deletados`
             })
         }catch(erro){
             return res.status(500).json({

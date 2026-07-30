@@ -1,6 +1,7 @@
-Endpoints referentes a criação, edição, exclusão e visualização do motorista ou usuário da plataforma
-- [[Criar Motorista]]: Endpoint referente a criação do motorista, ou, usuário. 
-- [[Login do Motorista]]: Endpoint referente ao login do motorista, ou, usuário.
+Endpoints referentes à criação, edição, exclusão e visualização da conta do motorista na plataforma.
+
+- [[Criar Motorista]]: endpoint para criar uma conta de motorista.
+- [[Login do Motorista]]: endpoint para fazer login na conta do motorista.
 - [[Enviar Código]]: Endpoint referente ao envio (ou reenvio) de código de verificação para o e-mail do motorista.
 - [[Verificar Conta]]: Endpoint referente à verificação da conta do motorista por meio do código enviado ao e-mail.
 - [[Recuperar Conta - Enviar Código]]: Endpoint referente ao envio do código para recuperação da senha do motorista.
