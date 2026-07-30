@@ -15,12 +15,15 @@ const CardAluno = () => {
             <div className="aluno-container">
                 {alunos.map((alunos, index) => (
                     <div className="statusAluno" key={index}>
-                        <div className="iconAluno">
-                            {alunos.icon}
-                        </div>
+                        <h2 className="tituloAluno" style={{ color: alunos.cor }}>{alunos.titulo}</h2>
 
-                        <h2>{alunos.titulo}</h2>
-                        <p>{alunos.qntd}</p>
+                        <div className="containerTexto">
+                            <div className="iconAluno" style={{ color: alunos.cor }}>
+                                {alunos.icon}
+                            </div>
+
+                            <p className="quantidadeAluno">{alunos.qntd}</p>
+                        </div>
                     </div>
                 ))}
             </div>

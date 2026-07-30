@@ -4,7 +4,7 @@ import './CardMensali.css';
 const CardMensali = ({ title, children }) => {
     const mensalidade = [
         {nome: "Pagas", qntd: "38", corf: "rgba(0, 255, 98, 0.25)", cor:"#15720C"},
-        {nome: "Pendentes", qntd: "8", corf: "rgba(234, 227, 24, 0.25)", cor: "#C8B028"},
+        {nome: "Pendentes", qntd: "8", corf: "rgba(234, 227, 24, 0.25)", cor: "#d4a30e"},
         {nome: "Vencidas", qntd: "5", corf: "rgba(199, 44, 44, 0.25)", cor: "#720C0C"}
     ];
 

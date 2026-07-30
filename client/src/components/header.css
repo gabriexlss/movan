@@ -1,7 +1,14 @@
 .header{
-    position: relative;
+    position: fixed;
+    top: 0;
     width: 100vw;
     overflow: hidden;
+
+    transition: transform .5s ease;
+}
+
+.header.hidden{
+    transform: translateY(-1000%)
 }
 
 .stain{

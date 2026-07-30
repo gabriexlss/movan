@@ -1,8 +1,11 @@
 .TituloTela-container{
     display: flex;
     flex-direction: row;
-    margin: 1.5rem 1.5rem 1rem 1.5rem;
+    margin: 0 1.5rem 1rem 1.5rem;
+    padding-top: 1rem;
     text-align: left;
+
+    margin-top: var(--header-height);
 }
 
 .texto{

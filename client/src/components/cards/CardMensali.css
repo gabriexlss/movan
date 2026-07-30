@@ -28,12 +28,13 @@
 .tituloMensalidade {
     font-family: 'Poppins', sans-serif;
     font-size: .55rem;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .quantidadeMensalidade {
     font-size: 1.25rem;
     font-family: 'Poppins', sans-serif;
+    font-weight: 600;
 }
 
 .proximaMensa{
