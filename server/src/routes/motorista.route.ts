@@ -42,4 +42,10 @@ router.post('/google', controllerMotorista.authGoogle)
 // rota post para vincular conta existente com o google
 router.post('/google/vincular', middlewareAutenticar, controllerMotorista.vincularGoogle)
 
+// rota post para criar uma conta, usando o google.
+router.post('/google/criar', controllerMotorista.criarContaGoogle)
+
+// rota delete para desvincular a conta google da conta do usuario logado.
+router.delete('/google/desvincular', middlewareAutenticar, controllerMotorista.desvincularGoogle)
+
 export default router;

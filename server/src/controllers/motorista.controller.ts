@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema, GoogleTokenSchema, ValidarPayloadGoogleSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema, GoogleTokenSchema, ValidarPayloadGoogleSchema, CriarMotoristaGoogleSchema } from "../models/motorista.model.js"
 import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
@@ -676,6 +676,7 @@ export const controllerMotorista = {
             })
         }
     },
+    // controller para autenticar o motorista usando o google, caso ele tenha uma conta vinculada ao google, ou criar uma nova conta caso ele não tenha.
     authGoogle: async (req: Request, res: Response) => {
         // iniciando variavel do usuario.
         let usuario
@@ -802,6 +803,7 @@ export const controllerMotorista = {
             })
         }
     },
+    // Controller para vincular a conta google com a conta do usuario logado.
     vincularGoogle: async (req: Request, res: Response) => {
         let usuario
 
@@ -886,6 +888,115 @@ export const controllerMotorista = {
             })
         }catch(erro){
             console.error("Erro ao vincular a conta google do usuario, erro: ", erro)
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+    },
+    // Controller para criar uma nova conta usando o google.
+    criarContaGoogle: async (req: Request, res: Response) => {
+        // dados esperados: Nome, email, senha, cnpj e googleId
+        const dadosBrutos = CriarMotoristaGoogleSchema.safeParse(req.body)
+
+        // Validação de dados
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para criação da conta.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // separando os dados
+        const {nome, cnpj, email, senha, googleId} = dadosBrutos.data
+
+        // Verifica se Email ou CNPJ ja estão cadastrados
+        try{
+            const responseEmail = await verificarEmailouCNPJ(email, "email")
+            if(responseEmail) {
+                return res.status(409).json({
+                    msg: "E-mail já cadastrado no Movan."
+                })
+            }
+            const responseCnpj = await verificarEmailouCNPJ(cnpj, "cnpj")
+            if(responseCnpj) {
+                return res.status(409).json({
+                    msg: "CNPJ já cadastrado no Movan."
+                })
+            }
+        } catch(erro){
+            console.error("Erro ao verificar se dados ja estão cadastrados, erro: ", erro)
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+
+        // transformando em hash a senha original do usuario
+        const senhaHash = await bcrypt.hash(senha, 10)
+
+        // eu começo uma transação com o banco de dados pra efetuar multiplas operações que dependam uma da outra.
+        const cliente = await database.connect()
+        try{
+            // inicio a transação
+            await cliente.query('BEGIN')
+
+            //salvando arquivos no banco de dados
+            const query = "INSERT INTO motorista (nome, cnpj, email, senha, google_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+            const valores = [nome, cnpj, email, senhaHash, googleId]
+            
+            // finalmente pega os dados e faz o insert no banco de dados
+            const { rows } = await cliente.query(query, valores)
+            const id = rows[0].id
+
+            // enviar o email com o codigo pro usuario
+            const response = await gerarCodigo(email, "criação", id, cliente)
+            if(!response) throw new Error
+
+            // se tudo ocorrer bem, manda de volta e confirmo as alterações
+            await cliente.query('COMMIT')
+            const segredoJWT = process.env['SEGREDO_JWT']
+            if(!segredoJWT){
+                console.error("Segredo JWT Ausente no ENV")
+                return res.status(500).json({
+                    msg: "Ocorreu um erro interno no servidor."
+                })
+            }
+            const token = jwt.sign({id}, segredoJWT, {expiresIn: '30d'})
+            return res.status(201).cookie('token', token,{
+                httpOnly: true,
+                secure: process.env['NODE_ENV'] === 'production',
+                sameSite: 'strict',
+                maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
+            }).json({
+                msg: "Conta criada com sucesso."
+            })
+        }catch(erro){
+            // Se não foi possivel enviar o codigo, apaga o usuario
+            console.error("Erro na Hora de mandar o codigo, erro:", erro)
+            // usa a transação pra dar rollback
+            await cliente.query('ROLLBACK')
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }finally{
+            // libero a conexão
+            cliente.release()
+        }
+    },
+    // Controller para desvincular a conta google da conta do usuario logado.
+    desvincularGoogle: async (req: Request, res: Response) => {
+        // pegando id do cookie
+        const id = req.userId
+
+        try{
+            // atualizando o google_id do motorista pra null.
+            const query = "UPDATE motorista SET google_id = null WHERE id = $1"
+            await database.query(query, [id])
+
+            //retornando usuario
+            return res.status(200).json({
+                msg: "Conta Google Desvinculada com Sucesso."
+            })
+        }catch(erro){
+            console.error("Erro ao desvincular conta google, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
