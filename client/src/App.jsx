@@ -16,7 +16,7 @@ function App() {
   return (
     <BrowserRouter>
         <Header />
-        <TituloTela title="Olá, Motorista!" subtitle="Sexta-feira, 12 de setembro" />
+        <TituloTela title="Olá, Motorista!" />
         <main>
           <CardHorarios />
           <CardRotas />
