@@ -36,4 +36,10 @@ router.patch('/editar', middlewareAutenticar, controllerMotorista.editarConta)
 // rota get para obter todos os dados do motorista
 router.get('/dados', middlewareAutenticar, controllerMotorista.obterDados)
 
+// rota post para autenticar com o google.
+router.post('/google', controllerMotorista.authGoogle)
+
+// rota post para vincular conta existente com o google
+router.post('/google/vincular', middlewareAutenticar, controllerMotorista.vincularGoogle)
+
 export default router;

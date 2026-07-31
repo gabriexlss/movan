@@ -1,10 +1,15 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema, GoogleTokenSchema, ValidarPayloadGoogleSchema } from "../models/motorista.model.js"
 import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
 import { gerarCodigo } from "../utils/mandarCodigo.js"
 import jwt from "jsonwebtoken"
+import { OAuth2Client } from 'google-auth-library' 
+
+const GOOGLE_CLIENT_ID = process.env['GOOGLE_CLIENT_ID']
+// Iniciando o google client do OAuth2, para autenticação
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
 
 // Constante de query global para servir pro verificar conta e recuperar senha.
 /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
@@ -133,7 +138,20 @@ export const controllerMotorista = {
 
             // se tudo ocorrer bem, manda de volta e confirmo as alterações
             await cliente.query('COMMIT')
-            return res.status(201).json({
+            const segredoJWT = process.env['SEGREDO_JWT']
+            if(!segredoJWT){
+                console.error("Segredo JWT Ausente no ENV")
+                return res.status(500).json({
+                    msg: "Ocorreu um erro interno no servidor."
+                })
+            }
+            const token = jwt.sign({id}, segredoJWT, {expiresIn: '30d'})
+            return res.status(201).cookie('token', token,{
+                httpOnly: true,
+                secure: process.env['NODE_ENV'] === 'production',
+                sameSite: 'strict',
+                maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
+            }).json({
                 msg: "Conta criada com sucesso."
             })
         }catch(erro){
@@ -653,6 +671,221 @@ export const controllerMotorista = {
             })
         }catch(erro){
             console.error("Erro ao obter dados do motorista, erro: ", erro)
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+    },
+    authGoogle: async (req: Request, res: Response) => {
+        // iniciando variavel do usuario.
+        let usuario
+
+        // Dados Esperados: token jwt enviado pelo google
+        const dadosBrutos = GoogleTokenSchema.safeParse(req.body)
+
+        // Validação dos dados
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para autenticar com o google.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        const { token } = dadosBrutos.data
+        try{
+            if(!GOOGLE_CLIENT_ID) throw new Error("Google Client ID ausente.")
+            /* manda uma solicitação pros servidores do google 
+            para abrir e verificar o token que nós foi passado
+            onde token é o código que nos foi passado e audience é o nosso cliente id, internamente
+            ele vai validar pra ver se os dois tem a mesma assinatura */
+            const ticket = await googleClient.verifyIdToken({
+                idToken: token,
+                audience: GOOGLE_CLIENT_ID
+            })
+
+            const payload = ticket.getPayload()
+
+            // checa pra ver se dados foram obtidos do token, quando o google processou ele. 
+            if(!payload){
+                return res.status(401).json({
+                    msg: "Token Inválido, expirado ou corrompido."
+                })
+            }
+
+            // checa pra ver se a conta google pertencente a esse token foi verificada.
+            if(!payload.email_verified){
+                return res.status(403).json({
+                    msg: "Email do Google não verificado."
+                })
+            }
+            // separa os dados.
+            const dados = {
+                googleId: payload.sub,
+                email: payload.email,
+                nome: payload.name,
+            }
+            const payloadCheck = ValidarPayloadGoogleSchema.safeParse(dados)
+
+            // verificação para ver se todos os dados vieram certos
+            if(!payloadCheck.success){
+                throw new Error(`Erro ao receber todos os dados necessarios do payload do google, erro: , ${payloadCheck.error.format()}`)
+            }
+            usuario = payloadCheck.data
+        }catch(erro){
+            console.error("Erro ao processar o token do google, erro: ", erro)
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+        // Se chegou aqui, já temos todos os dados do google certinho, então vamos tentar buscar o usuario pelo id google
+        try{
+            // iniciando variavel booleana pra ver se ja achou o usuario.
+            let achouUsuario:boolean = false
+
+            const queryBuscarID = "SELECT id, data_exclusao FROM motorista WHERE google_id = $1"
+            const resultadoID = await database.query(queryBuscarID, [usuario.googleId])
+
+            // se tiver achado algo, marca q achou, loga e devolve cookie jwt.
+            if(resultadoID.rows.length > 0) {
+                // deixa id e data exclusão mais legiveis
+                const id = resultadoID.rows[0].id
+                const data_exclusao = resultadoID.rows[0].data_exclusao
+                
+                //marca que achou usuario
+                achouUsuario = true
+
+                // verifica se a conta está agendada para exclusão. se sim, cancela.
+                if(data_exclusao){
+                    const query = "UPDATE motorista SET data_exclusao = NULL WHERE id = $1"
+                    await database.query(query, [id])
+                }
+                // se chegou até aqui, o usuario foi encontrado com o google_id então só dar seu cookie.
+                const segredoJWT = process.env['SEGREDO_JWT']
+                if(!segredoJWT){
+                    console.error("Segredo JWT Ausente no ENV")
+                    return res.status(500).json({
+                        msg: "Ocorreu um erro interno no servidor."
+                    })
+                }
+                const token = jwt.sign({id}, segredoJWT, {expiresIn: '30d'})
+                return res.status(200).cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env['NODE_ENV'] === 'production',
+                    sameSite: 'strict',
+                    maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
+                }).json({
+                    msg: "Login realizado com sucesso."
+                })
+            }
+
+            if(!achouUsuario) {
+                // se não achou com o id da google, tenta achar usando o email.
+                const queryBuscarEmail = "SELECT id, data_exclusao FROM motorista WHERE email = $1"
+                const resultadoEmail = await database.query(queryBuscarEmail, [usuario.email])
+
+                if(resultadoEmail.rows.length > 0) {
+                    achouUsuario = true
+                    return res.status(409).json({
+                        msg: "Conta Encontrada, mas não vinculada ao google."
+                    })
+                }
+            }
+            // Se não achou nem por google_id nem por email ele não tem conta, iniciando processo de criação de conta.
+                return res.status(200).json({
+                    msg: "Conta não encontrada. iniciando criação de conta com o google.",
+                    CREATION_REQUIRED: true,
+                    dadosGoogle: usuario
+                })
+        }catch(erro){
+            console.error("Erro ao  processar dados usando os dados obtidos pelo google, erro: ", erro)
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+    },
+    vincularGoogle: async (req: Request, res: Response) => {
+        let usuario
+
+        // pega id e verificado do cookie
+        const id = req.userId
+        const verificado = req.verificado
+
+        // verifica se a conta dele está verificada, se não, manda embora
+        if(!verificado){
+            return res.status(403).json({
+                msg: "Conta não verificada. Não é possível vincular conta google."
+            })
+        }
+
+        // dados esperados: token google.
+        const dadosBrutos = GoogleTokenSchema.safeParse(req.body)
+
+        // Validação
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para vincular sua conta google.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // separação dos dados
+        const { token } = dadosBrutos.data
+
+        try{
+            if(!GOOGLE_CLIENT_ID) throw new Error("Google Client ID ausente.")
+            /* manda uma solicitação pros servidores do google 
+            para abrir e verificar o token que nós foi passado
+            onde token é o código que nos foi passado e audience é o nosso cliente id, internamente
+            ele vai validar pra ver se os dois tem a mesma assinatura */
+            const ticket = await googleClient.verifyIdToken({
+                idToken: token,
+                audience: GOOGLE_CLIENT_ID
+            })
+
+            const payload = ticket.getPayload()
+
+            // checa pra ver se dados foram obtidos do token, quando o google processou ele. 
+            if(!payload){
+                return res.status(401).json({
+                    msg: "Token Inválido, expirado ou corrompido."
+                })
+            }
+
+            // checa pra ver se a conta google pertencente a esse token foi verificada.
+            if(!payload.email_verified){
+                return res.status(403).json({
+                    msg: "Email do Google não verificado."
+                })
+            }
+            // separa os dados.
+            const dados = {
+                googleId: payload.sub,
+                email: payload.email,
+                nome: payload.name,
+            }
+            const payloadCheck = ValidarPayloadGoogleSchema.safeParse(dados)
+
+            // verificação para ver se todos os dados vieram certos
+            if(!payloadCheck.success){
+                throw new Error(`Erro ao receber todos os dados necessarios do payload do google, erro: , ${payloadCheck.error.format()}`)
+            }
+            usuario = payloadCheck.data
+        }catch(erro){
+            console.error("Erro ao processar o token do google, erro: ", erro)
+            return res.status(500).json({
+                msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+        // agr que temos os dados, só vincular a conta google com a conta logada do usuario.
+        try{
+            const query = "UPDATE motorista SET google_id = $1 WHERE id = $2"
+            const valores = [usuario.googleId, id]
+            await database.query(query, valores)
+
+            // agr com a conta vinculada, só retornar.
+            return res.status(200).json({
+                msg: "Conta vinculada ao google com sucesso."
+            })
+        }catch(erro){
+            console.error("Erro ao vincular a conta google do usuario, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
