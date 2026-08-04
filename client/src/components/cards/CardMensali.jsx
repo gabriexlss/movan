@@ -1,4 +1,4 @@
-import DefaultCard from '../DefaultCard';
+import DefaultCard from './DefaultCard';
 import './CardMensali.css';
 
 const CardMensali = ({ title, children }) => {

@@ -1,4 +1,4 @@
-import DefaultCard from '../DefaultCard';
+import DefaultCard from './DefaultCard';
 import './CardFinanc.css';
 
 const CardFinanc = ({ title, children }) => {

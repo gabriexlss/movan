@@ -1,4 +1,4 @@
-import DefaultCard from "../DefaultCard";
+import DefaultCard from "./DefaultCard";
 import './CardAluno.css'
 
 import { PiStudentBold } from "react-icons/pi";

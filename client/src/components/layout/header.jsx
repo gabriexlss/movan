@@ -2,9 +2,9 @@ import React from 'react'
 import './header.css'
 import { useLayoutEffect, useRef } from 'react'
 
-import useHeaderScroll from '../hook/useHeaderScroll'
+import useHeaderScroll from '../../hook/useHeaderScroll'
 
-import stain from '../assets/media/img/header-stain.svg'
+import stain from '../../assets/media/img/header-stain.svg'
 
 const header = () => {
 const headerRef = useRef(null);

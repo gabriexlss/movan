@@ -1,4 +1,4 @@
-import DefaultCard from '../DefaultCard';
+import DefaultCard from './DefaultCard';
 import './CardRotas.css';
 
 import { RiGraduationCapLine } from "react-icons/ri";
