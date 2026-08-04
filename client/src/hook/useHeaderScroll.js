@@ -1,9 +1,9 @@
-import { useState, useLayoutEffect} from 'react';
+import { useEffect, useState } from 'react';
 
 const useHeaderScroll = () => {
     const [showHeader, setShowHeader] = useState(true);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         let scrollInicialY = window.scrollY;
         const threshold = 50;
 
@@ -21,10 +21,10 @@ const useHeaderScroll = () => {
             scrollInicialY = scrollAtualY;
         };
 
-        window.addEventListener("scroll", handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
 
         return () => {
-            window.removeEventListener("scroll", handleScroll)
+            window.removeEventListener('scroll', handleScroll);
         };
 
     }, []);

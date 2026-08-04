@@ -31,7 +31,7 @@
     width: 100%;
 }
 
-.containerTexto p, h1{
+.containerTexto p, .containerTexto h1{
     font-family: 'Poppins', sans-serif;
     font-weight: 900;
 }

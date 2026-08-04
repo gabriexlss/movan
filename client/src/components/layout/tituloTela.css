@@ -8,19 +8,19 @@
     margin-top: var(--header-height);
 }
 
-.texto{
+.TituloTela-container .texto{
     display: flex;
     flex-direction: column;
 }
 
-.titulo{
+.TituloTela-container .titulo{
     color: #07368A;
     font-family: 'Merriweather Sans', sans-serif;
     font-weight: 900;
     font-size: 1.1rem;
 }
 
-.subtitulo{
+.TituloTela-container .subtitulo{
     color: #7A7A7A;
     font-family: 'Poppins', sans-serif;
     font-weight: 400;
@@ -28,7 +28,7 @@
     margin-top: 0.1rem;
 }
 
-.iconeNotificacao{
+.TituloTela-container .iconeNotificacao{
     margin-left: auto;
     align-self: center;
 }

@@ -1,7 +1,7 @@
 import DefaultCard from './DefaultCard';
 import './CardFinanc.css';
 
-const CardFinanc = ({ title, children }) => {
+const CardFinanc = () => {
     const financeiro =[
         {titulo: "Receitas", valor: "6.890,00", cor: "#15720C"},
         {titulo: "Despesas", valor: "2.450,00", cor: "#720C0C"},

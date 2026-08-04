@@ -5,7 +5,7 @@ import { TbSunFilled } from "react-icons/tb";
 import { TbSunset2Filled } from "react-icons/tb";
 import { IoMoon } from "react-icons/io5";
 
-const CardHorarios = ({ title, children }) => {
+const CardHorarios = () => {
     const horarios = [
         { titulo: "Manhã", hora: "06:30 - 8:00", icon: <TbSunFilled size={30} color="#F4C51F" /> },
         { titulo: "Tarde", hora: "11:30 - 13:00", icon: <TbSunset2Filled size={30} color="#e7a01c" /> },

@@ -11,7 +11,7 @@ const CardAluno = () => {
     ];
 
     return(
-        <DefaultCard title="Alunos" link="clientes">
+        <DefaultCard title="Alunos" link="/clientes">
             <div className="aluno-container">
                 {alunos.map((alunos, index) => (
                     <div className="statusAluno" key={index}>

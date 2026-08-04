@@ -6,8 +6,8 @@ import useHeaderScroll from '../../hook/useHeaderScroll'
 
 import stain from '../../assets/media/img/header-stain.svg'
 
-const header = () => {
-const headerRef = useRef(null);
+const Header = () => {
+    const headerRef = useRef(null);
 
 // essa constante faz com que a altura do header seja atualizada e seja exportada como variavel pro css
 const updateHeaderHeight = () => {
@@ -55,4 +55,4 @@ return (
 
 }
 
-export default header
+export default Header

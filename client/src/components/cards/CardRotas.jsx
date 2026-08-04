@@ -3,7 +3,7 @@ import './CardRotas.css';
 
 import { RiGraduationCapLine } from "react-icons/ri";
 
-const CardRotas = ({ title, children }) => {
+const CardRotas = () => {
 	const escolas = [
 				{ nome: "Escola 1", horario: "manhã" },
 				{ nome: "Escola 2", horario: "tarde" },

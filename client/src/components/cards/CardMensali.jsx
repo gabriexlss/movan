@@ -1,7 +1,7 @@
 import DefaultCard from './DefaultCard';
 import './CardMensali.css';
 
-const CardMensali = ({ title, children }) => {
+const CardMensali = () => {
     const mensalidade = [
         {nome: "Pagas", qntd: "38", corf: "rgba(0, 255, 98, 0.25)", cor:"#15720C"},
         {nome: "Pendentes", qntd: "8", corf: "rgba(234, 227, 24, 0.25)", cor: "#d4a30e"},
