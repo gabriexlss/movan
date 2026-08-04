@@ -1,0 +1,46 @@
+.containerHorarios{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    margin-top: 1.7rem;
+}
+
+.horario{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.iconHorario{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    background-color: #EAEAEA;
+    width: 45px;
+    height: 45px;
+    border-radius: 10%;
+}
+
+.tituloHorario{
+    color: #0D47A1;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+
+    margin-left: 0.5rem;
+}
+
+.hora{
+    color: #7A7A7A;
+    align-self: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.55rem;
+    
+    margin-left: 0.5rem;
+}

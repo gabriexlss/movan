@@ -1,0 +1,35 @@
+.TituloTela-container{
+    display: flex;
+    flex-direction: row;
+    margin: 0 1.5rem 1rem 1.5rem;
+    padding-top: 1rem;
+    text-align: left;
+
+    margin-top: var(--header-height);
+}
+
+.TituloTela-container .texto{
+    display: flex;
+    flex-direction: column;
+}
+
+.TituloTela-container .titulo{
+    color: #07368A;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+}
+
+.TituloTela-container .subtitulo{
+    color: #7A7A7A;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: 0.75rem;
+    margin-top: 0.1rem;
+}
+
+.TituloTela-container .iconeNotificacao{
+    margin-left: auto;
+    align-self: center;
+}
+

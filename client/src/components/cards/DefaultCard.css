@@ -1,0 +1,66 @@
+.card{
+    width: 90%;
+    min-height: 15vh;
+    background-color: #F8F5F5;
+    border-radius: 10px;
+    box-shadow: 0px 8px 5px rgba(0, 0, 0, 0.3);
+
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.card-header{
+    color: #0D47A1;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+
+    margin-top: 0.7rem;
+    margin-left: 1.5rem;
+
+    align-self: flex-start;
+}
+
+.BtnVerMensalidade {
+    width: 90%;
+    height: 1.5rem;
+    background-color: #0D47A1;
+    color: #F8F5F5;
+    font-family: 'Poppins', sans-serif;
+    font-size: .6rem;
+    font-weight: 100;
+    text-decoration: none;
+    text-align: center;
+    line-height: 1.5rem;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: .5rem;
+
+    position: relative;
+    overflow: hidden;
+    align-self: center;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+.BtnVerMensalidade::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #083075b7;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.BtnVerMensalidade:active::after {
+    transform: translate(-50%, -50%) scale(20);
+    opacity: 0;
+    transition: .7s;
+}

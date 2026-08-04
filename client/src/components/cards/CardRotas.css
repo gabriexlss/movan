@@ -1,0 +1,37 @@
+.containerEscolas{
+    display: flex;
+    justify-content: space-around;
+    gap: .5rem;
+    margin: 1.4rem 0.5rem 1.5rem 0.5rem;
+    align-self: center;
+}
+
+.escola{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.iconEscola{
+    color: #7a7a7a;
+    margin-right: 0.5rem;
+}
+
+.textoEscola{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: 'Poppins', sans-serif;
+}
+
+.textoEscola p{
+    font-family: 'Poppins', sans-serif;
+    color: #7a7a7a;
+    font-size: .7rem;
+}
+
+.textoEscola span{
+    font-size: .7rem;
+    color: #7a7a7a;
+}

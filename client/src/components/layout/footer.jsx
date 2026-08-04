@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './footer.css';
 
 import { GoHome } from 'react-icons/go';
@@ -23,10 +23,10 @@ const footer = () => {
                     const Icon = item.icon;
                     
                     return (
-                        <Link key={item.to} to={item.to} className="footer-link">
+                        <NavLink key={item.to} to={item.to} className="footer-link">
                             <Icon className="footer-icon" />
                             <span>{item.label}</span>
-                        </Link>
+                        </NavLink>
                     );
                 })}
             </nav>

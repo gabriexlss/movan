@@ -20,6 +20,20 @@
 }
 
 @font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  src: url('./assets/fonts/Poppins/Poppins-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  src: url('./assets/fonts/Poppins/Poppins-ExtraBold.ttf') format('truetype');
+}
+
+@font-face {
   font-family: 'TAN Nimbus';
   font-style: normal;
   font-weight: 400;
@@ -34,4 +48,13 @@
 
 body {
   background-color: #FFFFFF;
+}
+
+main {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  gap: 1rem;
 }
