@@ -879,8 +879,7 @@ export const controllerMotorista = {
     },
     // Controller para criar uma nova conta usando o google.
     criarContaGoogle: async (req: Request, res: Response) => {
-        // dados esperados: Nome, email, senha, cnpj e googleId
-        const dadosBrutos = CriarMotoristaGoogleSchema.safeParse(req.body)
+        // dados esperados: nome, cnpj, senha e token do Google (ID token)
 
         // Validação de dados
         if (!dadosBrutos.success) {
