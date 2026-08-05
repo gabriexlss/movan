@@ -73,8 +73,8 @@ const desembalarGoogle = async (token: string) => {
         }
         return dados
     } catch (erro) {
-        dados.msg = "Ocorreu um erro interno no servidor."
-        dados.status = 500
+        dados.msg = "Token do Google inválido, expirado ou corrompido."
+        dados.status = 401
         console.error("Erro ao processar o token do google, erro: ", erro)
         return dados
     }
@@ -100,15 +100,14 @@ const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
 }
 
 const validarCodigo = async (id: number, tipo: "criação" | "recuperação" | "edição", cod: string, email?: string) => {
-    const dataAtual = new Date().toISOString();
-    const valores = [id, tipo, dataAtual]
+    const valores = [id, tipo]
 
     /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
 apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
 e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
     const queryCodigoVerificacao = `SELECT id, cod
     FROM cod_verificacao
-    WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > $3 AND data_uso IS NULL
+    WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > NOW() AND data_uso IS NULL
     ORDER BY data_criacao DESC 
     LIMIT 1`
     try {
@@ -216,11 +215,16 @@ export const controllerMotorista = {
             }).json({
                 msg: "Conta criada com sucesso."
             })
-        } catch (erro) {
+        } catch (erro: unknown) {
             // Se não foi possivel enviar o codigo, apaga o usuario
             console.error("Erro na Hora de mandar o codigo, erro:", erro)
             // usa a transação pra dar rollback
             await cliente.query('ROLLBACK')
+            if ((erro as { code?: string })?.code === '23505') {
+                return res.status(409).json({
+                    msg: "E-mail ou CNPJ já cadastrado no Movan."
+                })
+            }
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -328,9 +332,9 @@ export const controllerMotorista = {
     enviarCodigo: async (req: Request, res: Response) => {
         const id = req.userId
 
-        // pega o tipo de codigo que ele quer enviar por meio das parametros da rota, tipo motorista/codigo/criação
-        // como só tem criação por enquanto, o dado já sera enviado por codig 
-        // const { tipo } = req.params
+        // pega o tipo de codigo que ele quer enviar por meio dos parametros da rota (ex: /motorista/codigo/criação)
+        // temporariamente só aceita criação, então está hardcodado
+        // so deixei o codigo aqui pra caso algum dia eu precise.
         const tipo = "criação"
 
         // se o tipo não for indicado ou não for nem criação ou recuperação, dá erro de bad request
@@ -473,6 +477,11 @@ export const controllerMotorista = {
         try {
             const idEmail = await verificarEmailouCNPJ(email, "email")
             if (idEmail) {
+                if (idEmail === id) {
+                    return res.status(400).json({
+                        msg: "Este já é o seu e-mail atual."
+                    })
+                }
                 return res.status(409).json({
                     msg: "E-mail já cadastrado no Movan."
                 })
@@ -629,7 +638,7 @@ export const controllerMotorista = {
         if (email) {
             try {
                 const idEmail = await verificarEmailouCNPJ(email, "email")
-                if (idEmail) {
+                if (idEmail && idEmail !== id) {
                     return res.status(409).json({
                         msg: "E-mail já cadastrado no Movan."
                     })
@@ -654,15 +663,15 @@ export const controllerMotorista = {
         }
         if (cnpj) {
             try {
-                // verifica se o cnpj pro qual ele quer trocar não está em uso.
+                // verifica se o cnpj pro qual ele quer trocar não está em uso por outro motorista.
                 const idCNPJ = await verificarEmailouCNPJ(cnpj, "cnpj")
-                if (idCNPJ) {
+                if (idCNPJ && idCNPJ !== id) {
                     return res.status(409).json({
                         msg: "CNPJ já cadastrado no Movan."
                     })
                 }
             } catch (erro) {
-                console.error("Erro ao validar código para alterar email, erro: ", erro)
+                console.error("Erro ao verificar CNPJ do motorista, erro: ", erro)
                 return res.status(500).json({
                     msg: "Ocorreu um erro interno no servidor."
                 })
@@ -969,11 +978,16 @@ export const controllerMotorista = {
             }).json({
                 msg: "Conta criada com sucesso."
             })
-        } catch (erro) {
+        } catch (erro: unknown) {
             // Se não foi possivel enviar o codigo, apaga o usuario
             console.error("Erro na Hora de mandar o codigo, erro:", erro)
             // usa a transação pra dar rollback
             await cliente.query('ROLLBACK')
+            if ((erro as { code?: string })?.code === '23505') {
+                return res.status(409).json({
+                    msg: "E-mail, CNPJ ou Conta Google já cadastrado no Movan."
+                })
+            }
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
