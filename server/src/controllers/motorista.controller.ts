@@ -811,10 +811,15 @@ export const controllerMotorista = {
                 }
             }
             // Se não achou nem por google_id nem por email ele não tem conta, iniciando processo de criação de conta.
+            const dadosParaCriacao = {
+                nome: usuario.nome,
+                email: usuario.email,
+                token: token,
+            }
             return res.status(200).json({
                 msg: "Conta não encontrada. iniciando criação de conta com o google.",
                 CREATION_REQUIRED: true,
-                dadosGoogle: usuario
+                dadosGoogle: dadosParaCriacao
             })
         } catch (erro) {
             console.error("Erro ao  processar dados usando os dados obtidos pelo google, erro: ", erro)

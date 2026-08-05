@@ -35,7 +35,7 @@ Endpoint público para realizar a autenticação do motorista utilizando o token
     "msg": "Conta não encontrada. iniciando criação de conta com o google.",
     "CREATION_REQUIRED": true,
     "dadosGoogle": {
-      "googleId": "109876543210987654321",
+      "token": "oijfuwerhfiuebrfiuher",
       "email": "exemplo@gmail.com",
       "nome": "René Theo"
     }
