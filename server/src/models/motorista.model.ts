@@ -17,29 +17,26 @@ const AuthGoogleSchema = z.object({
     token: z.string("Não é uma String").min(1, "Token não pode estar vazio."),
     nome: z.string("Nome Ausente.").min(1, "Nome não pode estar vazio."),
     email: z.string("Email Ausente.").min(1, "Email não pode estar vazio").email("tem que ser um email valido"),
-    googleId: z.string("id ausente.").min(1, "id não pode estar vazio.")
+    googleId: z.string("id ausente.").min(1, "id não pode estar vazio."),
+    status: z.number("Status ausente."),
+    msg: z.string("Mensagem ausente.").min(1, "Mensagem não pode estar vazia."),
+    sucesso: z.boolean("Sucesso ausente.")
 })
 export const CriarMotoristaGoogleSchema = z.object({
     nome: MotoristaSchema.shape.nome,
     cnpj: MotoristaSchema.shape.cnpj,
-    email: AuthGoogleSchema.shape.email,
     senha: MotoristaSchema.shape.senha,
-    googleId: AuthGoogleSchema.shape.googleId
+    token: AuthGoogleSchema.shape.token
 })
 export const GoogleTokenSchema = AuthGoogleSchema.pick({
     token: true
-})
-export const ValidarPayloadGoogleSchema = AuthGoogleSchema.pick({
-    nome: true,
-    email: true,
-    googleId: true
 })
 // Modelo Referente a Criação do Motorista
 export const CriarMotoristaSchema = MotoristaSchema.pick({
     nome: true,
     cnpj: true,
     email: true,
-    senha: true
+    senha: true,
 });
 export const LoginMotoristaSchema = MotoristaSchema.pick({
     login: true,
@@ -66,7 +63,6 @@ export const DeletarMotoristaSchema = MotoristaSchema.pick({
     senha: true
 })
 export type CriarMotoristaGoogle = z.infer<typeof CriarMotoristaGoogleSchema>
-export type ValidarPayloadGoogle = z.infer<typeof ValidarPayloadGoogleSchema>
 export type GoogleToken = z.infer<typeof GoogleTokenSchema>
 export type DeletarMotorista = z.infer<typeof DeletarMotoristaSchema>
 export type RecuperarSenha = z.infer<typeof RecuperarSenhaSchema>

@@ -28,7 +28,7 @@ router.post('/editar/enviar-codigo', middlewareAutenticar, controllerMotorista.e
 router.delete('/logout', controllerMotorista.deslogarConta)
 
 // rota delete para realizar o soft delete da sua conta. a agendando para encerramento permanente após 30 dias.
-router.delete('/encerrar-conta', middlewareAutenticar ,controllerMotorista.deletarConta)
+router.delete('/encerrar-conta', middlewareAutenticar, controllerMotorista.deletarConta)
 
 // rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
 router.patch('/editar', middlewareAutenticar, controllerMotorista.editarConta)
