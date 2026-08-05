@@ -903,7 +903,9 @@ export const controllerMotorista = {
         }
         const { email, googleId } = usuario
         if (!email || !googleId) {
-            throw new Error("Email do google não encontrado.")
+            return res.status(401).json({
+                msg: "Token do Google inválido ou incompleto."
+            })
         }
 
         // Verifica se Email ou CNPJ ou googleid ja estão cadastrados
