@@ -887,8 +887,9 @@ export const controllerMotorista = {
         // dados esperados: nome, cnpj, senha e token do Google (ID token)
 
         // Validação de dados
+        const dadosBrutos = CriarMotoristaGoogleSchema.safeParse(req.body)
+
         if (!dadosBrutos.success) {
-            return res.status(400).json({
                 msg: "Dados Inválidos para criação da conta.",
                 erro: dadosBrutos.error.format()
             })
