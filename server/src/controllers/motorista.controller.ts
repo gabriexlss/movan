@@ -884,16 +884,18 @@ export const controllerMotorista = {
     },
     // Controller para criar uma nova conta usando o google.
     criarContaGoogle: async (req: Request, res: Response) => {
-        // dados esperados: nome, cnpj, senha e token do Google (ID token)
-
-        // Validação de dados
+        // dados esperados: Nome, email, senha, cnpj e token do google
         const dadosBrutos = CriarMotoristaGoogleSchema.safeParse(req.body)
 
+        // Validação de dados
         if (!dadosBrutos.success) {
+            return res.status(400).json({
                 msg: "Dados Inválidos para criação da conta.",
                 erro: dadosBrutos.error.format()
             })
         }
+        /* Edited by Carlos Vinicius
+            +RESPECT */
         // separando os dados
         const { nome, cnpj, token, senha } = dadosBrutos.data
         const usuario = await desembalarGoogle(token)
@@ -904,9 +906,7 @@ export const controllerMotorista = {
         }
         const { email, googleId } = usuario
         if (!email || !googleId) {
-            return res.status(401).json({
-                msg: "Token do Google inválido ou incompleto."
-            })
+            throw new Error("Email do google não encontrado.")
         }
 
         // Verifica se Email ou CNPJ ou googleid ja estão cadastrados
