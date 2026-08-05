@@ -7,17 +7,15 @@ Endpoint público para criar uma nova conta de motorista vinculada ao Google ID.
 - **Corpo (Body)**:
   - "nome": String, máximo de 200 e mínimo de 3
   - "cnpj": String, 14 caracteres sem máscara
-  - "email": String, formato de e-mail, máximo de 150
   - "senha": String, máximo de 100
-  - "googleId": String, ID fornecido no payload do Google
+  - "token": String, ID Token JWT fornecido pelo SDK do Google
 #### Exemplo
 ``` JSON
 {
   "nome": "René Theo",
   "cnpj": "12345678901234",
-  "email": "renetheo@gmail.com",
   "senha": "03082007",
-  "googleId": "109876543210987654321"
+  "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6..."
 }
 ```
 ## Respostas
@@ -30,7 +28,9 @@ Endpoint público para criar uma nova conta de motorista vinculada ao Google ID.
 }
 ```
 ## Status
-- 201: Conta criada com sucesso via Google (define cookie `token` e envia código de verificação)
+- 201: Conta criada com sucesso via Google (conta nasce já verificada e define cookie `token`)
 - 400: Dados inválidos para criação da conta
+- 401: Token do Google inválido, expirado ou corrompido
+- 403: E-mail da conta Google não verificado
 - 409: E-mail ou CNPJ já cadastrado no Movan
 - 500: Erro interno no servidor

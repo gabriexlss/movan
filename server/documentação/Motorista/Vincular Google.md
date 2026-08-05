@@ -27,4 +27,5 @@ Endpoint autenticado para vincular a conta do Google à conta do motorista atual
 - 400: Token do Google ausente ou inválido no corpo da requisição
 - 401: Token JWT de sessão ausente/inválido OU token do Google inválido/expirado
 - 403: Conta não verificada no Movan OU e-mail da conta Google não verificado
+- 409: Esta conta do Google já está vinculada a outro usuário
 - 500: Erro interno no servidor
