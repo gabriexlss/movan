@@ -46,6 +46,14 @@
   box-sizing: border-box;
 }
 
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar{
+  display: none;
+}
+
 body {
   background-color: #FFFFFF;
 }

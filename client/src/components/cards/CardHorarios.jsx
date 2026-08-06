@@ -13,8 +13,7 @@ const CardHorarios = () => {
     ];
 
     return (
-        <DefaultCard title="Horários Diários">
-
+        <DefaultCard title="Horários Diários" compactTitle>
             <div className="containerHorarios">
                 {horarios.map((horarios) => (
                     <div className="horario" key={horarios.titulo}>

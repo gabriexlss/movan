@@ -5,7 +5,6 @@
     position: fixed;
     bottom: 0;
     box-shadow: 10px 10px 10px 12px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
 }
 
 .footer nav{
@@ -32,8 +31,9 @@
     font-size: 0.75rem;
     font-weight: 900;
     color: #7A7A7A;
+    
+    margin-top: 0.8rem;
 
-    margin-top: 1rem;
     transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 

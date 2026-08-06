@@ -5,16 +5,15 @@
     justify-content: center;
     align-items: center;
 
-    margin-top: 1.7rem;
-    margin-bottom: 1.5rem;
+    margin-top: auto;
 }
 
 .texto-financ{
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: start;
     align-items: center;
-    gap: 3rem;
+    gap: 2rem;
 }
 
 .texto-financ h1{

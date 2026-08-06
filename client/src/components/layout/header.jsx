@@ -7,6 +7,7 @@ import useHeaderScroll from '../../hook/useHeaderScroll'
 import stain from '../../assets/media/img/header-stain.svg'
 
 const Header = () => {
+    const showHeader = useHeaderScroll();
     const headerRef = useRef(null);
 
 // essa constante faz com que a altura do header seja atualizada e seja exportada como variavel pro css
@@ -37,20 +38,18 @@ useLayoutEffect(() => {
     };
 
 }, []);
-const showHeader = useHeaderScroll();
 
 //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA EU NÃO AGUENTO MAAAAAAAIS
 
 return (
-    <div ref={headerRef} className={`header ${showHeader ? "" : "hidden"}`}>
-        <img src={stain} alt="Stain" className='stain'/>
+    <header ref={headerRef} className={`header ${showHeader ? "" : "hidden"}`}>
 
         <div className='texto-titulo'>
-            <h1 id='movan'>MO<span id='movan-span'>VAN</span></h1>
-            <p id='subtitulo'>Seu caminho seguro na <br/> palma da mão</p>
+            <h1 className='movan'>MO<span className='movan-span'>VAN</span></h1>
+            <p className='subtitulo'>Seu caminho seguro na <br/> palma da mão</p>
         </div>
 
-    </div>
+    </header>
 )
 
 }

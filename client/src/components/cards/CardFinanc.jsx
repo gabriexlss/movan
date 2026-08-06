@@ -9,7 +9,7 @@ const CardFinanc = () => {
     ];
 
     return(
-        <DefaultCard title="Resumo Financeiro" link="/financeiro">
+        <DefaultCard title="Resumo Financeiro" link="/financeiro" compactTitle>
             <div className="financeiro-container">
                 <div className="texto-financ">
                     {financeiro.map((item, index) => (
