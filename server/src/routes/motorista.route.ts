@@ -28,12 +28,24 @@ router.post('/editar/enviar-codigo', middlewareAutenticar, controllerMotorista.e
 router.delete('/logout', controllerMotorista.deslogarConta)
 
 // rota delete para realizar o soft delete da sua conta. a agendando para encerramento permanente após 30 dias.
-router.delete('/encerrar-conta', middlewareAutenticar ,controllerMotorista.deletarConta)
+router.delete('/encerrar-conta', middlewareAutenticar, controllerMotorista.deletarConta)
 
 // rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
 router.patch('/editar', middlewareAutenticar, controllerMotorista.editarConta)
 
 // rota get para obter todos os dados do motorista
 router.get('/dados', middlewareAutenticar, controllerMotorista.obterDados)
+
+// rota post para autenticar com o google.
+router.post('/google', controllerMotorista.authGoogle)
+
+// rota post para vincular conta existente com o google
+router.post('/google/vincular', middlewareAutenticar, controllerMotorista.vincularGoogle)
+
+// rota post para criar uma conta, usando o google.
+router.post('/google/criar', controllerMotorista.criarContaGoogle)
+
+// rota delete para desvincular a conta google da conta do usuario logado.
+router.delete('/google/desvincular', middlewareAutenticar, controllerMotorista.desvincularGoogle)
 
 export default router;

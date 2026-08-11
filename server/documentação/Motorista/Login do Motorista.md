@@ -2,6 +2,7 @@ Endpoint para fazer login na conta do motorista.
 ## Rota URL
 - Rota: /motorista/login
 - Tipo: POST
+- *Nota: Se a conta estiver agendada para exclusão (soft delete), o login bem-sucedido cancela o agendamento de exclusão automaticamente.*
 ## Dados Esperados
 - "login": String, mínimo de 3 e máximo de 255 caracteres (pode ser o e-mail ou o CNPJ do motorista)
 - "senha": String, máximo de 100
@@ -30,7 +31,7 @@ Endpoint para fazer login na conta do motorista.
 }
 ```
 ## Status
-- 200: Login realizado com sucesso.
+- 200: Login realizado com sucesso (cancela agendamento de exclusão se houver).
 - 400: Dados ausentes ou inválidos.
 - 401: E-mail, CNPJ ou senha inválidos.
 - 500: Erro interno no servidor.

@@ -11,7 +11,7 @@ export const middlewareSistema = (req: Request, res: Response, next: NextFunctio
     const segredo = process.env['SEGREDO_SISTEMA']
 
     // checa pra ver se a variavel env existe
-    if(!segredo){
+    if (!segredo) {
         console.error("Variavel env para acessar rotas do sistema não definida, impossivel concluir solicitação")
         return res.status(500).json({
             msg: "Erro Interno do Servidor."
@@ -20,7 +20,7 @@ export const middlewareSistema = (req: Request, res: Response, next: NextFunctio
     // pega a credencial enviada no header e válida pra ver se é minimamente válida
     const credencialBruta = schemaEnv.safeParse(req.headers)
 
-    if(!credencialBruta.success){
+    if (!credencialBruta.success) {
         return res.status(401).json({
             msg: "Credencial ausente ou invalida.",
             erro: credencialBruta.error.format()
@@ -28,12 +28,12 @@ export const middlewareSistema = (req: Request, res: Response, next: NextFunctio
     }
     const { credencial } = credencialBruta.data
     // Compara com o segredo que temos.
-    if(credencial !== segredo){
+    if (credencial !== segredo) {
         return res.status(401).json({
             msg: "Credencial inserida inválida."
         })
     }
     // credencial valida, pode passar pra proxima etapa.
-        next()
-        return
+    next()
+    return
 }
