@@ -1,9 +1,11 @@
 .containerEscolas{
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     gap: .5rem;
-    margin: 1.4rem 0.5rem 1.5rem 0.5rem;
     align-self: center;
+
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .escola{

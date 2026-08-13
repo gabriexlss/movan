@@ -5,6 +5,9 @@
     border-radius: 10px;
     box-shadow: 0px 8px 5px rgba(0, 0, 0, 0.3);
 
+    padding: 0.5rem;
+    padding-top: .8rem;
+
     display: flex;
     flex-direction: column;
     align-items: start;
@@ -15,11 +18,14 @@
     font-family: 'Poppins', sans-serif;
     font-size: 0.7rem;
     font-weight: 500;
-
-    margin-top: 0.7rem;
-    margin-left: 1.5rem;
+    margin-left: 0.7rem;
+    margin-bottom: 0.5rem;
 
     align-self: flex-start;
+}
+
+.card-header.compact {
+    margin-bottom: 0;
 }
 
 .BtnVerMensalidade {
@@ -27,20 +33,22 @@
     height: 1.5rem;
     background-color: #0D47A1;
     color: #F8F5F5;
+
     font-family: 'Poppins', sans-serif;
     font-size: .6rem;
     font-weight: 100;
     text-decoration: none;
     text-align: center;
     line-height: 1.5rem;
+
     border-radius: 10px;
     border: none;
-    margin-bottom: .5rem;
+    margin-top: auto;
 
     position: relative;
     overflow: hidden;
     align-self: center;
-
+    
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -62,5 +70,5 @@
 .BtnVerMensalidade:active::after {
     transform: translate(-50%, -50%) scale(20);
     opacity: 0;
-    transition: .7s;
+    transition: .2s;
 }
