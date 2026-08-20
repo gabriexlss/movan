@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
-import { CriarResponsavelSchema, EditarResponsavelSchema, IdResponsavelSchema, IdResponsavelParamsSchema} from "../models/responsavel.model.js";
+import { CriarResponsavelSchema, EditarResponsavelSchema, IdResponsavelSchema, IdResponsavelParamsSchema } from "../models/responsavel.model.js";
 import { database } from "../db/postgre.js";
+import { cpf } from "cpf-cnpj-validator";
 
 export const controllerResponsavel = {
     // controller para criar um novo responsavel
@@ -19,11 +20,17 @@ export const controllerResponsavel = {
             })
         }
         // separando os dados em constantes
-        const { cpf, nome, endereco, tel, email } = dadosBrutos.data
+        const { cpf: dadocpf, nome, endereco, tel, email } = dadosBrutos.data
 
+        // if pra validar se um cpf realmente é um cpf ou se não é so um cara metendo rage bait.
+        if (!cpf.isValid(dadocpf)) {
+            return res.status(400).json({
+                msg: "CPF Digitado não é um CPF válido."
+            })
+        }
         try {
             const query = "INSERT INTO responsavel (cpf, nome, endereco, tel, email, motorista_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
-            const valores = [cpf, nome, endereco, tel, email, motoristaId]
+            const valores = [dadocpf, nome, endereco, tel, email, motoristaId]
             // faz o insert no banco de dados e retorna os dados que acabei de inserir
             const { rows } = await database.query(query, valores)
             // pega o valor que retornou e coloca numa constante
@@ -52,7 +59,7 @@ export const controllerResponsavel = {
                 erro: dadosBrutos.error.format()
             })
         }
-        const { id, cpf, nome, endereco, tel, email } = dadosBrutos.data
+        const { id, cpf:cpfdado, nome, endereco, tel, email } = dadosBrutos.data
 
         // iniciando arrays de campos e valores
         const campos: string[] = []
@@ -66,9 +73,14 @@ export const controllerResponsavel = {
         }
 
         // checagem para ver quais campos foram enviados.
-        if (cpf) {
+        if (cpfdado) {
+            if (!cpf.isValid(cpfdado)) {
+                return res.status(400).json({
+                    msg: "CPF Digitado não é um CPF válido."
+                })
+            }
             campos.push(`cpf = $${valores.length + 1}`)
-            valores.push(cpf)
+            valores.push(cpfdado)
         }
         if (nome) {
             campos.push(`nome = $${valores.length + 1}`)
@@ -109,7 +121,9 @@ export const controllerResponsavel = {
             })
         } catch (erro) {
             console.error("Erro no endpoint de editar responsavel, erro: ", erro)
-            return res.status(500).json("Erro Interno do Servidor.")
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
         }
     },
     // controller para deletar responsavel

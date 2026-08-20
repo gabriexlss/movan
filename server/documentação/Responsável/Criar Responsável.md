@@ -14,11 +14,11 @@ Endpoint autenticado para cadastrar um responsável vinculado ao motorista logad
 
 ### Corpo (Body)
 
-- `cpf`: String com exatamente 11 caracteres.
+- `cpf`: String com exatamente 11 dígitos e um CPF válido.
 - `nome`: String entre 5 e 200 caracteres.
 - `endereco`: String entre 10 e 255 caracteres.
-- `tel`: String com exatamente 11 caracteres.
-- `email`: String entre 11 e 150 caracteres.
+- `tel`: String com exatamente 11 dígitos.
+- `email`: E-mail válido entre 5 e 150 caracteres.
 
 Os campos `cpf` e `tel` devem ser enviados sem máscara.
 
