@@ -9,4 +9,11 @@ router.post('/criar', middlewareAutenticar, controllerResponsavel.criarResponsav
 // endpoint para editar responsável.
 router.patch('/editar', middlewareAutenticar, controllerResponsavel.editarResponsavel)
 
+// endpoint para excluir responsável
+router.delete('/excluir', middlewareAutenticar, controllerResponsavel.excluirResponsavel)
+
+// rota para obter varios dados simples, ou um perfil complexo
+router.get('/dados/:id', middlewareAutenticar, controllerResponsavel.obterDados)
+router.get('/dados', middlewareAutenticar, controllerResponsavel.obterDados)
+
 export default router

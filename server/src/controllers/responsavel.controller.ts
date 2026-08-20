@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarResponsavelSchema, EditarResponsavelSchema } from "../models/responsavel.model.js";
+import { CriarResponsavelSchema, EditarResponsavelSchema, IdResponsavelSchema, IdResponsavelParamsSchema} from "../models/responsavel.model.js";
 import { database } from "../db/postgre.js";
 
 export const controllerResponsavel = {
@@ -112,5 +112,73 @@ export const controllerResponsavel = {
             return res.status(500).json("Erro Interno do Servidor.")
         }
     },
+    // controller para deletar responsavel
+    excluirResponsavel: async (req: Request, res: Response) => {
+        const motoristaId = req.userId
+        // dados esperados: id.
+        const dadosBrutos = IdResponsavelSchema.safeParse(req.body)
 
+        // validação pra ver se o id está correto
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados Invalidos para deletar responsavel",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        // desestruturação de dados
+        const { id } = dadosBrutos.data
+
+        try {
+            const query = "DELETE FROM responsavel WHERE id = $1 AND motorista_id = $2"
+            const valores = [id, motoristaId]
+            // deleta o responsável
+            await database.query(query, valores)
+            return res.status(200).json({
+                msg: "Responsável deletado com sucesso."
+            })
+        } catch (erro) {
+            console.error("erro no endpoint de excluir responsável, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // controller para obter os dados do responsável.
+    obterDados: async (req: Request, res: Response) => {
+        const motoristaId = req.userId
+        // dados esperados: id
+        const dadosBrutos = IdResponsavelParamsSchema.safeParse(req.params)
+
+        // validação pra ver se o id ta ok
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados Inválidos para obter dados do responsável.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        const { id } = dadosBrutos.data
+        try {
+            const querycomID = "SELECT * FROM responsavel WHERE motorista_id = $1 AND id = $2"
+            const querysemID = "SELECT id, nome FROM responsavel WHERE motorista_id = $1"
+            let resultado
+            if (id) {
+                const { rows } = await database.query(querycomID, [motoristaId, id])
+                resultado = rows[0]
+            } else {
+                const { rows } = await database.query(querysemID, [motoristaId])
+                resultado = rows
+            }
+
+
+            return res.status(200).json({
+                responsavel: resultado
+            })
+        } catch (erro) {
+            console.error("erro no endpoint de obter dado de responsavel, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
+    }
 }
