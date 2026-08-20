@@ -88,7 +88,7 @@ export const controllerResponsavel = {
         }
 
         // se nao tiver nenhum campo para edição, manda embora.
-        if (campos.length < 2) {
+        if (campos.length < 1) {
             return res.status(400).json({
                 msg: "É necessario enviar pelo menos um valor para enviar."
             })

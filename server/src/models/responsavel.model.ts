@@ -29,7 +29,7 @@ export const IdResponsavelSchema = ResponsavelSchema.pick({
     id: true
 })
 export const IdResponsavelParamsSchema = z.object({
-    id: z.coerce.number().positive()
+    id: z.coerce.number().positive().optional()
 })
 
 export type IdResponsavelOpcional = z.infer<typeof IdResponsavelParamsSchema>
