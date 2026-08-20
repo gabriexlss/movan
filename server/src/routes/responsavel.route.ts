@@ -6,4 +6,7 @@ const router = Router();
 // Endpoint para criar responsável
 router.post('/criar', middlewareAutenticar, controllerResponsavel.criarResponsavel)
 
+// endpoint para editar responsável.
+router.patch('/editar', middlewareAutenticar, controllerResponsavel.editarResponsavel)
+
 export default router

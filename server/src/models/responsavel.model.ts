@@ -17,5 +17,14 @@ export const CriarResponsavelSchema = ResponsavelSchema.pick({
     tel: true,
     email: true
 })
+export const EditarResponsavelSchema = ResponsavelSchema.pick({
+    id: true,
+    cpf: true,
+    nome: true,
+    endereco: true,
+    tel: true,
+    email: true
+}).partial()
+export type EditarResponsavel = z.infer<typeof EditarResponsavelSchema>
 export type Responsavel = z.infer<typeof ResponsavelSchema>
 export type criarResponsavel = z.infer<typeof CriarResponsavelSchema>
