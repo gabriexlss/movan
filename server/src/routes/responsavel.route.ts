@@ -10,7 +10,7 @@ router.post('/criar', middlewareAutenticar, controllerResponsavel.criarResponsav
 router.patch('/editar', middlewareAutenticar, controllerResponsavel.editarResponsavel)
 
 // endpoint para excluir responsável
-router.delete('/excluir', middlewareAutenticar, controllerResponsavel.excluirResponsavel)
+router.delete('/excluir/:id', middlewareAutenticar, controllerResponsavel.excluirResponsavel)
 
 // rota para obter varios dados simples, ou um perfil complexo
 router.get('/dados/:id', middlewareAutenticar, controllerResponsavel.obterDados)

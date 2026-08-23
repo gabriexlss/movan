@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "./utils.model.js";
+import { ParamsSchema, UtilSchema } from "./utils.model.js";
 
 
 const ResponsavelSchema = z.object({
@@ -26,15 +26,13 @@ export const EditarResponsavelSchema = ResponsavelSchema.pick({
     tel: true,
     email: true
 }).partial()
-export const IdResponsavelSchema = ResponsavelSchema.pick({
-    id: true
+export const DeletarResponsavelSchema = z.object({
+    id: ParamsSchema.shape.id
 })
-export const IdResponsavelParamsSchema = z.object({
-    id: UtilSchema.shape.id.optional()
-})
+export const ObterResponsavelSchema = DeletarResponsavelSchema.partial()
 
-export type IdResponsavelOpcional = z.infer<typeof IdResponsavelParamsSchema>
-export type IdResponsavel = z.infer<typeof IdResponsavelSchema>
+export type ObterResponsavel = z.infer<typeof ObterResponsavelSchema>
+export type DeletarResponsavel = z.infer<typeof DeletarResponsavelSchema>
 export type EditarResponsavel = z.infer<typeof EditarResponsavelSchema>
 export type Responsavel = z.infer<typeof ResponsavelSchema>
 export type criarResponsavel = z.infer<typeof CriarResponsavelSchema>

@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarResponsavelSchema, EditarResponsavelSchema, IdResponsavelSchema, IdResponsavelParamsSchema } from "../models/responsavel.model.js";
+import { CriarResponsavelSchema, EditarResponsavelSchema, DeletarResponsavelSchema, ObterResponsavelSchema } from "../models/responsavel.model.js";
 import { database } from "../db/postgre.js";
 import { cpf } from "cpf-cnpj-validator";
 
@@ -130,7 +130,7 @@ export const controllerResponsavel = {
     excluirResponsavel: async (req: Request, res: Response) => {
         const motoristaId = req.userId
         // dados esperados: id.
-        const dadosBrutos = IdResponsavelSchema.safeParse(req.body)
+        const dadosBrutos = DeletarResponsavelSchema.safeParse(req.params)
 
         // validação pra ver se o id está correto
         if (!dadosBrutos.success) {
@@ -162,7 +162,7 @@ export const controllerResponsavel = {
     obterDados: async (req: Request, res: Response) => {
         const motoristaId = req.userId
         // dados esperados: id
-        const dadosBrutos = IdResponsavelParamsSchema.safeParse(req.params)
+        const dadosBrutos = ObterResponsavelSchema.safeParse(req.params)
 
         // validação pra ver se o id ta ok
         if (!dadosBrutos.success) {

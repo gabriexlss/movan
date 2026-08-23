@@ -2,7 +2,7 @@ Endpoint autenticado para excluir um responsável vinculado ao motorista logado.
 
 ## Rota URL
 
-- Rota: `/responsavel/excluir`
+- Rota: `/responsavel/excluir/:id`
 - Tipo: `DELETE`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -12,16 +12,14 @@ Endpoint autenticado para excluir um responsável vinculado ao motorista logado.
 
 - `token`: String (JWT da sessão).
 
-### Corpo (Body)
+### Parâmetro de rota
 
 - `id`: Número positivo que identifica o responsável.
 
 #### Exemplo
 
-```json
-{
-  "id": 1
-}
+```text
+DELETE /responsavel/excluir/1
 ```
 
 ## Respostas

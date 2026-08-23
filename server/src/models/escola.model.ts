@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "./utils.model.js";
+import { ParamsSchema, UtilSchema } from "./utils.model.js";
 
 const EscolaSchema = z.object({
     id: UtilSchema.shape.id,
@@ -12,5 +12,20 @@ const EscolaSchema = z.object({
     longitude: UtilSchema.shape.longitude,
     motorista_id: UtilSchema.shape.id
 })
+export const CriarEscolaSchema = EscolaSchema.omit({
+    id: true,
+    motorista_id: true
+})
+export const EditarEscolaSchema = EscolaSchema.omit({
+    motorista_id: true
+}).partial()
+export const DeletarEscolaSchema = z.object({
+    id: ParamsSchema.shape.id
+})
+export const ObterEscolaSchema = DeletarEscolaSchema.partial()
 
+export type ObterEscola = z.infer<typeof ObterEscolaSchema>
+export type DeletarEscola = z.infer<typeof DeletarEscolaSchema>
+export type EditarEscola = z.infer<typeof EditarEscolaSchema>
+export type CriarEscola = z.infer<typeof CriarEscolaSchema>
 
