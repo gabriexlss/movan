@@ -14,5 +14,5 @@ export const UtilSchema = z.object({
     id: z.number("id tem que ser um número").int("id tem que ser um número inteiro").positive("id tem que ser um numero positivo")
 });
 export const ParamsSchema = z.object({
-    id: z.coerce.number().int().positive()
+    id: z.coerce.number("o parametro tem que ser um número").int("o parametro tem que ser um numero inteiro").positive("o parametro tem que ser um numero positivo")
 })
