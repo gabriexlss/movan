@@ -35,12 +35,20 @@ DELETE /responsavel/excluir/1
 }
 ```
 
-Somente um responsável vinculado ao motorista autenticado pode ser excluído. Atualmente, a resposta de sucesso também é retornada quando o `id` informado não pertence a esse motorista ou não existe.
+Somente um responsável vinculado ao motorista autenticado pode ser excluído. Quando o `id` não existe ou pertence a outro motorista, o endpoint responde com `404`.
+
+#### Exemplo de responsável não encontrado
+
+```json
+{
+  "msg": "Nenhum Responsável encontrado."
+}
+```
 
 ## Status
 
-- `200`: Solicitação de exclusão processada.
+- `200`: Responsável excluído com sucesso.
 - `400`: `id` ausente ou inválido.
 - `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Motorista da sessão não encontrado ou com exclusão agendada.
+- `404`: Responsável não encontrado para o motorista autenticado, motorista da sessão não encontrado ou com exclusão agendada.
 - `500`: Erro interno no servidor.

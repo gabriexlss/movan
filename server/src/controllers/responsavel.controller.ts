@@ -59,7 +59,7 @@ export const controllerResponsavel = {
                 erro: dadosBrutos.error.format()
             })
         }
-        const { id, cpf:cpfdado, nome, endereco, tel, email } = dadosBrutos.data
+        const { id, cpf: cpfdado, nome, endereco, tel, email } = dadosBrutos.data
 
         // iniciando arrays de campos e valores
         const campos: string[] = []
@@ -114,11 +114,17 @@ export const controllerResponsavel = {
                 `
             valores.push(id)
             valores.push(MotoristaId)
-            await database.query(query, valores)
+            const responsavel = await database.query(query, valores)
 
-            return res.status(200).json({
-                msg: "Responsavel Editado com Sucesso."
-            })
+            if (!responsavel.rowCount) {
+                return res.status(404).json({
+                    msg: "Nenhum Responsável encontrado."
+                })
+            } else {
+                return res.status(200).json({
+                    msg: "Responsavel Editado com Sucesso."
+                })
+            }
         } catch (erro) {
             console.error("Erro no endpoint de editar responsavel, erro: ", erro)
             return res.status(500).json({
@@ -147,10 +153,18 @@ export const controllerResponsavel = {
             const query = "DELETE FROM responsavel WHERE id = $1 AND motorista_id = $2"
             const valores = [id, motoristaId]
             // deleta o responsável
-            await database.query(query, valores)
-            return res.status(200).json({
-                msg: "Responsável deletado com sucesso."
-            })
+            const responsavel = await database.query(query, valores)
+
+            if (!responsavel.rowCount) {
+                return res.status(404).json({
+                    msg: "Nenhum Responsável encontrado."
+                })
+            } else {
+                return res.status(200).json({
+                    msg: "Responsável deletado com sucesso."
+                })
+            }
+
         } catch (erro) {
             console.error("erro no endpoint de excluir responsável, erro: ", erro)
             return res.status(500).json({
@@ -178,16 +192,29 @@ export const controllerResponsavel = {
             let resultado
             if (id) {
                 const { rows } = await database.query(querycomID, [motoristaId, id])
-                resultado = rows[0]
+                if (rows.length < 1) {
+                    resultado = null
+                } else {
+                    resultado = rows[0]
+                }
             } else {
                 const { rows } = await database.query(querysemID, [motoristaId])
-                resultado = rows
+                if (rows.length < 1) {
+                    resultado = null
+                } else {
+                    resultado = rows
+                }
+            }
+            if (!resultado) {
+                return res.status(404).json({
+                    msg: "Nenhum Respnsável Encontrado."
+                })
+            } else {
+                return res.status(200).json({
+                    responsavel: resultado
+                })
             }
 
-
-            return res.status(200).json({
-                responsavel: resultado
-            })
         } catch (erro) {
             console.error("erro no endpoint de obter dado de responsavel, erro: ", erro)
             return res.status(500).json({

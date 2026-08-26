@@ -112,11 +112,18 @@ export const controllerEscola = {
             `
             valores.push(id)
             valores.push(motoristaId)
-            await database.query(query, valores)
+            const escola = await database.query(query, valores)
 
-            return res.status(200).json({
-                msg: "Escola editada com sucesso!"
-            })
+            if (!escola.rowCount) {
+                return res.status(404).json({
+                    msg: "Nenhuma Escola Encontrada."
+                })
+            } else {
+                return res.status(200).json({
+                    msg: "Escola editada com sucesso!"
+                })
+            }
+
         } catch (erro) {
             console.error("Erro no endpoint de editar escola, erro: ", erro)
             return res.status(500).json({
@@ -144,11 +151,18 @@ export const controllerEscola = {
         try {
             const query = "DELETE FROM escola WHERE id = $1 AND motorista_id = $2"
 
-            await database.query(query, [id, motoristaId])
+            const escola = await database.query(query, [id, motoristaId])
 
-            return res.status(200).json({
-                msg: "Escola Excluida com sucesso."
-            })
+            if (!escola.rowCount) {
+                return res.status(404).json({
+                    msg: "Nenhuma Escola Encontrada."
+                })
+            } else {
+                return res.status(200).json({
+                    msg: "Escola Excluida com sucesso."
+                })
+            }
+
         } catch (erro) {
             console.error("Erro no endpoint de excluir escola, erro: ", erro)
             return res.status(500).json({
@@ -184,18 +198,33 @@ export const controllerEscola = {
                 valores.push(motoristaId)
                 valores.push(id)
                 const { rows } = await database.query(query, valores)
-                resultado = rows[0]
+                if (rows.length < 1) {
+                    resultado = null
+                } else {
+                    resultado = rows[0]
+                }
+
             } else {
                 query = "SELECT id, nome FROM escola WHERE motorista_id = $1"
                 valores.push(motoristaId)
                 const { rows } = await database.query(query, valores)
-                resultado = rows
+                if (rows.length < 1) {
+                    resultado = null
+                } else {
+                    resultado = rows
+                }
+            }
+            if (!resultado) {
+                return res.status(404).json({
+                    msg: "Nenhuma Escola Encontrada."
+                })
+            } else {
+                return res.status(200).json({
+                    resultado
+                })
             }
 
-            return res.status(200).json({
-                resultado
-            })
-        }catch(erro){
+        } catch (erro) {
             console.error("erro no endpoint de obter escola, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno no Servidor."
