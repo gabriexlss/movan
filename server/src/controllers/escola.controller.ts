@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CriarEscolaSchema, EditarEscolaSchema } from "../models/escola.model.js";
+import { CriarEscolaSchema, DeletarEscolaSchema, EditarEscolaSchema, ObterEscolaSchema } from "../models/escola.model.js";
 import { database } from "../db/postgre.js";
 
 export const controllerEscola = {
@@ -67,44 +67,44 @@ export const controllerEscola = {
                 msg: "id é necessario para editar uma escola"
             })
         }
-        if(nome){
+        if (nome) {
             campos.push(`nome = $${valores.length + 1}`)
             valores.push(nome)
         }
-        if(endereco){
+        if (endereco) {
             campos.push(`endereco = $${valores.length + 1}`)
             valores.push(endereco)
         }
-        if(tel){
+        if (tel) {
             campos.push(`tel = $${valores.length + 1}`)
             valores.push(tel)
         }
-        if(hora_abertura){
+        if (hora_abertura) {
             campos.push(`hora_abertura = $${valores.length + 1}`)
             valores.push(hora_abertura)
         }
-        if(hora_fechamento){
+        if (hora_fechamento) {
             campos.push(`hora_fechamento = $${valores.length + 1}`)
             valores.push(hora_fechamento)
         }
-        if(latitude){
+        if (latitude) {
             campos.push(`latitude = $${valores.length + 1}`)
             valores.push(latitude)
         }
-        if(longitude){
+        if (longitude) {
             campos.push(`longitude = $${valores.length + 1}`)
             valores.push(longitude)
         }
-        
+
         // se nenhum campo for recebido, manda embora
-        if(campos.length < 1){
+        if (campos.length < 1) {
             return res.status(400).json({
                 msg: "É necessario pelo menos um campo para realizar a edição."
             })
         }
 
         // Okay, agr realizar a operação
-        try{
+        try {
             const query = `
             UPDATE escola
             SET ${campos.join(', ')}
@@ -117,10 +117,88 @@ export const controllerEscola = {
             return res.status(200).json({
                 msg: "Escola editada com sucesso!"
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("Erro no endpoint de editar escola, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // controller para excluir uma escola.
+    excluirEscola: async (req: Request, res: Response) => {
+        // pegando id do motorista do middleware de autenticação
+        const motoristaId = req.userId
+        // dados esperados: id
+        const dadosBrutos = DeletarEscolaSchema.safeParse(req.params)
+
+        // validação dos dados (sendo o unico dado o id kkkk)
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "ID Inválido ou Ausente para deletar escola.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { id } = dadosBrutos.data
+
+        try {
+            const query = "DELETE FROM escola WHERE id = $1 AND motorista_id = $2"
+
+            await database.query(query, [id, motoristaId])
+
+            return res.status(200).json({
+                msg: "Escola Excluida com sucesso."
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de excluir escola, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // controller para obter os dados (ou o dado) da escola
+    obterEscola: async (req: Request, res: Response) => {
+        // pegando motoristaId do middleware.
+        const motoristaId = req.userId
+        // dados esperados: id, opcional
+        const dadosBrutos = ObterEscolaSchema.safeParse(req.params)
+
+        // validação do id
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Id inválido.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { id } = dadosBrutos.data
+
+        // IFs para montar a query e os valores dependendo se há ID ou não.
+        let query: string
+        const valores: number[] = []
+        let resultado
+
+        try {
+            if (id) {
+                query = "SELECT * FROM escola WHERE motorista_id = $1 AND id = $2"
+                valores.push(motoristaId)
+                valores.push(id)
+                const { rows } = await database.query(query, valores)
+                resultado = rows[0]
+            } else {
+                query = "SELECT id, nome FROM escola WHERE motorista_id = $1"
+                valores.push(motoristaId)
+                const { rows } = await database.query(query, valores)
+                resultado = rows
+            }
+
+            return res.status(200).json({
+                resultado
+            })
+        }catch(erro){
+            console.error("erro no endpoint de obter escola, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno no Servidor."
             })
         }
     }
