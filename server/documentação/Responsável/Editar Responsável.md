@@ -45,12 +45,20 @@ Além do `id`, é necessário enviar pelo menos um campo para edição.
 }
 ```
 
-Somente um responsável vinculado ao motorista autenticado pode ser alterado. Atualmente, a resposta de sucesso também é retornada quando o `id` informado não pertence a esse motorista ou não existe.
+Somente um responsável vinculado ao motorista autenticado pode ser alterado. Quando o `id` não existe ou pertence a outro motorista, o endpoint responde com `404`.
+
+#### Exemplo de responsável não encontrado
+
+```json
+{
+  "msg": "Nenhum Responsável encontrado."
+}
+```
 
 ## Status
 
-- `200`: Solicitação de edição processada.
+- `200`: Responsável editado com sucesso.
 - `400`: `id` ausente, dados inválidos ou nenhum campo informado para edição.
 - `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Motorista da sessão não encontrado ou com exclusão agendada.
+- `404`: Responsável não encontrado para o motorista autenticado, motorista da sessão não encontrado ou com exclusão agendada.
 - `500`: Erro interno no servidor.
