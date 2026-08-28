@@ -1,0 +1,38 @@
+.LogCad-header-container.login {
+    background-image: url('../../../assets/media/img/LogCad-stain.svg');
+}
+
+.LogCad-header-container.cadastro {
+    background-image: url('../../../assets/media/img/LogCad-stain-cadastro.svg');
+}
+
+.LogCad-header-container{
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image .5s ease-in-out;
+
+    width: 100%;
+    min-height: 30vh;
+    padding-bottom: 3rem;
+    margin-bottom: 2vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.titulo-header{
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+.titulo-header span.login{
+    color: #0D47A1;
+}
+
+.titulo-header span.cadastro{
+    color: #FFC33A
+}
