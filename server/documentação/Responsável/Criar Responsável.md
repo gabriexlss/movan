@@ -2,7 +2,7 @@ Endpoint autenticado para cadastrar um responsável vinculado ao motorista logad
 
 ## Rota URL
 
-- Rota: `/responsavel/criar`
+- Rota: `/responsavel`
 - Tipo: `POST`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 

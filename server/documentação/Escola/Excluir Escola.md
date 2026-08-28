@@ -2,7 +2,7 @@ Endpoint autenticado para excluir uma escola vinculada ao motorista logado.
 
 ## Rota URL
 
-- Rota: `/escola/excluir/:id`
+- Rota: `/escola/:id`
 - Tipo: `DELETE`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -19,7 +19,7 @@ Endpoint autenticado para excluir uma escola vinculada ao motorista logado.
 #### Exemplo
 
 ```text
-DELETE /escola/excluir/1
+DELETE /escola/1
 ```
 
 ## Respostas
@@ -41,7 +41,7 @@ Somente uma escola vinculada ao motorista autenticado pode ser excluída. Quando
 
 ```json
 {
-  "msg": "Nenhum Escola Encontrada."
+  "msg": "Nenhuma Escola Encontrada."
 }
 ```
 

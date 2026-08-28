@@ -1,7 +1,8 @@
 import { Request, Response } from "express"
-import { CriarResponsavelSchema, EditarResponsavelSchema, DeletarResponsavelSchema, ObterResponsavelSchema } from "../models/responsavel.model.js";
+import { CriarResponsavelSchema, EditarResponsavelSchema } from "../models/responsavel.model.js";
 import { database } from "../db/postgre.js";
 import { cpf } from "cpf-cnpj-validator";
+import { ParamsSchema } from "../models/utils.model.js";
 
 export const controllerResponsavel = {
     // controller para criar um novo responsavel
@@ -52,14 +53,25 @@ export const controllerResponsavel = {
         // dados esperados: id. dados opcionais: cpf, nome, email, telefone, endereço
         const dadosBrutos = EditarResponsavelSchema.safeParse(req.body)
 
+        // pega o ID dos parametros.
+        const idBruto = ParamsSchema.safeParse(req.params)
+
         // valida dados, se forem invalidos, bye bye
+        if(!idBruto.success){
+            return res.status(400).json({
+                msg: "ID Inválido ou Ausente para Editar Respnsável.",
+                erro: idBruto.error.format()
+            })
+        }
         if (!dadosBrutos.success) {
             return res.status(400).json({
                 msg: "Dados Inválidos para edição do responsavel.",
                 erro: dadosBrutos.error.format()
             })
         }
-        const { id, cpf: cpfdado, nome, endereco, tel, email } = dadosBrutos.data
+        // desestruturação dos dados
+        const { id } = idBruto.data
+        const { cpf: cpfdado, nome, endereco, tel, email } = dadosBrutos.data
 
         // iniciando arrays de campos e valores
         const campos: string[] = []
@@ -136,7 +148,7 @@ export const controllerResponsavel = {
     excluirResponsavel: async (req: Request, res: Response) => {
         const motoristaId = req.userId
         // dados esperados: id.
-        const dadosBrutos = DeletarResponsavelSchema.safeParse(req.params)
+        const dadosBrutos = ParamsSchema.safeParse(req.params)
 
         // validação pra ver se o id está correto
         if (!dadosBrutos.success) {
@@ -176,7 +188,7 @@ export const controllerResponsavel = {
     obterDados: async (req: Request, res: Response) => {
         const motoristaId = req.userId
         // dados esperados: id
-        const dadosBrutos = ObterResponsavelSchema.safeParse(req.params)
+        const dadosBrutos = ParamsSchema.partial().safeParse(req.params)
 
         // validação pra ver se o id ta ok
         if (!dadosBrutos.success) {

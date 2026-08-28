@@ -2,7 +2,7 @@ Endpoint autenticado para editar os dados de uma escola vinculada ao motorista l
 
 ## Rota URL
 
-- Rota: `/escola/editar`
+- Rota: `/escola/:id`
 - Tipo: `PATCH`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -12,26 +12,31 @@ Endpoint autenticado para editar os dados de uma escola vinculada ao motorista l
 
 - `token`: String (JWT da sessão).
 
+### Parâmetro de rota
+
+- `id`: Número inteiro positivo que identifica a escola.
+
 ### Corpo (Body)
 
-- `id`: Número inteiro positivo que identifica a escola (obrigatório).
 - `nome`: String entre 1 e 200 caracteres (opcional).
 - `endereco`: String entre 5 e 255 caracteres (opcional).
 - `tel`: String com exatamente 11 dígitos (opcional).
-- `hora_abertura`: String com um horário ISO válido (opcional).
-- `hora_fechamento`: String com um horário ISO válido (opcional).
 - `latitude`: Número entre -90 e 90 (opcional).
 - `longitude`: Número entre -180 e 180 (opcional).
 
-Além do `id`, é necessário enviar pelo menos um campo para edição. O campo `tel` deve ser enviado sem máscara.
+É necessário enviar pelo menos um campo para edição. O campo `tel` deve ser enviado sem máscara.
 
-#### Exemplo
+#### Exemplo de rota
+
+```text
+PATCH /escola/1
+```
+
+#### Exemplo de corpo
 
 ```json
 {
-  "id": 1,
-  "nome": "Colégio Caminhos do Saber",
-  "hora_fechamento": "19:00:00"
+  "nome": "Colégio Caminhos do Saber"
 }
 ```
 

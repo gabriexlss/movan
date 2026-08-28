@@ -4,10 +4,22 @@ import { controllerMotorista } from "../controllers/motorista.controller.js"
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
 
 // Rota pra criar um motorista
-router.post('/criar', controllerMotorista.criarMotorista)
+router.post('/', controllerMotorista.criarMotorista)
+
+// rota delete para realizar o soft delete da sua conta. a agendando para encerramento permanente após 30 dias.
+router.delete('/', middlewareAutenticar, controllerMotorista.deletarConta)
+
+// rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
+router.patch('/', middlewareAutenticar, controllerMotorista.editarConta)
+
+// rota get para obter todos os dados do motorista
+router.get('/', middlewareAutenticar, controllerMotorista.obterDados)
 
 // Rota pra logar um motorista
 router.post('/login', controllerMotorista.loginMotorista)
+
+// rota delete para destruir o cookie de sessão que realiza o login, efetivamente efetuando um logout
+router.delete('/logout', controllerMotorista.deslogarConta)
 
 // Rota para enviar um codigo (ou reenviar) tanto pra criação de conta quanto pra recuperação da conta
 router.post('/codigo/:tipo', middlewareAutenticar, controllerMotorista.enviarCodigo)
@@ -23,18 +35,6 @@ router.post('/recuperar-conta/recuperar', controllerMotorista.recuperarSenha)
 
 // rota para enviar um código ao novo email antes de alterá-lo
 router.post('/editar/enviar-codigo', middlewareAutenticar, controllerMotorista.enviarCodigoEditarEmail)
-
-// rota delete para destruir o cookie de sessão que realiza o login, efetivamente efetuando um logout
-router.delete('/logout', controllerMotorista.deslogarConta)
-
-// rota delete para realizar o soft delete da sua conta. a agendando para encerramento permanente após 30 dias.
-router.delete('/encerrar-conta', middlewareAutenticar, controllerMotorista.deletarConta)
-
-// rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
-router.patch('/editar', middlewareAutenticar, controllerMotorista.editarConta)
-
-// rota get para obter todos os dados do motorista
-router.get('/dados', middlewareAutenticar, controllerMotorista.obterDados)
 
 // rota post para autenticar com o google.
 router.post('/google', controllerMotorista.authGoogle)

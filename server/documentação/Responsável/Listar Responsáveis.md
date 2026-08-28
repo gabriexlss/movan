@@ -2,7 +2,7 @@ Endpoint autenticado para listar, de forma resumida, os responsáveis vinculados
 
 ## Rota URL
 
-- Rota: `/responsavel/dados`
+- Rota: `/responsavel`
 - Tipo: `GET`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 

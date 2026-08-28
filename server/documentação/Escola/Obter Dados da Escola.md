@@ -2,7 +2,7 @@ Endpoint autenticado para obter todos os dados de uma escola específica vincula
 
 ## Rota URL
 
-- Rota: `/escola/dados/:id`
+- Rota: `/escola/:id`
 - Tipo: `GET`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -19,7 +19,7 @@ Endpoint autenticado para obter todos os dados de uma escola específica vincula
 #### Exemplo
 
 ```text
-GET /escola/dados/1
+GET /escola/1
 ```
 
 ## Respostas
@@ -35,8 +35,6 @@ GET /escola/dados/1
     "nome": "Escola Caminhos do Saber",
     "endereco": "Rua das Flores, 123",
     "tel": "11987654321",
-    "hora_abertura": "07:00:00",
-    "hora_fechamento": "18:00:00",
     "latitude": -23.55052,
     "longitude": -46.633308,
     "motorista_id": 7
