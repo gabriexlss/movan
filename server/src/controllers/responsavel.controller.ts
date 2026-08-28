@@ -29,6 +29,22 @@ export const controllerResponsavel = {
                 msg: "CPF Digitado não é um CPF válido."
             })
         }
+        // testando pra ver se o cpf não está em uso atualmente.
+        try{
+            const query = "SELECT id FROM responsavel WHERE cpf = $1"
+            const CPFemUso = await database.query(query, [dadocpf])
+
+            if(CPFemUso.rowCount){
+                return res.status(409).json({
+                    msg: "Responsável já cadastrado com esse CPF."
+                })
+            }
+        }catch(erro){
+            console.error("erro no endpoint de criar responsável ao verificar unique do cpf, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
         try {
             const query = "INSERT INTO responsavel (cpf, nome, endereco, tel, email, motorista_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
             const valores = [dadocpf, nome, endereco, tel, email, motoristaId]
@@ -71,7 +87,7 @@ export const controllerResponsavel = {
         }
         // desestruturação dos dados
         const { id } = idBruto.data
-        const { cpf: cpfdado, nome, endereco, tel, email } = dadosBrutos.data
+        const { nome, endereco, tel, email } = dadosBrutos.data
 
         // iniciando arrays de campos e valores
         const campos: string[] = []
@@ -85,15 +101,6 @@ export const controllerResponsavel = {
         }
 
         // checagem para ver quais campos foram enviados.
-        if (cpfdado) {
-            if (!cpf.isValid(cpfdado)) {
-                return res.status(400).json({
-                    msg: "CPF Digitado não é um CPF válido."
-                })
-            }
-            campos.push(`cpf = $${valores.length + 1}`)
-            valores.push(cpfdado)
-        }
         if (nome) {
             campos.push(`nome = $${valores.length + 1}`)
             valores.push(nome)

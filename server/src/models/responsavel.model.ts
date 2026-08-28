@@ -19,7 +19,6 @@ export const CriarResponsavelSchema = ResponsavelSchema.pick({
     email: true
 })
 export const EditarResponsavelSchema = ResponsavelSchema.pick({
-    cpf: true,
     nome: true,
     endereco: true,
     tel: true,
