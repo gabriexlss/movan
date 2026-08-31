@@ -26,7 +26,7 @@ Os campos `cpf` e `tel` devem ser enviados sem máscara.
 
 ```json
 {
-  "cpf": "12345678901",
+  "cpf": "52998224725",
   "nome": "Maria da Silva",
   "endereco": "Rua das Flores, 123",
   "tel": "11987654321",
@@ -44,10 +44,10 @@ Os campos `cpf` e `tel` devem ser enviados sem máscara.
 
 ```json
 {
-  "msg": "Responsavel criado com sucesso.",
+  "msg": "Responsável criado com sucesso.",
   "responsavel": {
     "id": 1,
-    "cpf": "12345678901",
+    "cpf": "52998224725",
     "nome": "Maria da Silva",
     "endereco": "Rua das Flores, 123",
     "tel": "11987654321",
@@ -61,7 +61,7 @@ Os campos `cpf` e `tel` devem ser enviados sem máscara.
 
 - `201`: Responsável criado com sucesso.
 - `400`: Dados ausentes ou inválidos.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Motorista da sessão não encontrado ou com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
 - `409`: Já existe um responsável cadastrado com o CPF informado.
+- `413`: Corpo da requisição excede o limite aceito pela API.
 - `500`: Erro interno no servidor.

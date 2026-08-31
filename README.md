@@ -30,14 +30,12 @@ A aplicação adota a arquitetura cliente-servidor para garantir estabilidade e 
 - **React.js**: Biblioteca baseada em componentes para a construção de uma interface dinâmica, moderna e reutilizável .
 - **Vite**: Ferramenta de construção rápida e servidor de desenvolvimento local para otimizar o fluxo de trabalho .
 - **HTML5 & CSS3**: Estruturação e criação de um ambiente visual organizado, responsivo e acessível .
-- **LeafLet**: Biblioteca para integração e renderização de mapas interativos diretamente na interface do usuário .
 
 ### Backend
 - **Node.js**: Ambiente de execução JavaScript no lado do servidor .
 - **Express.js**: Framework para facilitar a criação de rotas, APIs e organização da lógica de negócio .
 - **TypeScript**: Adição de tipagem estática que garante maior padronização, legibilidade e segurança durante o desenvolvimento do servidor .
-- **MySQL**: Sistema de Gerenciamento de Banco de Dados Relacional (SGBDR) responsável por armazenar dados de clientes, rotas e registros financeiros com integridade por meio da linguagem SQL .
-- **API OSRM (Open Source Routing Machine)**: Integração para processamento e cálculo otimizado de rotas no servidor .
+- **PostgreSQL**: Sistema de Gerenciamento de Banco de Dados Relacional (SGBDR) responsável por armazenar os dados da aplicação com integridade por meio da linguagem SQL .
 
 ## 🧪 Qualidade e Testes
 
@@ -49,14 +47,14 @@ Para assegurar uma solução confiável, o projeto adota o modelo de avaliação
 
 O repositório está dividido em duas partes principais:
 
-- `/client`: Contém todo o código do frontend e da interface (React + Vite + LeafLet).
-- `/server`: Contém a API, lógica de negócio, rotas e conexão com o banco (Express + Node.js + TypeScript + OSRM).
+- `/client`: Contém todo o código do frontend e da interface (React + Vite).
+- `/server`: Contém a API, lógica de negócio, rotas e conexão PostgreSQL (Express + Node.js + TypeScript).
 
 ## 🏁 Como Rodar o Projeto
 
 ### Pré-requisitos
 - Node.js instalado.
-- Banco de dados MySQL configurado.
+- Banco de dados PostgreSQL configurado.
 
 ### Configuração do Backend
 1. Navegue até a pasta `server`:
@@ -65,10 +63,12 @@ O repositório está dividido em duas partes principais:
 2. Instale as dependências:
    `npm install`
 
-3. Configure o arquivo `.env` com suas credenciais do banco de dados MySQL e demais chaves da API.
+3. Crie o arquivo `server/.env` a partir de `server/.env.example` e configure a conexão PostgreSQL e as demais variáveis de ambiente.
 
-4. Inicie o servidor:
-   `npm start`
+4. Inicie o servidor em modo de desenvolvimento:
+   `npm run dev`
+
+Para executar a versão compilada, rode `npm run build` e, em seguida, `npm start`.
 
 ### Configuração do Frontend
 1. Navegue até a pasta `client`:

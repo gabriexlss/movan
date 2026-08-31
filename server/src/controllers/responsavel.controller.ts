@@ -3,6 +3,7 @@ import { CriarResponsavelSchema, EditarResponsavelSchema } from "../models/respo
 import { database } from "../db/postgre.js";
 import { cpf } from "cpf-cnpj-validator";
 import { ParamsSchema } from "../models/utils.model.js";
+import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 
 export const controllerResponsavel = {
     // controller para criar um novo responsavel
@@ -16,7 +17,7 @@ export const controllerResponsavel = {
         // se a validação falhar, manda embora
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Invalidos para Criação do responsavel",
+                msg: "Dados inválidos para criar o responsável.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -26,7 +27,7 @@ export const controllerResponsavel = {
         // if pra validar se um cpf realmente é um cpf ou se não é so um cara metendo rage bait.
         if (!cpf.isValid(dadocpf)) {
             return res.status(400).json({
-                msg: "CPF Digitado não é um CPF válido."
+                msg: "CPF inválido."
             })
         }
         // testando pra ver se o cpf não está em uso atualmente.
@@ -42,7 +43,7 @@ export const controllerResponsavel = {
         }catch(erro){
             console.error("erro no endpoint de criar responsável ao verificar unique do cpf, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
         try {
@@ -53,13 +54,18 @@ export const controllerResponsavel = {
             // pega o valor que retornou e coloca numa constante
             const responsavel = rows[0]
             return res.status(201).json({
-                msg: "Responsavel criado com sucesso.",
+                msg: "Responsável criado com sucesso.",
                 responsavel
             })
         } catch (erro) {
             console.error("erro no endpoint de criação de responsavel, erro: ", erro)
+            if (possuiCodigoPostgres(erro, "23505")) {
+                return res.status(409).json({
+                    msg: "Responsável já cadastrado com esse CPF."
+                })
+            }
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -75,13 +81,13 @@ export const controllerResponsavel = {
         // valida dados, se forem invalidos, bye bye
         if(!idBruto.success){
             return res.status(400).json({
-                msg: "ID Inválido ou Ausente para Editar Respnsável.",
+                msg: "ID inválido ou ausente para editar o responsável.",
                 erro: idBruto.error.format()
             })
         }
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para edição do responsavel.",
+                msg: "Dados inválidos para editar o responsável.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -96,7 +102,7 @@ export const controllerResponsavel = {
         // checa pra ver se o id do responsavel realmente veio.
         if (!id) {
             return res.status(400).json({
-                msg: "id do responsável é obrigatorio para edita-lo"
+                msg: "ID inválido ou ausente para editar o responsável."
             })
         }
 
@@ -121,7 +127,7 @@ export const controllerResponsavel = {
         // se nao tiver nenhum campo para edição, manda embora.
         if (campos.length < 1) {
             return res.status(400).json({
-                msg: "É necessario enviar pelo menos um valor para enviar."
+                msg: "É necessário informar pelo menos um campo para edição."
             })
         }
 
@@ -137,17 +143,17 @@ export const controllerResponsavel = {
 
             if (!responsavel.rowCount) {
                 return res.status(404).json({
-                    msg: "Nenhum Responsável encontrado."
+                    msg: "Responsável não encontrado."
                 })
             } else {
                 return res.status(200).json({
-                    msg: "Responsavel Editado com Sucesso."
+                    msg: "Responsável editado com sucesso."
                 })
             }
         } catch (erro) {
             console.error("Erro no endpoint de editar responsavel, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -160,7 +166,7 @@ export const controllerResponsavel = {
         // validação pra ver se o id está correto
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Invalidos para deletar responsavel",
+                msg: "ID inválido ou ausente para excluir o responsável.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -176,18 +182,23 @@ export const controllerResponsavel = {
 
             if (!responsavel.rowCount) {
                 return res.status(404).json({
-                    msg: "Nenhum Responsável encontrado."
+                    msg: "Responsável não encontrado."
                 })
             } else {
                 return res.status(200).json({
-                    msg: "Responsável deletado com sucesso."
+                    msg: "Responsável excluído com sucesso."
                 })
             }
 
         } catch (erro) {
             console.error("erro no endpoint de excluir responsável, erro: ", erro)
+            if (possuiCodigoPostgres(erro, "23503")) {
+                return res.status(409).json({
+                    msg: "Não é possível excluir o responsável enquanto houver alunos vinculados a ele."
+                })
+            }
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -200,44 +211,37 @@ export const controllerResponsavel = {
         // validação pra ver se o id ta ok
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para obter dados do responsável.",
+                msg: "ID inválido.",
                 erro: dadosBrutos.error.format()
             })
         }
         const { id } = dadosBrutos.data
         try {
-            const querycomID = "SELECT * FROM responsavel WHERE motorista_id = $1 AND id = $2"
-            const querysemID = "SELECT id, nome FROM responsavel WHERE motorista_id = $1 ORDER BY id ASC"
-            let resultado
             if (id) {
-                const { rows } = await database.query(querycomID, [motoristaId, id])
-                if (rows.length < 1) {
-                    resultado = null
-                } else {
-                    resultado = rows[0]
+                const query = "SELECT * FROM responsavel WHERE motorista_id = $1 AND id = $2"
+                const { rows } = await database.query(query, [motoristaId, id])
+                if (!rows[0]) {
+                    return res.status(404).json({
+                        msg: "Responsável não encontrado."
+                    })
                 }
-            } else {
-                const { rows } = await database.query(querysemID, [motoristaId])
-                if (rows.length < 1) {
-                    resultado = null
-                } else {
-                    resultado = rows
-                }
-            }
-            if (!resultado) {
-                return res.status(404).json({
-                    msg: "Nenhum Respnsável Encontrado."
-                })
-            } else {
+
                 return res.status(200).json({
-                    responsavel: resultado
+                    responsavel: rows[0]
                 })
             }
+
+            const query = "SELECT id, nome FROM responsavel WHERE motorista_id = $1 ORDER BY id ASC"
+            const { rows } = await database.query(query, [motoristaId])
+
+            return res.status(200).json({
+                responsaveis: rows
+            })
 
         } catch (erro) {
             console.error("erro no endpoint de obter dado de responsavel, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor"
+                msg: "Erro interno do servidor."
             })
         }
     }

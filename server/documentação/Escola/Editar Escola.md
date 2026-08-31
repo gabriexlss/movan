@@ -49,7 +49,7 @@ PATCH /escola/1
 
 ```json
 {
-  "msg": "Escola editada com sucesso!"
+  "msg": "Escola editada com sucesso."
 }
 ```
 
@@ -59,7 +59,7 @@ Somente uma escola vinculada ao motorista autenticado pode ser alterada. Quando 
 
 ```json
 {
-  "msg": "Nenhuma Escola Encontrada."
+  "msg": "Escola não encontrada."
 }
 ```
 
@@ -67,6 +67,7 @@ Somente uma escola vinculada ao motorista autenticado pode ser alterada. Quando 
 
 - `200`: Escola editada com sucesso.
 - `400`: `id` ausente, dados inválidos ou nenhum campo reconhecido para edição.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Escola não encontrada para o motorista autenticado, motorista da sessão não encontrado ou com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
+- `404`: Escola não encontrada para o motorista autenticado.
+- `413`: Corpo da requisição excede o limite aceito pela API.
 - `500`: Erro interno no servidor.

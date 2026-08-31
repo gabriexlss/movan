@@ -14,7 +14,7 @@ Endpoint autenticado para excluir um responsável vinculado ao motorista logado.
 
 ### Parâmetro de rota
 
-- `id`: Número positivo que identifica o responsável.
+- `id`: Número inteiro positivo que identifica o responsável.
 
 #### Exemplo
 
@@ -31,7 +31,7 @@ DELETE /responsavel/1
 
 ```json
 {
-  "msg": "Responsável deletado com sucesso."
+  "msg": "Responsável excluído com sucesso."
 }
 ```
 
@@ -41,7 +41,7 @@ Somente um responsável vinculado ao motorista autenticado pode ser excluído. Q
 
 ```json
 {
-  "msg": "Nenhum Responsável encontrado."
+  "msg": "Responsável não encontrado."
 }
 ```
 
@@ -49,6 +49,7 @@ Somente um responsável vinculado ao motorista autenticado pode ser excluído. Q
 
 - `200`: Responsável excluído com sucesso.
 - `400`: `id` ausente ou inválido.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Responsável não encontrado para o motorista autenticado, motorista da sessão não encontrado ou com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
+- `404`: Responsável não encontrado para o motorista autenticado.
+- `409`: A integridade referencial do banco impediu a exclusão porque existem alunos vinculados ao responsável.
 - `500`: Erro interno no servidor.

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { database } from "../db/postgre.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { CriarAlunoSchema, EditarAlunoSchema } from "../models/aluno.model.js";
+import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 
 export const controllerAluno = {
     // controller para criar um novo aluno
@@ -14,7 +15,7 @@ export const controllerAluno = {
         // validação dos dados
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para criar Aluno.",
+                msg: "Dados inválidos para criar o aluno.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -35,20 +36,20 @@ export const controllerAluno = {
 
             if (!responsavel.rowCount) {
                 return res.status(404).json({
-                    msg: "Responsável não encontrado para cadastrar aluno."
+                    msg: "Responsável não encontrado para criar o aluno."
                 })
             }
 
             if (!escola.rowCount) {
                 return res.status(404).json({
-                    msg: "Escola não encontrado para cadastrar aluno."
+                    msg: "Escola não encontrada para criar o aluno."
                 })
             }
 
         } catch (erro) {
             console.error("Erro no endpoint de cadastrar aluno ao verificar chaves estrangeiras, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
         // Iniciando Operação.
@@ -63,13 +64,18 @@ export const controllerAluno = {
             const aluno = await database.query(query, valores)
 
             return res.status(201).json({
-                msg: "Aluno criado com sucesso!",
+                msg: "Aluno criado com sucesso.",
                 aluno: aluno.rows[0]
             })
         } catch (erro) {
             console.error("Erro no endpoint de criar aluno, erro: ", erro)
+            if (possuiCodigoPostgres(erro, "23503")) {
+                return res.status(409).json({
+                    msg: "Não foi possível criar o aluno porque a escola ou o responsável informado não está mais disponível."
+                })
+            }
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -85,14 +91,14 @@ export const controllerAluno = {
         //Validação dos dados
         if (!idBruto.success) {
             return res.status(400).json({
-                msg: "ID Inválido ou Ausente para editar aluno.",
+                msg: "ID inválido ou ausente para editar o aluno.",
                 erro: idBruto.error.format()
             })
         }
 
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para editar o aluno.",
+                msg: "Dados inválidos para editar o aluno.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -107,7 +113,7 @@ export const controllerAluno = {
         // checagem para verificar quais campos foram recebidos.
         if (!id) {
             return res.status(400).json({
-                msg: "id é necessario para editar uma aluno"
+                msg: "ID inválido ou ausente para editar o aluno."
             })
         }
         if (nome) {
@@ -145,7 +151,7 @@ export const controllerAluno = {
                 const escola = await database.query(query, [escola_id, motoristaId])
                 if (!escola.rowCount) {
                     return res.status(404).json({
-                        msg: "Escola não encontrado com o id fornecido para editar."
+                        msg: "Escola não encontrada para editar o aluno."
                     })
                 } else {
                     campos.push(`escola_id = $${valores.length + 1}`)
@@ -155,13 +161,13 @@ export const controllerAluno = {
         } catch (erro) {
             console.error("Erro no endpoint de cadastrar aluno ao verificar chaves estrangeiras, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
         // se nenhum campo for recebido, manda embora
         if (campos.length < 1) {
             return res.status(400).json({
-                msg: "É necessario pelo menos um campo para realizar a edição."
+                msg: "É necessário informar pelo menos um campo para edição."
             })
         }
 
@@ -178,19 +184,23 @@ export const controllerAluno = {
 
             if (!aluno.rowCount) {
                 return res.status(404).json({
-                    msg: "Nenhum Aluno Encontrado.",
-                    id: id
+                    msg: "Aluno não encontrado."
                 })
             } else {
                 return res.status(200).json({
-                    msg: "Aluno editado com sucesso!"
+                    msg: "Aluno editado com sucesso."
                 })
             }
 
         } catch (erro) {
             console.error("Erro no endpoint de editar aluno, erro: ", erro)
+            if (possuiCodigoPostgres(erro, "23503")) {
+                return res.status(409).json({
+                    msg: "Não foi possível editar o aluno porque a escola informada não está mais disponível."
+                })
+            }
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -204,7 +214,7 @@ export const controllerAluno = {
         // validação dos dados (sendo o unico dado o id kkkk)
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "ID Inválido ou Ausente para deletar aluno.",
+                msg: "ID inválido ou ausente para excluir o aluno.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -218,18 +228,18 @@ export const controllerAluno = {
 
             if (!aluno.rowCount) {
                 return res.status(404).json({
-                    msg: "Nenhum aluno Encontrado."
+                    msg: "Aluno não encontrado."
                 })
             } else {
                 return res.status(200).json({
-                    msg: "Aluno Excluido com sucesso."
+                    msg: "Aluno excluído com sucesso."
                 })
             }
 
         } catch (erro) {
             console.error("Erro no endpoint de excluir aluno, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -243,7 +253,7 @@ export const controllerAluno = {
         // validação do id
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Id inválido.",
+                msg: "ID inválido.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -251,46 +261,32 @@ export const controllerAluno = {
         const { id } = dadosBrutos.data
 
         // IFs para montar a query e os valores dependendo se há ID ou não.
-        let query: string
-        const valores: number[] = []
-        let resultado
-
         try {
             if (id) {
-                query = "SELECT * FROM aluno WHERE motorista_id = $1 AND id = $2"
-                valores.push(motoristaId)
-                valores.push(id)
-                const { rows } = await database.query(query, valores)
-                if (rows.length < 1) {
-                    resultado = null
-                } else {
-                    resultado = rows[0]
+                const query = "SELECT * FROM aluno WHERE motorista_id = $1 AND id = $2"
+                const { rows } = await database.query(query, [motoristaId, id])
+                if (!rows[0]) {
+                    return res.status(404).json({
+                        msg: "Aluno não encontrado."
+                    })
                 }
 
-            } else {
-                query = "SELECT id, nome FROM aluno WHERE motorista_id = $1 ORDER BY id ASC"
-                valores.push(motoristaId)
-                const { rows } = await database.query(query, valores)
-                if (rows.length < 1) {
-                    resultado = null
-                } else {
-                    resultado = rows
-                }
-            }
-            if (!resultado) {
-                return res.status(404).json({
-                    msg: "Nenhuma Aluno Encontrada."
-                })
-            } else {
                 return res.status(200).json({
-                    resultado
+                    aluno: rows[0]
                 })
             }
+
+            const query = "SELECT id, nome FROM aluno WHERE motorista_id = $1 ORDER BY id ASC"
+            const { rows } = await database.query(query, [motoristaId])
+
+            return res.status(200).json({
+                alunos: rows
+            })
 
         } catch (erro) {
             console.error("erro no endpoint de obter aluno, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno no Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     }

@@ -24,13 +24,13 @@ GET /aluno/8
 
 ## Respostas
 
-- `resultado`: Objeto com todos os dados do aluno.
+- `aluno`: Objeto com todos os dados do aluno.
 
 #### Exemplo de sucesso
 
 ```json
 {
-  "resultado": {
+  "aluno": {
     "id": 8,
     "nome": "Ana Souza",
     "data_nasc": "2015-04-12",
@@ -52,7 +52,7 @@ Somente os dados de um aluno vinculado ao motorista autenticado são consultados
 
 ```json
 {
-  "msg": "Nenhuma Aluno Encontrada."
+  "msg": "Aluno não encontrado."
 }
 ```
 
@@ -60,6 +60,6 @@ Somente os dados de um aluno vinculado ao motorista autenticado são consultados
 
 - `200`: Aluno encontrado e retornado com sucesso.
 - `400`: `id` ausente, não numérico, igual a zero ou negativo.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Aluno ou motorista da sessão não encontrado; também pode indicar uma conta com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
+- `404`: Aluno não encontrado para o motorista autenticado.
 - `500`: Erro interno no servidor.

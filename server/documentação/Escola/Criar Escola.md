@@ -44,7 +44,7 @@ O campo `tel` deve ser enviado sem máscara. Todos os campos são obrigatórios.
 
 ```json
 {
-  "msg": "Escola criada com sucesso!",
+  "msg": "Escola criada com sucesso.",
   "escola": {
     "id": 1,
     "nome": "Escola Caminhos do Saber",
@@ -61,6 +61,6 @@ O campo `tel` deve ser enviado sem máscara. Todos os campos são obrigatórios.
 
 - `201`: Escola criada com sucesso.
 - `400`: Dados ausentes ou inválidos.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Motorista da sessão não encontrado ou com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
+- `413`: Corpo da requisição excede o limite aceito pela API.
 - `500`: Erro interno no servidor.

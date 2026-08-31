@@ -21,7 +21,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
     if (!segredoJWT) {
         console.error("Segredo JWT Ausente no ENV")
         return res.status(500).json({
-            msg: "Ocorreu um erro interno no servidor."
+            msg: "Erro interno do servidor."
         })
     }
     try {
@@ -33,8 +33,8 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
             const valores = [id]
             const { rows } = await database.query(query, valores)
             if (rows.length < 1) {
-                return res.status(404).json({
-                    msg: "Usuário não encontrado."
+                return res.status(401).json({
+                    msg: "Acesso negado. Faça login para continuar."
                 })
             }
             // pega o verificado e coloca dentro da requisição atual
@@ -42,7 +42,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         } catch (erro) {
             console.error("Erro ao verificar se usuario existe, erro:", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                msg: "Erro interno do servidor."
             })
         }
         // pega o id e coloca dentro da requisição atual

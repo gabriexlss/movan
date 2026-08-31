@@ -52,7 +52,7 @@ Todos os campos são obrigatórios, exceto `observacao`.
 
 ```json
 {
-  "msg": "Aluno criado com sucesso!",
+  "msg": "Aluno criado com sucesso.",
   "aluno": {
     "id": 8,
     "nome": "Ana Souza",
@@ -75,6 +75,8 @@ O responsável e a escola informados devem existir e pertencer ao motorista aute
 
 - `201`: Aluno criado com sucesso.
 - `400`: Dados ausentes ou inválidos.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Responsável, escola ou motorista da sessão não encontrado; também pode indicar uma conta com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
+- `404`: Responsável ou escola não encontrado para o motorista autenticado.
+- `409`: A escola ou o responsável deixou de estar disponível durante a criação.
+- `413`: Corpo da requisição excede o limite aceito pela API.
 - `500`: Erro interno no servidor.

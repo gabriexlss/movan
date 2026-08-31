@@ -16,13 +16,13 @@ Nenhum dado é esperado no corpo da requisição ou nos parâmetros.
 
 ## Respostas
 
-- `responsavel`: Array com `id` e `nome` de cada responsável vinculado ao motorista autenticado.
+- `responsaveis`: Array ordenado por `id`, contendo o `id` e o `nome` de cada responsável vinculado ao motorista autenticado.
 
 #### Exemplo de sucesso
 
 ```json
 {
-  "responsavel": [
+  "responsaveis": [
     {
       "id": 1,
       "nome": "Maria da Silva"
@@ -35,19 +35,18 @@ Nenhum dado é esperado no corpo da requisição ou nos parâmetros.
 }
 ```
 
-Quando o motorista ainda não possui responsáveis, o endpoint responde com `404`.
+Quando o motorista ainda não possui responsáveis, a consulta continua sendo bem-sucedida e retorna um array vazio.
 
 #### Exemplo sem responsáveis cadastrados
 
 ```json
 {
-  "msg": "Nenhum Respnsável Encontrado."
+  "responsaveis": []
 }
 ```
 
 ## Status
 
-- `200`: Lista obtida com sucesso.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Nenhum responsável encontrado, motorista da sessão não encontrado ou com exclusão agendada.
+- `200`: Lista obtida com sucesso, inclusive quando estiver vazia.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
 - `500`: Erro interno no servidor.
