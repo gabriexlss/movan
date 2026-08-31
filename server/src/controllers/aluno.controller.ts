@@ -4,11 +4,11 @@ import { ParamsSchema } from "../models/utils.model.js";
 import { CriarAlunoSchema, EditarAlunoSchema } from "../models/aluno.model.js";
 
 export const controllerAluno = {
-    // controller para criar uma nova escola
+    // controller para criar um novo aluno
     criarAluno: async (req: Request, res: Response) => {
         // pega id do motorista do controller
         const motoristaId = req.userId
-        // dados esperados: nome, endereço, telefone, hora_abertura, hora_fechamento, latitude, longitude
+        // dados esperados: nome, endereço, telefone, latitude, longitude, data de nascimento, observação opcional e turno, além de escola  id e responsavel id
         const dadosBrutos = CriarAlunoSchema.safeParse(req.body)
 
         // validação dos dados
@@ -85,7 +85,7 @@ export const controllerAluno = {
         //Validação dos dados
         if (!idBruto.success) {
             return res.status(400).json({
-                msg: "ID Inválido ou Ausente para editar escola.",
+                msg: "ID Inválido ou Ausente para editar aluno.",
                 erro: idBruto.error.format()
             })
         }
@@ -107,7 +107,7 @@ export const controllerAluno = {
         // checagem para verificar quais campos foram recebidos.
         if (!id) {
             return res.status(400).json({
-                msg: "id é necessario para editar uma escola"
+                msg: "id é necessario para editar uma aluno"
             })
         }
         if (nome) {
@@ -118,7 +118,7 @@ export const controllerAluno = {
             campos.push(`data_nasc = $${valores.length + 1}`)
             valores.push(data_nasc)
         }
-        if (observacao) {
+        if (observacao !== undefined) {
             campos.push(`observacao = $${valores.length + 1}`)
             valores.push(observacao)
         }
@@ -126,11 +126,11 @@ export const controllerAluno = {
             campos.push(`ano_escolar = $${valores.length + 1}`)
             valores.push(ano_escolar)
         }
-        if (latitude) {
+        if (latitude !== undefined) {
             campos.push(`latitude = $${valores.length + 1}`)
             valores.push(latitude)
         }
-        if (longitude) {
+        if (longitude !== undefined) {
             campos.push(`longitude = $${valores.length + 1}`)
             valores.push(longitude)
         }
@@ -143,10 +143,13 @@ export const controllerAluno = {
                 // verificar se escola existe
                 const query = "SELECT id FROM escola WHERE id = $1 AND motorista_id = $2"
                 const escola = await database.query(query, [escola_id, motoristaId])
-                if (escola.rowCount) {
+                if (!escola.rowCount) {
                     return res.status(404).json({
                         msg: "Escola não encontrado com o id fornecido para editar."
                     })
+                } else {
+                    campos.push(`escola_id = $${valores.length + 1}`)
+                    valores.push(escola_id)
                 }
             }
         } catch (erro) {
@@ -211,9 +214,9 @@ export const controllerAluno = {
         try {
             const query = "DELETE FROM aluno WHERE id = $1 AND motorista_id = $2"
 
-            const escola = await database.query(query, [id, motoristaId])
+            const aluno = await database.query(query, [id, motoristaId])
 
-            if (!escola.rowCount) {
+            if (!aluno.rowCount) {
                 return res.status(404).json({
                     msg: "Nenhum aluno Encontrado."
                 })

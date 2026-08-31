@@ -23,6 +23,6 @@ export const EditarAlunoSchema = AlunoSchema.omit({
     id: true,
     responsavel_id: true,
     motorista_id: true
-})
+}).partial()
 
 export type CriarAluno = z.infer<typeof CriarAlunoSchema>

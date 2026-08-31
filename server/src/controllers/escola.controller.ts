@@ -91,11 +91,11 @@ export const controllerEscola = {
             campos.push(`tel = $${valores.length + 1}`)
             valores.push(tel)
         }
-        if (latitude) {
+        if (latitude !== undefined) {
             campos.push(`latitude = $${valores.length + 1}`)
             valores.push(latitude)
         }
-        if (longitude) {
+        if (longitude !== undefined) {
             campos.push(`longitude = $${valores.length + 1}`)
             valores.push(longitude)
         }
