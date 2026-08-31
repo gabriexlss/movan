@@ -7,6 +7,9 @@ const router = Router()
 router.post('/', middlewareAutenticar, controllerAluno.criarAluno)
 
 // rota patch para editar um aluno
-router.patch('/:id', controllerAluno.editarAluno)
+router.patch('/:id', middlewareAutenticar, controllerAluno.editarAluno)
+
+// rota delete para excluir um aluno
+router.delete('/:id', middlewareAutenticar, controllerAluno.excluirAluno)
 
 export default router
