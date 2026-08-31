@@ -9,6 +9,7 @@ const AlunoSchema = z.object({
     observacao: z.string().max(255).optional(),
     latitude: UtilSchema.shape.latitude,
     longitude: UtilSchema.shape.longitude,
+    turno: z.string().max(5).min(1),
     responsavel_id: UtilSchema.shape.id,
     escola_id: UtilSchema.shape.id,
     motorista_id: UtilSchema.shape.id

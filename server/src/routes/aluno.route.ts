@@ -12,4 +12,10 @@ router.patch('/:id', middlewareAutenticar, controllerAluno.editarAluno)
 // rota delete para excluir um aluno
 router.delete('/:id', middlewareAutenticar, controllerAluno.excluirAluno)
 
+// rota get para listar alunos
+router.get('/', middlewareAutenticar, controllerAluno.obterAluno)
+
+// rota get para obter todos os dados de um aluno
+router.get('/:id', middlewareAutenticar, controllerAluno.obterAluno)
+
 export default router

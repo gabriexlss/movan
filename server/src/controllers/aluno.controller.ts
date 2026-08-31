@@ -19,7 +19,7 @@ export const controllerAluno = {
             })
         }
         // realizar desestruturação dos dados
-        const { nome, data_nasc, ano_escolar, observacao, responsavel_id, escola_id, latitude, longitude } = dadosBrutos.data
+        const { nome, data_nasc, ano_escolar, observacao, responsavel_id, escola_id, latitude, longitude, turno } = dadosBrutos.data
 
         // Verificando se as chaves estrangeiras existem no banco.
         try {
@@ -54,10 +54,10 @@ export const controllerAluno = {
         // Iniciando Operação.
         try {
             const query = `INSERT INTO aluno 
-            (nome, data_nasc, ano_escolar, responsavel_id, escola_id, latitude, longitude, motorista_id${observacao ? ', observacao' : ''}) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8${observacao ? ', $9' : ''})
+            (nome, data_nasc, ano_escolar, responsavel_id, escola_id, latitude, longitude, motorista_id, turno${observacao ? ', observacao' : ''}) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9${observacao ? ', $10' : ''})
             RETURNING *`
-            const valores = [nome, data_nasc, ano_escolar, responsavel_id, escola_id, latitude, longitude, motoristaId]
+            const valores = [nome, data_nasc, ano_escolar, responsavel_id, escola_id, latitude, longitude, motoristaId, turno]
             if (observacao) valores.push(observacao)
 
             const aluno = await database.query(query, valores)
@@ -98,7 +98,7 @@ export const controllerAluno = {
         }
         // desestruturação dos dados
         const { id } = idBruto.data
-        const { nome, data_nasc, ano_escolar, observacao, latitude, longitude, escola_id } = dadosBrutos.data
+        const { nome, data_nasc, ano_escolar, observacao, latitude, longitude, escola_id, turno } = dadosBrutos.data
 
         // iniciando arrays para guardar os dados recebidos.
         const campos: string[] = []
@@ -134,6 +134,10 @@ export const controllerAluno = {
             campos.push(`longitude = $${valores.length + 1}`)
             valores.push(longitude)
         }
+        if (turno) {
+            campos.push(`turno = $${valores.length + 1}`)
+            valores.push(turno)
+        }
         try {
             if (escola_id) {
                 // verificar se escola existe
@@ -144,7 +148,6 @@ export const controllerAluno = {
                         msg: "Escola não encontrado com o id fornecido para editar."
                     })
                 }
-
             }
         } catch (erro) {
             console.error("Erro no endpoint de cadastrar aluno ao verificar chaves estrangeiras, erro: ", erro)
@@ -227,8 +230,8 @@ export const controllerAluno = {
             })
         }
     },
-    // controller para obter os dados (ou o dado) da escola
-    obterEscola: async (req: Request, res: Response) => {
+    // controller para obter os dados (ou o dado) do aluno
+    obterAluno: async (req: Request, res: Response) => {
         // pegando motoristaId do middleware.
         const motoristaId = req.userId
         // dados esperados: id, opcional
@@ -251,7 +254,7 @@ export const controllerAluno = {
 
         try {
             if (id) {
-                query = "SELECT * FROM escola WHERE motorista_id = $1 AND id = $2"
+                query = "SELECT * FROM aluno WHERE motorista_id = $1 AND id = $2"
                 valores.push(motoristaId)
                 valores.push(id)
                 const { rows } = await database.query(query, valores)
@@ -262,7 +265,7 @@ export const controllerAluno = {
                 }
 
             } else {
-                query = "SELECT id, nome FROM escola WHERE motorista_id = $1"
+                query = "SELECT id, nome FROM aluno WHERE motorista_id = $1"
                 valores.push(motoristaId)
                 const { rows } = await database.query(query, valores)
                 if (rows.length < 1) {
@@ -273,7 +276,7 @@ export const controllerAluno = {
             }
             if (!resultado) {
                 return res.status(404).json({
-                    msg: "Nenhuma Escola Encontrada."
+                    msg: "Nenhuma Aluno Encontrada."
                 })
             } else {
                 return res.status(200).json({
@@ -282,7 +285,7 @@ export const controllerAluno = {
             }
 
         } catch (erro) {
-            console.error("erro no endpoint de obter escola, erro: ", erro)
+            console.error("erro no endpoint de obter aluno, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno no Servidor."
             })
