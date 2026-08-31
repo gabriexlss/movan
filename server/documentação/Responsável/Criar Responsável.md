@@ -63,4 +63,5 @@ Os campos `cpf` e `tel` devem ser enviados sem máscara.
 - `400`: Dados ausentes ou inválidos.
 - `401`: Cookie de autenticação ausente ou inválido.
 - `404`: Motorista da sessão não encontrado ou com exclusão agendada.
+- `409`: Já existe um responsável cadastrado com o CPF informado.
 - `500`: Erro interno no servidor.

@@ -18,13 +18,12 @@ Endpoint autenticado para editar os dados de um responsável vinculado ao motori
 
 ### Corpo (Body)
 
-- `cpf`: String com exatamente 11 dígitos e um CPF válido (opcional).
 - `nome`: String entre 5 e 200 caracteres (opcional).
 - `endereco`: String entre 10 e 255 caracteres (opcional).
 - `tel`: String com exatamente 11 dígitos (opcional).
 - `email`: E-mail válido entre 5 e 150 caracteres (opcional).
 
-É necessário enviar pelo menos um campo para edição.
+É necessário enviar pelo menos um campo para edição. O CPF não pode ser alterado por este endpoint.
 
 #### Exemplo de rota
 

@@ -63,8 +63,6 @@ Somente uma escola vinculada ao motorista autenticado pode ser alterada. Quando 
 }
 ```
 
-Na implementação atual, `latitude` ou `longitude` com valor `0` não são reconhecidas como campos enviados durante a edição. Se forem os únicos campos de alteração, a resposta será `400`.
-
 ## Status
 
 - `200`: Escola editada com sucesso.
