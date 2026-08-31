@@ -207,7 +207,7 @@ export const controllerResponsavel = {
         const { id } = dadosBrutos.data
         try {
             const querycomID = "SELECT * FROM responsavel WHERE motorista_id = $1 AND id = $2"
-            const querysemID = "SELECT id, nome FROM responsavel WHERE motorista_id = $1"
+            const querysemID = "SELECT id, nome FROM responsavel WHERE motorista_id = $1 ORDER BY id ASC"
             let resultado
             if (id) {
                 const { rows } = await database.query(querycomID, [motoristaId, id])

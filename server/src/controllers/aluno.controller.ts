@@ -265,7 +265,7 @@ export const controllerAluno = {
                 }
 
             } else {
-                query = "SELECT id, nome FROM aluno WHERE motorista_id = $1"
+                query = "SELECT id, nome FROM aluno WHERE motorista_id = $1 ORDER BY id ASC"
                 valores.push(motoristaId)
                 const { rows } = await database.query(query, valores)
                 if (rows.length < 1) {
