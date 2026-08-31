@@ -1,3 +1,109 @@
-.formulario-login{
+.formulario-login {
     width: 100%;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.formulario-login form {
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.formulario-login a {
+    margin-top: 1rem;
+    text-decoration: underline;
+    color: #0D47A1;
+    font-weight: 500;
+    font-family: 'Bree Serif', serif;
+}
+
+.inputEmailCNPJ,
+.inputSenha {
+    position: relative;
+    width: 100%;
+}
+
+.inputEmailCNPJ input,
+.inputSenha input {
+    width: 100%;
+    height: 3.5rem;
+    padding: 0 1rem;
+
+    border: 2px solid #FFC33A;
+    border-radius: 1rem;
+
+    background-color: #FFFFFF;
+
+    color: #263238;
+    font-family: 'Bree Serif', sans-serif;
+    font-size: 1rem;
+    outline: none;
+
+    box-sizing: border-box;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.inputEmailCNPJ label,
+.inputSenha label {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    z-index: 1;
+    padding: 0 0.35rem;
+
+    background-color: #FFFFFF;
+    
+    color: #6B7280;
+    font-family: 'Bree Serif', sans-serif;
+    font-size: 0.95rem;
+
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: top .2s ease, color .2s ease, font-size .2s ease;
+}
+
+.inputEmailCNPJ input:focus,
+.inputSenha input:focus {
+    border-color: #0D47A1;
+    box-shadow: 0 0 0 3px rgb(13 71 161 / 12%);
+}
+
+.inputEmailCNPJ input:focus + label,
+.inputEmailCNPJ input:not(:placeholder-shown) + label,
+.inputEmailCNPJ input:-webkit-autofill + label,
+.inputSenha input:focus + label,
+.inputSenha input:not(:placeholder-shown) + label,
+.inputSenha input:-webkit-autofill + label {
+    top: 0;
+    color: #0D47A1;
+    font-size: 0.75rem;
+}
+
+.entrar{
+    width: 50%;
+    height: 2.5rem;
+    display: flex;
+    flex-direction: column;
+
+    background-color: #0D47A1;
+    border-radius: 10px;
+    border: none;
+    
+    font-family: 'Bree Serif', serif;
+    color: #FFFFFF;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.formulario-login .ou{
+    font-size: 1.4rem;
+    color: #C0C0C0;
+    margin: 2%;
 }

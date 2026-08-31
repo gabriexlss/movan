@@ -1,3 +1,117 @@
-.formulario-cad{
+.formulario-cad {
     width: 100%;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.formulario-cad form {
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.campo-cadastro {
+    position: relative;
+    width: 100%;
+}
+
+.campo-cadastro input {
+    width: 100%;
+    height: 3.5rem;
+    padding: 0 1rem;
+
+    border: 2px solid #0D47A1;
+    border-radius: 1rem;
+    background-color: #FFFFFF;
+
+    color: #263238;
+    font-family: 'Bree Serif', serif;
+    font-size: 1rem;
+    outline: none;
+
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.campo-cadastro label {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    z-index: 1;
+    padding: 0 0.35rem;
+
+    background-color: #FFFFFF;
+    color: #6B7280;
+    font-family: 'Bree Serif', serif;
+    font-size: 0.95rem;
+
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: top .2s ease, color .2s ease, font-size .2s ease;
+}
+
+.campo-cadastro input:focus {
+    border-color: #FFC33A;
+    box-shadow: 0 0 0 3px rgb(255 195 58 / 18%);
+}
+
+.campo-cadastro input:focus + label,
+.campo-cadastro input:not(:placeholder-shown) + label,
+.campo-cadastro input:-webkit-autofill + label {
+    top: 0;
+    color: #0D47A1;
+    font-size: 0.75rem;
+}
+
+.campo-termos {
+    align-self: flex-start;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    color: #6B7280;
+    font-family: 'Bree Serif', serif;
+    font-size: 0.95rem;
+    padding-left: 0.5rem;
+}
+
+.campo-termos input {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.1rem;
+    flex: 0 0 auto;
+    accent-color: #0D47A1;
+}
+
+.campo-termos a {
+    color: #0D47A1;
+    font-weight: 500;
+}
+
+.cadastrar {
+    width: 50%;
+    min-height: 2.75rem;
+
+    display: grid;
+    place-items: center;
+
+    border: none;
+    border-radius: 10px;
+    background-color: #0D47A1;
+
+    color: #FFFFFF;
+    font-family: 'Bree Serif', serif;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.formulario-cad .ou {
+    margin: 2%;
+    color: #C0C0C0;
+    font-size: 1.4rem;
 }
