@@ -1,7 +1,6 @@
-import React from 'react'
 import './LogCad-header.css'
 
-const LogCadHeader = ({modo}) => {
+const LogCadHeader = ({ modo }) => {
     return (
         <div className={`LogCad-header-container ${modo}`}>
             <h1 className="titulo-header">MO<span className={`titulo-header2 ${modo}`}>VAN</span></h1>

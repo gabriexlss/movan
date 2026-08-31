@@ -9,11 +9,12 @@ import './LogCad-layout.css'
 const LogCadLayout = () => {
     const { pathname } = useLocation()
     const modo = pathname === '/cadastro' ? 'cadastro' : 'login'
+    const telaPrincipal = pathname === '/login' || pathname === '/cadastro'
 
     return (
         <div className={`logcad-layout ${modo}`}>
             <LogCadHeader modo={modo} />
-            <LogCadToggleSwitch />
+            {telaPrincipal && <LogCadToggleSwitch />}
 
             <div className="logcad-conteudo">
                 <Outlet />
