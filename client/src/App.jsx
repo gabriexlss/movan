@@ -21,7 +21,6 @@ function App() {
     '/login',
     '/cadastro',
     '/cadastro-google',
-    '/recSenha',
     '/recuperar-senha',
     '/codigo-enviado',
     '/redefinir-senha'
