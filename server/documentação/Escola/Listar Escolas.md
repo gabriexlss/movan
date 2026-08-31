@@ -2,7 +2,7 @@ Endpoint autenticado para listar, de forma resumida, as escolas vinculadas ao mo
 
 ## Rota URL
 
-- Rota: `/escola/dados`
+- Rota: `/escola`
 - Tipo: `GET`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 

@@ -2,7 +2,7 @@ Endpoint autenticado para cadastrar um responsável vinculado ao motorista logad
 
 ## Rota URL
 
-- Rota: `/responsavel/criar`
+- Rota: `/responsavel`
 - Tipo: `POST`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -63,4 +63,5 @@ Os campos `cpf` e `tel` devem ser enviados sem máscara.
 - `400`: Dados ausentes ou inválidos.
 - `401`: Cookie de autenticação ausente ou inválido.
 - `404`: Motorista da sessão não encontrado ou com exclusão agendada.
+- `409`: Já existe um responsável cadastrado com o CPF informado.
 - `500`: Erro interno no servidor.

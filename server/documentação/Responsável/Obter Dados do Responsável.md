@@ -2,7 +2,7 @@ Endpoint autenticado para obter todos os dados de um responsável específico vi
 
 ## Rota URL
 
-- Rota: `/responsavel/dados/:id`
+- Rota: `/responsavel/:id`
 - Tipo: `GET`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -19,7 +19,7 @@ Endpoint autenticado para obter todos os dados de um responsável específico vi
 #### Exemplo
 
 ```text
-GET /responsavel/dados/1
+GET /responsavel/1
 ```
 
 ## Respostas

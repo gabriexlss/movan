@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { CriarEscolaSchema, DeletarEscolaSchema, EditarEscolaSchema, ObterEscolaSchema } from "../models/escola.model.js";
+import { CriarEscolaSchema, EditarEscolaSchema } from "../models/escola.model.js";
 import { database } from "../db/postgre.js";
+import { ParamsSchema } from "../models/utils.model.js";
 
 export const controllerEscola = {
     // controller para criar uma nova escola
@@ -18,15 +19,15 @@ export const controllerEscola = {
             })
         }
         // realizar desestruturação dos dados
-        const { nome, endereco, tel, hora_abertura, hora_fechamento, latitude, longitude } = dadosBrutos.data
+        const { nome, endereco, tel, latitude, longitude } = dadosBrutos.data
 
         // realizando a operação
         try {
             const query = `INSERT INTO escola 
-            (nome, endereco, tel, hora_abertura, hora_fechamento, latitude, longitude, motorista_id) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            (nome, endereco, tel, latitude, longitude, motorista_id) 
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *`
-            const valores = [nome, endereco, tel, hora_abertura, hora_fechamento, latitude, longitude, motoristaId]
+            const valores = [nome, endereco, tel, latitude, longitude, motoristaId]
 
             const escola = await database.query(query, valores)
 
@@ -47,7 +48,17 @@ export const controllerEscola = {
         // dados esperados: id. dados opcionais: nome, endereço, telefone, hora abertura e hora fechamento, latitude e longitude
         const dadosBrutos = EditarEscolaSchema.safeParse(req.body)
 
-        // validação dos dados
+        // pegando ID da escola dos parametros
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        //Validação dos dados
+        if(!idBruto.success){
+            return res.status(400).json({
+                msg: "ID Inválido ou Ausente para editar escola.",
+                erro: idBruto.error.format()
+            })
+        }
+
         if (!dadosBrutos.success) {
             return res.status(400).json({
                 msg: "Dados Inválidos para editar a escola.",
@@ -55,7 +66,8 @@ export const controllerEscola = {
             })
         }
         // desestruturação dos dados
-        const { id, nome, endereco, tel, hora_abertura, hora_fechamento, latitude, longitude } = dadosBrutos.data
+        const { id } = idBruto.data
+        const { nome, endereco, tel, latitude, longitude } = dadosBrutos.data
 
         // iniciando arrays para guardar os dados recebidos.
         const campos: string[] = []
@@ -79,19 +91,11 @@ export const controllerEscola = {
             campos.push(`tel = $${valores.length + 1}`)
             valores.push(tel)
         }
-        if (hora_abertura) {
-            campos.push(`hora_abertura = $${valores.length + 1}`)
-            valores.push(hora_abertura)
-        }
-        if (hora_fechamento) {
-            campos.push(`hora_fechamento = $${valores.length + 1}`)
-            valores.push(hora_fechamento)
-        }
-        if (latitude) {
+        if (latitude !== undefined) {
             campos.push(`latitude = $${valores.length + 1}`)
             valores.push(latitude)
         }
-        if (longitude) {
+        if (longitude !== undefined) {
             campos.push(`longitude = $${valores.length + 1}`)
             valores.push(longitude)
         }
@@ -136,7 +140,7 @@ export const controllerEscola = {
         // pegando id do motorista do middleware de autenticação
         const motoristaId = req.userId
         // dados esperados: id
-        const dadosBrutos = DeletarEscolaSchema.safeParse(req.params)
+        const dadosBrutos = ParamsSchema.safeParse(req.params)
 
         // validação dos dados (sendo o unico dado o id kkkk)
         if (!dadosBrutos.success) {
@@ -175,7 +179,7 @@ export const controllerEscola = {
         // pegando motoristaId do middleware.
         const motoristaId = req.userId
         // dados esperados: id, opcional
-        const dadosBrutos = ObterEscolaSchema.safeParse(req.params)
+        const dadosBrutos = ParamsSchema.partial().safeParse(req.params)
 
         // validação do id
         if (!dadosBrutos.success) {
@@ -205,7 +209,7 @@ export const controllerEscola = {
                 }
 
             } else {
-                query = "SELECT id, nome FROM escola WHERE motorista_id = $1"
+                query = "SELECT id, nome FROM escola WHERE motorista_id = $1 ORDER BY id ASC"
                 valores.push(motoristaId)
                 const { rows } = await database.query(query, valores)
                 if (rows.length < 1) {

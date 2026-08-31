@@ -2,7 +2,7 @@ Endpoint autenticado para cadastrar uma escola vinculada ao motorista logado.
 
 ## Rota URL
 
-- Rota: `/escola/criar`
+- Rota: `/escola`
 - Tipo: `POST`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -17,8 +17,6 @@ Endpoint autenticado para cadastrar uma escola vinculada ao motorista logado.
 - `nome`: String entre 1 e 200 caracteres.
 - `endereco`: String entre 5 e 255 caracteres.
 - `tel`: String com exatamente 11 dígitos.
-- `hora_abertura`: String com um horário ISO válido.
-- `hora_fechamento`: String com um horário ISO válido.
 - `latitude`: Número entre -90 e 90.
 - `longitude`: Número entre -180 e 180.
 
@@ -31,8 +29,6 @@ O campo `tel` deve ser enviado sem máscara. Todos os campos são obrigatórios.
   "nome": "Escola Caminhos do Saber",
   "endereco": "Rua das Flores, 123",
   "tel": "11987654321",
-  "hora_abertura": "07:00:00",
-  "hora_fechamento": "18:00:00",
   "latitude": -23.55052,
   "longitude": -46.633308
 }
@@ -54,8 +50,6 @@ O campo `tel` deve ser enviado sem máscara. Todos os campos são obrigatórios.
     "nome": "Escola Caminhos do Saber",
     "endereco": "Rua das Flores, 123",
     "tel": "11987654321",
-    "hora_abertura": "07:00:00",
-    "hora_fechamento": "18:00:00",
     "latitude": -23.55052,
     "longitude": -46.633308,
     "motorista_id": 7

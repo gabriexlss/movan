@@ -2,7 +2,7 @@ Endpoint autenticado para editar os dados de um responsável vinculado ao motori
 
 ## Rota URL
 
-- Rota: `/responsavel/editar`
+- Rota: `/responsavel/:id`
 - Tipo: `PATCH`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -12,22 +12,29 @@ Endpoint autenticado para editar os dados de um responsável vinculado ao motori
 
 - `token`: String (JWT da sessão).
 
+### Parâmetro de rota
+
+- `id`: Número inteiro positivo que identifica o responsável.
+
 ### Corpo (Body)
 
-- `id`: Número positivo que identifica o responsável (obrigatório).
-- `cpf`: String com exatamente 11 dígitos e um CPF válido (opcional).
 - `nome`: String entre 5 e 200 caracteres (opcional).
 - `endereco`: String entre 10 e 255 caracteres (opcional).
 - `tel`: String com exatamente 11 dígitos (opcional).
 - `email`: E-mail válido entre 5 e 150 caracteres (opcional).
 
-Além do `id`, é necessário enviar pelo menos um campo para edição.
+É necessário enviar pelo menos um campo para edição. O CPF não pode ser alterado por este endpoint.
 
-#### Exemplo
+#### Exemplo de rota
+
+```text
+PATCH /responsavel/1
+```
+
+#### Exemplo de corpo
 
 ```json
 {
-  "id": 1,
   "nome": "Maria Oliveira da Silva"
 }
 ```

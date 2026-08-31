@@ -1,8 +1,8 @@
-Endpoint autenticado para excluir uma escola vinculada ao motorista logado.
+Endpoint autenticado para excluir um aluno vinculado ao motorista logado.
 
 ## Rota URL
 
-- Rota: `/escola/:id`
+- Rota: `/aluno/:id`
 - Tipo: `DELETE`
 - Nota: rota protegida. É necessário enviar o cookie `token` de autenticação.
 
@@ -14,12 +14,12 @@ Endpoint autenticado para excluir uma escola vinculada ao motorista logado.
 
 ### Parâmetro de rota
 
-- `id`: Número inteiro positivo que identifica a escola.
+- `id`: Número inteiro positivo que identifica o aluno.
 
 #### Exemplo
 
 ```text
-DELETE /escola/1
+DELETE /aluno/8
 ```
 
 ## Respostas
@@ -31,24 +31,24 @@ DELETE /escola/1
 
 ```json
 {
-  "msg": "Escola Excluida com sucesso."
+  "msg": "Aluno Excluido com sucesso."
 }
 ```
 
-Somente uma escola vinculada ao motorista autenticado pode ser excluída. Quando o `id` não existe ou pertence a outro motorista, o endpoint responde com `404`.
+Somente um aluno vinculado ao motorista autenticado pode ser excluído.
 
-#### Exemplo de escola não encontrada
+#### Exemplo de aluno não encontrado
 
 ```json
 {
-  "msg": "Nenhuma Escola Encontrada."
+  "msg": "Nenhum aluno Encontrado."
 }
 ```
 
 ## Status
 
-- `200`: Escola excluída com sucesso.
+- `200`: Aluno excluído com sucesso.
 - `400`: `id` ausente, não numérico, igual a zero ou negativo.
 - `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Escola não encontrada para o motorista autenticado, motorista da sessão não encontrado ou com exclusão agendada.
+- `404`: Aluno ou motorista da sessão não encontrado; também pode indicar uma conta com exclusão agendada.
 - `500`: Erro interno no servidor.
