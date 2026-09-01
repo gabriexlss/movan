@@ -2,17 +2,23 @@ import { z } from "zod"
 
 export const UtilSchema = z.object({
     latitude: z
-        .number()
-        .min(-90, "Latitude mínima da terra é -90")
-        .max(90, "Latitude máxima da terra é 90"),
+        .number("Latitude deve ser um número.")
+        .min(-90, "Latitude deve ser maior ou igual a -90.")
+        .max(90, "Latitude deve ser menor ou igual a 90."),
 
     longitude: z
-        .number()
-        .min(-180, "Longitude mínima da terra é -180")
-        .max(180, "Longitude máxima da terra é 180"),
+        .number("Longitude deve ser um número.")
+        .min(-180, "Longitude deve ser maior ou igual a -180.")
+        .max(180, "Longitude deve ser menor ou igual a 180."),
 
-    id: z.number("id tem que ser um número").int("id tem que ser um número inteiro").positive("id tem que ser um numero positivo")
+    id: z
+        .number("ID deve ser um número.")
+        .int("ID deve ser um número inteiro.")
+        .positive("ID deve ser positivo.")
 });
 export const ParamsSchema = z.object({
-    id: z.coerce.number("o parametro tem que ser um número").int("o parametro tem que ser um numero inteiro").positive("o parametro tem que ser um numero positivo")
+    id: z.coerce
+        .number("ID deve ser um número.")
+        .int("ID deve ser um número inteiro.")
+        .positive("ID deve ser positivo.")
 })

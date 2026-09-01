@@ -48,7 +48,7 @@ PATCH /responsavel/1
 
 ```json
 {
-  "msg": "Responsavel Editado com Sucesso."
+  "msg": "Responsável editado com sucesso."
 }
 ```
 
@@ -58,7 +58,7 @@ Somente um responsável vinculado ao motorista autenticado pode ser alterado. Qu
 
 ```json
 {
-  "msg": "Nenhum Responsável encontrado."
+  "msg": "Responsável não encontrado."
 }
 ```
 
@@ -66,6 +66,7 @@ Somente um responsável vinculado ao motorista autenticado pode ser alterado. Qu
 
 - `200`: Responsável editado com sucesso.
 - `400`: `id` ausente, dados inválidos ou nenhum campo informado para edição.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Responsável não encontrado para o motorista autenticado, motorista da sessão não encontrado ou com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
+- `404`: Responsável não encontrado para o motorista autenticado.
+- `413`: Corpo da requisição excede o limite aceito pela API.
 - `500`: Erro interno no servidor.

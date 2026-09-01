@@ -14,7 +14,7 @@ Endpoint autenticado para obter todos os dados de um responsável específico vi
 
 ### Parâmetro de rota
 
-- `id`: Número positivo que identifica o responsável.
+- `id`: Número inteiro positivo que identifica o responsável.
 
 #### Exemplo
 
@@ -32,7 +32,7 @@ GET /responsavel/1
 {
   "responsavel": {
     "id": 1,
-    "cpf": "12345678901",
+    "cpf": "52998224725",
     "nome": "Maria da Silva",
     "endereco": "Rua das Flores, 123",
     "tel": "11987654321",
@@ -48,7 +48,7 @@ Somente os dados de um responsável vinculado ao motorista autenticado são cons
 
 ```json
 {
-  "msg": "Nenhum Respnsável Encontrado."
+  "msg": "Responsável não encontrado."
 }
 ```
 
@@ -56,6 +56,6 @@ Somente os dados de um responsável vinculado ao motorista autenticado são cons
 
 - `200`: Responsável encontrado e retornado com sucesso.
 - `400`: `id` ausente, não numérico, igual a zero ou negativo.
-- `401`: Cookie de autenticação ausente ou inválido.
-- `404`: Responsável não encontrado para o motorista autenticado, motorista da sessão não encontrado ou com exclusão agendada.
+- `401`: Sessão ausente ou inválida, inclusive quando o motorista da sessão não existe mais ou está com exclusão agendada.
+- `404`: Responsável não encontrado para o motorista autenticado.
 - `500`: Erro interno no servidor.
