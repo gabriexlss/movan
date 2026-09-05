@@ -11,7 +11,7 @@ const api = axios.create({
     timeout: 8000, //tempo limite se passar de 8 segundos é porque algo esta errado
     withCredentials: true, //para mandar o cookie de autenticação junto com a requisição (obrigatório para usar cokies httpOnly)
     headers: {
-        'Content-Type': 'application/json', //ele so aceita dados com formato json, se for outro formato ele da erro
+        'Content-Type': 'application/json', //define o formato dos dados enviados para ser apenas JSON
     },
 })
 
@@ -22,32 +22,31 @@ const api = axios.create({
 //===========================
 api.interceptors.response.use(
     (response) => {
-        return response, //se o response tiver ok ele manda a resposta sem erro
+        return response, //retorna respostas bem-sucedidas
         (error) => {
             if (error.code === 'ECONNABORTED') {
                 toast.error('Tempo de requisição esgotado. Tente novamente mais tarde.'); //caso o tempo passe de 8 segundos manda um aviso com o erro
             }else if (!error.response){
-                toast.error('Não foi possivel realizar conexão com o servidor. Verifique sua conexão com a internet ou tente novamente mais tarde.'); // caso o servidor não tenha conseguido mandar uma resposta, avisa esse erro
+                toast.error('Não foi possivel realizar conexão com o servidor. Verifique sua conexão com a internet ou tente novamente mais tarde.'); //informa que não houve resposta do servidor
             }else if (error.response.status === 500) {
-                toast.error('Erro interno do servidor. Tente novamente mais tarde.'); //caso o servidor tenha dado erro interno
+                toast.error('Erro interno do servidor. Tente novamente mais tarde.'); //informa um erro interno do servidor
             }else if (error.response.status === 404) {
-                toast.error('Recurso não encontrado.'); //caso o recurso não seja encontrado
+                toast.error('Recurso não encontrado.'); //informa que o recurso não existe
             }else if (error.response.status === 403) {
-                toast.error('Acesso negado. Você não tem permissão para acessar este recurso.'); //caso o usuário não tenha permissão para acessar o recurso
+                toast.error('Acesso negado. Você não tem permissão para acessar este recurso.'); //informa que o acesso foi negado
             }else if (error.response.status === 401) {
-                toast.error('Não autorizado. Faça login para acessar este recurso.'); //caso o usuário não esteja logado
+                toast.error('Não autorizado. Faça login para acessar este recurso.'); //informa que a autenticação é necessária
 
                 if (window.location.pathname !== '/login') {
-                    window.location.href = '/login'; //redireciona para a tela de login ja que o servidor deu não autorizado
+                    window.location.href = '/login'; //redireciona o usuário para a tela de login
                 }
 
             }else if (error.response.status === 400) {
                 const mensagemBackend = error.response.data?.message || 'Dados inválidos enviados ao servidor.';
-                toast.error(`Requisição inválida. ${mensagemBackend}`); //caso o usuário tenha enviado dados inválidos além de falar o erro que de validação do enviado pelo backend (geralmente ocorre quando o backend fala que os dados não estão de acordo)
+                toast.error(`Requisição inválida. ${mensagemBackend}`); //informa que os dados enviados são inválidos, além de mostrar a mensagem do backend caso exista
             }
 
-            return Promise.reject(error); //retorna o erro para que possa ser tratado em outro lugar
-        }
+            return Promise.reject(error); //exporta para tratar o erro em outro lugar caso necessario
     }
 );
 
