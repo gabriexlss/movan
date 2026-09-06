@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { validarCodigoSchema } from './codigo_verificacao.js'
+import { UtilSchema } from './utils.model.js';
 
 // Modelo global pro motorista (usuario)
 const MotoristaSchema = z.object({
-    id: z.number("Não é um Numero Válido").int().positive(),
+    id: UtilSchema.shape.id,
     cnpj: z.string("Não é uma String").length(14, "CNPJ Invalido"),
     email: z.string("Não é uma String").min(3, "Email muito curto").max(150, "Email Muito Longo").email("Email Invalido"),
     nome: z.string("Não é uma String").min(3, "Nome muito Curto").max(200, "Nome muito Longo"),
