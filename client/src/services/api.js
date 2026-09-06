@@ -22,8 +22,9 @@ const api = axios.create({
 //===========================
 api.interceptors.response.use(
     (response) => {
-        return response, //retorna respostas bem-sucedidas
-        (error) => {
+        return response
+    },
+    (error) => {
             if (error.code === 'ECONNABORTED') {
                 toast.error('Tempo de requisição esgotado. Tente novamente mais tarde.'); //caso o tempo passe de 8 segundos manda um aviso com o erro
             }else if (!error.response){
@@ -35,12 +36,7 @@ api.interceptors.response.use(
             }else if (error.response.status === 403) {
                 toast.error('Acesso negado. Você não tem permissão para acessar este recurso.'); //informa que o acesso foi negado
             }else if (error.response.status === 401) {
-                toast.error('Não autorizado. Faça login para acessar este recurso.'); //informa que a autenticação é necessária
-
-                if (window.location.pathname !== '/login') {
-                    window.location.href = '/login'; //redireciona o usuário para a tela de login
-                }
-
+                window.dispatchEvent(new Event('auth:expired'));
             }else if (error.response.status === 400) {
                 const mensagemBackend = error.response.data?.message || 'Dados inválidos enviados ao servidor.';
                 toast.error(`Requisição inválida. ${mensagemBackend}`); //informa que os dados enviados são inválidos, além de mostrar a mensagem do backend caso exista

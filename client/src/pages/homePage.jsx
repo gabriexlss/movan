@@ -1,5 +1,3 @@
-import React from 'react'
-
 import CardHorarios from '../components/cards/CardHorarios'
 import CardRotas from '../components/cards/CardRotas'
 import CardMensali from '../components/cards/CardMensali'

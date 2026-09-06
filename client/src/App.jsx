@@ -12,6 +12,8 @@ import RecuperarSenha from './pages/login-cad/auth-screens/RecuperarSenha'
 import CodigoEnviado from './pages/login-cad/auth-screens/CodigoEnviado'
 import RedefinirSenha from './pages/login-cad/auth-screens/RedefinirSenha'
 import LogCadLayout from './pages/login-cad/layout-LogCad/LogCad-layout'
+import ProtectedRoute from './components/auth/ProtectedRoute'
+import PublicRoute from './components/auth/PublicRoute'
 
 function App() {
 
@@ -34,10 +36,17 @@ function App() {
         {!logCad && <TituloTela title="Olá, Motorista!" />}
 
         <Routes>
-            <Route path='/' element={<HomePage />} />
+            <Route element={<ProtectedRoute />}>
+                <Route path='/' element={<HomePage />} />
+            </Route>
+
+            <Route element={<PublicRoute />}>
+                <Route element={<LogCadLayout />}>
+                    <Route path='/login' element={<Login />} />
+                </Route>
+            </Route>
 
             <Route element={<LogCadLayout />}>
-                <Route path='/login' element={<Login />} />
                 <Route path='/cadastro' element={<Cad />} />
                 <Route path='/cadastro-google' element={<CadGoogle />} />
                 <Route path='/recuperar-senha' element={<RecuperarSenha />} />
