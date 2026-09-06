@@ -1,28 +1,40 @@
 Endpoint autenticado para vincular a conta do Google à conta do motorista atualmente logado.
+
 ## Rota URL
+
 - Rota: /motorista/google/vincular
 - Tipo: POST
-- *Nota: Rota protegida. Necessário o cookie `token` de autenticação.*
+- _Nota: Rota protegida. Necessário o cookie `token` de autenticação._
+
 ## Dados Esperados
+
 - **Cabeçalho (Cookie)**:
   - `token`: String (JWT da sessão)
 - **Corpo (Body)**:
   - "token": String, ID Token JWT fornecido pelo SDK do Google
+
 #### Exemplo
-``` JSON
+
+```JSON
 {
   "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6..."
 }
 ```
+
 ## Respostas
+
 - "msg": mensagem informando o resultado da vinculação.
+
 #### Exemplo
-``` JSON
+
+```JSON
 {
   "msg": "Conta vinculada ao google com sucesso."
 }
 ```
+
 ## Status
+
 - 200: Conta vinculada ao Google com sucesso
 - 400: Token do Google ausente ou inválido no corpo da requisição
 - 401: Token JWT de sessão ausente/inválido OU token do Google inválido/expirado

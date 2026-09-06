@@ -1,22 +1,32 @@
 Endpoint público para solicitar o envio do código de recuperação de senha por e-mail.
+
 ## Rota URL
+
 - Rota: /motorista/recuperar-conta/enviar-codigo
 - Tipo: POST
-- *Nota: Endpoint público, não exige cookies de autenticação.*
+- _Nota: Endpoint público, não exige cookies de autenticação._
+
 ## Dados Esperados
+
 - **Corpo (Body)**:
   - "email": String, formato de e-mail, mínimo de 3 e máximo de 150 caracteres
+
 #### Exemplo
-``` JSON
+
+```JSON
 {
   "email": "renetheo@gmail.com"
 }
 ```
+
 ## Respostas
+
 - "msg": mensagem que descreve o resultado da solicitação. Exemplo: "Código de recuperação enviado com sucesso."
 - "erro": objeto retornado quando a validação dos dados falha; indica os erros de cada campo.
+
 #### Exemplo (Erro de Validação)
-``` JSON
+
+```JSON
 {
     "msg": "Dados inválidos para recuperação de senha.",
     "erro": {
@@ -29,7 +39,9 @@ Endpoint público para solicitar o envio do código de recuperação de senha po
     }
 }
 ```
+
 ## Status
+
 - 200: Código de recuperação enviado com sucesso.
 - 400: Dados inválidos ou e-mail em formato incorreto.
 - 404: Nenhuma conta encontrada com o e-mail informado.

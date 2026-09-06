@@ -1,24 +1,34 @@
 Endpoint referente à verificação da conta do motorista por meio do código enviado ao e-mail.
+
 ## Rota URL
+
 - Rota: /motorista/verificar-conta
 - Tipo: POST
-- *Nota: Rota protegida. Necessário o cookie `token` de autenticação.*
+- _Nota: Rota protegida. Necessário o cookie `token` de autenticação._
+
 ## Dados Esperados
+
 - **Corpo (Body)**:
   - "cod": String, exatamente 6 dígitos
 - **Cabeçalho (Cookie)**:
   - `token`: String (JWT da sessão)
+
 #### Exemplo
-``` JSON
+
+```JSON
 {
   "cod": "123456"
 }
 ```
+
 ## Respostas
+
 - "msg": mensagem que descreve o resultado da solicitação. Exemplo: "Conta verificada com sucesso."
 - "erro": objeto retornado quando a validação dos dados falha; indica os erros de cada campo.
+
 #### Exemplo (Erro de Validação)
-``` JSON
+
+```JSON
 {
     "msg": "Dados inválidos para verificar a conta.",
     "erro": {
@@ -31,7 +41,9 @@ Endpoint referente à verificação da conta do motorista por meio do código en
     }
 }
 ```
+
 ## Status
+
 - 200: Conta verificada com sucesso.
 - 400: Dados da requisição ou código inválidos.
 - 401: Token de autenticação ausente ou inválido.

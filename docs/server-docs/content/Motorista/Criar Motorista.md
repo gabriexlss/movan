@@ -1,14 +1,20 @@
 Endpoint para criar uma conta de motorista.
+
 ## Rota URL
+
 - Rota: /motorista
 - Tipo: POST
+
 ## Dados Esperados
+
 - "nome": String, máximo de 200 e minimo de 3
-- "cnpj": String, 14 caracteres(sem máscara. apenas números) 
+- "cnpj": String, 14 caracteres(sem máscara. apenas números)
 - "senha": String, máximo de 100
 - "email": String, Formato de Email, minimo de 3 e máximo de 150
+
 #### Exemplo
-``` JSON
+
+```JSON
 {
 "nome": "rene",
 "cnpj": "12345678901234",
@@ -16,11 +22,15 @@ Endpoint para criar uma conta de motorista.
 "senha": "03082007"
 }
 ```
+
 ## Respostas
+
 - "msg": mensagem que descreve o resultado da solicitação. Exemplo: "Conta criada com sucesso."
 - "erro": objeto retornado quando a validação dos dados falha; indica os erros de cada campo.
+
 #### Exemplo
-``` JSON
+
+```JSON
 {
     "msg": "Dados inválidos para criar a conta.",
     "erro": {
@@ -33,7 +43,9 @@ Endpoint para criar uma conta de motorista.
     }
 }
 ```
+
 ## Status
+
 - 201: Conta criada com sucesso.
 - 400: Dados ausentes ou inválidos.
 - 409: E-mail ou CNPJ já cadastrado.
