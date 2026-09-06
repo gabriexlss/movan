@@ -1,6 +1,6 @@
 Endpoint para criar uma conta de motorista.
 ## Rota URL
-- Rota: /motorista/criar
+- Rota: /motorista
 - Tipo: POST
 ## Dados Esperados
 - "nome": String, máximo de 200 e minimo de 3
