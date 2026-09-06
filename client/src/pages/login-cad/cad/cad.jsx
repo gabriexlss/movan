@@ -5,6 +5,7 @@ import api from '../../../services/api'
 import './cad.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
+import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const Cad = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
@@ -143,7 +144,7 @@ const Cad = () => {
                 </div>
 
                 <button className="cadastrar" type="submit" disabled={enviando}>
-                    {enviando ? 'Cadastrando...' : 'Cadastrar'}
+                    {enviando ? <LoadingSpinner /> : 'Cadastrar'}
                 </button>
             </form>
 

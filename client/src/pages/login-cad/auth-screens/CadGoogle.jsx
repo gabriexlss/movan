@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
 import { useAuth } from '../../../context/useAuth'
 import './AuthScreens.css'
+import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const CadGoogle = () => {
     const navigate = useNavigate() //me deixa mandar o usuario para outra pagina
@@ -121,7 +122,7 @@ const CadGoogle = () => {
                 </div>
 
                 <button className="auth-screens__botao" type="submit" disabled={enviando}>
-                    {enviando ? 'Cadastrando...' : 'Cadastrar'}
+                    {enviando ? <LoadingSpinner /> : 'Cadastrar'}
                 </button>
             </form>
         </section>

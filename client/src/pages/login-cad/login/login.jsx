@@ -7,6 +7,7 @@ import { useAuth } from '../../../context/useAuth';
 import './login.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle';
+import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const Login = () => {
     //=======================
@@ -63,7 +64,7 @@ const Login = () => {
                     <label htmlFor="senha">Senha</label>
                 </div>
                 <button className="entrar" type="submit" disabled={enviando}>
-                    {enviando ? 'Entrando...' : 'Entrar'}
+                    {enviando ? <LoadingSpinner /> : 'Entrar'}
                 </button>
             </form>
 

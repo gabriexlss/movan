@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
 import './AuthScreens.css'
+import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const RecuperarSenha = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
@@ -60,7 +61,7 @@ const RecuperarSenha = () => {
                 </div>
 
                 <button className="auth-screens__botao" type="submit" disabled={enviando}>
-                    {enviando ? 'Enviando...' : 'Enviar'}
+                    {enviando ? <LoadingSpinner /> : 'Enviar'}
                 </button>
             </form>
         </section>
