@@ -42,6 +42,11 @@ const Cad = () => {
             sessionStorage.setItem('movan:verificationFlow', 'cadastro') //falo que o fluxo de verificação é de cadastro, porque o usuário acabou de criar a conta
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro' } }) //mando o usuario para a pagina de codigo enviado
         } catch (error) {
+            if (error.response?.status === 409) {
+                toast.error(error.response.data?.msg || 'E-mail ou CNPJ já cadastrado no Movan.')
+                return
+            }
+
             const errosDeCampo = Object.values(error.response?.data?.erro || {}) //pego os erros do backend e transformo eles em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio
                 .flatMap((campo) => campo?._errors || []) //tiro o _errors do campo
             const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível criar sua conta.' //mando a mensagem que tratei do backend, se não tiver mensagem mando uma generica
