@@ -39,7 +39,8 @@ const Cad = () => {
             })
 
             toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma caixa de sucesso com a mensagem do backend, caso não tenha mensagem do backend mando uma mensagem padrão
-            navigate('/codigo-enviado', { replace: true }) //mando o usuario para a pagina de codigo enviado
+            sessionStorage.setItem('movan:verificationFlow', 'cadastro') //falo que o fluxo de verificação é de cadastro, porque o usuário acabou de criar a conta
+            navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro' } }) //mando o usuario para a pagina de codigo enviado
         } catch (error) {
             const errosDeCampo = Object.values(error.response?.data?.erro || {}) //pego os erros do backend e transformo eles em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio
                 .flatMap((campo) => campo?._errors || []) //tiro o _errors do campo

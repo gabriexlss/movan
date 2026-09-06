@@ -25,6 +25,10 @@ api.interceptors.response.use(
         return response
     },
     (error) => {
+            if (error.config?.skipGlobalErrorToast) { //(esqueci de comentar) se essa variavel for true ele não mostra nenhum toast
+                return Promise.reject(error)
+            }
+
             if (error.code === 'ECONNABORTED') {
                 toast.error('Tempo de requisição esgotado. Tente novamente mais tarde.'); //caso o tempo passe de 8 segundos manda um aviso com o erro
             }else if (!error.response){

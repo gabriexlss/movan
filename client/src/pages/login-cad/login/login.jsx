@@ -62,8 +62,8 @@ const Login = () => {
                     />
                     <label htmlFor="senha">Senha</label>
                 </div>
-                <button className="entrar" type="submit" disabled={enviando}> //ele desliga o botão até a requisição de login terminar
-                    {enviando ? 'Entrando...' : 'Entrar'} //quando o botão estiver desativado mostra entrando caso não esteja mostra entrar mesmo (caso ache que ficou feio é so deixar entrar apenas)
+                <button className="entrar" type="submit" disabled={enviando}>
+                    {enviando ? 'Entrando...' : 'Entrar'}
                 </button>
             </form>
 

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { AuthContext } from './auth-context'
 
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate() //isso mandar para outra pagina
+    const { pathname } = useLocation() //guarda o caminho da pagina atual do usuario
     const [user, setUser] = useState(null)//essa variavel define se o usuario esta logado, alem de guardar as informações dele caso esteja logado
     const [isLoading, setIsLoading] = useState(true)//esse is loading fala que ta carregando
 
@@ -16,11 +17,7 @@ export const AuthProvider = ({ children }) => {
             const response = await api.get('/motorista')//pega as informacoes do usuario logado
             setUser(response.data.motorista)//coloco as informações do usuario na variavel
         } catch (error) {
-            if (error.response?.status === 403) { //se ele falar que o usuario nao é permitido (provavelmente porque a sessão expirou) ele vai setar user como um array vazio
-                setUser({})
-            } else {
-                setUser(null)
-            }
+            setUser(null) //qualquer falha ao carregar a sessão significa que o usuário está deslogado
         } finally {
             setIsLoading(false)
         }
@@ -33,7 +30,16 @@ export const AuthProvider = ({ children }) => {
         const handleSessionExpired = () => { //essa variavel é chamada quando uma sessão expira
             setUser(null)//deixa tudo nulo ou falso 
             setIsLoading(false)
-            if (window.location.pathname !== '/login') { //caso a URL não for login
+            const rotasPublicas = [ //eu listo quais são as rotas que o usuario pode acessar sem login
+                '/login',
+                '/cadastro',
+                '/cadastro-google',
+                '/recuperar-senha',
+                '/codigo-enviado',
+                '/redefinir-senha',
+            ]
+
+            if (!rotasPublicas.includes(pathname)) { //caso a rota atual do usuario não for uma rota publica
                 navigate('/login', { replace: true }) //manda pro login
             }
         }
@@ -45,7 +51,7 @@ export const AuthProvider = ({ children }) => {
             window.clearTimeout(sessionLoader)//tira o timeout de carregar a sessão
             window.removeEventListener('auth:expired', handleSessionExpired)//tira o evento de sessão expirada
         }
-    }, [loadSession, navigate])
+    }, [loadSession, navigate, pathname])
 
 
     //=======================
@@ -71,7 +77,8 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: user !== null, //fala se o usuario esta logado
         login, //função de login
         logout,// função de logout
-    }), [user, isLoading, login, logout])
+        refreshSession: loadSession, //função de carregar a sessão (so que com o nome de atualizar já que o codigo pros dois seria literalmente o mesmo)
+    }), [user, isLoading, login, logout, loadSession])
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider> //devolve as informações caso seja necessario, e devolve os filhos do componente AuthProvider (achei melhor fazer armazenar na memoria com o useMemo porque isso roda literalmente em cada renderização do app, ao guardar em cache ele so roda caso eu troque as informações dele)
 }
