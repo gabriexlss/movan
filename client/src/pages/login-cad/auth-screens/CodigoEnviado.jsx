@@ -125,7 +125,7 @@ const CodigoEnviado = () => {
                         onClick={handleReenviar}
                         disabled={tempoRestante > 0 || reenviando}
                     >
-                        {reenviando ? 'Enviando...' : 'Reenviar código'}
+                        {reenviando ? 'Reenviando...' : 'Reenviar código'}
                     </button>
                     {tempoRestante > 0 && (
                         <span className="auth-screens__tempo">
