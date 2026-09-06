@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await api.get('/motorista')//pega as informacoes do usuario logado
             setUser(response.data.motorista)//coloco as informações do usuario na variavel
-        } catch (error) {
+        } catch {
             setUser(null) //qualquer falha ao carregar a sessão significa que o usuário está deslogado
         } finally {
             setIsLoading(false)
