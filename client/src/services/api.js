@@ -37,7 +37,7 @@ api.interceptors.response.use(
                 toast.error('Acesso negado. Você não tem permissão para acessar este recurso.'); //informa que o acesso foi negado
             }else if (error.response.status === 401) {
                 window.dispatchEvent(new Event('auth:expired'));
-            }else if (error.response.status === 400) {
+            }else if (error.response.status === 400 && !error.config?.skipGlobalErrorToast) {
                 const mensagemBackend = error.response.data?.message || 'Dados inválidos enviados ao servidor.';
                 toast.error(`Requisição inválida. ${mensagemBackend}`); //informa que os dados enviados são inválidos, além de mostrar a mensagem do backend caso exista
             }
