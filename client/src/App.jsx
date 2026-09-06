@@ -14,6 +14,8 @@ import RedefinirSenha from './pages/login-cad/auth-screens/RedefinirSenha'
 import LogCadLayout from './pages/login-cad/layout-LogCad/LogCad-layout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import PublicRoute from './components/auth/PublicRoute'
+import VerificationRoute from './components/auth/VerificationRoute'
+import GoogleSignupRoute from './components/auth/GoogleSignupRoute'
 
 function App() {
 
@@ -42,22 +44,26 @@ function App() {
 
             <Route element={<PublicRoute />}>
                 <Route element={<LogCadLayout />}>
-                    <Route path='/login' element={<Login />} />
+                <Route path='/login' element={<Login />} />
+                <Route path='/cadastro' element={<Cad />} />
+                <Route path='/recuperar-senha' element={<RecuperarSenha />} />
+                <Route element={<GoogleSignupRoute />}>
+                <Route path='/cadastro-google' element={<CadGoogle />} />
+                </Route>
                 </Route>
             </Route>
 
             <Route element={<LogCadLayout />}>
-                <Route path='/cadastro' element={<Cad />} />
-                <Route path='/cadastro-google' element={<CadGoogle />} />
-                <Route path='/recuperar-senha' element={<RecuperarSenha />} />
-                <Route path='/codigo-enviado' element={<CodigoEnviado />} />
-                <Route path='/redefinir-senha' element={<RedefinirSenha />} />
-            </Route>
+                <Route element={<VerificationRoute />}>
+                    <Route path='/codigo-enviado' element={<CodigoEnviado />} />
+                    <Route path='/redefinir-senha' element={<RedefinirSenha />} />
+                </Route>
+                </Route>
         </Routes>
 
         {!logCad && <Footer />}
     </>
-  )
+    )
 }
 
 export default App

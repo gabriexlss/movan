@@ -54,6 +54,11 @@ const CadGoogle = () => {
             toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma mensagem de sucesso do backend caso ela não exista mando uma mensagem generica
             navigate('/', { replace: true }) //mando o usuario para a tela inicial
         } catch (error) {
+            if (error.response?.status === 409) {
+                toast.error(error.response.data?.msg || 'E-mail, CNPJ ou conta Google já cadastrado no Movan.')
+                return
+            }
+
             const errosDeCampo = Object.values(error.response?.data?.erro || {}) //transformo o erro do backend em um array, caso ele não mande nada o array fica vazio
                 .flatMap((campo) => campo?._errors || []) //tiro o _errors de cada campo e coloco tudo em um array só
             const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível criar sua conta Google.' //se o backend mandou algo eu uso, caso não eu mando uma mensagem de erro generica

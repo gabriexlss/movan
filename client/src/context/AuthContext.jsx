@@ -3,18 +3,26 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { AuthContext } from './auth-context'
 
+const rotasPublicas = [
+    '/login',
+    '/cadastro',
+    '/cadastro-google',
+    '/recuperar-senha',
+    '/codigo-enviado',
+    '/redefinir-senha',
+]
+
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate() //isso mandar para outra pagina
     const { pathname } = useLocation() //guarda o caminho da pagina atual do usuario
     const [user, setUser] = useState(null)//essa variavel define se o usuario esta logado, alem de guardar as informações dele caso esteja logado
     const [isLoading, setIsLoading] = useState(true)//esse is loading fala que ta carregando
-
 //=======================
 //CARREGAR SESSÃO
 //=======================
     const loadSession = useCallback(async () => {
         try {
-            const response = await api.get('/motorista')//pega as informacoes do usuario logado
+            const response = await api.get('/motorista', { skipGlobalErrorToast: true })//pega as informacoes do usuario logado
             setUser(response.data.motorista)//coloco as informações do usuario na variavel
         } catch {
             setUser(null) //qualquer falha ao carregar a sessão significa que o usuário está deslogado
@@ -30,14 +38,6 @@ export const AuthProvider = ({ children }) => {
         const handleSessionExpired = () => { //essa variavel é chamada quando uma sessão expira
             setUser(null)//deixa tudo nulo ou falso 
             setIsLoading(false)
-            const rotasPublicas = [ //eu listo quais são as rotas que o usuario pode acessar sem login
-                '/login',
-                '/cadastro',
-                '/cadastro-google',
-                '/recuperar-senha',
-                '/codigo-enviado',
-                '/redefinir-senha',
-            ]
 
             if (!rotasPublicas.includes(pathname)) { //caso a rota atual do usuario não for uma rota publica
                 navigate('/login', { replace: true }) //manda pro login

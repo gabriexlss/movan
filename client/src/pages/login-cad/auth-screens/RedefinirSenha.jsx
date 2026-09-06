@@ -43,6 +43,7 @@ const RedefinirSenha = () => {
             toast.success(response.data?.msg || 'Senha alterada com sucesso.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
             sessionStorage.removeItem('movan:recoveryEmail') //tiro o email do sessionStorage porque o usuário já redefiniu a senha
             sessionStorage.removeItem('movan:recoveryCode') //tiro o código do sessionStorage porque o usuário já redefiniu a senha
+            sessionStorage.removeItem('movan:verificationFlow')
             navigate('/login', { replace: true }) //mando o usuário para a tela de login
         } catch (error) {
             const errosDeCampo = Object.values(error.response?.data?.erro || {}) //transformo o erro do backend em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio

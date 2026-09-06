@@ -21,6 +21,7 @@ const RecuperarSenha = () => {
                 skipGlobalErrorToast: true, //vou tratar o erro aqui então impeço que o toast do api.js seja mostrado
             })
             sessionStorage.setItem('movan:recoveryEmail', email) //guardo o email no sessionStorage porque vou usar na tela de enviar codigo
+            sessionStorage.setItem('movan:verificationFlow', 'recuperacao')//falo que o fluxo agora é de verificação
             toast.success(response.data?.msg || 'Código de recuperação enviado.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
             navigate('/codigo-enviado', { state: { fluxo: 'recuperacao' } }) //mando para a pagina de codigo enviado e falo que o estado de fluxo é de recuperação
         } catch (error) {
