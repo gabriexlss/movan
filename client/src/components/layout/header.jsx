@@ -1,10 +1,7 @@
-import React from 'react'
 import './header.css'
 import { useLayoutEffect, useRef } from 'react'
 
 import useHeaderScroll from '../../hook/useHeaderScroll'
-
-import stain from '../../assets/media/img/header-stain.svg'
 
 const Header = () => {
     const showHeader = useHeaderScroll();
