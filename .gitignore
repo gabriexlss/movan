@@ -1,6 +1,3 @@
-#obsidian
-**/.obsidian/workspace.json
-
 # Logs
 logs
 *.log
@@ -56,3 +53,12 @@ coverage/
 *.sw?
 .DS_Store
 Thumbs.db
+# Obsidian
+**/.obsidian/
+
+# Quartz
+docs/server-docs/public/
+docs/server-docs/.quartz/
+docs/server-docs/.quartz-cache/
+docs/server-docs/.turbo/
+docs/server-docs/prof/
