@@ -194,7 +194,7 @@ export const controllerMotorista = {
             const id = rows[0].id
 
             // enviar o email com o codigo pro usuario
-            const response = await gerarCodigo(email, "criação", id, cliente)
+            const response = await gerarCodigo(email, "CRIACAO", id, cliente)
             if (!response) throw new Error
 
             // se tudo ocorrer bem, manda de volta e confirmo as alterações
@@ -335,7 +335,7 @@ export const controllerMotorista = {
         // pega o tipo de codigo que ele quer enviar por meio dos parametros da rota (ex: /motorista/codigo/criação)
         // temporariamente só aceita criação, então está hardcodado
         // so deixei o codigo aqui pra caso algum dia eu precise.
-        const tipo = "criação"
+        const tipo = "CRIACAO"
 
         // se o tipo não for indicado ou não for nem criação ou recuperação, dá erro de bad request
         if (!tipo) {
@@ -343,7 +343,7 @@ export const controllerMotorista = {
                 msg: "O tipo do código não foi informado."
             })
         }
-        if (tipo !== "criação" && tipo !== "recuperação") {
+        if (tipo !== "CRIACAO" && tipo !== "RECUPERACAO") {
             return res.status(400).json({
                 msg: "Tipo de código inválido."
             })
@@ -438,7 +438,7 @@ export const controllerMotorista = {
                 })
             }
             // se ja chegou aqui, a conta existe e já temos um id de conta, então hora de enviar o código
-            const response = await gerarCodigo(email, "recuperação", id)
+            const response = await gerarCodigo(email, "RECUPERACAO", id)
             if (!response) throw new Error("Não foi possível enviar o código de recuperação.")
 
             // deu tudo certo, só retornar.
@@ -487,7 +487,7 @@ export const controllerMotorista = {
                 })
             }
 
-            const response = await gerarCodigo(email, "edição", id)
+            const response = await gerarCodigo(email, "ALTERACAO", id)
             if (!response) throw new Error("Não foi possível enviar o código de alteração de e-mail.")
 
             return res.status(200).json({
