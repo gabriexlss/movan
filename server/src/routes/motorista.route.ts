@@ -14,7 +14,7 @@ router.delete('/', middlewareAutenticar, controllerMotorista.deletarConta)
 router.patch('/', middlewareAutenticar, middlewareVerificado, controllerMotorista.editarConta)
 
 // rota get para obter todos os dados do motorista
-router.get('/', middlewareAutenticar, middlewareVerificado, controllerMotorista.obterDados)
+router.get('/', middlewareAutenticar, controllerMotorista.obterDados)
 
 // Rota pra logar um motorista
 router.post('/login', controllerMotorista.loginMotorista)
@@ -47,6 +47,6 @@ router.post('/google/vincular', middlewareAutenticar, middlewareVerificado, cont
 router.post('/google/criar', controllerMotorista.criarContaGoogle)
 
 // rota delete para desvincular a conta google da conta do usuario logado.
-router.delete('/google/desvincular', middlewareAutenticar, controllerMotorista.desvincularGoogle)
+router.delete('/google/desvincular', middlewareAutenticar, middlewareVerificado,controllerMotorista.desvincularGoogle)
 
 export default router;
