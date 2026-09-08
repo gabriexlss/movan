@@ -271,15 +271,15 @@ export const controllerMotorista = {
                 msg: "E-mail, CNPJ ou senha inválidos."
             })
         }
-
+        let verificado:boolean
         // Pega o hash de senha e a data de exclusão usando o id do usuario e guarda numa variavel
         try {
-            const query = "SELECT senha, data_exclusao FROM motorista WHERE id = $1"
+            const query = "SELECT senha, data_exclusao, verificado FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
 
             const hashNoBanco = rows[0].senha
             const data_exclusao: Date | null = rows[0].data_exclusao
-
+            verificado = rows[0].verificado
             // Compara a senha digitada pelo usuario com a senha salva no banco de dados e retorna true ou false
             const senhaValida = await bcrypt.compare(senha, hashNoBanco)
 
@@ -309,13 +309,18 @@ export const controllerMotorista = {
         }
         const token = jwt.sign({ id }, segredoJWT, { expiresIn: '30d' })
 
+
+        //cria uma mensagem com base se está verificado ou não.
+        const mensagem = verificado ? "Login Realizado com Sucesso." : "Login Realizado com Sucesso, Mas verificação necessaria para obter os dados."
+
         return res.status(200).cookie('token', token, {
             httpOnly: true,
             secure: process.env['NODE_ENV'] === 'production',
             sameSite: 'strict',
             maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
         }).json({
-            msg: "Login realizado com sucesso."
+            msg: mensagem,
+            verificado
         })
     },
     // Controller para deslogar o motorista
