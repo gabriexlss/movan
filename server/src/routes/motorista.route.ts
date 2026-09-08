@@ -2,6 +2,7 @@ import { Router } from "express";
 const router = Router();
 import { controllerMotorista } from "../controllers/motorista.controller.js"
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
+import { middlewareVerificado } from "../middlewares/verificado.middleware.js";
 
 // Rota pra criar um motorista
 router.post('/', controllerMotorista.criarMotorista)
@@ -10,10 +11,10 @@ router.post('/', controllerMotorista.criarMotorista)
 router.delete('/', middlewareAutenticar, controllerMotorista.deletarConta)
 
 // rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
-router.patch('/', middlewareAutenticar, controllerMotorista.editarConta)
+router.patch('/', middlewareAutenticar, middlewareVerificado, controllerMotorista.editarConta)
 
 // rota get para obter todos os dados do motorista
-router.get('/', middlewareAutenticar, controllerMotorista.obterDados)
+router.get('/', middlewareAutenticar, middlewareVerificado, controllerMotorista.obterDados)
 
 // Rota pra logar um motorista
 router.post('/login', controllerMotorista.loginMotorista)
@@ -34,13 +35,13 @@ router.post('/recuperar-conta/enviar-codigo', controllerMotorista.enviarCodigoRe
 router.post('/recuperar-conta/recuperar', controllerMotorista.recuperarSenha)
 
 // rota para enviar um código ao novo email antes de alterá-lo
-router.post('/editar/enviar-codigo', middlewareAutenticar, controllerMotorista.enviarCodigoEditarEmail)
+router.post('/editar/enviar-codigo', middlewareAutenticar, middlewareVerificado, controllerMotorista.enviarCodigoEditarEmail)
 
 // rota post para autenticar com o google.
 router.post('/google', controllerMotorista.authGoogle)
 
 // rota post para vincular conta existente com o google
-router.post('/google/vincular', middlewareAutenticar, controllerMotorista.vincularGoogle)
+router.post('/google/vincular', middlewareAutenticar, middlewareVerificado, controllerMotorista.vincularGoogle)
 
 // rota post para criar uma conta, usando o google.
 router.post('/google/criar', controllerMotorista.criarContaGoogle)

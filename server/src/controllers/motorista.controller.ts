@@ -460,15 +460,7 @@ export const controllerMotorista = {
     // Rota para enviar um código para o novo email antes de alterá-lo.
     enviarCodigoEditarEmail: async (req: Request, res: Response) => {
         const id = req.userId
-        const verificado = req.verificado
         const dadosBrutos = CodigoEditarEmailSchema.safeParse(req.body)
-
-        // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível alterar o e-mail."
-            })
-        }
 
         // verifica se os dados são validos
         if (!dadosBrutos.success) {
@@ -613,14 +605,7 @@ export const controllerMotorista = {
     editarConta: async (req: Request, res: Response) => {
         // pegando id da requisição como sempre
         const id = req.userId
-        const verificado = req.verificado
-
-        // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível editar os dados."
-            })
-        }
+        
         // tratando os dados usando o mesmo modelo de criação, mas com o metodo partial pra todos os dados virarem opcionais.
         const dadosBrutos = EditarMotoristaSchema.safeParse(req.body)
 
@@ -724,15 +709,7 @@ export const controllerMotorista = {
     obterDados: async (req: Request, res: Response) => {
         // pega o id e o status de verificado do cookie
         const id = req.userId
-        const verificado = req.verificado
 
-        // verifica se a conta dele está verificada, se não, manda embora
-       /* if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível obter os dados."
-            })
-        }
-        */
         // pega os dados do motorista e envia de volta
         try {
             const query = "SELECT id, nome, email, cnpj, data_exclusao, verificado FROM motorista WHERE id = $1"
@@ -846,14 +823,6 @@ export const controllerMotorista = {
     vincularGoogle: async (req: Request, res: Response) => {
         // pega id e verificado do cookie
         const id = req.userId
-        const verificado = req.verificado
-
-        // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível vincular conta google."
-            })
-        }
 
         // dados esperados: token google.
         const dadosBrutos = GoogleTokenSchema.safeParse(req.body)
