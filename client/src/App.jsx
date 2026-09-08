@@ -16,6 +16,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import PublicRoute from './components/auth/PublicRoute'
 import VerificationRoute from './components/auth/VerificationRoute'
 import GoogleSignupRoute from './components/auth/GoogleSignupRoute'
+import ErrorPage from './pages/errorPage'
 
 function App() {
 
@@ -27,7 +28,8 @@ function App() {
     '/cadastro-google',
     '/recuperar-senha',
     '/codigo-enviado',
-    '/redefinir-senha'
+    '/redefinir-senha',
+    '/error'
   ]
 
   const logCad = rotasLogCad.includes(location.pathname)
@@ -38,6 +40,8 @@ function App() {
         {!logCad && <TituloTela title="Olá, Motorista!" />}
 
         <Routes>
+            <Route path='/error' element={<ErrorPage />} />
+
             <Route element={<ProtectedRoute />}>
                 <Route path='/' element={<HomePage />} />
             </Route>

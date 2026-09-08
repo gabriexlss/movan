@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
@@ -13,6 +13,31 @@ const CodigoEnviado = () => {
     const [reenviando, setReenviando] = useState(false) //uso para o codigo saber se ja estou reenviando
     const [tempoRestante, setTempoRestante] = useState(23)
     const fluxo = state?.fluxo || sessionStorage.getItem('movan:verificationFlow') || 'recuperacao' //pego o fluxo do estado ou do sessionStorage, caso não tenha nenhum defino como 'recuperacao'
+    const autoEnvioRealizado = useRef(false)
+
+    const enviarCodigoCadastro = useCallback(async () => {
+        return api.post('/motorista/codigo/CRIACAO', {}, {
+            skipGlobalErrorToast: true,
+        })
+    }, [])
+
+    useEffect(() => {
+        if (fluxo !== 'cadastro' || state?.autoSendVerification !== true || autoEnvioRealizado.current) return
+
+        autoEnvioRealizado.current = true
+        setReenviando(true)
+
+        enviarCodigoCadastro()
+            .then(() => {
+                setTempoRestante(23)
+                toast.success('Código de verificação enviado com sucesso.')
+            })
+            .catch((error) => {
+                const mensagem = error.response?.data?.msg || 'Não foi possível enviar o código.'
+                toast.error(mensagem)
+            })
+            .finally(() => setReenviando(false))
+    }, [enviarCodigoCadastro, fluxo, state?.autoSendVerification])
 
 
     //==========================
@@ -35,14 +60,16 @@ const CodigoEnviado = () => {
 
         try {
             const response = fluxo === 'cadastro' //se o fluxo for de cadastro
-                ? await api.post('/motorista/codigo/criação', {}, { skipGlobalErrorToast: true }) //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
+                ? await enviarCodigoCadastro() //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
                 : await api.post('/motorista/recuperar-conta/enviar-codigo', { //se o fluxo não for cadastro eu mando o codigo ser enviado como um de recuperação de conta
                     email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de recuperar senha e mandei pro backend para ele saber para qual email enviar o codigo
                 }, { skipGlobalErrorToast: true }) //recuso que o toast do api.js seja mostrado, vou tratar o erro aqui
 
             setCodigo('') //limpo o campo de código para o usuário digitar denovo
             setTempoRestante(23) //reinicio o tempo para o usuário poder reenviar denovo caso ele não receba o código
-            toast.success(response.data?.msg || 'Código reenviado com sucesso.')//mando uma mensagem de sucesso do backend caso ela não exista mando uma mensagem generica
+            toast.success(fluxo === 'cadastro'
+                ? 'Código de verificação reenviado com sucesso.'
+                : response.data?.msg || 'Código reenviado com sucesso.')//mando uma mensagem amigável para o cadastro e a mensagem do backend nos demais fluxos
         } catch (error) {
             //trato o erro para ele aparecer bonitinho no toast
             const errosDeCampo = Object.values(error.response?.data?.erro || {})

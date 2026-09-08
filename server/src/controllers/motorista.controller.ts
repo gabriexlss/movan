@@ -99,7 +99,7 @@ const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
     }
 }
 
-const validarCodigo = async (id: number, tipo: "criação" | "recuperação" | "edição", cod: string, email?: string) => {
+const validarCodigo = async (id: number, tipo: "CRIACAO" | "RECUPERACAO" | "ALTERACAO", cod: string, email?: string) => {
     const valores = [id, tipo]
 
     /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
@@ -125,7 +125,7 @@ e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
         const idCodigo: number = rows[0].id
 
         // checa se bate.
-        const codigoParaValidar = tipo === "edição" ? `${cod}:${email}` : cod
+        const codigoParaValidar = tipo === "ALTERACAO" ? `${cod}:${email}` : cod
         const codigoValido = await bcrypt.compare(codigoParaValidar, codigoHash)
 
         // se o codigo não for valido, da um não autorizado pro nosso filhão
@@ -396,7 +396,7 @@ export const controllerMotorista = {
         const { cod } = dadosBrutos.data
 
         try {
-            const idCodigo = await validarCodigo(id, "criação", cod)
+            const idCodigo = await validarCodigo(id, "CRIACAO", cod) //mudei esse nomes porque por algum motivo que nao sei ele tava reclamando disso, já que a norma é nao colocar acento mudei aqui
             if (idCodigo === null) {
                 return res.status(400).json({
                     msg: "Código inválido ou expirado."
@@ -528,7 +528,7 @@ export const controllerMotorista = {
                 })
             }
             // beleza, conta existe, agora verificar código se bate com o banco de dados. 
-            const idCodigo = await validarCodigo(id, "recuperação", cod)
+            const idCodigo = await validarCodigo(id, "RECUPERACAO", cod)
             if (idCodigo === null) {
                 return res.status(400).json({
                     msg: "Código inválido ou expirado."
@@ -649,7 +649,7 @@ export const controllerMotorista = {
                     })
                 }
 
-                const idCodigo = await validarCodigo(id, "edição", cod!, email)
+                const idCodigo = await validarCodigo(id, "ALTERACAO", cod!, email)
                 if (idCodigo === null) {
                     return res.status(400).json({
                         msg: "Código inválido ou expirado."
@@ -727,12 +727,12 @@ export const controllerMotorista = {
         const verificado = req.verificado
 
         // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
+       /* if (!verificado) {
             return res.status(403).json({
                 msg: "Conta não verificada. Não é possível obter os dados."
             })
         }
-
+        */
         // pega os dados do motorista e envia de volta
         try {
             const query = "SELECT id, nome, email, cnpj, data_exclusao, verificado FROM motorista WHERE id = $1"

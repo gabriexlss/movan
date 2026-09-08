@@ -10,6 +10,7 @@ const rotasPublicas = [
     '/recuperar-senha',
     '/codigo-enviado',
     '/redefinir-senha',
+    '/error',
 ]
 
 export const AuthProvider = ({ children }) => {
@@ -22,14 +23,35 @@ export const AuthProvider = ({ children }) => {
 //=======================
     const loadSession = useCallback(async () => {
         try {
+            const health = await api.get('/health', { skipGlobalErrorToast: true }) //verifica se o backend esta online
+            if (health.status !== 200) { //se dar algum erro
+                setUser(null)//deixa o usuario nulo
+                navigate('/error', { replace: true })//manda para a pagina de erro
+                return //paro a execução
+            }
+        } catch {
+            setUser(null)
+            setIsLoading(false)
+            navigate('/error', { replace: true })
+            return
+        }
+
+        try {
             const response = await api.get('/motorista', { skipGlobalErrorToast: true })//pega as informacoes do usuario logado
-            setUser(response.data.motorista)//coloco as informações do usuario na variavel
+            const motorista = response.data.motorista //pega as informacoes do usuario logadoo
+            setUser(motorista) //guarda as informações do usuario logado
+
+            if(motorista.verificado === false){
+                navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //manda para a pagina de codigo enviado caso o usuario não esteja verificado
+            } else {
+                navigate('/', { replace: true }) //manda para a pagina inicial caso o usuario esteja verificado
+            }
         } catch {
             setUser(null) //qualquer falha ao carregar a sessão significa que o usuário está deslogado
         } finally {
             setIsLoading(false)
         }
-    }, [])
+    }, [navigate])
 
 //=======================
 //LIDAR COM SESSÃO EXPIRADA

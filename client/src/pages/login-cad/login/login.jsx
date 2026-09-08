@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../../context/useAuth';
 
@@ -13,7 +12,6 @@ const Login = () => {
     //=======================
     //LOGIN
     //=======================
-    const navigate = useNavigate() //so encurtei pra facilitar minha vida, serve para mandar o usuario para outra pagina
     const { login: authenticate } = useAuth() //pego a função login do authcontext e renomeio ela para authenticate pra não precissar mandar 30 useAuth().login() toda hora
     const [login, setLogin] = useState('') //aqui eu guardo o CNPJ ou email
     const [senha, setSenha] = useState('') //aqui eu guardo a senha
@@ -25,7 +23,6 @@ const Login = () => {
 
         try {
             await authenticate({ login, senha }) //chamo a função de login 
-            navigate('/', { replace: true }) //caso funcione mando o usuario para a pagina inicial
         } catch (error) {
             toast.error(error.response?.data?.msg || 'Não foi possível realizar o login.')
         } finally {
