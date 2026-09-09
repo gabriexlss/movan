@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import './footer.css';
+import styles from './footer.module.css';
 
 import { GoHome } from 'react-icons/go';
 import { MdAltRoute, MdOutlineAccountBalanceWallet } from 'react-icons/md';
@@ -17,14 +17,18 @@ const footer = () => {
     ];
 
     return (
-        <footer className="footer">
+        <footer className={styles.footer}>
             <nav>
                 {navFooter.map((item) => {
                     const Icon = item.icon;
                     
                     return (
-                        <NavLink key={item.to} to={item.to} className="footer-link">
-                            <Icon className="footer-icon" />
+                        <NavLink
+                            key={item.to}
+                            to={item.to}
+                            className={({ isActive }) => `${styles['footer-link']} ${isActive ? styles.active : ''}`}
+                        >
+                            <Icon className={styles['footer-icon']} />
                             <span>{item.label}</span>
                         </NavLink>
                     );

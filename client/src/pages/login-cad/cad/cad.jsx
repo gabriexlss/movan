@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
-import { useNavigate } from 'react-router-dom'
-import './cad.css'
+import styles from './cad.module.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -56,31 +55,12 @@ const Cad = () => {
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }
-    const navigate = useNavigate()
-
-    const handleCadastro = (event) => {
-        event.preventDefault()
-
-        const form = event.currentTarget;
-        const senha = form.elements.senha.value;
-        const sConfirmada = form.elements.confirmarSenha.value;
-
-        if(senha !== sConfirmada){
-            const campoConfirmar = form.elements.confirmarSenha;
-
-            campoConfirmar.setCustomValidity('As senhas não coincidem');
-            campoConfirmar.reportValidity();
-            return
-        }
-
-        navigate('/verificar-email')
     }
 
     return(
-        <div className="formulario-cad">
+        <div className={styles['formulario-cad']}>
             <form onSubmit={handleSubmit}>
-            <form onSubmit={handleCadastro}>
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="text"
                         id="nomeCompleto"
@@ -94,7 +74,7 @@ const Cad = () => {
                     <label htmlFor="nomeCompleto">Nome completo</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="email"
                         id="emailCadastro"
@@ -108,7 +88,7 @@ const Cad = () => {
                     <label htmlFor="emailCadastro">E-mail</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="text"
                         id="cnpj"
@@ -123,7 +103,7 @@ const Cad = () => {
                     <label htmlFor="cnpj">CNPJ</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="password"
                         id="senhaCadastro"
@@ -137,7 +117,7 @@ const Cad = () => {
                     <label htmlFor="senhaCadastro">Senha</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="password"
                         id="confirmarSenha"
@@ -152,7 +132,7 @@ const Cad = () => {
                     <label htmlFor="confirmarSenha">Confirmar senha</label>
                 </div>
 
-                <div className="campo-termos">
+                <div className={styles['campo-termos']}>
                     <input
                         type="checkbox"
                         id="termos"
@@ -164,12 +144,12 @@ const Cad = () => {
                     </label>
                 </div>
 
-                <button className="cadastrar" type="submit" disabled={enviando}>
+                <button className={styles['cadastrar']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}
                 </button>
             </form>
 
-            <p className="ou">ou</p>
+            <p className={styles.ou}>ou</p>
 
             <ButtonGoogle />
         </div>

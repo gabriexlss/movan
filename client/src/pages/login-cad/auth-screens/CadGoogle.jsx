@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
 import { useAuth } from '../../../context/useAuth'
-import './AuthScreens.css'
+import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const CadGoogle = () => {
@@ -70,14 +70,14 @@ const CadGoogle = () => {
     }
 
     return (
-        <section className="auth-screens">
-            <h2 className="auth-screens__titulo">Cadastro com google</h2>
+        <section className={styles['auth-screens']}>
+            <h2 className={styles['auth-screens__titulo']}>Cadastro com google</h2>
 
             <form
-                className="auth-screens__form"
+                className={styles['auth-screens__form']}
                 onSubmit={handleSubmit}
             >
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="text"
                         id="cnpjGoogle"
@@ -92,7 +92,7 @@ const CadGoogle = () => {
                     <label htmlFor="cnpjGoogle">CNPJ</label>
                 </div>
 
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="password"
                         id="senhaGoogle"
@@ -107,7 +107,7 @@ const CadGoogle = () => {
                     <label htmlFor="senhaGoogle">Senha</label>
                 </div>
 
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="password"
                         id='confirmarSenhaGoogle'
@@ -121,7 +121,7 @@ const CadGoogle = () => {
                     <label htmlFor="confirmarSenhaGoogle">Confirmar senha</label>
                 </div>
 
-                <button className="auth-screens__botao" type="submit" disabled={enviando}>
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}
                 </button>
             </form>
