@@ -1,5 +1,4 @@
 import styles from './LogCad-header.module.css'
-import '../../../App.css'
 
 const LogCadHeader = ({ modo }) => {
     return (
