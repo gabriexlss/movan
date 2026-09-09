@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 
 import LogCadHeader from './LogCad-header'
-import LogCadToggleSwitch from './LogCad-toggleSwitch'
+import LogCadToggleSwitch from './LogCadToggleSwitch'
 import LogCadFooter from './LogCad-footer'
 
 import './LogCad-layout.css'
