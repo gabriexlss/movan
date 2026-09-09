@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { useNavigate } from 'react-router-dom'
 import './cad.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
@@ -55,11 +56,30 @@ const Cad = () => {
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }
+    const navigate = useNavigate()
+
+    const handleCadastro = (event) => {
+        event.preventDefault()
+
+        const form = event.currentTarget;
+        const senha = form.elements.senha.value;
+        const sConfirmada = form.elements.confirmarSenha.value;
+
+        if(senha !== sConfirmada){
+            const campoConfirmar = form.elements.confirmarSenha;
+
+            campoConfirmar.setCustomValidity('As senhas não coincidem');
+            campoConfirmar.reportValidity();
+            return
+        }
+
+        navigate('/verificar-email')
     }
 
     return(
         <div className="formulario-cad">
             <form onSubmit={handleSubmit}>
+            <form onSubmit={handleCadastro}>
                 <div className="campo-cadastro">
                     <input
                         type="text"
@@ -126,6 +146,7 @@ const Cad = () => {
                         onChange={(event) => setConfirmarSenha(event.target.value)}
                         placeholder=" "
                         autoComplete="new-password"
+                        onInput={(event) => event.currentTarget.setCustomValidity('')}
                         required
                     />
                     <label htmlFor="confirmarSenha">Confirmar senha</label>

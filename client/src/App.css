@@ -40,6 +40,10 @@
   src: url('./assets/fonts/TAN-Nimbus/TAN-NIMBUS.woff') format('woff');
 }
 
+:root {
+  --footer-height: 7vh;
+}
+
 *{
   margin: 0;
   padding: 0;
@@ -62,6 +66,7 @@ body {
 main {
   display: flex;
   min-height: 100vh;
+  padding-bottom: calc(var(--footer-height) + 1rem);
   flex-direction: column;
   align-items: center;
   justify-content: start;
