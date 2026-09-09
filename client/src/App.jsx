@@ -22,53 +22,53 @@ import Perfil from './pages/perfil/perfil'
 
 function App() {
 
-  const location = useLocation();
+    const location = useLocation();
 
-  const rotasLogCad = [
-    '/login',
-    '/cadastro',
-    '/cadastro-google',
-    '/recuperar-senha',
-    '/codigo-enviado',
-    '/redefinir-senha',
-    '/verificar-email'
-  ]
+    const rotasLogCad = [
+        '/login',
+        '/cadastro',
+        '/cadastro-google',
+        '/recuperar-senha',
+        '/codigo-enviado',
+        '/redefinir-senha',
+        '/verificar-email'
+    ]
 
-  const logCad = rotasLogCad.includes(location.pathname)
+    const logCad = rotasLogCad.includes(location.pathname)
 
-  return (
-    <div className='app'>
-        {!logCad && <Header />}
+    return (
+        <div className='app'>
+            {!logCad && <Header />}
 
-        <Routes>
-            <Route element={<ProtectedRoute />}>
-                <Route path='/' element={<HomePage />} />
-                <Route path='/perfil' element={<Perfil />} />
-            </Route>
+            <Routes>
+                <Route element={<ProtectedRoute />}>
+                    <Route path='/' element={<HomePage />} />
+                    <Route path='/perfil' element={<Perfil />} />
+                </Route>
 
-            <Route element={<PublicRoute />}>
-                <Route element={<LogCadLayout />}>
-                    <Route path='/login' element={<Login />} />
-                    <Route path='/cadastro' element={<Cad />} />
-                    <Route path='/recuperar-senha' element={<RecuperarSenha />} />
-                    <Route element={<GoogleSignupRoute />}>
-                        <Route path='/cadastro-google' element={<CadGoogle />} />
+                <Route element={<PublicRoute />}>
+                    <Route element={<LogCadLayout />}>
+                        <Route path='/login' element={<Login />} />
+                        <Route path='/cadastro' element={<Cad />} />
+                        <Route path='/recuperar-senha' element={<RecuperarSenha />} />
+                        <Route element={<GoogleSignupRoute />}>
+                            <Route path='/cadastro-google' element={<CadGoogle />} />
+                        </Route>
                     </Route>
                 </Route>
-            </Route>
 
-            <Route element={<LogCadLayout />}>
-                <Route element={<VerificationRoute />}>
-                    <Route path='/codigo-enviado' element={<CodigoEnviado />} />
-                    <Route path='/redefinir-senha' element={<RedefinirSenha />} />
-                    <Route path='/verificar-email' element={<VerificarEmail />} />
+                <Route element={<LogCadLayout />}>
+                    <Route element={<VerificationRoute />}>
+                        <Route path='/codigo-enviado' element={<CodigoEnviado />} />
+                        <Route path='/redefinir-senha' element={<RedefinirSenha />} />
+                        <Route path='/verificar-email' element={<VerificarEmail />} />
+                    </Route>
                 </Route>
-            </Route>
-        </Routes>
+            </Routes>
 
-        {!logCad && <Footer />}
-    </div>
-  )
+            {!logCad && <Footer />}
+        </div>
+)
 }
 
 export default App
