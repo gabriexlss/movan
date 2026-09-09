@@ -1,6 +1,156 @@
 .perfil-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    min-height: 100vh;
+    padding-bottom: calc(var(--footer-height) + 2rem);
+}
+
+.titulo-tela {
+    margin-bottom: 2vh;
+}
+
+.conteudos-perfil {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(1rem, 5vw, 2rem);
+
+    width: 90%;
+    max-width: 42rem;
+    min-height: 8rem;
+    box-shadow: 0 8px 18px rgba(7, 54, 138, 0.14);
+    border: 1px solid rgba(7, 54, 138, 0.08);
+    border-radius: 1rem;
+    padding: clamp(1rem, 4vw, 1.5rem);
+
+    background-color: #f8f5f5;
+}
+
+.foto-perfil {
+    width: clamp(5rem, 24vw, 7rem);
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.info-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 0;
+    line-height: 1.5;
+}
+
+.perfil-container h1,
+.perfil-container p {
+    font-family: 'Poppins', sans-serif;
+    color: #7a7a7a;
+    font-weight: bold;
+}
+
+.perfil-container p {
+    font-size: .9rem;
+    font-weight: lighter;
+    text-align: left;
+}
+
+.campos-perfil {
+    display: grid;
+    gap: 1rem;
+    width: 90%;
+    max-width: 42rem;
+    margin-top: 1.5rem;
+}
+
+.campo-grupo {
+    display: grid;
+    gap: .2rem;
+}
+
+.campo-grupo label {
+    color: #7a7a7a;
+    font-family: 'Poppins', sans-serif;
+    font-size: .9rem;
+    font-weight: 400;
+    line-height: 1.2;
+    padding-left: 1rem;
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    overflow: hidden;
+    border: 1px solid #b8b8b8;
+    border-radius: 999px;
+    background-color: #ffffff;
+    transition: border-color .2s ease;
+}
+
+.input-container--editavel:focus-within {
+    border-color: #0d47a1;
+}
+
+.input-container input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    padding: .55rem 3.25rem .55rem 1rem;
+    background-color: transparent;
+    color: #3f3f3f;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+}
+
+.input-container input[readonly] {
+    cursor: default;
+    pointer-events: none;
+}
+
+.input-container input::placeholder {
+    color: #727272;
+    opacity: 1;
+}
+
+.botao-editar {
+    position: absolute;
+    right: .35rem;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 50%;
+    background-color: transparent;
+    color: #7a7a7a;
+    cursor: pointer;
+    transition: color .2s ease, transform .2s ease;
+}
+
+.botao-editar svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.input-container--editavel:focus-within .botao-editar {
+    color: #0d47a1;
+}
+
+.botao-editar:active {
+    transform: scale(.94);
+}
+
+.botao-editar:focus-visible {
+    outline: 0;
+}
+
+@media (min-width: 48rem) {
+    .campos-perfil {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }

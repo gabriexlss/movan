@@ -2,14 +2,14 @@ import styles from './tituloTela.module.css';
 
 import { FaBell } from "react-icons/fa";
 
-const TituloTela = ({ title }) => {
+const TituloTela = ({ title, className='' }) => {
     const data = new Intl.DateTimeFormat("pt-BR", {
         weekday: "long",
         day: "numeric",
         month: "long",
     }).format(new Date());
     return (
-        <div className={styles['TituloTela-container']}>
+        <div className={`${styles['TituloTela-container']} ${className}`}>
             <div className={styles.texto}>
                 <h1 className={styles.titulo}>{title}</h1>
                 <h2 className={styles.subtitulo}>{data}</h2> {/* ps pro back-end: aqui tem que colocar a data do dispositivo */}
