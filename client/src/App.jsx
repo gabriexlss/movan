@@ -4,6 +4,7 @@ import './App.css'
 import HomePage from './pages/homePage'
 import Header from './components/layout/header'
 import Footer from './components/layout/footer'
+
 import Login from './pages/login-cad/login/login'
 import Cad from './pages/login-cad/cad/cad'
 import CadGoogle from './pages/login-cad/auth-screens/CadGoogle'
@@ -16,6 +17,8 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import PublicRoute from './components/auth/PublicRoute'
 import VerificationRoute from './components/auth/VerificationRoute'
 import GoogleSignupRoute from './components/auth/GoogleSignupRoute'
+
+import Perfil from './pages/perfil/perfil'
 
 function App() {
 
@@ -34,22 +37,23 @@ function App() {
   const logCad = rotasLogCad.includes(location.pathname)
 
   return (
-    <>
+    <div className='app'>
         {!logCad && <Header />}
 
         <Routes>
             <Route element={<ProtectedRoute />}>
                 <Route path='/' element={<HomePage />} />
+                <Route path='/perfil' element={<Perfil />} />
             </Route>
 
             <Route element={<PublicRoute />}>
                 <Route element={<LogCadLayout />}>
-                <Route path='/login' element={<Login />} />
-                <Route path='/cadastro' element={<Cad />} />
-                <Route path='/recuperar-senha' element={<RecuperarSenha />} />
-                <Route element={<GoogleSignupRoute />}>
-                <Route path='/cadastro-google' element={<CadGoogle />} />
-                </Route>
+                    <Route path='/login' element={<Login />} />
+                    <Route path='/cadastro' element={<Cad />} />
+                    <Route path='/recuperar-senha' element={<RecuperarSenha />} />
+                    <Route element={<GoogleSignupRoute />}>
+                        <Route path='/cadastro-google' element={<CadGoogle />} />
+                    </Route>
                 </Route>
             </Route>
 
@@ -57,13 +61,14 @@ function App() {
                 <Route element={<VerificationRoute />}>
                     <Route path='/codigo-enviado' element={<CodigoEnviado />} />
                     <Route path='/redefinir-senha' element={<RedefinirSenha />} />
+                    <Route path='/verificar-email' element={<VerificarEmail />} />
                 </Route>
-                </Route>
+            </Route>
         </Routes>
 
         {!logCad && <Footer />}
-    </>
-    )
+    </div>
+  )
 }
 
 export default App

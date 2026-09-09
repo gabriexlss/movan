@@ -5,6 +5,10 @@
   src: url('./assets/fonts/Bree_Serif/BreeSerif-Regular.ttf') format('truetype');
 }
 
+.app {
+  min-height: 100vh;
+}
+
 @font-face {
   font-family: 'Merriweather Sans';
   font-style: normal;

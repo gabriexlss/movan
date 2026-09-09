@@ -1,4 +1,4 @@
-.TituloTela-container{
+.TituloTela-container {
     width: 90%;
     display: flex;
     flex-direction: row;
@@ -35,4 +35,3 @@
     margin-left: auto;
     align-self: center;
 }
-

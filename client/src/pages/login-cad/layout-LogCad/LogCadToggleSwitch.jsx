@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
 
-import './LogCadToggleSwitch.css'
+import styles from './LogCadToggleSwitch.module.css'
 
 const LogCadToggleSwitch = () => {
     
@@ -8,8 +8,8 @@ const LogCadToggleSwitch = () => {
     const modo = pathname === '/cadastro' ? 'cadastro' : 'login';
 
     return (
-        <nav className={`logcad-toggle ${modo}`}>
-            <span className="toggle-indicador" />
+        <nav className={`${styles['logcad-toggle']} ${styles[modo]}`}>
+            <span className={styles['toggle-indicador']} />
 
             <NavLink to="/login">
                 Entrar
