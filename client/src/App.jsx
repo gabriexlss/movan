@@ -4,13 +4,13 @@ import './App.css'
 import HomePage from './pages/homePage'
 import Header from './components/layout/header'
 import Footer from './components/layout/footer'
-import TituloTela from './components/layout/tituloTela'
 import Login from './pages/login-cad/login/login'
 import Cad from './pages/login-cad/cad/cad'
 import CadGoogle from './pages/login-cad/auth-screens/CadGoogle'
 import RecuperarSenha from './pages/login-cad/auth-screens/RecuperarSenha'
 import CodigoEnviado from './pages/login-cad/auth-screens/CodigoEnviado'
 import RedefinirSenha from './pages/login-cad/auth-screens/RedefinirSenha'
+import VerificarEmail from './pages/login-cad/auth-screens/VerificarEmail'
 import LogCadLayout from './pages/login-cad/layout-LogCad/LogCad-layout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import PublicRoute from './components/auth/PublicRoute'
@@ -27,7 +27,8 @@ function App() {
     '/cadastro-google',
     '/recuperar-senha',
     '/codigo-enviado',
-    '/redefinir-senha'
+    '/redefinir-senha',
+    '/verificar-email'
   ]
 
   const logCad = rotasLogCad.includes(location.pathname)
@@ -35,7 +36,6 @@ function App() {
   return (
     <>
         {!logCad && <Header />}
-        {!logCad && <TituloTela title="Olá, Motorista!" />}
 
         <Routes>
             <Route element={<ProtectedRoute />}>
