@@ -44,7 +44,7 @@ const CadGoogle = () => {
         try {
             const response = await api.post('/motorista/google/criar', { //envio os seguintes dados para o backend
                 nome: dadosGoogle.nome, //o nome do usuario que o google me devolveu
-                cnpj: cnpj.replace(/\D/g, ''), //deixo so os numeros do CNPJ e mando pro backend
+                cnpj: cnpj.replace(/[^a-z0-9]/gi, '').toUpperCase(), //deixo so os numeros do CNPJ e mando pro backend
                 senha, //a senha do usuario
                 token: dadosGoogle.token, //o token do google
             }, {

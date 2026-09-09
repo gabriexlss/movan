@@ -33,7 +33,7 @@ const Cad = () => {
             const response = await api.post('/motorista', { //aguardo a resposta do backend para criar o usuario
                 nome, //mando o nome do usuario
                 email, //mando o email do usuario
-                cnpj: cnpj.replace(/\D/g, ''), //mando o cnpj do usuario sem os caracteres especiais
+                cnpj: cnpj.replace(/[^a-z0-9]/gi, '').toUpperCase(), //mando o cnpj do usuario sem os caracteres especiais
                 senha, //mando a senha do usuario (não to encriptando a senha pq o backend vai fazer isso)
             }, {
                 skipGlobalErrorToast: true, //eu recuso a mensagem de erro do backend que tratei no api.js, porque tratarei ele de forma diferente aqui
