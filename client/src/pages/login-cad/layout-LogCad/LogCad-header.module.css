@@ -1,9 +1,9 @@
 .LogCad-header-container.login {
-    background-image: url('../../../assets/media/img/LogCad-stain.svg');
+    background-image: url('../../../assets/media/img/header-imgs/LogCad-stain.svg');
 }
 
 .LogCad-header-container.cadastro {
-    background-image: url('../../../assets/media/img/LogCad-stain-cadastro.svg');
+    background-image: url('../../../assets/media/img/header-imgs/LogCad-stain-cadastro.svg');
 }
 
 .LogCad-header-container {
