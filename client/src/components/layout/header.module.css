@@ -1,4 +1,4 @@
-.header{
+.header {
     position: fixed;
     display: flex;
     flex-direction: row;
@@ -32,18 +32,18 @@
     margin-left: 1rem;
 }
 
-h1, .movan{
+.movan {
     font-size: 1.5rem;
     font-family: 'TAN Nimbus';
     font-weight: normal;
     line-height: 1;
-
-    .movan-span{
-        color: #FFFFFF;
-    }
 }
 
-p, .subtitulo{
+.movan-span {
+    color: #FFFFFF;
+}
+
+.subtitulo {
     text-align: center;
     font-family: 'Bree Serif', serif;
     font-size: 0.75rem;

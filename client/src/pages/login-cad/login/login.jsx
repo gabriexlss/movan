@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from '../../../context/useAuth';
 
 
-import './login.css'
+import styles from './login.module.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle';
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -31,9 +31,9 @@ const Login = () => {
     }
 
     return(
-        <div className="formulario-login">
+        <div className={styles['formulario-login']}>
             <form onSubmit={handleSubmit}>
-                <div className="inputEmailCNPJ">
+                <div className={styles['inputEmailCNPJ']}>
                     <input
                         type="text"
                         id='email'
@@ -47,7 +47,7 @@ const Login = () => {
                     <label htmlFor="email">E-mail/CNPJ</label>
                 </div>
 
-                <div className='inputSenha'>
+                <div className={styles.inputSenha}>
                     <input
                         type="password"
                         id='senha'
@@ -60,12 +60,12 @@ const Login = () => {
                     />
                     <label htmlFor="senha">Senha</label>
                 </div>
-                <button className="entrar" type="submit" disabled={enviando}>
+                <button className={styles['entrar']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Entrar'}
                 </button>
             </form>
 
-            <p className='ou'>ou</p>
+            <p className={styles['ou']}>ou</p>
 
             <ButtonGoogle />
 

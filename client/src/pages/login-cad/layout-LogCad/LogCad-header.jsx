@@ -1,10 +1,11 @@
-import './LogCad-header.css'
+import styles from './LogCad-header.module.css'
+import '../../../App.css'
 
 const LogCadHeader = ({ modo }) => {
     return (
-        <div className={`LogCad-header-container ${modo}`}>
-            <h1 className="titulo-header">MO<span className={`titulo-header2 ${modo}`}>VAN</span></h1>
-            <p className="subtitulo-logCad">Seu caminho mais seguro<br/>na palma da sua mão</p>
+        <div className={`${styles['LogCad-header-container']} ${styles[modo]}`}>
+            <h1 className={styles['titulo-header']}>MO<span className={styles[modo]}>VAN</span></h1>
+            <p>Seu caminho mais seguro<br/>na palma da sua mão</p>
         </div>
     )
 }

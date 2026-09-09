@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
-import './AuthScreens.css'
+import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const RedefinirSenha = () => {
@@ -57,17 +57,17 @@ const RedefinirSenha = () => {
     }
 
     return (
-        <section className="auth-screens">
-            <h2 className="auth-screens__titulo">Redefinir senha</h2>
-            <p className="auth-screens__descricao">
+        <section className={styles['auth-screens']}>
+            <h2 className={styles['auth-screens__titulo']}>Redefinir senha</h2>
+            <p className={styles['auth-screens__descricao']}>
                 Insira sua nova senha nos campos abaixo.
             </p>
 
             <form
-                className="auth-screens__form"
+                className={styles['auth-screens__form']}
                 onSubmit={handleSubmit}
             >
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="password"
                         id="novaSenha"
@@ -81,7 +81,7 @@ const RedefinirSenha = () => {
                     <label htmlFor="novaSenha">Nova senha</label>
                 </div>
 
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="password"
                         id="confirmarNovaSenha"
@@ -97,7 +97,7 @@ const RedefinirSenha = () => {
                     </label>
                 </div>
 
-                <button className="auth-screens__botao" type="submit" disabled={enviando}>
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Redefinir'}
                 </button>
             </form>

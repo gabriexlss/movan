@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
-import './AuthScreens.css'
+import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const RecuperarSenha = () => {
@@ -36,17 +36,17 @@ const RecuperarSenha = () => {
     }
 
     return (
-        <section className="auth-screens">
-            <h2 className="auth-screens__titulo">Recuperar senha</h2>
-            <p className="auth-screens__descricao">
+        <section className={styles['auth-screens']}>
+            <h2 className={styles['auth-screens__titulo']}>Recuperar senha</h2>
+            <p className={styles['auth-screens__descricao']}>
                 Digite seu e-mail de recuperação para redefinir a senha. Um código de verificação será enviado para o e-mail informado.
             </p>
 
             <form
-                className="auth-screens__form"
+                className={styles['auth-screens__form']}
                 onSubmit={handleSubmit}
             >
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="email"
                         id="emailRecuperacao"
@@ -60,7 +60,7 @@ const RecuperarSenha = () => {
                     <label htmlFor="emailRecuperacao">E-mail</label>
                 </div>
 
-                <button className="auth-screens__botao" type="submit" disabled={enviando}>
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Enviar'}
                 </button>
             </form>

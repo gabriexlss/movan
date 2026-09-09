@@ -1,5 +1,5 @@
 import DefaultCard from './DefaultCard';
-import './CardRotas.css';
+import styles from './CardRotas.module.css';
 
 import { RiGraduationCapLine } from "react-icons/ri";
 
@@ -12,12 +12,12 @@ const CardRotas = () => {
 	return(
 		<DefaultCard title="Rotas Diárias" link="/rota">
 
-			<div className="containerEscolas">
+			<div className={styles.containerEscolas}>
 				{escolas.map((escola) => (
-					<div className="escola" key={escola.nome}>
-						<RiGraduationCapLine className="iconEscola" size={20} />
+					<div className={styles.escola} key={escola.nome}>
+						<RiGraduationCapLine className={styles.iconEscola} size={20} />
 
-						<div className="textoEscola">
+						<div className={styles.textoEscola}>
 							<p>{escola.nome}</p>
 							<span>{"horário: " +escola.horario}</span>
 						</div>
