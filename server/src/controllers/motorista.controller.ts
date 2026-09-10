@@ -99,7 +99,7 @@ const verificarEmailouCNPJ = async (dado: string, tipo: "email" | "cnpj") => {
     }
 }
 
-const validarCodigo = async (id: number, tipo: "criação" | "recuperação" | "edição", cod: string, email?: string) => {
+const validarCodigo = async (id: number, tipo: "CRIACAO" | "RECUPERACAO" | "ALTERACAO", cod: string, email?: string) => {
     const valores = [id, tipo]
 
     /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
@@ -125,7 +125,7 @@ e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
         const idCodigo: number = rows[0].id
 
         // checa se bate.
-        const codigoParaValidar = tipo === "edição" ? `${cod}:${email}` : cod
+        const codigoParaValidar = tipo === "ALTERACAO" ? `${cod}:${email}` : cod
         const codigoValido = await bcrypt.compare(codigoParaValidar, codigoHash)
 
         // se o codigo não for valido, da um não autorizado pro nosso filhão
@@ -194,7 +194,7 @@ export const controllerMotorista = {
             const id = rows[0].id
 
             // enviar o email com o codigo pro usuario
-            const response = await gerarCodigo(email, "criação", id, cliente)
+            const response = await gerarCodigo(email, "CRIACAO", id, cliente)
             if (!response) throw new Error
 
             // se tudo ocorrer bem, manda de volta e confirmo as alterações
@@ -271,15 +271,15 @@ export const controllerMotorista = {
                 msg: "E-mail, CNPJ ou senha inválidos."
             })
         }
-
+        let verificado:boolean
         // Pega o hash de senha e a data de exclusão usando o id do usuario e guarda numa variavel
         try {
-            const query = "SELECT senha, data_exclusao FROM motorista WHERE id = $1"
+            const query = "SELECT senha, data_exclusao, verificado FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
 
             const hashNoBanco = rows[0].senha
             const data_exclusao: Date | null = rows[0].data_exclusao
-
+            verificado = rows[0].verificado
             // Compara a senha digitada pelo usuario com a senha salva no banco de dados e retorna true ou false
             const senhaValida = await bcrypt.compare(senha, hashNoBanco)
 
@@ -309,13 +309,18 @@ export const controllerMotorista = {
         }
         const token = jwt.sign({ id }, segredoJWT, { expiresIn: '30d' })
 
+
+        //cria uma mensagem com base se está verificado ou não.
+        const mensagem = verificado ? "Login Realizado com Sucesso." : "Login Realizado com Sucesso, Mas verificação necessaria para obter os dados."
+
         return res.status(200).cookie('token', token, {
             httpOnly: true,
             secure: process.env['NODE_ENV'] === 'production',
             sameSite: 'strict',
             maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
         }).json({
-            msg: "Login realizado com sucesso."
+            msg: mensagem,
+            verificado
         })
     },
     // Controller para deslogar o motorista
@@ -335,7 +340,7 @@ export const controllerMotorista = {
         // pega o tipo de codigo que ele quer enviar por meio dos parametros da rota (ex: /motorista/codigo/criação)
         // temporariamente só aceita criação, então está hardcodado
         // so deixei o codigo aqui pra caso algum dia eu precise.
-        const tipo = "criação"
+        const tipo = "CRIACAO"
 
         // se o tipo não for indicado ou não for nem criação ou recuperação, dá erro de bad request
         if (!tipo) {
@@ -343,7 +348,7 @@ export const controllerMotorista = {
                 msg: "O tipo do código não foi informado."
             })
         }
-        if (tipo !== "criação" && tipo !== "recuperação") {
+        if (tipo !== "CRIACAO" && tipo !== "RECUPERACAO") {
             return res.status(400).json({
                 msg: "Tipo de código inválido."
             })
@@ -391,7 +396,7 @@ export const controllerMotorista = {
         const { cod } = dadosBrutos.data
 
         try {
-            const idCodigo = await validarCodigo(id, "criação", cod)
+            const idCodigo = await validarCodigo(id, "CRIACAO", cod) //mudei esse nomes porque por algum motivo que nao sei ele tava reclamando disso, já que a norma é nao colocar acento mudei aqui
             if (idCodigo === null) {
                 return res.status(400).json({
                     msg: "Código inválido ou expirado."
@@ -438,7 +443,7 @@ export const controllerMotorista = {
                 })
             }
             // se ja chegou aqui, a conta existe e já temos um id de conta, então hora de enviar o código
-            const response = await gerarCodigo(email, "recuperação", id)
+            const response = await gerarCodigo(email, "RECUPERACAO", id)
             if (!response) throw new Error("Não foi possível enviar o código de recuperação.")
 
             // deu tudo certo, só retornar.
@@ -455,15 +460,7 @@ export const controllerMotorista = {
     // Rota para enviar um código para o novo email antes de alterá-lo.
     enviarCodigoEditarEmail: async (req: Request, res: Response) => {
         const id = req.userId
-        const verificado = req.verificado
         const dadosBrutos = CodigoEditarEmailSchema.safeParse(req.body)
-
-        // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível alterar o e-mail."
-            })
-        }
 
         // verifica se os dados são validos
         if (!dadosBrutos.success) {
@@ -487,7 +484,7 @@ export const controllerMotorista = {
                 })
             }
 
-            const response = await gerarCodigo(email, "edição", id)
+            const response = await gerarCodigo(email, "ALTERACAO", id)
             if (!response) throw new Error("Não foi possível enviar o código de alteração de e-mail.")
 
             return res.status(200).json({
@@ -523,7 +520,7 @@ export const controllerMotorista = {
                 })
             }
             // beleza, conta existe, agora verificar código se bate com o banco de dados. 
-            const idCodigo = await validarCodigo(id, "recuperação", cod)
+            const idCodigo = await validarCodigo(id, "RECUPERACAO", cod)
             if (idCodigo === null) {
                 return res.status(400).json({
                     msg: "Código inválido ou expirado."
@@ -608,14 +605,7 @@ export const controllerMotorista = {
     editarConta: async (req: Request, res: Response) => {
         // pegando id da requisição como sempre
         const id = req.userId
-        const verificado = req.verificado
-
-        // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível editar os dados."
-            })
-        }
+        
         // tratando os dados usando o mesmo modelo de criação, mas com o metodo partial pra todos os dados virarem opcionais.
         const dadosBrutos = EditarMotoristaSchema.safeParse(req.body)
 
@@ -644,7 +634,7 @@ export const controllerMotorista = {
                     })
                 }
 
-                const idCodigo = await validarCodigo(id, "edição", cod!, email)
+                const idCodigo = await validarCodigo(id, "ALTERACAO", cod!, email)
                 if (idCodigo === null) {
                     return res.status(400).json({
                         msg: "Código inválido ou expirado."
@@ -719,14 +709,6 @@ export const controllerMotorista = {
     obterDados: async (req: Request, res: Response) => {
         // pega o id e o status de verificado do cookie
         const id = req.userId
-        const verificado = req.verificado
-
-        // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível obter os dados."
-            })
-        }
 
         // pega os dados do motorista e envia de volta
         try {
@@ -841,14 +823,6 @@ export const controllerMotorista = {
     vincularGoogle: async (req: Request, res: Response) => {
         // pega id e verificado do cookie
         const id = req.userId
-        const verificado = req.verificado
-
-        // verifica se a conta dele está verificada, se não, manda embora
-        if (!verificado) {
-            return res.status(403).json({
-                msg: "Conta não verificada. Não é possível vincular conta google."
-            })
-        }
 
         // dados esperados: token google.
         const dadosBrutos = GoogleTokenSchema.safeParse(req.body)

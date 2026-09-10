@@ -1,7 +1,6 @@
 Endpoint autenticado para editar os dados do perfil do motorista (nome, CNPJ, senha e/ou e-mail).
 
 ## Rota URL
-
 - Rota: /motorista
 - Tipo: PATCH
 - _Nota: Rota protegida. Necessário o cookie `token` de autenticação._

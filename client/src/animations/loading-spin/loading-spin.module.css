@@ -1,0 +1,23 @@
+.loadingSpin{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: fit-content;
+    height: auto;
+    margin: auto;
+}
+.loadingSpinIcon{
+    animation: loadingSpinAnimation infinite 1s;
+    width: 30px;
+    height: 30px;
+}
+@keyframes loadingSpinAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -48,8 +48,6 @@
     position: relative;
     overflow: hidden;
     align-self: center;
-    
-    -webkit-tap-highlight-color: transparent;
 }
 
 .BtnVerMensalidade::after {
