@@ -5,6 +5,9 @@ import TituloTela from '../../components/layout/tituloTela'
 
 import { useAuth } from '../../context/useAuth'
 import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
+import { IoMdExit } from "react-icons/io"
+import { CgTrash } from "react-icons/cg"
+
 import styles from './perfil.module.css'
 
 const formatarCnpj = (cnpj = '') => {
@@ -151,6 +154,9 @@ const Perfil = () => {
                     )
                 })}
             </section>
+
+            <button className={styles['BtnExclu-conta']}> <CgTrash style={{ strokeWidth: '.6', fontSize: '1.7rem' }} /> Excluir conta</button>
+            <button className={`${styles['BtnExclu-conta']} ${styles['BtnSair-conta']}`}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
         </main>
     )
 }

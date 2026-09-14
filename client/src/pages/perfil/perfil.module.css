@@ -149,8 +149,57 @@
     outline: 0;
 }
 
-@media (min-width: 48rem) {
-    .campos-perfil {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+.BtnExclu-conta{
+    position: relative;
+    overflow: hidden;
+
+    width: 70%;
+    height: 6vh;
+    margin-top: 2vh;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #F5F5F5;
+    box-shadow: 0 3px 5px rgba(1, 16, 43, 0.424);
+    border-radius: 5px;
+    border: #C72C2C solid 2px;
+
+    color: #C72C2C;
+    font-family: 'Poppins', sans-serif;
+    font-size: .8rem;
+    text-align: center;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.BtnSair-conta{
+    margin-top: 0;
+
+    border-color: #0d47a1;
+    color: #0d47a1;
+}
+
+.BtnExclu-conta::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: rgba(105, 105, 105, .28);
+    pointer-events: none;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform .3s ease, opacity .3s ease;
+}
+
+.BtnExclu-conta:active::after {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(20);
+    transition-duration: .2s;
 }
