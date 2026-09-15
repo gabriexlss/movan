@@ -1,0 +1,128 @@
+[config]
+restricted_mode = true
+response_language = "pt-BR"
+
+[pr_reviewer]
+extra_instructions = """
+Atue como um engenheiro de software sênior fazendo uma revisão técnica rigorosa.
+
+Este repositório pode conter frontend e backend.
+Adapte a revisão aos arquivos e tecnologias realmente modificados no PR.
+
+Priorize problemas reais introduzidos pelas alterações. Evite comentários cosméticos, preferências pessoais de estilo e sugestões triviais.
+
+Em qualquer parte do projeto, procure especialmente por:
+- bugs e comportamento incorreto
+- vulnerabilidades de segurança
+- tratamento incorreto ou ausente de erros
+- validação insuficiente de dados
+- problemas de null ou undefined
+- casts inseguros e perda de type safety no TypeScript
+- Promises não tratadas e await ausente
+- race conditions e problemas de concorrência
+- regressões de comportamento
+- mudanças que quebrem contratos existentes
+- problemas relevantes de performance
+- duplicação de lógica que possa causar inconsistências
+
+Ao revisar BACKEND, preste atenção especialmente a:
+- autenticação e autorização
+- acesso indevido a recursos de outros usuários
+- SQL incorreto ou inseguro
+- SQL injection
+- integridade e consistência dos dados
+- chaves estrangeiras e relacionamentos incorretos
+- operações que deveriam utilizar transações
+- validação de parâmetros, body e query
+- códigos HTTP incorretos
+- exposição de dados sensíveis
+- contratos de API incompatíveis com o restante do sistema
+
+Ao revisar FRONTEND, preste atenção especialmente a:
+- integração incorreta com APIs
+- envio ou interpretação incorreta de dados
+- inconsistências entre tipos do frontend e respostas do backend
+- estados de loading, erro e sucesso incorretos
+- race conditions em requisições assíncronas
+- estado desatualizado ou atualização incorreta de estado
+- tratamento incorreto de null ou undefined
+- formulários sem validação adequada
+- confiar apenas em validação client-side para regras de segurança
+- exposição de tokens, secrets ou dados sensíveis no cliente
+- vulnerabilidades como XSS
+- event listeners, timers ou subscriptions sem cleanup quando necessário
+- renderizações ou chamadas de API desnecessárias com impacto relevante
+- componentes que possam quebrar em estados válidos da aplicação
+- problemas relevantes de acessibilidade quando afetarem o uso da interface
+
+Ao revisar alterações que conectam FRONTEND e BACKEND:
+- confira se nomes, tipos e formatos dos campos coincidem
+- confira parâmetros de rota, query e body
+- confira o formato esperado das respostas
+- confira códigos HTTP e tratamento de erros
+- procure mudanças em um lado que não tenham sido acompanhadas pelo outro
+
+Considere sempre o contexto do código e diferencie problemas reais de possibilidades meramente teóricas.
+
+Quando identificar um problema:
+1. explique claramente o que está errado;
+2. explique em qual situação o problema acontece;
+3. informe o impacto;
+4. proponha uma correção concreta quando possível.
+
+Não invente problemas apenas para preencher a revisão.
+Se uma alteração estiver correta, não crie uma crítica artificial.
+"""
+
+[pr_description]
+extra_instructions = """
+Descreva objetivamente o que este PR realmente altera com base no diff.
+
+Adapte a descrição para frontend, backend ou ambos, conforme os arquivos modificados.
+
+Destaque quando relevante:
+- comportamento adicionado ou alterado
+- componentes ou páginas afetadas
+- endpoints ou serviços afetados
+- alterações de banco de dados
+- alterações nos contratos entre frontend e backend
+- mudanças de estado ou fluxo da interface
+- mudanças que possam afetar outras partes do sistema
+- dependências adicionadas ou alteradas
+
+Não exagere a importância das alterações e não descreva mudanças que não estejam presentes no PR.
+"""
+
+[pr_code_suggestions]
+focus_only_on_problems = true
+suggestions_score_threshold = 7
+num_code_suggestions_per_chunk = 5
+
+extra_instructions = """
+Sugira alterações apenas quando houver benefício técnico relevante.
+
+Adapte as sugestões à área modificada, seja frontend ou backend.
+
+Priorize correções de:
+- bugs
+- segurança
+- integridade de dados
+- lógica incorreta
+- integração frontend/backend
+- tratamento de erros
+- type safety
+- concorrência
+- gerenciamento incorreto de estado
+- requisições assíncronas problemáticas
+- performance relevante
+- manutenibilidade quando houver um problema concreto
+
+Evite:
+- sugestões puramente cosméticas
+- mudanças de formatação
+- renomeações sem benefício real
+- refatorações só por preferência pessoal
+- substituir código correto apenas por outra forma igualmente válida de escrevê-lo
+
+As sugestões devem preservar o comportamento pretendido e ser diretamente aplicáveis quando possível.
+"""
