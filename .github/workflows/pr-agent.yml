@@ -9,7 +9,7 @@ on:
             - synchronize
 
     issue_comment:
-
+        types: [created]
 jobs:
     pr_agent:
         if: ${{ github.event.sender.type != 'Bot' }}
