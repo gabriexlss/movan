@@ -91,6 +91,7 @@
     height: 2.5rem;
     display: flex;
     flex-direction: column;
+    align-self: center;
 
     background-color: #0D47A1;
     border-radius: 10px;
