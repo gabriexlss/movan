@@ -17,7 +17,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import PublicRoute from './components/auth/PublicRoute'
 import VerificationRoute from './components/auth/VerificationRoute'
 import GoogleSignupRoute from './components/auth/GoogleSignupRoute'
-import ErrorPage from './pages/errorPage'
+import ErrorPage from './pages/errors/errorPage'
 
 import Perfil from './pages/perfil/perfil'
 
