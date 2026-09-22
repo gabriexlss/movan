@@ -712,7 +712,7 @@ export const controllerMotorista = {
 
         // pega os dados do motorista e envia de volta
         try {
-            const query = "SELECT id, nome, email, cnpj, data_exclusao, verificado FROM motorista WHERE id = $1"
+            const query = "SELECT id, nome, email, cnpj, data_exclusao, verificado, google_id IS NOT NULL AS google_vinculado FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 

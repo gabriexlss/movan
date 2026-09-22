@@ -3,6 +3,11 @@ import axios from 'axios';
 //biblioteca para dar um aviso caso algo de errado na verificação aqui
 import { toast } from 'react-hot-toast';
 
+if (!import.meta.env.VITE_API_URL) {
+    throw new Error('VITE_API_URL não está definido no arquivo .env');
+    console.log('VITE_API_URL não está definido no arquivo .env');
+}
+
 //===========================
 //criando a instancia com a url da api do backend
 //===========================
@@ -33,14 +38,17 @@ api.interceptors.response.use(
                 toast.error('Tempo de requisição esgotado. Tente novamente mais tarde.'); //caso o tempo passe de 8 segundos manda um aviso com o erro
             }else if (!error.response){
                 toast.error('Não foi possivel realizar conexão com o servidor. Verifique sua conexão com a internet ou tente novamente mais tarde.'); //informa que não houve resposta do servidor
-            }else if (error.response.status === 500) {
-                toast.error('Erro interno do servidor. Tente novamente mais tarde.'); //informa um erro interno do servidor
-            }else if (error.response.status === 404) {
-                toast.error('Recurso não encontrado.'); //informa que o recurso não existe
-            }else if (error.response.status === 403) {
-                toast.error('Acesso negado. Você não tem permissão para acessar este recurso.'); //informa que o acesso foi negado
-            }else if (error.response.status === 401) {
-                window.dispatchEvent(new Event('auth:expired'));
+            }else if (error.response.status === 500) { //erro interno do servidor
+                toast.error('Erro interno do servidor. Tente novamente mais tarde.');
+            }else if (error.response.status === 404) { //recurso não encontrado
+                toast.error('Recurso não encontrado.');
+            }else if (error.response.status === 403) { //conta existente mas não tem permissão para acessar o recurso
+                toast.error('Acesso negado. Você não tem permissão para acessar este recurso.'); 
+            }else if (error.response.status === 401) { //não autorizado, ou seja a sessão expirou
+                toast.error('Sua sessão expirou. Por favor, faça login novamente.');
+                if (!error.config?.skipAuthExpired) { //essa variavel serve para eu não mandar o evento de sessão expirada caso eu queira tratar o erro de outra forma
+                    window.dispatchEvent(new Event('auth:expired'));
+                }
             }else if (error.response.status === 400 && !error.config?.skipGlobalErrorToast) {
                 const mensagemBackend = error.response.data?.msg || 'Dados inválidos enviados ao servidor.';
                 toast.error(`Requisição inválida. ${mensagemBackend}`); //informa que os dados enviados são inválidos, além de mostrar a mensagem do backend caso exista

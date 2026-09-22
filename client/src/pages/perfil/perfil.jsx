@@ -1,9 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
+import { GoogleLogin } from '@react-oauth/google'
+import { toast } from 'react-hot-toast'
 
 import { PiNotePencilBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
-import { FcGoogle } from "react-icons/fc";
 import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
 
 
@@ -14,6 +15,7 @@ import DialogEmail from './edicao-perfil/DialogEmail'
 import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
+import api from '../../services/api'
 
 import styles from './perfil.module.css'
 
@@ -31,7 +33,7 @@ const formatarCnpj = (cnpj = '') => {
 }
 
 const Perfil = () => {
-    const { user } = useAuth()
+    const { user, refreshSession, logout } = useAuth()
     const [camposEditaveis, setCamposEditaveis] = useState({})
     const [campoSelect, setCampoSelect] = useState(null)
     const [valores, setValores] = useState({
@@ -43,6 +45,7 @@ const Perfil = () => {
     const inputRefs = useRef({})
     const [dialogEditAberto, setDialogEditAberto] = useState(false)
     const [dialogExluContaAberto, setDialogExluContaAberto] = useState(false)
+    const [vinculandoGoogle, setVinculandoGoogle] = useState(false)
     const fecharDialogExluConta = useCallback(() => setDialogExluContaAberto(false), [])
 
     const campos = [
@@ -75,6 +78,7 @@ const Perfil = () => {
     ]
 
     const DialogEdicao = dialogsEdicao[campoSelect]
+
 
     const fecharDialogEdicao = useCallback(() => {
         const botaoEdicao = inputRefs.current[campoSelect]?.parentElement.querySelector('button')
@@ -114,6 +118,28 @@ const Perfil = () => {
             setDialogEditAberto(true)
         }
     }
+
+    //======================
+    //VINCULAR GOOGLE
+    //======================
+    const vincularGoogle = async ({ credential }) => {
+        if (!credential || vinculandoGoogle) return //se não tiver o token ou ja estiver vinculando, não faz nada
+
+        setVinculandoGoogle(true) //digo que estou no processo de vincular a conta do google para não permitir que o usuario clique varias vezes no botão
+
+        try {
+            const response = await api.post('/motorista/google/vincular', { token: credential }, { //mando as informações do token do google para o backend para vincular a conta do google com a conta do usuario
+                skipGlobalErrorToast: true,
+            })
+            await refreshSession() //chamo a função de refreshSession para atualizar as informações do usuario apos vincular a conta do google
+            toast.success(response.data?.msg || 'Conta Google vinculada com sucesso.')
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível vincular a conta Google.')
+        } finally {
+            setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
+        }
+    }
+
 
     return (
         <main className={styles['perfil-container']}>
@@ -185,8 +211,16 @@ const Perfil = () => {
                                 </button>
                             </div>
 
-                            {campo.id === 'email' && (
-                                <a href="" className={styles['linkGoogle']}><FcGoogle className={styles['iconGoogle']} /> Conectar conta Google</a>
+                            {campo.id === 'email' && user?.verificado === true && !user?.google_vinculado && (
+                                <div className={styles['linkGoogle']}>
+                                    <GoogleLogin
+                                        onSuccess={vincularGoogle}
+                                        onError={() => toast.error('Não foi possível abrir o Google.')}
+                                        text="continue_with"
+                                        size="small"
+                                        shape="pill"
+                                    />
+                                </div>
                             )}
 
                         </div>
@@ -214,7 +248,7 @@ const Perfil = () => {
                 <CgTrash aria-hidden="true" style={{ strokeWidth: '.6', fontSize: '1.7rem' }} />
                 Excluir conta
             </button>
-            <button className={`${styles['BtnExclu-conta']} ${styles['BtnSair-conta']}`}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
+            <button className={`${styles['BtnExclu-conta']}  ${styles['BtnSair-conta']}` } onClick={logout}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
         </main>
     )
 }
