@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from  'react-hot-toast'
 import {
     PiIdentificationCardBold,
     PiLockKeyBold,
@@ -14,12 +15,24 @@ import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
 
+const [senha,setSenha] = useState('');
 const dadosExcluidos = [
     { texto: 'Seu perfil e dados atuais', Icone: PiUserBold },
     { texto: 'Dados financeiros e históricos', Icone: PiIdentificationCardBold },
     { texto: 'Cadastro de responsáveis e crianças', Icone: PiUsersBold },
     { texto: 'Contratos e mensalidades', Icone: PiReceiptBold },
 ]
+
+//======================
+//TRATAR EXCLUSÃO
+//======================
+const handleSubmit = async (event) => {
+    event.preventDefault(); //não deixo atualizar a pagina
+    
+    if(!senha) { //se não tiver senha
+        toast.error("Senha não indentificada, porfavor insira uma senha")
+    }
+}
 
 const DialogExluConta = ({ onClose }) => {
     const [senhaAtual, setSenhaAtual] = useState('')
