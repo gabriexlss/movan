@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
-import './cad.css'
+import styles from './cad.module.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -58,9 +58,9 @@ const Cad = () => {
     }
 
     return(
-        <div className="formulario-cad">
+        <div className={styles['formulario-cad']}>
             <form onSubmit={handleSubmit}>
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="text"
                         id="nomeCompleto"
@@ -74,7 +74,7 @@ const Cad = () => {
                     <label htmlFor="nomeCompleto">Nome completo</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="email"
                         id="emailCadastro"
@@ -88,7 +88,7 @@ const Cad = () => {
                     <label htmlFor="emailCadastro">E-mail</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="text"
                         id="cnpj"
@@ -103,7 +103,7 @@ const Cad = () => {
                     <label htmlFor="cnpj">CNPJ</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="password"
                         id="senhaCadastro"
@@ -117,7 +117,7 @@ const Cad = () => {
                     <label htmlFor="senhaCadastro">Senha</label>
                 </div>
 
-                <div className="campo-cadastro">
+                <div className={styles['campo-cadastro']}>
                     <input
                         type="password"
                         id="confirmarSenha"
@@ -126,12 +126,13 @@ const Cad = () => {
                         onChange={(event) => setConfirmarSenha(event.target.value)}
                         placeholder=" "
                         autoComplete="new-password"
+                        onInput={(event) => event.currentTarget.setCustomValidity('')}
                         required
                     />
                     <label htmlFor="confirmarSenha">Confirmar senha</label>
                 </div>
 
-                <div className="campo-termos">
+                <div className={styles['campo-termos']}>
                     <input
                         type="checkbox"
                         id="termos"
@@ -143,12 +144,12 @@ const Cad = () => {
                     </label>
                 </div>
 
-                <button className="cadastrar" type="submit" disabled={enviando}>
+                <button className={styles['cadastrar']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}
                 </button>
             </form>
 
-            <p className="ou">ou</p>
+            <p className={styles.ou}>ou</p>
 
             <ButtonGoogle />
         </div>

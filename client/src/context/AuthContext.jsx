@@ -7,17 +7,29 @@ const rotasPublicas = [
     '/login',
     '/cadastro',
     '/cadastro-google',
-    '/recuperar-senha',
+    '/esqueci-senha',
     '/codigo-enviado',
     '/redefinir-senha',
     '/error',
 ]
+
+const ERROR_CODE_STORAGE_KEY = 'movan:errorcode'
 
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate() //isso mandar para outra pagina
     const { pathname } = useLocation() //guarda o caminho da pagina atual do usuario
     const [user, setUser] = useState(null)//essa variavel define se o usuario esta logado, alem de guardar as informações dele caso esteja logado
     const [isLoading, setIsLoading] = useState(true)//esse is loading fala que ta carregando
+
+    const redirectToErrorPage = useCallback((errorCode) => {
+        const normalizedErrorCode = String(errorCode || 'default')
+
+        sessionStorage.setItem(ERROR_CODE_STORAGE_KEY, normalizedErrorCode)
+        navigate('/error', {
+            replace: true,
+            state: { errorCode: normalizedErrorCode },
+        })
+    }, [navigate])
 //=======================
 //CARREGAR SESSÃO
 //=======================
@@ -26,13 +38,14 @@ export const AuthProvider = ({ children }) => {
             const health = await api.get('/health', { skipGlobalErrorToast: true }) //verifica se o backend esta online
             if (health.status !== 200) { //se dar algum erro
                 setUser(null)//deixa o usuario nulo
-                navigate('/error', { replace: true })//manda para a pagina de erro
+                setIsLoading(false)
+                redirectToErrorPage(health.status)
                 return //paro a execução
             }
-        } catch {
+        } catch (error) {
             setUser(null)
             setIsLoading(false)
-            navigate('/error', { replace: true })
+            redirectToErrorPage(error.response?.status || 503)
             return
         }
 
@@ -43,15 +56,18 @@ export const AuthProvider = ({ children }) => {
 
             if(motorista.verificado === false){
                 navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //manda para a pagina de codigo enviado caso o usuario não esteja verificado
-            } else {
-                navigate('/', { replace: true }) //manda para a pagina inicial caso o usuario esteja verificado
             }
-        } catch {
-            setUser(null) //qualquer falha ao carregar a sessão significa que o usuário está deslogado
+
+        } catch (error) {
+            setUser(null)
+
+            if (error.response?.status !== 401) {
+                redirectToErrorPage(error.response?.status || 503)
+            }
         } finally {
             setIsLoading(false)
         }
-    }, [navigate])
+    }, [navigate, redirectToErrorPage])
 
 //=======================
 //LIDAR COM SESSÃO EXPIRADA

@@ -1,5 +1,5 @@
 import DefaultCard from './DefaultCard';
-import './CardMensali.css';
+import styles from './CardMensali.module.css';
 
 const CardMensali = () => {
     const mensalidade = [
@@ -10,16 +10,16 @@ const CardMensali = () => {
 
     return (
         <DefaultCard title="Mensalidades" link="/financeiro">
-            <div className="containerMensalidade">
+            <div className={styles.containerMensalidade}>
                 {mensalidade.map((mensalidade) => (
-                    <div className="mensalidadeItem" key={mensalidade.nome} style={{backgroundColor: mensalidade.corf, color: mensalidade.cor}}>
-                        <h2 className="quantidadeMensalidade">{mensalidade.qntd}</h2>
-                        <p className="tituloMensalidade" style={{color: mensalidade.cor}}>{mensalidade.nome}</p>
+                    <div className={styles.mensalidadeItem} key={mensalidade.nome} style={{backgroundColor: mensalidade.corf, color: mensalidade.cor}}>
+                        <h2 className={styles.quantidadeMensalidade}>{mensalidade.qntd}</h2>
+                        <p className={styles.tituloMensalidade} style={{color: mensalidade.cor}}>{mensalidade.nome}</p>
                     </div>
                 ))}
             </div>
 
-            <div className="proximaMensa">
+            <div className={styles.proximaMensa}>
                     <p>Próxima Mensalidade: <span>15/03 - aluno</span></p>
             </div>
         </DefaultCard>

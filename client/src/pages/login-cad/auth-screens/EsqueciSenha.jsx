@@ -2,16 +2,16 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
-import './AuthScreens.css'
+import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
-const RecuperarSenha = () => {
+const EsqueciSenha = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
     const [email, setEmail] = useState('') //guarda o email do usuario
     const [enviando, setEnviando] = useState(false) //uso para falar que o formulario esta sendo enviado
 
     //==========================
-    //RECUPERAR SENHA
+    //ESQUECI SENHA
     //==========================
     const handleSubmit = async (event) => { //uso essa função no para enviar os dados do formulario para o backend quando aperto o botão de enviar
         event.preventDefault() //não deixo o navegador atualizar a pagina
@@ -36,20 +36,20 @@ const RecuperarSenha = () => {
     }
 
     return (
-        <section className="auth-screens">
-            <h2 className="auth-screens__titulo">Recuperar senha</h2>
-            <p className="auth-screens__descricao">
-                Digite seu e-mail de recuperação para redefinir a senha. Um código de verificação será enviado para o e-mail informado.
+        <section className={styles['auth-screens']}>
+            <h2 className={styles['auth-screens__titulo']}>Esqueci minha senha</h2>
+            <p className={styles['auth-screens__descricao']}>
+                Digite o e-mail cadastrado na sua conta para redefinir a senha. Um código de verificação será enviado para o e-mail informado.
             </p>
 
             <form
-                className="auth-screens__form"
+                className={styles['auth-screens__form']}
                 onSubmit={handleSubmit}
             >
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="email"
-                        id="emailRecuperacao"
+                        id="emailEsqueciSenha"
                         name="email"
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
@@ -57,10 +57,10 @@ const RecuperarSenha = () => {
                         autoComplete="email"
                         required
                     />
-                    <label htmlFor="emailRecuperacao">E-mail</label>
+                    <label htmlFor="emailEsqueciSenha">E-mail</label>
                 </div>
 
-                <button className="auth-screens__botao" type="submit" disabled={enviando}>
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Enviar'}
                 </button>
             </form>
@@ -68,4 +68,4 @@ const RecuperarSenha = () => {
     )
 }
 
-export default RecuperarSenha
+export default EsqueciSenha

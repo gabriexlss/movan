@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
-import './AuthScreens.css'
+import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const CodigoEnviado = () => {
@@ -62,7 +62,7 @@ const CodigoEnviado = () => {
             const response = fluxo === 'cadastro' //se o fluxo for de cadastro
                 ? await enviarCodigoCadastro() //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
                 : await api.post('/motorista/recuperar-conta/enviar-codigo', { //se o fluxo não for cadastro eu mando o codigo ser enviado como um de recuperação de conta
-                    email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de recuperar senha e mandei pro backend para ele saber para qual email enviar o codigo
+                    email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de esqueci minha senha e mandei pro backend para ele saber para qual email enviar o codigo
                 }, { skipGlobalErrorToast: true }) //recuso que o toast do api.js seja mostrado, vou tratar o erro aqui
 
             setCodigo('') //limpo o campo de código para o usuário digitar denovo
@@ -117,17 +117,17 @@ const CodigoEnviado = () => {
     }
 
     return (
-        <section className="auth-screens">
-            <h2 className="auth-screens__titulo">Código enviado ao seu e-mail</h2>
-            <p className="auth-screens__descricao">
-                Insira o código de verificação no campo abaixo.
+        <section className={styles['auth-screens']}>
+            <h2 className={styles['auth-screens__titulo']}>Código enviado ao seu e-mail</h2>
+            <p className={styles['auth-screens__descricao']}>
+                Insira o código de verificação abaixo.
             </p>
 
             <form
-                className="auth-screens__form"
+                className={styles['auth-screens__form']}
                 onSubmit={handleSubmit}
             >
-                <div className="auth-screens__campo">
+                <div className={styles['auth-screens__campo']}>
                     <input
                         type="text"
                         id="codigoVerificacao"
@@ -145,9 +145,9 @@ const CodigoEnviado = () => {
                     </label>
                 </div>
 
-                <div className="auth-screens__codigo-meta">
+                <div className={styles['auth-screens__codigo-meta']}>
                     <button
-                        className="auth-screens__reenviar"
+                        className={styles['auth-screens__reenviar']}
                         type="button"
                         onClick={handleReenviar}
                         disabled={tempoRestante > 0 || reenviando}
@@ -155,13 +155,13 @@ const CodigoEnviado = () => {
                         {reenviando ? 'Reenviando...' : 'Reenviar código'}
                     </button>
                     {tempoRestante > 0 && (
-                        <span className="auth-screens__tempo">
+                        <span className={styles['auth-screens__tempo']}>
                             0:{String(tempoRestante).padStart(2, '0')}
                         </span>
                     )}
                 </div>
 
-                <button className="auth-screens__botao" type="submit" disabled={enviando}>
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
                     {enviando ? <LoadingSpinner /> : 'Enviar'}
                 </button>
             </form>

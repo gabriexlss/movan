@@ -1,0 +1,45 @@
+.errorPage-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 5%;
+
+    width: 100%;
+    height: 100vh;
+
+    color: #0d47a1;
+}
+
+.iconeErro{
+    width: 70%;
+    margin-top: 35%;
+}
+
+.errorPage-container h1{
+    font-family: 'Poppins', sans-serif;
+    font-size: 6rem;
+    font-weight: 700;
+}
+
+.errorPage-container h2{
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.errorPage-container p,
+.errorPage-container a {
+    font-family: 'Poppins', sans-serif;
+    font-size: .6rem;
+    font-weight: 400;
+    color: #7A7A7A;
+    margin: .5%;
+    margin-top: 2%;
+}
+
+.errorPage-container a{
+    margin-top: 8%;
+    font-size: .8rem;
+    color: #0d47a1;
+}

@@ -1,0 +1,91 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+
+    background-color: rgb(0 20 55 / 55%);
+    backdrop-filter: blur(3px);
+}
+
+.dialog {
+    position: relative;
+    width: 100%;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+
+    padding: 3.5rem 1.5rem 1.5rem;
+
+    border-radius: 1.25rem;
+    background-color: #fff;
+    box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 25%);
+
+    font-family: 'Poppins', sans-serif;
+}
+
+.small {
+    max-width: 24rem;
+}
+
+.medium {
+    max-width: 32rem;
+}
+
+.large {
+    max-width: 48rem;
+}
+
+.closeButton {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+
+    display: grid;
+    place-items: center;
+
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    background: transparent;
+
+    color: #0d47a1;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.icon {
+    display: grid;
+    place-items: center;
+
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0 auto 0.75rem;
+
+    border: 2px solid #0d47a1;
+    border-radius: 50%;
+
+    color: #0d47a1;
+    font-size: 1.5rem;
+}
+
+.header {
+    text-align: center;
+}
+
+.header h2 {
+    color: #0d47a1;
+}
+
+.content {
+    margin-top: 1.5rem;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
