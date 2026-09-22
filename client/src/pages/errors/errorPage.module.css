@@ -28,7 +28,8 @@
     font-weight: 600;
 }
 
-.errorPage-container p, a {
+.errorPage-container p,
+.errorPage-container a {
     font-family: 'Poppins', sans-serif;
     font-size: .6rem;
     font-weight: 400;

@@ -62,7 +62,7 @@ const CodigoEnviado = () => {
             const response = fluxo === 'cadastro' //se o fluxo for de cadastro
                 ? await enviarCodigoCadastro() //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
                 : await api.post('/motorista/recuperar-conta/enviar-codigo', { //se o fluxo não for cadastro eu mando o codigo ser enviado como um de recuperação de conta
-                    email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de recuperar senha e mandei pro backend para ele saber para qual email enviar o codigo
+                    email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de esqueci minha senha e mandei pro backend para ele saber para qual email enviar o codigo
                 }, { skipGlobalErrorToast: true }) //recuso que o toast do api.js seja mostrado, vou tratar o erro aqui
 
             setCodigo('') //limpo o campo de código para o usuário digitar denovo
@@ -120,7 +120,7 @@ const CodigoEnviado = () => {
         <section className={styles['auth-screens']}>
             <h2 className={styles['auth-screens__titulo']}>Código enviado ao seu e-mail</h2>
             <p className={styles['auth-screens__descricao']}>
-                Insira o código de verificação no campo abaixo.
+                Insira o código de verificação abaixo.
             </p>
 
             <form

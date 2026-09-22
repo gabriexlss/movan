@@ -8,7 +8,7 @@ import Footer from './components/layout/footer'
 import Login from './pages/login-cad/login/login'
 import Cad from './pages/login-cad/cad/cad'
 import CadGoogle from './pages/login-cad/auth-screens/CadGoogle'
-import RecuperarSenha from './pages/login-cad/auth-screens/RecuperarSenha'
+import EsqueciSenha from './pages/login-cad/auth-screens/EsqueciSenha'
 import CodigoEnviado from './pages/login-cad/auth-screens/CodigoEnviado'
 import RedefinirSenha from './pages/login-cad/auth-screens/RedefinirSenha'
 import VerificarEmail from './pages/login-cad/auth-screens/VerificarEmail'
@@ -20,6 +20,7 @@ import GoogleSignupRoute from './components/auth/GoogleSignupRoute'
 import ErrorPage from './pages/errors/errorPage'
 
 import Perfil from './pages/perfil/perfil'
+import Notificacoes from './pages/notificacoes/notificacoes'
 
 function App() {
 
@@ -29,7 +30,7 @@ function App() {
         '/login',
         '/cadastro',
         '/cadastro-google',
-        '/recuperar-senha',
+        '/esqueci-senha',
         '/codigo-enviado',
         '/redefinir-senha',
         '/error',
@@ -48,13 +49,14 @@ function App() {
                 <Route element={<ProtectedRoute />}>
                     <Route path='/' element={<HomePage />} />
                     <Route path='/perfil' element={<Perfil />} />
+                    <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
 
                 <Route element={<PublicRoute />}>
                     <Route element={<LogCadLayout />}>
                         <Route path='/login' element={<Login />} />
                         <Route path='/cadastro' element={<Cad />} />
-                        <Route path='/recuperar-senha' element={<RecuperarSenha />} />
+                        <Route path='/esqueci-senha' element={<EsqueciSenha />} />
                         <Route element={<GoogleSignupRoute />}>
                             <Route path='/cadastro-google' element={<CadGoogle />} />
                         </Route>
