@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from 'react'
 import { PiNotePencilBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
+import { FcGoogle } from "react-icons/fc";
 import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
 
 
@@ -183,6 +184,11 @@ const Perfil = () => {
                                     <PiNotePencilBold aria-hidden="true" />
                                 </button>
                             </div>
+
+                            {campo.id === 'email' && (
+                                <a href="" className={styles['linkGoogle']}><FcGoogle className={styles['iconGoogle']} /> Conectar conta Google</a>
+                            )}
+
                         </div>
                     )
                 })}
