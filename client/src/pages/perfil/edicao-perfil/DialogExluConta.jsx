@@ -14,14 +14,23 @@ import {
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
+import { useAuth } from '../../../context/useAuth'
 
-const [senha,setSenha] = useState('');
+
 const dadosExcluidos = [
     { texto: 'Seu perfil e dados atuais', Icone: PiUserBold },
     { texto: 'Dados financeiros e históricos', Icone: PiIdentificationCardBold },
     { texto: 'Cadastro de responsáveis e crianças', Icone: PiUsersBold },
     { texto: 'Contratos e mensalidades', Icone: PiReceiptBold },
 ]
+
+
+
+const DialogExluConta = ({ onClose }) => {
+    const [senhaAtual, setSenhaAtual] = useState('')
+    const [confirmacao, setConfirmacao] = useState('')
+    const podeConfirmar = senhaAtual.trim().length > 0 && confirmacao === 'EXCLUIR'
+    const { logout:sair } = useAuth()
 
 //======================
 //TRATAR EXCLUSÃO
@@ -30,14 +39,19 @@ const handleSubmit = async (event) => {
     event.preventDefault(); //não deixo atualizar a pagina
     
     if(!senha) { //se não tiver senha
-        toast.error("Senha não indentificada, porfavor insira uma senha")
+        toast.error("Senha não indentificada, por favor insira uma senha")
+    }
+
+    try{
+        const response = await api.delete('/motorista', {
+            senha
+        })
+        await sair;
+    
+    }catch{
+
     }
 }
-
-const DialogExluConta = ({ onClose }) => {
-    const [senhaAtual, setSenhaAtual] = useState('')
-    const [confirmacao, setConfirmacao] = useState('')
-    const podeConfirmar = senhaAtual.trim().length > 0 && confirmacao === 'EXCLUIR'
 
     return (
         <DefaultDialog
