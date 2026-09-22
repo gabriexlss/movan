@@ -1,14 +1,22 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
+
 import { PiNotePencilBold } from 'react-icons/pi'
-
-import TituloTela from '../../components/layout/tituloTela'
-
-import { useAuth } from '../../context/useAuth'
-import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
 import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
+import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
+
+
+import TituloTela from '../../components/layout/tituloTela'
+import DialogSenha from './edicao-perfil/DialogSenha'
+import DialogCnpj from './edicao-perfil/DialogCnpj'
+import DialogEmail from './edicao-perfil/DialogEmail'
+import DialogExluConta from './edicao-perfil/DialogExluConta'
+
+import { useAuth } from '../../context/useAuth'
 
 import styles from './perfil.module.css'
+
+const dialogsEdicao = { senha: DialogSenha, cnpj: DialogCnpj, email: DialogEmail }
 
 const formatarCnpj = (cnpj = '') => {
     const numeros = String(cnpj).replace(/\D/g, '').slice(0, 14)
@@ -24,6 +32,7 @@ const formatarCnpj = (cnpj = '') => {
 const Perfil = () => {
     const { user } = useAuth()
     const [camposEditaveis, setCamposEditaveis] = useState({})
+    const [campoSelect, setCampoSelect] = useState(null)
     const [valores, setValores] = useState({
         nome: '',
         email: '',
@@ -31,6 +40,9 @@ const Perfil = () => {
         senha: '',
     })
     const inputRefs = useRef({})
+    const [dialogEditAberto, setDialogEditAberto] = useState(false)
+    const [dialogExluContaAberto, setDialogExluContaAberto] = useState(false)
+    const fecharDialogExluConta = useCallback(() => setDialogExluContaAberto(false), [])
 
     const campos = [
         {
@@ -61,6 +73,17 @@ const Perfil = () => {
         },
     ]
 
+    const DialogEdicao = dialogsEdicao[campoSelect]
+
+    const fecharDialogEdicao = useCallback(() => {
+        const botaoEdicao = inputRefs.current[campoSelect]?.parentElement.querySelector('button')
+        setDialogEditAberto(false)
+        setCampoSelect(null)
+        requestAnimationFrame(() => {
+            if (botaoEdicao?.isConnected) botaoEdicao.focus()
+        })
+    }, [campoSelect])
+
     const habilitarEdicao = (campo) => {
         setCamposEditaveis((estadoAtual) => ({
             ...estadoAtual,
@@ -78,10 +101,17 @@ const Perfil = () => {
     }
 
     const encerrarEdicao = (campo) => {
+        if (!camposEditaveis[campo]) return
+
         setCamposEditaveis((estadoAtual) => ({
             ...estadoAtual,
             [campo]: false,
         }))
+
+        if (dialogsEdicao[campo]) {
+            setCampoSelect(campo)
+            setDialogEditAberto(true)
+        }
     }
 
     return (
@@ -135,7 +165,10 @@ const Perfil = () => {
                                     onChange={(event) => alterarValor(campo.id, event.target.value)}
                                     onBlur={() => encerrarEdicao(campo.id)}
                                     onKeyDown={(event) => {
-                                        if (event.key === 'Enter') event.currentTarget.blur()
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault()
+                                            event.currentTarget.blur()
+                                        }
                                     }}
                                 />
 
@@ -155,7 +188,26 @@ const Perfil = () => {
                 })}
             </section>
 
-            <button className={styles['BtnExclu-conta']}> <CgTrash style={{ strokeWidth: '.6', fontSize: '1.7rem' }} /> Excluir conta</button>
+            {dialogEditAberto && DialogEdicao && (
+                <DialogEdicao
+                    valor={valores[campoSelect]}
+                    valorAtual={user?.[campoSelect]}
+                    onValorChange={(valor) => alterarValor(campoSelect, valor)}
+                    onClose={fecharDialogEdicao}
+                />
+            )}
+
+            {dialogExluContaAberto && <DialogExluConta onClose={fecharDialogExluConta} />}
+
+            <button
+                type="button"
+                className={styles['BtnExclu-conta']}
+                onClick={() => setDialogExluContaAberto(true)}
+                aria-haspopup="dialog"
+            >
+                <CgTrash aria-hidden="true" style={{ strokeWidth: '.6', fontSize: '1.7rem' }} />
+                Excluir conta
+            </button>
             <button className={`${styles['BtnExclu-conta']} ${styles['BtnSair-conta']}`}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
         </main>
     )

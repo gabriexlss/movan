@@ -69,7 +69,7 @@ const Login = () => {
 
             <ButtonGoogle />
 
-            <a href="/recuperar-senha">Esqueceu a senha?</a>
+            <a href="/esqueci-senha">Esqueci minha senha</a>
         </div>
     )
 }

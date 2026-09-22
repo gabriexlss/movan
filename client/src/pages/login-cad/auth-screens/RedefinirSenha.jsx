@@ -27,7 +27,7 @@ const RedefinirSenha = () => {
 
         if (!email || !codigo) { //se não tiver email ou código no estado ou no sessionStorage
             toast.error('Solicite um novo código de recuperação.') //mando uma mensagem de erro
-            navigate('/recuperar-senha', { replace: true }) //mando o usuário para a tela de recuperar senha
+            navigate('/esqueci-senha', { replace: true }) //mando o usuário para a tela de esqueci minha senha
             return //cancelo o envio do formulario
         }
 

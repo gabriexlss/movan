@@ -7,7 +7,7 @@ const rotasPublicas = [
     '/login',
     '/cadastro',
     '/cadastro-google',
-    '/recuperar-senha',
+    '/esqueci-senha',
     '/codigo-enviado',
     '/redefinir-senha',
     '/error',
