@@ -89,10 +89,12 @@
     border-radius: 999px;
     background-color: #ffffff;
     transition: border-color .2s ease;
+    user-select: none; 
 }
 
 .input-container--editavel:focus-within {
     border-color: #0d47a1;
+    user-select: auto;
 }
 
 .input-container input {
