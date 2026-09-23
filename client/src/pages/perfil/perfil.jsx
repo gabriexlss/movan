@@ -90,6 +90,12 @@ const Perfil = () => {
     }, [campoSelect])
 
     const habilitarEdicao = (campo) => {
+        if (dialogsEdicao[campo]) { //se o campo for de dialog
+            setCampoSelect(campo) //seto o campo que vai ser editado
+            setDialogEditAberto(true) //abro o dialog de edição
+            return //retorno aqui porque não quero que ele edite o input caso seja um campo de dialog
+        }
+
         setCamposEditaveis((estadoAtual) => ({
             ...estadoAtual,
             [campo]: true,
@@ -105,7 +111,7 @@ const Perfil = () => {
         }))
     }
 
-    const encerrarEdicao = (campo) => {
+    const encerrarEdicao = async (campo) => {
         if (!camposEditaveis[campo]) return
 
         setCamposEditaveis((estadoAtual) => ({
@@ -116,6 +122,20 @@ const Perfil = () => {
         if (dialogsEdicao[campo]) {
             setCampoSelect(campo)
             setDialogEditAberto(true)
+        }
+        //======================
+        //ATUALIZAR CAMPO 
+        //======================
+        try {
+            await api.patch(
+                '/motorista',
+                { [campo]: valores[campo] },
+                { skipGlobalErrorToast: true },
+            )
+            await refreshSession()
+            toast.success('Campo atualizado com sucesso.')
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível atualizar o campo.')
         }
     }
 

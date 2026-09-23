@@ -587,10 +587,12 @@ export const controllerMotorista = {
             await database.query(queryAplicarDelete, [id])
 
             // Data de exclusão colocada (soft delete) ent agora só apagar a sessão dele e retornar
-            return res.status(200).clearCookie("token", {
+            return res.status(200).cookie("token", "", {
                 httpOnly: true,
                 secure: process.env['NODE_ENV'] === 'production',
-                sameSite: 'strict'
+                sameSite: 'strict',
+                expires: new Date(0),
+                maxAge: 0
             }).json({
                 msg: "Conta agendada para exclusão com sucesso."
             })
