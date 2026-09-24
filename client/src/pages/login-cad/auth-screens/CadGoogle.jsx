@@ -17,7 +17,7 @@ const CadGoogle = () => {
             return null //se der erro eu devolvo null
         }
     })
-    const [cnpj, setCnpj] = useState('') //CNPJ do usuário
+    const [credencial, setCredencial] = useState('') //CPF ou CNPJ do usuário
     const [senha, setSenha] = useState('') //senha do usuário
     const [confirmarSenha, setConfirmarSenha] = useState('') //senha de confirmação do usuário
     const [enviando, setEnviando] = useState(false) //essa variavel fala se o formulario esta no processo de envio
@@ -44,7 +44,7 @@ const CadGoogle = () => {
         try {
             const response = await api.post('/motorista/google/criar', { //envio os seguintes dados para o backend
                 nome: dadosGoogle.nome, //o nome do usuario que o google me devolveu
-                cnpj: cnpj.replace(/[^a-z0-9]/gi, '').toUpperCase(), //deixo so os numeros do CNPJ e mando pro backend
+                credencial: credencial.replace(/[^a-z0-9]/gi, '').toUpperCase(), //mando o CPF ou CNPJ sem os caracteres especiais
                 senha, //a senha do usuario
                 token: dadosGoogle.token, //o token do google
             }, {
@@ -56,7 +56,7 @@ const CadGoogle = () => {
             navigate('/', { replace: true }) //mando o usuario para a tela inicial
         } catch (error) {
             if (error.response?.status === 409) {
-                toast.error(error.response.data?.msg || 'E-mail, CNPJ ou conta Google já cadastrado no Movan.')
+                toast.error(error.response.data?.msg || 'E-mail, CPF, CNPJ ou conta Google já cadastrado no Movan.')
                 return
             }
 
@@ -80,16 +80,16 @@ const CadGoogle = () => {
                 <div className={styles['auth-screens__campo']}>
                     <input
                         type="text"
-                        id="cnpjGoogle"
-                        name="cnpj"
-                        value={cnpj}
-                        onChange={(event) => setCnpj(event.target.value)}
+                        id="credencialGoogle"
+                        name="credencial"
+                        value={credencial}
+                        onChange={(event) => setCredencial(event.target.value)}
                         placeholder=" "
                         inputMode="numeric"
                         maxLength={18}
                         required
                     />
-                    <label htmlFor="cnpjGoogle">CNPJ</label>
+                    <label htmlFor="credencialGoogle">CPF ou CNPJ</label>
                 </div>
 
                 <div className={styles['auth-screens__campo']}>
