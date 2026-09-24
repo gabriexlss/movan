@@ -4,11 +4,9 @@ import DefaultCard from '../../../components/cards/DefaultCard'
 
 const ResumoFinanc = () => {
     return (
-        <div className={styles['resumo-container']}>
-            <DefaultCard title="Resumo Financeiro">
-
-            </DefaultCard>
-        </div>
+        <DefaultCard title="Resumo Financeiro">
+            
+        </DefaultCard>
     )
 }
 
