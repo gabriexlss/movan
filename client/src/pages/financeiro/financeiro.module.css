@@ -6,3 +6,38 @@
 
     width: 100%;
 }
+
+.periodo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    margin-top: -.35rem;
+    color: #07368A;
+    font-family: 'Poppins', sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.setaPeriodo {
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0D47A1;
+    cursor: pointer;
+}
+
+.setaPeriodo svg,
+.iconeCalendario {
+    font-size: .9rem;
+}
+
+.setaPeriodo:focus-visible {
+    border-radius: .2rem;
+    outline: 2px solid #0D47A1;
+    outline-offset: 2px;
+}
