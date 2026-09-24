@@ -113,7 +113,7 @@ const validarCodigo = async (id: number, tipo: "CRIACAO" | "RECUPERACAO" | "ALTE
     /* Essa Query gigantesca basicamente pega o codigo mais recente do banco de dados e 
 apenas um só dele, E só se tiver o mesmo id do motorista, o mesmo tipo de código 
 e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
-    const queryCodigoVerificacao = `SELECT id, cod
+    const queryCodigoVerificacao = `SELECT id, codigo_hash
     FROM cod_verificacao
     WHERE motorista_id = $1 AND tipo = $2 AND (data_criacao + INTERVAL '5 minutes') > NOW() AND data_uso IS NULL
     ORDER BY data_criacao DESC 
@@ -127,7 +127,7 @@ e se nao for um codigo expirado, ou seja se nao tiver passado 5 minutos */
             return null
         }
         // salva o hash de codigo numa constante
-        const codigoHash = rows[0].cod
+        const codigoHash = rows[0].codigo_hash
 
         // salva o id do codigo numa variavel
         const idCodigo: number = rows[0].id
@@ -202,7 +202,7 @@ export const controllerMotorista = {
             const responseCredencial = await verificarEmailouCNPJouCPF(credencial, metodo)
             if (responseCredencial) {
                 return res.status(409).json({
-                    msg: "CNPJ ou CPF já cadastrado no Movan."
+                    msg: `${metodo === 'cnpj' ? 'CNPJ' : 'CPF'} já cadastrado no Movan.`
                 })
             }
         } catch (erro) {
