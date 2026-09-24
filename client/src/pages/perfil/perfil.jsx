@@ -16,15 +16,18 @@ import { useAuth } from '../../context/useAuth'
 
 import styles from './perfil.module.css'
 
-const dialogsEdicao = { senha: DialogSenha, cnpj: DialogCnpj, email: DialogEmail }
+const dialogsEdicao = { senha: DialogSenha, credencial: DialogCnpj, email: DialogEmail }
 
-const formatarCnpj = (cnpj = '') => {
-    const numeros = String(cnpj).replace(/\D/g, '').slice(0, 14)
+const formatarCredencial = (credencial = '') => {
+    const documento = String(credencial || '').replace(/[^a-z0-9]/gi, '').toUpperCase()
 
-    if (numeros.length !== 14) return cnpj
+    if (documento.length === 11) {
+        return documento.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')
+    }
+    if (documento.length !== 14) return credencial
 
-    return numeros.replace(
-        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+    return documento.replace(
+        /^([A-Z0-9]{2})([A-Z0-9]{3})([A-Z0-9]{3})([A-Z0-9]{4})(\d{2})$/,
         '$1.$2.$3/$4-$5',
     )
 }
@@ -36,7 +39,7 @@ const Perfil = () => {
     const [valores, setValores] = useState({
         nome: '',
         email: '',
-        cnpj: '',
+        credencial: '',
         senha: '',
     })
     const inputRefs = useRef({})
@@ -59,9 +62,9 @@ const Perfil = () => {
             autoComplete: 'email',
         },
         {
-            id: 'cnpj',
-            label: 'CNPJ',
-            placeholder: formatarCnpj(user?.cnpj) || 'CNPJ não informado',
+            id: 'credencial',
+            label: 'CPF ou CNPJ',
+            placeholder: formatarCredencial(user?.credencial) || 'CPF/CNPJ não informado',
             inputMode: 'numeric',
         },
         {
@@ -130,7 +133,7 @@ const Perfil = () => {
                         {user?.nome || 'Nome não informado'}
                     </h1>
                     <p className={styles['cnpj-perfil']}>
-                        CNPJ: {formatarCnpj(user?.cnpj) || 'não informado'}
+                        {user?.tipo_pessoa === 'PF' ? 'CPF' : 'CNPJ'}: {formatarCredencial(user?.credencial) || 'não informado'}
                     </p>
                 </div>
             </div>

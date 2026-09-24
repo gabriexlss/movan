@@ -11,7 +11,7 @@ const Cad = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
     const [nome, setNome] = useState('') //guarda o nome do usuario
     const [email, setEmail] = useState('') //guarda o email
-    const [cnpj, setCnpj] = useState('') //guarda o cnpj do usuario
+    const [credencial, setCredencial] = useState('') //guarda o CPF ou CNPJ do usuario
     const [senha, setSenha] = useState('') //guarda a senha do usuario
     const [confirmarSenha, setConfirmarSenha] = useState('') //guarda a confirmação da senha do usuario
     const [enviando, setEnviando] = useState(false) //uso para falar que o formulario esta sendo enviado
@@ -33,7 +33,7 @@ const Cad = () => {
             const response = await api.post('/motorista', { //aguardo a resposta do backend para criar o usuario
                 nome, //mando o nome do usuario
                 email, //mando o email do usuario
-                cnpj: cnpj.replace(/[^a-z0-9]/gi, '').toUpperCase(), //mando o cnpj do usuario sem os caracteres especiais
+                credencial: credencial.replace(/[^a-z0-9]/gi, '').toUpperCase(), //mando o CPF ou CNPJ sem os caracteres especiais
                 senha, //mando a senha do usuario (não to encriptando a senha pq o backend vai fazer isso)
             }, {
                 skipGlobalErrorToast: true, //eu recuso a mensagem de erro do backend que tratei no api.js, porque tratarei ele de forma diferente aqui
@@ -41,10 +41,10 @@ const Cad = () => {
 
             toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma caixa de sucesso com a mensagem do backend, caso não tenha mensagem do backend mando uma mensagem padrão
             sessionStorage.setItem('movan:verificationFlow', 'cadastro') //falo que o fluxo de verificação é de cadastro, porque o usuário acabou de criar a conta
-            navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro' } }) //mando o usuario para a pagina de codigo enviado
+            navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //mando o usuario para a pagina de codigo enviado
         } catch (error) {
             if (error.response?.status === 409) {
-                toast.error(error.response.data?.msg || 'E-mail ou CNPJ já cadastrado no Movan.')
+                toast.error(error.response.data?.msg || 'E-mail, CPF ou CNPJ já cadastrado no Movan.')
                 return
             }
 
@@ -91,16 +91,16 @@ const Cad = () => {
                 <div className={styles['campo-cadastro']}>
                     <input
                         type="text"
-                        id="cnpj"
-                        name="cnpj"
-                        value={cnpj}
-                        onChange={(event) => setCnpj(event.target.value)}
+                        id="credencial"
+                        name="credencial"
+                        value={credencial}
+                        onChange={(event) => setCredencial(event.target.value)}
                         placeholder=" "
                         inputMode="numeric"
                         maxLength={18}
                         required
                     />
-                    <label htmlFor="cnpj">CNPJ</label>
+                    <label htmlFor="credencial">CPF ou CNPJ</label>
                 </div>
 
                 <div className={styles['campo-cadastro']}>
