@@ -13,19 +13,19 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
         <DefaultDialog
             isOpen
             onClose={onClose}
-            title="Alterar CNPJ"
-            description="Confirme os dados antes de salvar. Alterações no CNPJ podem impactar documentos e recebimentos."
+            title="Alterar CPF ou CNPJ"
+            description="Confirme os dados antes de salvar. Alterações no documento podem impactar documentos e recebimentos."
             icon={<PiBuildingsBold />}
             size="small"
             className={styles.dialog}
         >
             <div className={styles.form}>
                 <CampoEdicao
-                    label="CNPJ atual"
+                    label="CPF ou CNPJ atual"
                     icon={<PiBuildingsBold />}
                     value={cnpjAtual}
                     onChange={(event) => setCnpjAtual(event.target.value)}
-                    placeholder="00.000.000/0000-00"
+                    placeholder="CPF ou CNPJ atual"
                     inputMode="numeric"
                     maxLength={18}
                     autoComplete="off"
@@ -43,18 +43,18 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
                     suffix={<><PiClockBold aria-hidden="true" /><span aria-label="Tempo ilustrativo: 30 segundos">0:30</span></>}
                 />
                 <CampoEdicao
-                    label="Novo CNPJ"
+                    label="Novo CPF ou CNPJ"
                     icon={<PiBuildingsBold />}
                     value={valor}
                     onChange={(event) => onValorChange(event.target.value)}
-                    placeholder="00.000.000/0000-00"
+                    placeholder="Novo CPF ou CNPJ"
                     inputMode="numeric"
                     maxLength={18}
                     autoFocus
                 />
 
                 <button type="button" className={styles.primaryButton} onClick={onClose}>
-                    Alterar CNPJ
+                    Alterar CPF ou CNPJ
                 </button>
             </div>
         </DefaultDialog>
