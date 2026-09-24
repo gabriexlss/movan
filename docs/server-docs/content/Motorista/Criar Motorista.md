@@ -1,7 +1,6 @@
 Endpoint para criar uma conta de motorista.
 
 ## Rota URL
-
 - Rota: /motorista
 - Tipo: POST
 

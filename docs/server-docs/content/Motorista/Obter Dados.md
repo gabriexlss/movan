@@ -1,7 +1,6 @@
 Endpoint autenticado para obter as informações e dados do perfil do motorista logado.
 
 ## Rota URL
-
 - Rota: /motorista
 - Tipo: GET
 - _Nota: Rota protegida. Necessário o cookie `token` de autenticação._

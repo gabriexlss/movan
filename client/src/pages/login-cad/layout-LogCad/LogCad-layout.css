@@ -1,0 +1,13 @@
+.logcad-layout {
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logcad-conteudo {
+    width: 100%;
+    flex: 1;
+}

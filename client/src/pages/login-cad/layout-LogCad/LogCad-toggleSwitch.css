@@ -1,0 +1,63 @@
+.logcad-toggle {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    width: min(85%, 22rem);
+    padding: 0.25rem;
+    border-radius: 15px;
+    background-color: #eeeeeeb4;
+
+    font-family: 'Bree Serif', serif;
+    font-size: 1.2rem;
+}
+
+.logcad-toggle a {
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    place-items: center;
+
+    padding: 0.7rem 1rem;
+    line-height: 1.2rem;
+
+    text-align: center;
+    text-decoration: none;
+    color: #0D47A1;
+}
+
+.toggle-indicador {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 0.25rem;
+
+    width: calc(50% - 0.25rem);
+    border-radius: 15px;
+
+    transition: transform .5s ease, background-color .5s ease;
+}
+
+.logcad-toggle.login .toggle-indicador {
+    transform: translateX(0);
+    background-color: #FFC33A;
+}
+
+.logcad-toggle.cadastro .toggle-indicador {
+    transform: translateX(100%);
+    background-color: #0D47A1;
+}
+
+.logcad-toggle.login {
+    border: 1px solid #FFC33A;
+}
+
+.logcad-toggle.cadastro {
+    border: 1px solid #0D47A1;
+}
+
+.logcad-toggle.login a:first-of-type,
+.logcad-toggle.cadastro a:last-of-type {
+    color: white;
+}

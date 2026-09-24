@@ -1,7 +1,6 @@
 Endpoint autenticado para agendar o encerramento (soft delete) da conta do motorista após 30 dias.
 
 ## Rota URL
-
 - Rota: /motorista
 - Tipo: DELETE
 - _Nota: Rota protegida. Necessário o cookie `token` de autenticação._
