@@ -25,13 +25,13 @@ const dados = {
         {
             label: 'Lucros',
             data: [1000, 3000, 1800, 6767, 7000, 3500, 3500, 3500, 3500, 0, 0, 0],
-            backgroundColor: [...Array(9).fill('#16852b'), ...cinza],
+            backgroundColor: [...Array(9).fill('#15720C'), ...cinza],
             borderRadius: 2,
         },
         {
             label: 'Despesas',
             data: [1200, 2000, 1400, 1800, 300, 3500, 3500, 3500, 3500, 0, 0, 0],
-            backgroundColor: [...Array(9).fill('#8d1010'), ...cinza],
+            backgroundColor: [...Array(9).fill('#720C0C'), ...cinza],
             borderRadius: 2,
         },
     ],
