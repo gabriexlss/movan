@@ -5,12 +5,12 @@ import { UtilSchema } from './utils.model.js';
 // Modelo global pro motorista (usuario)
 const MotoristaSchema = z.object({
     id: UtilSchema.shape.id,
-    cnpj: z.string("Não é uma String").length(14, "CNPJ Invalido"),
+    credencial: z.string("Não é uma String"), //credencial é ou cnpj ou cpf
     email: z.string("Não é uma String").min(3, "Email muito curto").max(150, "Email Muito Longo").email("Email Invalido"),
     nome: z.string("Não é uma String").min(3, "Nome muito Curto").max(200, "Nome muito Longo"),
     senha: z.string("Não é uma String").max(100, "Senha muito Longa"),
-    verificado: z.boolean("Não é um Booleano"),
-    data_exclusao: z.string("Não é uma String").datetime("Não é uma Data Valida").nullish(),
+    email_verificado: z.boolean("Não é um Booleano"),
+    excluido_em: z.string("Não é uma String").datetime("Não é uma Data Valida").nullish(),
     login: z.string("Não é uma String").min(3, "Credenciais de Login muito curtas").max(255, "Credenciais de Login muito longas")
 });
 // Modelo referente a autenticação utilizando o google.
@@ -25,7 +25,7 @@ const AuthGoogleSchema = z.object({
 })
 export const CriarMotoristaGoogleSchema = z.object({
     nome: MotoristaSchema.shape.nome,
-    cnpj: MotoristaSchema.shape.cnpj,
+    credencial: MotoristaSchema.shape.credencial,
     senha: MotoristaSchema.shape.senha,
     token: AuthGoogleSchema.shape.token
 })
@@ -35,7 +35,7 @@ export const GoogleTokenSchema = AuthGoogleSchema.pick({
 // Modelo Referente a Criação do Motorista
 export const CriarMotoristaSchema = MotoristaSchema.pick({
     nome: true,
-    cnpj: true,
+    credencial: true,
     email: true,
     senha: true,
 });

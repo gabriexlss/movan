@@ -18,7 +18,7 @@ export const gerarCodigo = async (email: string, tipo: "CRIACAO" | "RECUPERACAO"
 
     // salva codigo no banco de dados
     try{
-        const query = "INSERT INTO cod_verificacao (cod, tipo, motorista_id) VALUES ($1, $2, $3)"
+        const query = "INSERT INTO cod_verificacao (codigo_hash, tipo, motorista_id) VALUES ($1, $2, $3)"
         const valores = [codigoHash, tipo, id];
 
         if(cliente){
