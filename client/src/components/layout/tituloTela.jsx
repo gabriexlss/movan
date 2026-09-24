@@ -8,12 +8,13 @@ import { FaBell } from "react-icons/fa";
 import { PiCaretRightBold } from 'react-icons/pi'
 import { Link } from 'react-router-dom'
 
-const TituloTela = ({ title, className='' }) => {
-    const data = new Intl.DateTimeFormat("pt-BR", {
+const TituloTela = ({ title, className='', subtitle }) => {
+    const dataAtual = new Intl.DateTimeFormat("pt-BR", {
         weekday: "long",
         day: "numeric",
         month: "long",
     }).format(new Date());
+    const textoSubtitulo = subtitle ?? dataAtual;
 
     const [notifAberta, setNotifAberta] = useState(false)
     const botaoNotificacaoRef = useRef(null)
@@ -23,7 +24,7 @@ const TituloTela = ({ title, className='' }) => {
         <div className={`${styles['TituloTela-container']} ${className}`}>
             <div className={styles.texto}>
                 <h1 className={styles.titulo}>{title}</h1>
-                <h2 className={styles.subtitulo}>{data}</h2>
+                <h2 className={styles.subtitulo}>{textoSubtitulo}</h2>
             </div>
 
             <div className={styles.notificacoes}>
