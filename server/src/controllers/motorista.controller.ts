@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema, GoogleTokenSchema, CriarMotoristaGoogleSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema, GoogleTokenSchema, CriarMotoristaGoogleSchema, compararSenhaSchema } from "../models/motorista.model.js"
 import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
@@ -1014,6 +1014,40 @@ export const controllerMotorista = {
             console.error("Erro ao desvincular conta google, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+    },
+    compararSenha: async (req: Request, res: Response) => {
+        // recebendo a senha bruta do cliente
+        const senhaBruta = compararSenhaSchema.safeParse(req.body)
+
+        // pegando o id do motorista
+        const motoristaID = req.userId
+
+        // validação
+        if(!senhaBruta.success){
+            return res.status(400).json({
+                msg: "Digite uma senha válida para comparar."
+            })
+        }
+        const { senha: senhaInserida } = senhaBruta.data
+        try{
+            // pegando a senha hash do motorista
+            const query = "SELECT senha FROM motorista WHERE id = $1"
+            const { rows: dados } = await database.query(query, [motoristaID])
+            const senhaHash = dados[0].senha
+
+            // fazendo a comparação.
+            const senhaValida = await bcrypt.compare(senhaInserida, senhaHash)
+
+            return res.status(200).json({
+                msg: "Senha Comparada com Sucesso!",
+                senhaValida: senhaValida
+            })
+        }catch(erro){
+            console.error("Erro ao pegar senha hash do motorista no endpoint de compararSenha, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         }
     }

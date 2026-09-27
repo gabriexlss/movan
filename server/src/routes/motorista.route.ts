@@ -49,4 +49,7 @@ router.post('/google/criar', controllerMotorista.criarContaGoogle)
 // rota delete para desvincular a conta google da conta do usuario logado.
 router.delete('/google/desvincular', middlewareAutenticar, middlewareVerificado,controllerMotorista.desvincularGoogle)
 
+// rota post para comparar uma senha digitada com a senha do motorista logado.
+router.post('/comparar-senha', middlewareAutenticar, controllerMotorista.compararSenha)
+
 export default router;
