@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
             const motorista = response.data.motorista //pega as informacoes do usuario logadoo
             setUser(motorista) //guarda as informações do usuario logado
 
-            if(motorista.verificado === false){
+            if(motorista.email_verificado === false){
                 navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //manda para a pagina de codigo enviado caso o usuario não esteja verificado
             }
 

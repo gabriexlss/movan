@@ -2,11 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const CodigoEnviado = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
+    const { refreshSession } = useAuth()
     const { state } = useLocation() //pego o estado que foi passado na navegação, caso não tenha estado pego o fluxo do sessionStorage, caso não tenha fluxo no sessionStorage defino como 'recuperacao'
     const [codigo, setCodigo] = useState('') //guarda o código que o usuário digita
     const [enviando, setEnviando] = useState(false) //uso para falar que o formulario esta sendo enviado
@@ -101,7 +103,8 @@ const CodigoEnviado = () => {
                 })
                 toast.success(response.data?.msg || 'Conta verificada com sucesso.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
                 sessionStorage.removeItem('movan:verificationFlow') //apago o fluxo porque o usuário já verificou a conta
-                navigate('/login', { replace: true }) //mando para a pagina de login
+                await refreshSession()
+                navigate('/', { replace: true })
             } else {
                 sessionStorage.setItem('movan:recoveryCode', codigo) //guardo o código no sessionStorage porque vou usar na tela de redefinir senha
                 navigate('/redefinir-senha', { state: { codigo, fluxo: 'recuperacao' } }) //mando para a pagina de redefinir senha e falo que o fluxo é de recuperação

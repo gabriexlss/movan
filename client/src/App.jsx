@@ -1,10 +1,10 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
 
-import HomePage from './pages/homePage'
 import Header from './components/layout/header'
 import Footer from './components/layout/footer'
 
+import HomePage from './pages/homePage'
 import Login from './pages/login-cad/login/login'
 import Cad from './pages/login-cad/cad/cad'
 import CadGoogle from './pages/login-cad/auth-screens/CadGoogle'
@@ -18,6 +18,7 @@ import PublicRoute from './components/auth/PublicRoute'
 import VerificationRoute from './components/auth/VerificationRoute'
 import GoogleSignupRoute from './components/auth/GoogleSignupRoute'
 import ErrorPage from './pages/errors/errorPage'
+import Financeiro from './pages/financeiro/financeiro'
 
 import Perfil from './pages/perfil/perfil'
 import Notificacoes from './pages/notificacoes/notificacoes'
@@ -48,6 +49,7 @@ function App() {
 
                 <Route element={<ProtectedRoute />}>
                     <Route path='/' element={<HomePage />} />
+                    <Route path='/financeiro' element={<Financeiro />} />
                     <Route path='/perfil' element={<Perfil />} />
                     <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>

@@ -44,7 +44,7 @@ const Login = () => {
                         autoComplete='username'
                         required
                     />
-                    <label htmlFor="email">E-mail/CNPJ</label>
+                    <label htmlFor="email">E-mail, CPF ou CNPJ</label>
                 </div>
 
                 <div className={styles.inputSenha}>
