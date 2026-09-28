@@ -22,7 +22,7 @@ export const controllerResponsavel = {
             })
         }
         // separando os dados em constantes
-        const { cpf: dadocpf, nome, endereco, tel, email } = dadosBrutos.data
+        const { cpf: dadocpf, nome, endereco, telefone, email } = dadosBrutos.data
 
         // if pra validar se um cpf realmente é um cpf ou se não é so um cara metendo rage bait.
         if (!cpf.isValid(dadocpf)) {
@@ -47,8 +47,8 @@ export const controllerResponsavel = {
             })
         }
         try {
-            const query = "INSERT INTO responsavel (cpf, nome, endereco, tel, email, motorista_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
-            const valores = [dadocpf, nome, endereco, tel, email, motoristaId]
+            const query = "INSERT INTO responsavel (cpf, nome, endereco, telefone, email, motorista_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
+            const valores = [dadocpf, nome, endereco, telefone, email, motoristaId]
             // faz o insert no banco de dados e retorna os dados que acabei de inserir
             const { rows } = await database.query(query, valores)
             // pega o valor que retornou e coloca numa constante
@@ -93,7 +93,7 @@ export const controllerResponsavel = {
         }
         // desestruturação dos dados
         const { id } = idBruto.data
-        const { nome, endereco, tel, email } = dadosBrutos.data
+        const { nome, endereco, telefone, email } = dadosBrutos.data
 
         // iniciando arrays de campos e valores
         const campos: string[] = []
@@ -115,9 +115,9 @@ export const controllerResponsavel = {
             campos.push(`endereco = $${valores.length + 1}`)
             valores.push(endereco)
         }
-        if (tel) {
-            campos.push(`tel = $${valores.length + 1}`)
-            valores.push(tel)
+        if (telefone) {
+            campos.push(`telefone = $${valores.length + 1}`)
+            valores.push(telefone)
         }
         if (email) {
             campos.push(`email = $${valores.length + 1}`)
