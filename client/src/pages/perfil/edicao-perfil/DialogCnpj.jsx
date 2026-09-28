@@ -4,10 +4,25 @@ import { PiBuildingsBold, PiClockBold, PiShieldCheckBold } from 'react-icons/pi'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
+import { response } from 'express'
 
 const DialogCnpj = ({ valor, onValorChange, onClose }) => {
     const [cnpjAtual, setCnpjAtual] = useState('')
     const [codigo, setCodigo] = useState('')
+
+    useEffect(() => {
+        api.post('motorista/codigo/CRIACAO')
+    })
+    //========================
+    //Verificar o cnpj e o codigo mandado
+    //========================
+    async function handleAlterarCnpj() {
+        try {
+            response = api.get ('/motorista')
+        }catch (error) {
+
+        }
+    }
 
     return (
         <DefaultDialog

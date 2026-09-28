@@ -130,10 +130,7 @@ const Perfil = () => {
         //ATUALIZAR CAMPO 
         //======================
         try {
-            await api.patch(
-                '/motorista',
-                { [campo]: valores[campo] },
-                { skipGlobalErrorToast: true },
+            await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
             )
             await refreshSession()
             toast.success('Campo atualizado com sucesso.')
