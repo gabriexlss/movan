@@ -1,26 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PiBuildingsBold, PiClockBold, PiShieldCheckBold } from 'react-icons/pi'
 
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
-import { response } from 'express'
+import { useAuth } from '../../../context/useAuth'
+import api from '../../../services/api'
 
 const DialogCnpj = ({ valor, onValorChange, onClose }) => {
-    const [cnpjAtual, setCnpjAtual] = useState('')
+    const [credencialAtual, setCredencialAtual] = useState('')
     const [codigo, setCodigo] = useState('')
+    const { user, isLoading } = useAuth()
+    const [ credencialOriginal, setCredencialOriginal ] = useState('')
 
-    useEffect(() => {
-        api.post('motorista/codigo/CRIACAO')
+     useEffect(() => {
+        ap.post('motorista/codigo/ALTERACAO')
     })
     //========================
     //Verificar o cnpj e o codigo mandado
     //========================
     async function handleAlterarCnpj() {
         try {
-            response = api.get ('/motorista')
-        }catch (error) {
+            setCredencialOriginal = user?.nome //pega o cnpj atual do usuario pelo cookie salvo
 
+            if (!/^\d{6}$/.test(codigo)){ //se o codigo tiver um numero diferente de 6
+                toast.error("Código invalido")
+            }
+            if (credencialOriginal === credencialAtual ){ //
+                const response = await api.post ('motorista/verificar-conta' , {})
+            }
+        }catch (error) {
         }
     }
 
@@ -38,8 +47,8 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
                 <CampoEdicao
                     label="CPF ou CNPJ atual"
                     icon={<PiBuildingsBold />}
-                    value={cnpjAtual}
-                    onChange={(event) => setCnpjAtual(event.target.value)}
+                    value={credencialAtual}
+                    onChange={(event) => setCredencialAtual(event.target.value)}
                     placeholder="CPF ou CNPJ atual"
                     inputMode="numeric"
                     maxLength={18}
