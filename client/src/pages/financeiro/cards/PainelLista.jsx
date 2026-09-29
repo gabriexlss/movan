@@ -1,7 +1,7 @@
 import { FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
 import styles from './PainelLista.module.css'
 
-const PainelLista = ({ title, page, totalPages, onPageChange, children }) => (
+const PainelLista = ({ title, page, totalPages, onPageChange, children, showAction = true }) => (
     <section className={styles.card}>
         <header className={styles.header}>
             <h2 className={styles.title}>{title}</h2>
@@ -28,10 +28,12 @@ const PainelLista = ({ title, page, totalPages, onPageChange, children }) => (
                 </button>
             </nav>
 
-            <button type="button" className={styles.alterar}>
-                <FaPlus aria-hidden="true" />
-                <span>Alterar / Adicionar</span>
-            </button>
+            {showAction && (
+                <button type="button" className={styles.alterar}>
+                    <FaPlus aria-hidden="true" />
+                    <span>Alterar / Adicionar</span>
+                </button>
+            )}
         </header>
         {children}
     </section>

@@ -32,7 +32,7 @@
 }
 
 .setaPeriodo svg,
-.iconeCalendario {
+.botaoCalendario svg {
     font-size: .9rem;
 }
 
@@ -40,4 +40,111 @@
     border-radius: .2rem;
     outline: 2px solid #0D47A1;
     outline-offset: 2px;
+}
+
+.seletorContainer {
+    position: relative;
+    display: grid;
+    place-items: center;
+}
+
+.botaoCalendario {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: .2rem;
+    background: transparent;
+    color: #0d47a1;
+    cursor: pointer;
+}
+
+.botaoCalendario:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
+}
+
+.seletorMes {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + .4rem);
+    right: -.25rem;
+    width: min(14.5rem, calc(100vw - 2rem));
+    padding: .55rem;
+    border: 1px solid #d9e1ed;
+    border-radius: .35rem;
+    background: #fff;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 15%);
+    color: #333;
+}
+
+.cabecalhoAno {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+    align-items: center;
+    justify-items: center;
+    min-height: 2rem;
+    color: #173d75;
+    font-family: 'Poppins', sans-serif;
+}
+
+.anoVisivel {
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.navegarAno {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: .2rem;
+    background: transparent;
+    color: #0d47a1;
+    cursor: pointer;
+}
+
+.navegarAno:hover {
+    background: #edf3fb;
+}
+
+.navegarAno:focus-visible,
+.mesOpcao:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 1px;
+}
+
+.gradeMeses {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .3rem;
+    margin-top: .35rem;
+}
+
+.mesOpcao {
+    min-height: 2.2rem;
+    padding: .25rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    background: #f3f6fa;
+    color: #34445b;
+    font-family: 'Poppins', sans-serif;
+    font-size: .54rem;
+    cursor: pointer;
+}
+
+.mesOpcao:hover {
+    border-color: #c4d5eb;
+    background: #e8eff8;
+}
+
+.mesSelecionado,
+.mesSelecionado:hover {
+    border-color: #0d47a1;
+    background: #0d47a1;
+    color: #fff;
 }
