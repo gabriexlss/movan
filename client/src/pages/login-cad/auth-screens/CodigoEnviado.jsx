@@ -14,6 +14,7 @@ const CodigoEnviado = () => {
     const [enviando, setEnviando] = useState(false) //uso para falar que o formulario esta sendo enviado
     const [reenviando, setReenviando] = useState(false) //uso para o codigo saber se ja estou reenviando
     const [tempoRestante, setTempoRestante] = useState(23)
+    const emailnovo = state?.emailnovo
     const fluxo = state?.fluxo || sessionStorage.getItem('movan:verificationFlow') || 'recuperacao' //pego o fluxo do estado ou do sessionStorage, caso não tenha nenhum defino como 'recuperacao'
     const autoEnvioRealizado = useRef(false)
 
@@ -105,7 +106,12 @@ const CodigoEnviado = () => {
                 sessionStorage.removeItem('movan:verificationFlow') //apago o fluxo porque o usuário já verificou a conta
                 await refreshSession()
                 navigate('/', { replace: true })
-            } else {
+            } else if(fluxo === 'atualizar'){
+                const response = await api.patch ('/motorista' , { cod: codigo, email: emailnovo })
+                sessionStorage.removeItem('movan:verificationFlow')
+                await refreshSession()
+                navigate('/perfil', {replace: true})
+            }else {
                 sessionStorage.setItem('movan:recoveryCode', codigo) //guardo o código no sessionStorage porque vou usar na tela de redefinir senha
                 navigate('/redefinir-senha', { state: { codigo, fluxo: 'recuperacao' } }) //mando para a pagina de redefinir senha e falo que o fluxo é de recuperação
             }
