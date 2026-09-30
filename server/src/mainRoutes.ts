@@ -4,6 +4,7 @@ import rotasSistema from './routes/system.route.js'
 import rotasResponsavel from "./routes/responsavel.route.js"
 import rotasEscola from "./routes/escola.route.js"
 import rotasAluno from "./routes/aluno.route.js"
+import rotasContrato from "./routes/contrato.route.js"
 
 const router = Router();
 
@@ -26,5 +27,8 @@ router.use('/escola', rotasEscola)
 
 //Rota para os endpoints relacionado aos alunos
 router.use('/aluno', rotasAluno)
+
+// Rota para os endpoints relacionado aos contratos e suas clausulas.
+router.use('/contrato', rotasContrato)
 
 export default router;
