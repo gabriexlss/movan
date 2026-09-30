@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { PiBuildingsBold, PiClockBold, PiShieldCheckBold } from 'react-icons/pi'
-
+import { toast } from 'react-hot-toast'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
@@ -8,28 +8,37 @@ import { useAuth } from '../../../context/useAuth'
 import api from '../../../services/api'
 
 const DialogCnpj = ({ valor, onValorChange, onClose }) => {
+    const [credencialNova, setCredencialNova] = useState('')
     const [credencialAtual, setCredencialAtual] = useState('')
-    const [codigo, setCodigo] = useState('')
-    const { user, isLoading } = useAuth()
-    const [ credencialOriginal, setCredencialOriginal ] = useState('')
+    const { user, refreshSession } = useAuth()
+    const credencialOriginal = String(user?.credencial ?? '').replace(/[^a-zA-Z0-9]/g, '')
 
-     useEffect(() => {
-        ap.post('motorista/codigo/ALTERACAO')
-    })
     //========================
     //Verificar o cnpj e o codigo mandado
     //========================
     async function handleAlterarCnpj() {
         try {
-            setCredencialOriginal = user?.nome //pega o cnpj atual do usuario pelo cookie salvo
+            const credencialAtualLimpo = credencialAtual.replace(/[^a-zA-Z0-9]/g, '') //remove apenas simbolos
+            const credencialNovaLimpo = credencialNova.replace(/[^a-zA-Z0-9]/g, '') //remove apenas simbolos
 
-            if (!/^\d{6}$/.test(codigo)){ //se o codigo tiver um numero diferente de 6
-                toast.error("Código invalido")
+            if (credencialAtualLimpo !== credencialOriginal) { //se o cnpj atual for diferente do cnpj original
+                toast.error('CNPJ atual não confere.')
+                return
+            }else if  (credencialNovaLimpo.length !== 14) { //se o cnpj novo não tiver 14 caracteres
+                toast.error('CNPJ novo inválido. O CNPJ deve conter 14 caracteres.')
+                return
+            }else if (credencialAtualLimpo.length !== 14) { //se o cnpj atual não tiver 14 caracteres
+                toast.error('CNPJ atual inválido. O CNPJ deve conter 14 caracteres.')
+                return
+            }else {
+            await api.patch('/motorista', { credencial: credencialNovaLimpo }, { skipGlobalErrorToast: true }) //manda o CNPJ para o backend
+            await refreshSession()
+            toast.success('CNPJ alterado com sucesso.')
             }
-            if (credencialOriginal === credencialAtual ){ //
-                const response = await api.post ('motorista/verificar-conta' , {})
-            }
-        }catch (error) {
+            onClose() //fecha o dialog
+        }
+        catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível alterar o CNPJ.')
         }
     }
 
@@ -37,7 +46,7 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
         <DefaultDialog
             isOpen
             onClose={onClose}
-            title="Alterar CPF ou CNPJ"
+            title="Alterar o CNPJ"
             description="Confirme os dados antes de salvar. Alterações no documento podem impactar documentos e recebimentos."
             icon={<PiBuildingsBold />}
             size="small"
@@ -45,17 +54,17 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
         >
             <div className={styles.form}>
                 <CampoEdicao
-                    label="CPF ou CNPJ atual"
+                    label="CNPJ atual"
                     icon={<PiBuildingsBold />}
                     value={credencialAtual}
                     onChange={(event) => setCredencialAtual(event.target.value)}
-                    placeholder="CPF ou CNPJ atual"
-                    inputMode="numeric"
+                    placeholder="CNPJ atual"
+                    inputMode="text"
                     maxLength={18}
                     autoComplete="off"
                 />
 
-                <CampoEdicao
+                {/* <CampoEdicao
                     label="Confirmar código"
                     icon={<PiShieldCheckBold />}
                     value={codigo}
@@ -65,20 +74,20 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
                     autoComplete="one-time-code"
                     maxLength={6}
                     suffix={<><PiClockBold aria-hidden="true" /><span aria-label="Tempo ilustrativo: 30 segundos">0:30</span></>}
-                />
+                /> */}
                 <CampoEdicao
-                    label="Novo CPF ou CNPJ"
+                    label="Novo CNPJ"
                     icon={<PiBuildingsBold />}
-                    value={valor}
-                    onChange={(event) => onValorChange(event.target.value)}
-                    placeholder="Novo CPF ou CNPJ"
-                    inputMode="numeric"
+                    value={credencialNova}
+                    onChange={(event) => setCredencialNova(event.target.value)}
+                    placeholder="Novo CNPJ"
+                    inputMode="text"
                     maxLength={18}
                     autoFocus
                 />
 
-                <button type="button" className={styles.primaryButton} onClick={onClose}>
-                    Alterar CPF ou CNPJ
+                <button type="button" className={styles.primaryButton} onClick={handleAlterarCnpj}>
+                    Alterar CNPJ
                 </button>
             </div>
         </DefaultDialog>

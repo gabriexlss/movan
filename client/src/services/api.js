@@ -30,7 +30,7 @@ api.interceptors.response.use(
         return response
     },
     (error) => {
-            if (error.config?.skipGlobalErrorToast) { //(esqueci de comentar) se essa variavel for true ele não mostra nenhum toast
+            if (error.config?.skipGlobalErrorToast) { //se essa variavel for true ele não mostra nenhum toast
                 return Promise.reject(error)
             }
 
