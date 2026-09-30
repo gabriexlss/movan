@@ -20,15 +20,15 @@ export const controllerEscola = {
             })
         }
         // realizar desestruturação dos dados
-        const { nome, endereco, tel, latitude, longitude } = dadosBrutos.data
+        const { nome, endereco, telefone, latitude, longitude } = dadosBrutos.data
 
         // realizando a operação
         try {
             const query = `INSERT INTO escola 
-            (nome, endereco, tel, latitude, longitude, motorista_id) 
+            (nome, endereco, telefone, latitude, longitude, motorista_id) 
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *`
-            const valores = [nome, endereco, tel, latitude, longitude, motoristaId]
+            const valores = [nome, endereco, telefone, latitude, longitude, motoristaId]
 
             const escola = await database.query(query, valores)
 
@@ -68,7 +68,7 @@ export const controllerEscola = {
         }
         // desestruturação dos dados
         const { id } = idBruto.data
-        const { nome, endereco, tel, latitude, longitude } = dadosBrutos.data
+        const { nome, endereco, telefone, latitude, longitude } = dadosBrutos.data
 
         // iniciando arrays para guardar os dados recebidos.
         const campos: string[] = []
@@ -88,9 +88,9 @@ export const controllerEscola = {
             campos.push(`endereco = $${valores.length + 1}`)
             valores.push(endereco)
         }
-        if (tel) {
-            campos.push(`tel = $${valores.length + 1}`)
-            valores.push(tel)
+        if (telefone) {
+            campos.push(`telefone = $${valores.length + 1}`)
+            valores.push(telefone)
         }
         if (latitude !== undefined) {
             campos.push(`latitude = $${valores.length + 1}`)

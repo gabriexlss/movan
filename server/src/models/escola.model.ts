@@ -11,7 +11,7 @@ const EscolaSchema = z.object({
         .string("Endereço deve ser uma string.")
         .min(5, "Endereço deve ter pelo menos 5 caracteres.")
         .max(255, "Endereço deve ter no máximo 255 caracteres."),
-    tel: z
+    telefone: z
         .string("Telefone deve ser uma string.")
         .regex(/^\d{11}$/, "Telefone deve conter exatamente 11 dígitos."),
     latitude: UtilSchema.shape.latitude,

@@ -1,4 +1,4 @@
-import './header.css'
+import styles from './header.module.css'
 import { useLayoutEffect, useRef } from 'react'
 
 import useHeaderScroll from '../../hook/useHeaderScroll'
@@ -39,11 +39,11 @@ useLayoutEffect(() => {
 //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA EU NÃO AGUENTO MAAAAAAAIS
 
 return (
-    <header ref={headerRef} className={`header ${showHeader ? "" : "hidden"}`}>
+    <header ref={headerRef} className={`${styles.header} ${showHeader ? '' : styles.hidden}`}>
 
-        <div className='texto-titulo'>
-            <h1 className='movan'>MO<span className='movan-span'>VAN</span></h1>
-            <p className='subtitulo'>Seu caminho seguro na <br/> palma da mão</p>
+        <div className={styles['texto-titulo']}>
+            <h1 className={styles.movan}>MO<span className={styles['movan-span']}>VAN</span></h1>
+            <p className={styles.subtitulo}>Seu caminho seguro na <br/> palma da mão</p>
         </div>
 
     </header>

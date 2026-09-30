@@ -16,12 +16,9 @@ const AlunoSchema = z.object({
         .string("Observação deve ser uma string.")
         .max(255, "Observação deve ter no máximo 255 caracteres.")
         .optional(),
+    endereco: z.string("Endereço deve ser uma string.").max(255, "endereço deve ter no maximo 255 caracteres."),
     latitude: UtilSchema.shape.latitude,
     longitude: UtilSchema.shape.longitude,
-    turno: z
-        .string("Turno deve ser uma string.")
-        .min(1, "Turno não pode estar vazio.")
-        .max(5, "Turno deve ter no máximo 5 caracteres."),
     responsavel_id: UtilSchema.shape.id,
     escola_id: UtilSchema.shape.id,
     motorista_id: UtilSchema.shape.id

@@ -29,7 +29,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         const id = tokenAberto.id
         try {
             // query verifica se o id do motorista existe e se sua conta não está agendada pra ser excluida.
-            const query = "SELECT verificado FROM motorista WHERE id = $1 AND data_exclusao IS NULL"
+            const query = "SELECT email_verificado FROM motorista WHERE id = $1 AND excluido_em IS NULL"
             const valores = [id]
             const { rows } = await database.query(query, valores)
             if (rows.length < 1) {
@@ -38,7 +38,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
                 })
             }
             // pega o verificado e coloca dentro da requisição atual
-            req.verificado = rows[0].verificado
+            req.verificado = rows[0].email_verificado
         } catch (erro) {
             console.error("Erro ao verificar se usuario existe, erro:", erro)
             return res.status(500).json({

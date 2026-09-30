@@ -1,0 +1,95 @@
+.lista {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: 1.45rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .35rem;
+    min-height: 2.25rem;
+    padding: .24rem .1rem;
+    border-top: 1px solid #d9d9d9;
+}
+
+.icone {
+    display: grid;
+    place-items: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: .25rem;
+    color: #fff;
+    font-size: .68rem;
+}
+
+.receita {
+    background: #15720c;
+}
+
+.despesa {
+    background: #720c0c;
+}
+
+.descricao,
+.valores {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.1;
+}
+
+.descricao strong {
+    overflow: hidden;
+    color: #686868;
+    font-size: .62rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.descricao span,
+.valores > span:not(.tag) {
+    color: #999;
+    font-size: .48rem;
+}
+
+.valores {
+    align-items: flex-end;
+    gap: .08rem;
+    white-space: nowrap;
+}
+
+.valorReceita,
+.valorDespesa {
+    font-size: .55rem;
+    font-weight: 600;
+}
+
+.valorReceita {
+    color: #15720c;
+}
+
+.valorDespesa {
+    color: #720c0c;
+}
+
+.tag {
+    min-width: 2.3rem;
+    padding: .1rem .25rem;
+    border-radius: .2rem;
+    font-size: .45rem;
+    text-align: center;
+}
+
+.tagReceita {
+    background: #d8eddd;
+    color: #15720c;
+}
+
+.tagDespesa {
+    background: #f0dada;
+    color: #720c0c;
+}

@@ -1,0 +1,67 @@
+.resumo-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+    width: 100%;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    min-width: 0;
+    min-height: 2.6rem;
+    padding: .45rem .5rem;
+    border-radius: .45rem;
+}
+
+.lucro {
+    color: #15720C;
+    background-color: #d8eddd;
+}
+
+.despesa {
+    color: #720C0C;
+    background-color: #f0dada;
+}
+
+.icone {
+    flex: 0 0 auto;
+    font-size: 1.2rem;
+}
+
+.textos {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.15;
+}
+
+.label {
+    overflow: hidden;
+    color: #686868;
+    font-size: .62rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.valor {
+    font-size: .68rem;
+    font-weight: 600;
+}
+
+@media (max-width: 340px) {
+    .item {
+        gap: .3rem;
+        padding-inline: .35rem;
+    }
+
+    .icone {
+        font-size: 1rem;
+    }
+
+    .valor {
+        font-size: .62rem;
+    }
+}

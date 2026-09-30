@@ -1,5 +1,5 @@
 import DefaultCard from "./DefaultCard";
-import './CardAluno.css'
+import styles from './CardAluno.module.css'
 
 import { PiStudentBold } from "react-icons/pi";
 import { BiSolidUserX } from "react-icons/bi";
@@ -12,17 +12,17 @@ const CardAluno = () => {
 
     return(
         <DefaultCard title="Alunos" link="/clientes">
-            <div className="aluno-container">
+            <div className={styles['aluno-container']}>
                 {alunos.map((alunos, index) => (
-                    <div className="statusAluno" key={index}>
-                        <h2 className="tituloAluno" style={{ color: alunos.cor }}>{alunos.titulo}</h2>
+                    <div className={styles.statusAluno} key={index}>
+                        <h2 className={styles.tituloAluno} style={{ color: alunos.cor }}>{alunos.titulo}</h2>
 
-                        <div className="containerTexto">
-                            <div className="iconAluno" style={{ color: alunos.cor }}>
+                        <div className={styles.containerTexto}>
+                            <div className={styles.iconAluno} style={{ color: alunos.cor }}>
                                 {alunos.icon}
                             </div>
 
-                            <p className="quantidadeAluno">{alunos.qntd}</p>
+                            <p className={styles.quantidadeAluno}>{alunos.qntd}</p>
                         </div>
                     </div>
                 ))}
