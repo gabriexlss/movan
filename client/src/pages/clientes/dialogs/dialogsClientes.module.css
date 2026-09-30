@@ -1,0 +1,232 @@
+.dialog {
+    max-width: 29rem;
+    padding: 3.25rem 1.4rem 1.4rem;
+    border: 1px solid #eeeeee;
+    border-radius: .75rem;
+    box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
+}
+
+.dialog > div[aria-hidden='true'] {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: .5rem;
+    border-width: 1px;
+    font-size: 1.5rem;
+}
+
+.dialog > header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.dialog > header p {
+    max-width: 22rem;
+    margin: .4rem auto 0;
+    color: #7a7a7a;
+    font-family: 'Poppins', sans-serif;
+    font-size: .75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.form {
+    display: grid;
+    gap: .75rem;
+}
+
+.field {
+    position: relative;
+    min-width: 0;
+    padding-top: .35rem;
+}
+
+.field > label {
+    position: absolute;
+    top: 0;
+    left: 1.75rem;
+    z-index: 1;
+    max-width: calc(100% - 3.5rem);
+    overflow: hidden;
+    padding: 0 .35rem;
+    background: #fff;
+    color: #0d47a1;
+    font-family: 'Poppins', sans-serif;
+    font-size: .65rem;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    border: 1px solid #b8b8b8;
+    border-radius: 999px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.inputWrapper:focus-within {
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 3px rgb(13 71 161 / 10%);
+}
+
+.fieldIcon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2rem;
+    padding-left: .4rem;
+    color: #0d47a1;
+}
+
+.inputWrapper input,
+.inputWrapper select,
+.inputWrapper textarea {
+    width: 100%;
+    min-width: 0;
+    padding: .55rem .7rem .55rem 0;
+    border: 0;
+    border-radius: 999px;
+    outline: 0;
+    background: transparent;
+    color: #454545;
+    font-family: 'Poppins', sans-serif;
+    font-size: .82rem;
+}
+
+.inputWrapper select {
+    cursor: pointer;
+}
+
+.inputWrapper input::placeholder,
+.inputWrapper textarea::placeholder {
+    color: #888;
+    opacity: 1;
+}
+
+.textareaField .inputWrapper {
+    align-items: flex-start;
+    border-radius: 1rem;
+}
+
+.textareaField .fieldIcon {
+    padding-top: .7rem;
+}
+
+.inputWrapper textarea {
+    min-height: 4.5rem;
+    resize: vertical;
+    border-radius: 1rem;
+}
+
+.twoColumns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, .8fr);
+    gap: .65rem;
+}
+
+.primaryButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    width: 100%;
+    min-height: 2.75rem;
+    margin-top: .35rem;
+    padding: .6rem 1rem;
+    border: 0;
+    border-radius: .3rem;
+    background: #0d47a1;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.primaryButton svg {
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.primaryButton:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 3px;
+}
+
+.dialog.deleteDialog {
+    max-width: 25rem;
+    padding-bottom: 1.7rem;
+}
+
+.deleteDialog > div[aria-hidden='true'] {
+    border-color: #c72c2c;
+    color: #c72c2c;
+}
+
+.deleteDialog > header h2 {
+    color: #c72c2c;
+}
+
+.deleteContent {
+    display: grid;
+    gap: 1rem;
+}
+
+.deleteNotice {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    padding: .85rem;
+    border: 1px solid rgb(199 44 44 / 35%);
+    border-radius: .7rem;
+    background: #fff7f7;
+    color: #7a7a7a;
+    font-family: 'Poppins', sans-serif;
+    font-size: .72rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.deleteNotice svg {
+    flex-shrink: 0;
+    margin-top: .1rem;
+    color: #c72c2c;
+    font-size: 1.1rem;
+}
+
+.deleteNotice strong {
+    color: #555;
+}
+
+.primaryButton.deleteButton {
+    margin-top: 0;
+    background: #c72c2c;
+}
+
+.deleteButton:focus-visible {
+    outline-color: #c72c2c;
+}
+
+@media (max-width: 420px) {
+    .dialog {
+        padding-inline: 1rem;
+    }
+
+    .twoColumns {
+        grid-template-columns: 1fr;
+        gap: .75rem;
+    }
+
+    .inputWrapper input,
+    .inputWrapper select,
+    .inputWrapper textarea {
+        font-size: 1rem;
+    }
+}
