@@ -62,16 +62,23 @@ const CodigoEnviado = () => {
         setReenviando(true) //digo que o processo de reenviar começou
 
         try {
-            const response = fluxo === 'cadastro' //se o fluxo for de cadastro
-                ? await enviarCodigoCadastro() //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
-                : await api.post('/motorista/recuperar-conta/enviar-codigo', { //se o fluxo não for cadastro eu mando o codigo ser enviado como um de recuperação de conta
-                    email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de esqueci minha senha e mandei pro backend para ele saber para qual email enviar o codigo
-                }, { skipGlobalErrorToast: true }) //recuso que o toast do api.js seja mostrado, vou tratar o erro aqui
+            let response
 
+            if (fluxo === 'atualizar') {//se o fluxo for de atualizar o email
+                response = await api.post('/motorista/editar/enviar-codigo', { email: emailnovo })//mando o email novo para o backend mandar o codigo
+            } else {
+                response = fluxo === 'cadastro' //se o fluxo for de cadastro
+                    ? await enviarCodigoCadastro() //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
+                    : await api.post('/motorista/recuperar-conta/enviar-codigo', { //se o fluxo não for cadastro eu mando o codigo ser enviado como um de recuperação de conta
+                        email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de esqueci minha senha e mandei pro backend para ele saber para qual email enviar o codigo
+                    }, { skipGlobalErrorToast: true }) //recuso que o toast do api.js seja mostrado, vou tratar o erro aqui
+            }
             setCodigo('') //limpo o campo de código para o usuário digitar denovo
             setTempoRestante(23) //reinicio o tempo para o usuário poder reenviar denovo caso ele não receba o código
             toast.success(fluxo === 'cadastro'
                 ? 'Código de verificação reenviado com sucesso.'
+                : fluxo === 'atualizar'
+                    ? response.data?.msg || 'Código para alteração de e-mail reenviado com sucesso.'
                 : response.data?.msg || 'Código reenviado com sucesso.')//mando uma mensagem amigável para o cadastro e a mensagem do backend nos demais fluxos
         } catch (error) {
             //trato o erro para ele aparecer bonitinho no toast

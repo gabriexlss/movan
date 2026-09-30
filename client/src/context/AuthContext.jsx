@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { AuthContext } from './auth-context'
+import LoadingSpinner from '../animations/loading-spin/loading-spin'
 
 const rotasPublicas = [
     '/login',
@@ -118,5 +119,9 @@ export const AuthProvider = ({ children }) => {
         refreshSession: loadSession, //função de carregar a sessão (so que com o nome de atualizar já que o codigo pros dois seria literalmente o mesmo)
     }), [user, isLoading, login, logout, loadSession])
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider> //devolve as informações caso seja necessario, e devolve os filhos do componente AuthProvider (achei melhor fazer armazenar na memoria com o useMemo porque isso roda literalmente em cada renderização do app, ao guardar em cache ele so roda caso eu troque as informações dele)
+    return (
+        <AuthContext.Provider value={value}>
+            {isLoading ? <LoadingSpinner /> : children}
+        </AuthContext.Provider>
+    )
 }

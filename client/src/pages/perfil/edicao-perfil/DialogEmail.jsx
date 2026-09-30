@@ -6,31 +6,29 @@ import { useNavigate } from 'react-router-dom'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
-import { useAuth } from '../../../context/useAuth'
 import api from '../../../services/api'
 
 const DialogEmail = ({ valor, onValorChange, onClose }) => {
     const [emailnovo, setEmailNovo] = useState('')
-    const { user, logout } = useAuth()
     const navigate = useNavigate()
 
     const enviarCodigo = useCallback(async () => {
         
         if(!emailnovo){
-            toast.error(emailnovo)
+            toast.error("Preencha o campo de e-mail.")
             return
         }
 
         try {
             await api.post('motorista/editar/enviar-codigo', { email: emailnovo }) //mando o email novo para o backend mandar o codigo
-            toast.success('Código enviado para o seu e-mail')
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'atualizar', autoSendVerification: false, emailnovo } })
+            toast.success('Código enviado para o seu e-mail')   
 
         } catch (error) {
             toast.error(error.response?.data?.msg || 'Não foi possível enviar o código.')
         }
         
-    }, [logout, navigate, user?.email])
+    }, [emailnovo, navigate])
 
 
     return (
