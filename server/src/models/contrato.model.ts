@@ -39,6 +39,11 @@ export const CriarContratoSchema = ContratoSchema.pick({
     valor_mensal: true,
     aluno_id: true
 })
+// Editar Contrato
+export const EditarContratoSchema = CriarContratoSchema.omit({
+    aluno_id: true
+}).partial()
+
 // Criar Clausula
 export const CriarClausulaSchema = ClausulaContratoSchema.pick({
     titulo: true,
@@ -70,7 +75,12 @@ const ClausulaPadraoSchema = ClausulaContratoSchema.pick({
 })
 
 // tipos
+// CONTRATO
+export type Contrato = z.infer<typeof ContratoSchema>
 export type CriarContrato = z.infer<typeof CriarContratoSchema>
+export type EditarContrato = z.infer<typeof EditarContratoSchema>
+
+//CLAUSULA
 export type ClausulaPadrao = z.infer<typeof ClausulaPadraoSchema>
 export type CriarClausula = z.infer<typeof CriarClausulaSchema>
 export type CriarClausulaPadrao = z.infer<typeof CriarClausulaPadraoSchema>

@@ -9,6 +9,7 @@ declare global {
         interface Request {
             userId: number;
             verificado: boolean;
+            contratoID: number
         }
     }
 }

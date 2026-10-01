@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ClausulaPadrao, CriarClausula, CriarClausulaPadrao, CriarContratoSchema } from "../models/contrato.model.js";
+import { ClausulaPadrao, CriarClausulaPadrao, CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
 import { database } from "../db/postgre.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 
@@ -146,6 +146,70 @@ export const controllerContrato = {
         } finally {
             // libero a conexão
             await cliente.release()
+        }
+    },
+    // Controller para editar o contrato se estiver como rascunho.
+    editarContrato: async (req: Request, res: Response) => {
+        // recebendo os dados
+        const dadosBrutos = EditarContratoSchema.safeParse(req.body)
+
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para editar um contrato.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { data_fim, data_inicio, dia_vencimento, valor_mensal } = dadosBrutos.data
+        const contratoID = req.contratoID
+        const motoristaID = req.userId
+
+        const campos: string[] = []
+        const valores: (string | number)[] = []
+
+        // montando a query
+        if(data_inicio){
+            campos.push(`data_inicio = $${valores.length + 1}`)
+            valores.push(data_inicio)
+        }
+        if(data_fim){
+            campos.push(`data_fim = $${valores.length + 1}`)
+            valores.push(data_fim)
+        }
+        if(dia_vencimento){
+            campos.push(`dia_vencimento = $${valores.length + 1}`)
+            valores.push(dia_vencimento)
+        }
+        if(valor_mensal){
+            campos.push(`valor_mensal = $${valores.length + 1}`)
+            valores.push(valor_mensal)
+        }
+        
+        // validando se pelo menos algum dos campos foi enviado
+        if(valores.length < 1){
+            return res.status(400).json({
+                msg: "É Necessario pelo menos um campo para editar."
+            })
+        }
+        // realizando operação
+        try{
+            const query = `
+            UPDATE contrato
+            SET ${campos.join(', ')}
+            WHERE motorista_id = $${campos.length + 1} AND id = $${campos.length + 2}
+            `
+            valores.push(motoristaID)
+            valores.push(contratoID)
+            await database.query(query, valores)
+
+            return res.status(200).json({
+                msg: "Contrato Editado com Sucesso"
+            })
+        }catch(erro){
+            console.error("erro no endpoint de editar contrato, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
         }
     }
 }
