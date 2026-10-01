@@ -65,7 +65,7 @@ export const CriarClausulaPadraoSchema = ClausulaContratoSchema.pick({
     clausula_padrao_id: true
 })
 // schema da clausula padrão
-const ClausulaPadraoSchema = ClausulaContratoSchema.pick({
+export const ClausulaPadraoSchema = ClausulaContratoSchema.pick({
     id: true,
     titulo: true,
     conteudo: true,

@@ -211,5 +211,47 @@ export const controllerContrato = {
                 msg: "Erro Interno do Servidor"
             })
         }
+    },
+    // excluir contrato
+    excluirContrato: async (req: Request, res: Response) => {
+        // pegando ID do contrato do middleware
+        const contratoID = req.contratoID
+        const motoristaID = req.userId
+
+        // iniciando a operação de deleção
+        const cliente = await database.connect()
+
+        try{
+            await cliente.query('BEGIN')
+            const queryDeletarContrato = `
+            DELETE FROM contrato
+            WHERE id = $1 AND motorista_id = $2
+            `
+            const queryDeletarClausulas = `
+            DELETE FROM contrato_clausula
+            WHERE contrato_id = $1
+            `
+            // apagando as clausulas
+            await cliente.query(queryDeletarClausulas, [contratoID])
+            
+            // apagando o contrato
+            await cliente.query(queryDeletarContrato, [contratoID, motoristaID])
+
+            // dando commit nas alterações
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Contrato deletado com sucesso."
+            })
+        }catch(erro){
+            console.error("Erro no endpoint de excluir contrato, erro: ", erro)
+            await cliente.query('ROLLBACK')
+            return res.status(500).json({
+                msg: "Erro Interno no Servidor."
+            })
+        }finally{
+            // libera a conexão.
+            await cliente.release()
+        }
     }
 }

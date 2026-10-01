@@ -5,10 +5,18 @@ import { middlewareContrato } from "../middlewares/contrato.middleware.js";
 
 const router = Router()
 
+// ----------CONTRATO--------------
+
 // rota post para criar um contrato, já com suas clausulas padrões atribuida a ele.
 router.post('/', middlewareAutenticar, controllerContrato.criarContrato)
 
 // rota patch para editar um contrato SOMENTE se ele for rascunho.
 router.patch('/:contrato_id', middlewareAutenticar, middlewareContrato, controllerContrato.editarContrato)
+
+// rota delete para excluir um contrato em rascunho.
+router.delete('/:contrato_id', middlewareAutenticar, middlewareContrato, controllerContrato.excluirContrato)
+
+// -----------CLAUSULAS-----------------
+
 
 export default router
