@@ -165,6 +165,23 @@ const Perfil = () => {
     }else{
         camposFiltrados = campos
     }
+    //======================
+    //DESVINCULAR GOOGLE
+    //======================
+    const desvinvularGoogle = async ({credencial}) =>{
+        if (!vinculandoGoogle) return
+
+        setVinculandoGoogle(true)
+        
+        try{
+        await api.delete('/motorista/google/desvincular', {token: credencial}, {skipGlobalErrorToast: true})
+        toast.success("conta desvinculada")
+        }catch{
+            toast.error("Falha para desvincular conta")
+        }finally{
+            setVinculandoGoogle(false)
+        }
+    }
 
     return (
         <main className={styles['perfil-container']}>
@@ -241,6 +258,17 @@ const Perfil = () => {
                                     <GoogleLogin
                                         onSuccess={vincularGoogle}
                                         onError={() => toast.error('Não foi possível abrir o Google.')}
+                                        text="signup_with"
+                                        size="small"
+                                        shape="pill"
+                                    />
+                                </div>
+                            )}
+                            {user?.google_vinculado && (
+                                <div>
+                                    <GoogleLogin
+                                        onSuccess={desvinvularGoogle}
+                                        onError={() => toast.error('Não foi possivel abrir o Google')}
                                         text="continue_with"
                                         size="small"
                                         shape="pill"
