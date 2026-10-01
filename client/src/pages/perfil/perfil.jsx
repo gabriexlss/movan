@@ -67,8 +67,8 @@ const Perfil = () => {
         },
         {
             id: 'credencial',
-            label: 'CPF ou CNPJ',
-            placeholder: formatarCredencial(user?.credencial) || 'CPF/CNPJ não informado',
+            label: 'CNPJ',
+            placeholder: formatarCredencial(user?.credencial) || 'CNPJ não informado',
             inputMode: 'numeric',
         },
         {
@@ -79,6 +79,7 @@ const Perfil = () => {
             autoComplete: 'new-password',
         },
     ]
+    let camposFiltrados
 
     const DialogEdicao = dialogsEdicao[campoSelect]
 
@@ -159,7 +160,11 @@ const Perfil = () => {
             setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
         }
     }
-
+    if(user.tipo_pessoa === 'PF'){
+        camposFiltrados = campos.filter((e) => e.id !== 'credencial')
+    }else{
+        camposFiltrados = campos
+    }
 
     return (
         <main className={styles['perfil-container']}>
@@ -183,7 +188,7 @@ const Perfil = () => {
             </div>
 
             <section className={styles['campos-perfil']} aria-label="Dados do perfil">
-                {campos.map((campo) => {
+                {camposFiltrados.map((campo) => {
                     const editavel = Boolean(camposEditaveis[campo.id])
 
                     return (
