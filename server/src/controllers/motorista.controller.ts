@@ -750,11 +750,20 @@ export const controllerMotorista = {
 
         // pega os dados do motorista e envia de volta
         try {
-            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado FROM motorista WHERE id = $1"
+            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado, google_id FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 
             const motorista = rows[0]
+            
+            // se o google id existir coloca que é google verificado, se não, coloca que não é
+            if(!motorista.google_id){
+                motorista.google_verificado = false
+            }else{
+                motorista.google_verificado = true
+            }
+            // deleta o google id do objeto
+            delete motorista.google_id
 
             return res.status(200).json({
                 msg: "Dados da conta obtidos com sucesso.",
