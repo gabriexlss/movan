@@ -22,6 +22,9 @@ router.delete('/:contrato_id', middlewareAutenticar, middlewareContrato, control
 
 // -----------CLAUSULAS PADROES-----------------
 // cria uma clausula padrão pra um motorista
-router.post('/clausula/padrao', middlewareAutenticar, middlewareContrato, controllerClausula.criarClausulaPadrao)
+router.post('/clausula/padrao', middlewareAutenticar, controllerClausula.criarClausulaPadrao)
+
+// edita uma clausula padrão por meio da ordem.
+router.patch('/clausula/padrao/:id', middlewareAutenticar, controllerClausula.editarClausulaPadrao)
 
 export default router

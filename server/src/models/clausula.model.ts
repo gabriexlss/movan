@@ -16,12 +16,7 @@ const ClausulaContratoSchema = z.object({
     clausula_padrao_id: UtilSchema.shape.id.nullable(),
     excluido: z.boolean
 })
-// Criar Clausula
-export const CriarClausulaSchema = ClausulaContratoSchema.pick({
-    titulo: true,
-    conteudo: true,
-})
-// Criar Clausula
+// Inserir Clausula definitiva na tabela 
 export const InserirClausulaPadraoSchema = ClausulaContratoSchema.pick({
     titulo: true,
     conteudo: true,
@@ -54,10 +49,20 @@ export const ClausulaMotoristaSchema = ClausulaContratoSchema.pick({
 }).extend({
     motorista_id: UtilSchema.shape.id
 })
-
+// Criar Clausula motorista
+export const CriarClausulaSchema = ClausulaMotoristaSchema.pick({
+    titulo: true,
+    conteudo: true,
+})
+export const EditarClausulaSchema = ClausulaMotoristaSchema.pick({
+    titulo: true,
+    conteudo: true
+}).partial()
 
 export type Clausula = z.infer<typeof ClausulaContratoSchema>
 export type ClausulaPadrao = z.infer<typeof ClausulaPadraoSchema>
-export type CriarClausula = z.infer<typeof CriarClausulaSchema>
-export type InserirClausulaContrato = z.infer<typeof InserirClausulaPadraoSchema>
 export type ClausulaMotorista = z.infer<typeof ClausulaMotoristaSchema>
+export type InserirClausulaContrato = z.infer<typeof InserirClausulaPadraoSchema>
+
+export type CriarClausula = z.infer<typeof CriarClausulaSchema>
+export type EditarClausula = z.infer<typeof EditarClausulaSchema>
