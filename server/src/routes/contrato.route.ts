@@ -7,7 +7,6 @@ import { controllerClausula } from "../controllers/clausula.controller.js";
 const router = Router()
 
 // ----------CONTRATO--------------
-
 // rota post para criar um contrato, já com suas clausulas padrões atribuida a ele.
 router.post('/', middlewareAutenticar, controllerContrato.criarContrato)
 
@@ -18,7 +17,14 @@ router.patch('/:contrato_id', middlewareAutenticar, middlewareContrato, controll
 router.delete('/:contrato_id', middlewareAutenticar, middlewareContrato, controllerContrato.excluirContrato)
 
 // -----------CLAUSULAS-----------------
+// cria uma clausula personalizada para um contrato, ou seja, só existe para aquele contrato em especifico.
+router.post('/:contrato_id/clausula', middlewareAutenticar, middlewareContrato, controllerClausula.criarClausula)
 
+// edita uma clausula (personalizada ou do motorista) pela ordem, somente se ela for editavel e o contrato estiver em rascunho.
+router.patch('/:contrato_id/clausula/:id', middlewareAutenticar, middlewareContrato, controllerClausula.editarClausula)
+
+// exclui uma clausula pela ordem, somente se ela for editavel e o contrato estiver em rascunho.
+router.delete('/:contrato_id/clausula/:id', middlewareAutenticar, middlewareContrato, controllerClausula.excluirClausula)
 
 // -----------CLAUSULAS PADROES-----------------
 // cria uma clausula padrão pra um motorista e atualiza todas as clausulas em contratos "rascunhos"

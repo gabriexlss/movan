@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CriarClausulaSchema, EditarClausulaSchema } from "../models/clausula.model.js";
+import { Clausula, CriarClausulaSchema, EditarClausulaSchema } from "../models/clausula.model.js";
 import { database } from "../db/postgre.js";
 import { PoolClient } from "pg";
 import { Contrato } from "../models/contrato.model.js";
@@ -26,6 +26,162 @@ const atualizarTodosContratos = async ({ cliente, motoristaID }: atualizarTodosC
 }
 
 export const controllerClausula = {
+    criarClausula: async (req: Request, res: Response) => {
+        // recebendo dados
+        const dadosBrutos = CriarClausulaSchema.safeParse(req.body)
+
+        //validação
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados Inválidos para criar clausula."
+            })
+        }
+        // desestruturação.
+        const { titulo, conteudo } = dadosBrutos.data
+        const contratoID = req.contratoID
+
+        try {
+            // primeiro buscar a ordem atual das clausulas
+            const queryBuscarOrdem = "SELECT * FROM contrato_clausula WHERE contrato_id = $1 ORDER BY ordem ASC"
+
+            const { rows: contratoClausulas } = await database.query<Clausula>(queryBuscarOrdem, [contratoID])
+            const ordemAtual = (contratoClausulas.at(-1)?.ordem ?? 0) + 1
+
+            // agr fazer a operação
+            const query = `
+            INSERT INTO contrato_clausula
+            (titulo, conteudo, ordem, editavel, origem, contrato_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            `
+            const valores = [titulo, conteudo, ordemAtual, true, 'PERSONALIZADO', contratoID]
+
+            await database.query(query, valores)
+
+            // devolve o usuario
+            return res.status(200).json({
+                msg: "Clausula personalizada criada com sucesso."
+            })
+
+        } catch (erro) {
+            console.error("erro no endpoint de criar clausulas, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // editar uma clausula editavel do contrato pela ordem.
+    editarClausula: async (req: Request, res: Response) => {
+        // recebendo dados
+        const dadosBrutos = EditarClausulaSchema.safeParse(req.body)
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        // validação
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados Inválidos para editar uma clausula.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "Ordem inválida ou ausente para editar a clausula.",
+                erro: idBruto.error.format()
+            })
+        }
+        // desestruturação
+        const { titulo, conteudo } = dadosBrutos.data
+        const { id: ordem } = idBruto.data
+        const contratoID = req.contratoID
+
+        // montando a query com os campos enviados
+        const campos: string[] = []
+        const valores: (string | number | boolean)[] = []
+
+        if (titulo) {
+            campos.push(`titulo = $${valores.length + 1}`)
+            valores.push(titulo)
+        }
+        if (conteudo) {
+            campos.push(`conteudo = $${valores.length + 1}`)
+            valores.push(conteudo)
+        }
+
+        if (campos.length < 1) {
+            return res.status(400).json({
+                msg: "É Necessario ao menos um campo para realizar a edição."
+            })
+        }
+
+        try {
+            const query = `
+            UPDATE contrato_clausula
+            SET ${campos.join(', ')}, atualizada_em = now()
+            WHERE contrato_id = $${campos.length + 1} AND ordem = $${campos.length + 2} AND editavel = $${campos.length + 3}
+            `
+            valores.push(contratoID)
+            valores.push(ordem)
+            valores.push(true)
+
+            const edicoes = await database.query(query, valores)
+
+            if (!edicoes.rowCount) {
+                return res.status(404).json({
+                    msg: "Nenhuma clausula editável encontrada com a ordem fornecida."
+                })
+            }
+
+            return res.status(200).json({
+                msg: "Clausula editada com sucesso."
+            })
+        } catch (erro) {
+            console.error("erro no endpoint de editar clausula, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // excluir uma clausula editavel do contrato pela ordem.
+    excluirClausula: async (req: Request, res: Response) => {
+        // recebendo a ordem da clausula
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        // validação
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "Ordem inválida ou ausente para excluir a clausula.",
+                erro: idBruto.error.format()
+            })
+        }
+        // desestruturação
+        const { id: ordem } = idBruto.data
+        const contratoID = req.contratoID
+
+        try {
+            const query = `
+            DELETE FROM contrato_clausula
+            WHERE contrato_id = $1 AND ordem = $2 AND editavel = $3
+            `
+            const valores = [contratoID, ordem, true]
+
+            const exclusoes = await database.query(query, valores)
+
+            if (!exclusoes.rowCount) {
+                return res.status(404).json({
+                    msg: "Nenhuma clausula editável encontrada com a ordem fornecida."
+                })
+            }
+
+            return res.status(200).json({
+                msg: "Clausula excluida com sucesso."
+            })
+        } catch (erro) {
+            console.error("erro no endpoint de excluir clausula, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    //===================CLAUSULAS PADROES==============================
     // criar uma clausula padrão de um motorista.
     criarClausulaPadrao: async (req: Request, res: Response) => {
         // recebendo dados
