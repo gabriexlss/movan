@@ -205,6 +205,9 @@ export const controllerClausula = {
             if (possuiCodigoPostgres(erro, "23001")) {
                 const cliente = await database.connect()
                 try {
+                    // inicia a transação
+                    await cliente.query('BEGIN')
+
                     const query = `
                     UPDATE clausula_motorista
                     SET excluido = $1
@@ -217,6 +220,9 @@ export const controllerClausula = {
 
                     // atualiza todas os contratos em rascunho pra nova condição
                     await atualizarTodosContratos({ cliente, motoristaID })
+
+                    // commita tudo
+                    await cliente.query('COMMIT')
 
                     return res.status(200).json({
                         msg: "Clausula parcialmente excluida com sucesso"
