@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import { ClausulaPadrao, CriarClausulaPadrao, CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
+import { CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
 import { database } from "../db/postgre.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
+import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 
 export const controllerContrato = {
     // controller para criar um contrato 
@@ -84,34 +85,9 @@ export const controllerContrato = {
         }
         // agora eu copio os dados da clausula padrão para as clausulas desse contrato.
         try {
-            // pego todas as clausulas padrões do sistema.
-            const BuscarClausulasPadraoQuery = "SELECT * FROM clausula_padrao"
-            const { rows: ClausulasPadroes } = await cliente.query<ClausulaPadrao>(BuscarClausulasPadraoQuery)
+            // atualiza o contrato recem criado com todas as clausulas do sistema e do motorista
+            await atualizarClausulasContrato({ cliente, contratoID: contrato_id, motoristaID })
 
-            // iniciando constante com os dados pra criar as clausulas.
-            const ClausulasMotorista: CriarClausulaPadrao[] = []
-
-            ClausulasPadroes.map(clausula => ClausulasMotorista.push({
-                titulo: clausula.titulo,
-                conteudo: clausula.conteudo,
-                ordem: clausula.ordem,
-                editavel: false,
-                origem: "PADRAO",
-                contrato_id: contrato_id,
-                clausula_padrao_id: clausula.id
-            }))
-            // coloco nas clausulas do contrato gerado anteriormente.
-            const query = `INSERT INTO contrato_clausula
-            (titulo, conteudo, ordem, editavel, origem, contrato_id, clausula_padrao_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            `
-            /*
-            vai inserindo as clausulas padrão nas do contrato motorista uma por uma.
-            Sinceramente nem sei como isso tá funcionando e nem sei se é o jeito mais rapido e eficiente e rápido de fazer isso mas fi, esqueça tudo, deu certo
-            */
-            for(const clausula of ClausulasMotorista){
-                await cliente.query(query, Object.values(clausula))
-            }
             // confirmo todas as alterações.
             await cliente.query('COMMIT')
 

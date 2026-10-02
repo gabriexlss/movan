@@ -17,20 +17,6 @@ const ContratoSchema = z.object({
     motorista_id: UtilSchema.shape.id,
     atualizado_em: z.iso.datetime()
 })
-// Schema da Clausula do contrato
-const ClausulaContratoSchema = z.object({
-    id: UtilSchema.shape.id,
-    titulo: z.string(),
-    conteudo: z.string(),
-    ordem: z.number().int().positive(),
-    editavel: z.boolean(),
-    origem: z.enum(['PADRAO', 'MOTORISTA']),
-    criado_em: z.iso.datetime(),
-    atualizada_em: z.iso.datetime(),
-    contrato_id: UtilSchema.shape.id,
-    clausula_motorista_id: UtilSchema.shape.id,
-    clausula_padrao_id: UtilSchema.shape.id
-})
 // Criar Contrato
 export const CriarContratoSchema = ContratoSchema.pick({
     data_inicio: true,
@@ -44,43 +30,7 @@ export const EditarContratoSchema = CriarContratoSchema.omit({
     aluno_id: true
 }).partial()
 
-// Criar Clausula
-export const CriarClausulaSchema = ClausulaContratoSchema.pick({
-    titulo: true,
-    conteudo: true,
-    ordem: true,
-    editavel: true,
-    origem: true,
-    contrato_id: true,
-    clausula_motorista_id: true
-})
-// Criar Clausula
-export const CriarClausulaPadraoSchema = ClausulaContratoSchema.pick({
-    titulo: true,
-    conteudo: true,
-    ordem: true,
-    editavel: true,
-    origem: true,
-    contrato_id: true,
-    clausula_padrao_id: true
-})
-// schema da clausula padrão
-export const ClausulaPadraoSchema = ClausulaContratoSchema.pick({
-    id: true,
-    titulo: true,
-    conteudo: true,
-    ordem: true,
-    criado_em: true,
-    atualizada_em: true
-})
-
 // tipos
-// CONTRATO
 export type Contrato = z.infer<typeof ContratoSchema>
 export type CriarContrato = z.infer<typeof CriarContratoSchema>
 export type EditarContrato = z.infer<typeof EditarContratoSchema>
-
-//CLAUSULA
-export type ClausulaPadrao = z.infer<typeof ClausulaPadraoSchema>
-export type CriarClausula = z.infer<typeof CriarClausulaSchema>
-export type CriarClausulaPadrao = z.infer<typeof CriarClausulaPadraoSchema>

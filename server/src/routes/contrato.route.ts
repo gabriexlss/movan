@@ -2,6 +2,7 @@ import { Router } from "express";
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js";
 import { controllerContrato } from "../controllers/contrato.controller.js";
 import { middlewareContrato } from "../middlewares/contrato.middleware.js";
+import { controllerClausula } from "../controllers/clausula.controller.js";
 
 const router = Router()
 
@@ -18,5 +19,9 @@ router.delete('/:contrato_id', middlewareAutenticar, middlewareContrato, control
 
 // -----------CLAUSULAS-----------------
 
+
+// -----------CLAUSULAS PADROES-----------------
+// cria uma clausula padrão pra um motorista
+router.post('/clausula/padrao', middlewareAutenticar, middlewareContrato, controllerClausula.criarClausulaPadrao)
 
 export default router
