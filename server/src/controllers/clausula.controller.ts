@@ -5,21 +5,22 @@ import { PoolClient } from "pg";
 import { Contrato } from "../models/contrato.model.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../models/utils.model.js";
+import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 
-interface atualizarTodosContratosProps{
+interface atualizarTodosContratosProps {
     cliente: PoolClient,
     motoristaID: number
 }
 
-const atualizarTodosContratos = async ({ cliente, motoristaID }: atualizarTodosContratosProps):Promise<void> => {
+const atualizarTodosContratos = async ({ cliente, motoristaID }: atualizarTodosContratosProps): Promise<void> => {
     const query = `
     SELECT * FROM contrato
     WHERE motorista_id = $1 AND status = $2
     `
     const { rows: contratos } = await cliente.query<Contrato>(query, [motoristaID, 'RASCUNHO'])
 
-    for(const contrato of contratos){
-        await atualizarClausulasContrato({ cliente,  motoristaID, contratoID: contrato.id})
+    for (const contrato of contratos) {
+        await atualizarClausulasContrato({ cliente, motoristaID, contratoID: contrato.id })
     }
     return
 }
@@ -54,9 +55,9 @@ export const controllerClausula = {
             const clausulaMotorista = dados[0]
             let ordem
 
-            if(!clausulaMotorista){
+            if (!clausulaMotorista) {
                 ordem = 1
-            }else{
+            } else {
                 ordem = clausulaMotorista.ordem + 1
             }
 
@@ -84,7 +85,7 @@ export const controllerClausula = {
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })
-        }finally{
+        } finally {
             await cliente.release()
         }
     },
@@ -95,13 +96,13 @@ export const controllerClausula = {
         const idBruto = ParamsSchema.safeParse(req.params)
 
         // validação
-        if(!dadosBrutos.success){
+        if (!dadosBrutos.success) {
             return res.status(400).json({
                 msg: "Dados Inválidos para edição das clausulas",
                 erro: dadosBrutos.error.format()
             })
         }
-        if(!idBruto.success){
+        if (!idBruto.success) {
             return res.status(400).json({
                 msg: "Ordem nécessaria edição das clausulas",
                 erro: idBruto.error.format()
@@ -116,24 +117,24 @@ export const controllerClausula = {
         const campos: string[] = []
         const valores: (string | number | boolean)[] = []
 
-        if(titulo){
+        if (titulo) {
             campos.push(`titulo = $${valores.length + 1}`)
             valores.push(titulo)
         }
-        if(conteudo){
+        if (conteudo) {
             campos.push(`conteudo = $${valores.length + 1}`)
             valores.push(conteudo)
         }
 
         // se não tiver enviado nenhum campo manda embora
-        if(campos.length < 1){
+        if (campos.length < 1) {
             return res.status(400).json({
                 msg: "É Necessario ao menos um campo para realizar a edição."
             })
         }
 
         const cliente = await database.connect()
-        try{
+        try {
             const query = `
             UPDATE clausula_motorista
             SET ${campos.join(', ')}
@@ -149,25 +150,93 @@ export const controllerClausula = {
             await cliente.query('COMMIT')
 
             // verifica se editou algum campo
-            if(!edicoes.rowCount){
+            if (!edicoes.rowCount) {
                 return res.status(404).json({
-                msg: "Nenhuma Clausula encontrada com a ordem fornecida."
-            })
+                    msg: "Nenhuma Clausula encontrada com a ordem fornecida."
+                })
             }
             await atualizarTodosContratos({ cliente, motoristaID })
-            
+
             return res.status(200).json({
                 msg: "Clausula Editada com sucesso."
             })
-        }catch (erro) {
+        } catch (erro) {
             await cliente.query('ROLLBACK')
             console.error("erro no endpoint de editar clausulas, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })
-        }finally{
+        } finally {
             await cliente.release()
         }
+    },
+    // Deletar clausula padrão
+    excluirClausulaPadrao: async (req: Request, res: Response) => {
+        // recebendo a ordem da clausula q quer remover
+        const idBruto = ParamsSchema.safeParse(req.params)
 
+        // validação
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "Ordem nécessaria edição das clausulas",
+                erro: idBruto.error.format()
+            })
+        }
+        // desestruturação
+        const { id: ordem } = idBruto.data
+        const motoristaID = req.userId
+
+        // deletar a ordem se ela não estiver em uso em mais nenhum lugar. 
+        try {
+            const query = `
+            DELETE FROM clausula_motorista
+            WHERE ordem = $1 AND motorista_id = $2
+            `
+            const valores = [ordem, motoristaID]
+
+            await database.query(query, valores)
+
+            return res.status(200).json({
+                msg: "Clausula Excluida com sucesso."
+            })
+
+        } catch (erro) {
+            // se cair aqui, é pq ja ta sendo em algum lugar, nesse caso só vou dar update no campo excluido de false pra true.
+            if (possuiCodigoPostgres(erro, "23001")) {
+                const cliente = await database.connect()
+                try {
+                    const query = `
+                    UPDATE clausula_motorista
+                    SET excluido = $1
+                    WHERE ordem = $2 AND motorista_id = $3
+                    `
+                    const valores = [true, ordem, motoristaID]
+
+                    // atualiza o status de excluido de falso pra verdadeiro
+                    await cliente.query(query, valores)
+
+                    // atualiza todas os contratos em rascunho pra nova condição
+                    await atualizarTodosContratos({ cliente, motoristaID })
+
+                    return res.status(200).json({
+                        msg: "Clausula parcialmente excluida com sucesso"
+                    })
+
+                } catch (erro) {
+                    await cliente.query('ROLLBACK')
+                    console.error("erro no endpoint de excluir clausulas, erro: ", erro)
+                    return res.status(500).json({
+                        msg: "Erro Interno do Servidor."
+                    })
+                } finally {
+                    await cliente.release()
+                }
+            }
+            // se chegar aq é pq ai sim de fato o erro é desconhecido e fdskkkkkk
+            console.error("erro no endpoint de excluir clausula, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
     }
 }

@@ -21,10 +21,13 @@ router.delete('/:contrato_id', middlewareAutenticar, middlewareContrato, control
 
 
 // -----------CLAUSULAS PADROES-----------------
-// cria uma clausula padrão pra um motorista
+// cria uma clausula padrão pra um motorista e atualiza todas as clausulas em contratos "rascunhos"
 router.post('/clausula/padrao', middlewareAutenticar, controllerClausula.criarClausulaPadrao)
 
-// edita uma clausula padrão por meio da ordem.
+// edita uma clausula padrão por meio da ordem e atualiza todas as clausulas em contratos "rascunhos"
 router.patch('/clausula/padrao/:id', middlewareAutenticar, controllerClausula.editarClausulaPadrao)
+
+// exclui permanentemente uma clausula padrão  se não estiver sendo usada em nenhum lugar ou marca apenas como excluida se estiver sendo usada em algum lugar e ai sim atualiza todas as clausulas em contratos "rascunhos"
+router.delete('/clausula/padrao/:id', middlewareAutenticar, controllerClausula.excluirClausulaPadrao)
 
 export default router
