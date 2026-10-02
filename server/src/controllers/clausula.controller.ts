@@ -137,7 +137,7 @@ export const controllerClausula = {
         try {
             const query = `
             UPDATE clausula_motorista
-            SET ${campos.join(', ')}
+            SET ${campos.join(', ')}, atualizada_em = now()
             WHERE motorista_id = $${campos.length + 1} AND ordem = $${campos.length + 2} AND excluido = $${campos.length + 3}
             `
             valores.push(motoristaID)
@@ -194,11 +194,17 @@ export const controllerClausula = {
             `
             const valores = [ordem, motoristaID]
 
-            await database.query(query, valores)
+            const response = await database.query(query, valores)
 
-            return res.status(200).json({
-                msg: "Clausula Excluida com sucesso."
-            })
+            if (!response.rowCount) {
+                return res.status(404).json({
+                    msg: "Clausula não encontrada para excluir."
+                })
+            } else {
+                return res.status(200).json({
+                    msg: "Clausula Excluida com sucesso."
+                })
+            }
 
         } catch (erro) {
             // se cair aqui, é pq ja ta sendo em algum lugar, nesse caso só vou dar update no campo excluido de false pra true.
@@ -210,13 +216,13 @@ export const controllerClausula = {
 
                     const query = `
                     UPDATE clausula_motorista
-                    SET excluido = $1
-                    WHERE ordem = $2 AND motorista_id = $3
+                    SET excluido = $1, atualizada_em = now()
+                    WHERE ordem = $2 AND motorista_id = $3 AND excluido = false
                     `
                     const valores = [true, ordem, motoristaID]
 
                     // atualiza o status de excluido de falso pra verdadeiro
-                    await cliente.query(query, valores)
+                    const response = await cliente.query(query, valores)
 
                     // atualiza todas os contratos em rascunho pra nova condição
                     await atualizarTodosContratos({ cliente, motoristaID })
@@ -224,9 +230,15 @@ export const controllerClausula = {
                     // commita tudo
                     await cliente.query('COMMIT')
 
-                    return res.status(200).json({
-                        msg: "Clausula parcialmente excluida com sucesso"
-                    })
+                    if (!response.rowCount) {
+                        return res.status(404).json({
+                            msg: "Clausula não encontrada para excluir."
+                        })
+                    } else {
+                        return res.status(200).json({
+                            msg: "Clausula parcialmente excluida com sucesso"
+                        })
+                    }
 
                 } catch (erro) {
                     await cliente.query('ROLLBACK')

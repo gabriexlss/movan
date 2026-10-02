@@ -171,7 +171,7 @@ export const controllerContrato = {
         try{
             const query = `
             UPDATE contrato
-            SET ${campos.join(', ')}
+            SET ${campos.join(', ')}, atualizado_em = now()
             WHERE motorista_id = $${campos.length + 1} AND id = $${campos.length + 2}
             `
             valores.push(motoristaID)
