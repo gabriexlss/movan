@@ -10,7 +10,7 @@ export const middlewareContrato = async (req: Request, res: Response, next: Next
     // validações
     if (!idBruto.success) {
         return res.status(400).json({
-            msg: "ID inválido ou ausente para editar o contrato.",
+            msg: "ID inválido ou ausente para acessar o contrato.",
             erro: idBruto.error.format()
         })
     }
@@ -34,8 +34,8 @@ export const middlewareContrato = async (req: Request, res: Response, next: Next
         // verifica se o contrato está como rascunho.
         const contratoDado = contratoDados[0]
         if (contratoDado?.status !== "RASCUNHO") {
-            return res.status(403).json({
-                msg: "Não é possível editar um contrato que não esteja no status de rascunho."
+            return res.status(409).json({
+                msg: "Não é possível alterar um contrato que não esteja no status de rascunho."
             })
         }
         // guarda o id do contrato na requisição
@@ -44,9 +44,9 @@ export const middlewareContrato = async (req: Request, res: Response, next: Next
         next()
         return
     } catch (erro) {
-        console.error("erro no endpoint de editar contrato ao verificar status, erro: ", erro)
+        console.error("Erro ao verificar o status do contrato, erro: ", erro)
         return res.status(500).json({
-            msg: "Erro Interno do Servidor"
+            msg: "Erro interno do servidor."
         })
     }
 }

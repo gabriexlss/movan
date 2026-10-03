@@ -5,7 +5,6 @@ import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { controllerClausula } from "./clausula.controller.js";
-import { Clausula } from "../models/clausula.model.js";
 
 export const controllerContrato = {
     // controller para criar um contrato 
@@ -19,7 +18,7 @@ export const controllerContrato = {
         // validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para criar um contrato.",
+                msg: "Dados inválidos para criar um contrato.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -29,17 +28,30 @@ export const controllerContrato = {
 
         //  pegando ID do responsável
         try {
-            const query = "SELECT responsavel_id FROM aluno WHERE id = $1"
-            const { rows: dados } = await database.query(query, [aluno_id])
+            const query = "SELECT responsavel_id FROM aluno WHERE id = $1 AND motorista_id = $2"
+            const { rows: dados } = await database.query(query, [aluno_id, motoristaID])
+            if (!dados[0]) {
+                return res.status(404).json({
+                    msg: "Aluno não encontrado para criar o contrato."
+                })
+            }
             responsavel_id = dados[0].responsavel_id
         } catch (erro) {
-            console.error("erro no endpoint de cadastrar contrato ao buscar responsavel do aluno, erro: ", erro)
+            console.error("Erro no endpoint de criar contrato ao buscar o responsável do aluno, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
         // criando uma constante de cliente para iniciar o processo de transação.
-        const cliente = await database.connect()
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("Erro ao conectar ao banco de dados no controller de contrato, erro: ", erro)
+            return null
+        })
+        if (!cliente) {
+            return res.status(500).json({
+                msg: "Erro interno do servidor."
+            })
+        }
 
         // iniciando variaveis
         // iniciando a variavel  pro id do contrato.
@@ -67,21 +79,22 @@ export const controllerContrato = {
                 // se o erro for relacionado a um  constraint
                 if (possuiCodigoPostgres(erro, "23503")) {
                     return res.status(409).json({
-                        msg: "Erro ao criar contrato. Aluno, Escola ou Responsável não estão mais disponiveis."
+                        msg: "Não foi possível criar o contrato porque o aluno, o responsável ou o motorista não está mais disponível."
                     })
                     // se for relacionado com a um check
                 } else if (possuiCodigoPostgres(erro, "23514")) {
                     return res.status(400).json({
-                        msg: "Erro ao criar contrato, aluno inserido não pertence ao motorista atual."
+                        msg: "Dados inválidos para criar o contrato. Verifique as restrições do contrato."
                     })
                     // se não for nenhum dos dois manda um erro generico.
                 } else {
-                    console.error("erro no endpoint de cadastro de contratos ao inserir dados na tabela contrato, erro: ", erro)
+                    console.error("Erro no endpoint de criar contrato ao inserir dados na tabela contrato, erro: ", erro)
                     return res.status(500).json({
-                        msg: "Erro Interno do Servidor."
+                        msg: "Erro interno do servidor."
                     })
                 }
             } finally {
+                await cliente.query('ROLLBACK')
                 // libero a conexão.
                 await cliente.release()
             }
@@ -96,26 +109,26 @@ export const controllerContrato = {
 
             // retorno
             return res.status(201).json({
-                msg: "Contrato Criado com Sucesso."
+                msg: "Contrato criado com sucesso."
             })
         } catch (erro) {
             try {
                 // se o erro for relacionado a um  constraint
                 if (possuiCodigoPostgres(erro, "23503")) {
                     return res.status(409).json({
-                        msg: "Erro ao criar contrato. Contrato não está mais disponivel."
+                        msg: "Não foi possível criar o contrato porque um registro vinculado às cláusulas não está mais disponível."
                     })
                     // se for relacionado com a um check
                 } else if (possuiCodigoPostgres(erro, "23514")) {
-                    console.error(erro)
-                    return res.status(400).json({
-                        msg: "Erro ao criar contrato, Clausula Não Pertence a Motorista.."
+                    console.error("Erro no endpoint de criar contrato ao copiar cláusulas, erro: ", erro)
+                    return res.status(500).json({
+                        msg: "Erro interno do servidor."
                     })
                     // se não for nenhum dos dois manda um erro generico.
                 } else {
-                    console.error("erro no endpoint de cadastro de contratos ao inserir dados na tabela clausulas, erro: ", erro)
+                    console.error("Erro no endpoint de criar contrato ao copiar cláusulas, erro: ", erro)
                     return res.status(500).json({
-                        msg: "Erro Interno do Servidor."
+                        msg: "Erro interno do servidor."
                     })
                 }
             } finally {
@@ -134,7 +147,7 @@ export const controllerContrato = {
 
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para editar um contrato.",
+                msg: "Dados inválidos para editar um contrato.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -159,7 +172,7 @@ export const controllerContrato = {
             campos.push(`dia_vencimento = $${valores.length + 1}`)
             valores.push(dia_vencimento)
         }
-        if (valor_mensal) {
+        if (valor_mensal !== undefined) {
             campos.push(`valor_mensal = $${valores.length + 1}`)
             valores.push(valor_mensal)
         }
@@ -167,7 +180,7 @@ export const controllerContrato = {
         // validando se pelo menos algum dos campos foi enviado
         if (valores.length < 1) {
             return res.status(400).json({
-                msg: "É Necessario pelo menos um campo para editar."
+                msg: "É necessário informar pelo menos um campo para edição."
             })
         }
         // realizando operação
@@ -179,15 +192,25 @@ export const controllerContrato = {
             `
             valores.push(motoristaID)
             valores.push(contratoID)
-            await database.query(query, valores)
+            const contrato = await database.query(query, valores)
+            if (!contrato.rowCount) {
+                return res.status(404).json({
+                    msg: "Contrato não encontrado."
+                })
+            }
 
             return res.status(200).json({
-                msg: "Contrato Editado com Sucesso"
+                msg: "Contrato editado com sucesso."
             })
         } catch (erro) {
-            console.error("erro no endpoint de editar contrato, erro: ", erro)
+            console.error("Erro no endpoint de editar contrato, erro: ", erro)
+            if (possuiCodigoPostgres(erro, "23514")) {
+                return res.status(400).json({
+                    msg: "Dados inválidos para editar o contrato. Verifique as restrições do contrato."
+                })
+            }
             return res.status(500).json({
-                msg: "Erro Interno do Servidor"
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -198,7 +221,15 @@ export const controllerContrato = {
         const motoristaID = req.userId
 
         // iniciando a operação de deleção
-        const cliente = await database.connect()
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("Erro ao conectar ao banco de dados no controller de contrato, erro: ", erro)
+            return null
+        })
+        if (!cliente) {
+            return res.status(500).json({
+                msg: "Erro interno do servidor."
+            })
+        }
 
         try {
             await cliente.query('BEGIN')
@@ -214,19 +245,25 @@ export const controllerContrato = {
             await cliente.query(queryDeletarClausulas, [contratoID])
 
             // apagando o contrato
-            await cliente.query(queryDeletarContrato, [contratoID, motoristaID])
+            const contrato = await cliente.query(queryDeletarContrato, [contratoID, motoristaID])
+            if (!contrato.rowCount) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Contrato não encontrado."
+                })
+            }
 
             // dando commit nas alterações
             await cliente.query('COMMIT')
 
             return res.status(200).json({
-                msg: "Contrato deletado com sucesso."
+                msg: "Contrato excluído com sucesso."
             })
         } catch (erro) {
             console.error("Erro no endpoint de excluir contrato, erro: ", erro)
             await cliente.query('ROLLBACK')
             return res.status(500).json({
-                msg: "Erro Interno no Servidor."
+                msg: "Erro interno do servidor."
             })
         } finally {
             // libera a conexão.
@@ -239,7 +276,8 @@ export const controllerContrato = {
 
         if (!idBruto.success) {
             return res.status(400).json({
-                msg: "ID Inválido para obter contrato"
+                msg: "ID inválido para obter o contrato.",
+                erro: idBruto.error.format()
             })
         }
         // desestruturação
@@ -247,7 +285,6 @@ export const controllerContrato = {
         const motoristaID = req.userId
 
         let query: string
-        let clausulas: Clausula[] = []
         const valores: (string | number)[] = []
 
         if (!contratoID) {
@@ -256,7 +293,6 @@ export const controllerContrato = {
             valores.push(motoristaID)
         } else {
             query = 'SELECT * FROM vw_detalhes_contrato WHERE motorista_id = $1 AND contrato_id = $2'
-            clausulas = await controllerClausula.obterClausulas(contratoID)
             valores.push(motoristaID)
             valores.push(contratoID)
         }
@@ -266,11 +302,12 @@ export const controllerContrato = {
             let contrato
 
             // verifica se é um contrato detalhado ou varios resumidos
-            if (resultado.length === 0) {
+            if (contratoID && resultado.length === 0) {
                 return res.status(404).json({
                     msg: "Nenhum contrato encontrado."
                 })
-            } else if (resultado.length === 1) {
+            } else if (contratoID) {
+                const clausulas = await controllerClausula.obterClausulas(contratoID)
                 contrato = resultado[0]
                 contrato.clausula = clausulas
             } else {
@@ -278,14 +315,14 @@ export const controllerContrato = {
             }
 
             return res.status(200).json({
-                msg: "Dados obtidos com sucesso!",
+                msg: "Dados obtidos com sucesso.",
                 contrato
             })
 
         } catch (erro) {
-            console.error("erro no endpoint de obter dados de contrato(s), erro: ", erro)
+            console.error("Erro no endpoint de obter dados de contrato(s), erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno no Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     }

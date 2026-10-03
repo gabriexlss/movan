@@ -33,7 +33,8 @@ export const controllerClausula = {
         //validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para criar clausula."
+                msg: "Dados inválidos para criar a cláusula.",
+                erro: dadosBrutos.error.format()
             })
         }
         // desestruturação.
@@ -58,14 +59,19 @@ export const controllerClausula = {
             await database.query(query, valores)
 
             // devolve o usuario
-            return res.status(200).json({
-                msg: "Clausula personalizada criada com sucesso."
+            return res.status(201).json({
+                msg: "Cláusula personalizada criada com sucesso."
             })
 
         } catch (erro) {
-            console.error("erro no endpoint de criar clausulas, erro: ", erro)
+            console.error("Erro no endpoint de criar cláusula personalizada, erro: ", erro)
+            if (possuiCodigoPostgres(erro, "23503")) {
+                return res.status(409).json({
+                    msg: "Não foi possível criar a cláusula porque o contrato não está mais disponível."
+                })
+            }
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -78,13 +84,13 @@ export const controllerClausula = {
         // validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para editar uma clausula.",
+                msg: "Dados inválidos para editar uma cláusula.",
                 erro: dadosBrutos.error.format()
             })
         }
         if (!idBruto.success) {
             return res.status(400).json({
-                msg: "Ordem inválida ou ausente para editar a clausula.",
+                msg: "Ordem inválida ou ausente para editar a cláusula.",
                 erro: idBruto.error.format()
             })
         }
@@ -108,7 +114,7 @@ export const controllerClausula = {
 
         if (campos.length < 1) {
             return res.status(400).json({
-                msg: "É Necessario ao menos um campo para realizar a edição."
+                msg: "É necessário informar pelo menos um campo para edição."
             })
         }
 
@@ -126,17 +132,17 @@ export const controllerClausula = {
 
             if (!edicoes.rowCount) {
                 return res.status(404).json({
-                    msg: "Nenhuma clausula editável encontrada com a ordem fornecida."
+                    msg: "Nenhuma cláusula editável encontrada com a ordem fornecida."
                 })
             }
 
             return res.status(200).json({
-                msg: "Clausula editada com sucesso."
+                msg: "Cláusula editada com sucesso."
             })
         } catch (erro) {
-            console.error("erro no endpoint de editar clausula, erro: ", erro)
+            console.error("Erro no endpoint de editar cláusula, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -148,7 +154,7 @@ export const controllerClausula = {
         // validação
         if (!idBruto.success) {
             return res.status(400).json({
-                msg: "Ordem inválida ou ausente para excluir a clausula.",
+                msg: "Ordem inválida ou ausente para excluir a cláusula.",
                 erro: idBruto.error.format()
             })
         }
@@ -167,17 +173,17 @@ export const controllerClausula = {
 
             if (!exclusoes.rowCount) {
                 return res.status(404).json({
-                    msg: "Nenhuma clausula editável encontrada com a ordem fornecida."
+                    msg: "Nenhuma cláusula editável encontrada com a ordem fornecida."
                 })
             }
 
             return res.status(200).json({
-                msg: "Clausula excluida com sucesso."
+                msg: "Cláusula excluída com sucesso."
             })
         } catch (erro) {
-            console.error("erro no endpoint de excluir clausula, erro: ", erro)
+            console.error("Erro no endpoint de excluir cláusula, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -199,7 +205,7 @@ export const controllerClausula = {
         // validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para criar uma clausula.",
+                msg: "Dados inválidos para criar a cláusula padrão.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -208,7 +214,15 @@ export const controllerClausula = {
         const motoristaID = req.userId
 
         // conectando ao banco de dados
-        const cliente = await database.connect()
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("Erro ao conectar ao banco de dados no controller de cláusula, erro: ", erro)
+            return null
+        })
+        if (!cliente) {
+            return res.status(500).json({
+                msg: "Erro interno do servidor."
+            })
+        }
         try {
             // iniciando transação
             await cliente.query('BEGIN')
@@ -241,14 +255,14 @@ export const controllerClausula = {
             // commita as atualizações
             await cliente.query('COMMIT')
 
-            return res.status(200).json({
-                msg: "Clausula Criada com sucesso."
+            return res.status(201).json({
+                msg: "Cláusula padrão criada com sucesso."
             })
         } catch (erro) {
             await cliente.query('ROLLBACK')
-            console.error("erro no endpoint de criar clausulas, erro: ", erro)
+            console.error("Erro no endpoint de criar cláusula padrão, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         } finally {
             await cliente.release()
@@ -263,13 +277,13 @@ export const controllerClausula = {
         // validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para edição das clausulas",
+                msg: "Dados inválidos para editar a cláusula padrão.",
                 erro: dadosBrutos.error.format()
             })
         }
         if (!idBruto.success) {
             return res.status(400).json({
-                msg: "Ordem nécessaria edição das clausulas",
+                msg: "Ordem inválida ou ausente para editar a cláusula padrão.",
                 erro: idBruto.error.format()
             })
         }
@@ -294,12 +308,21 @@ export const controllerClausula = {
         // se não tiver enviado nenhum campo manda embora
         if (campos.length < 1) {
             return res.status(400).json({
-                msg: "É Necessario ao menos um campo para realizar a edição."
+                msg: "É necessário informar pelo menos um campo para edição."
             })
         }
 
-        const cliente = await database.connect()
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("Erro ao conectar ao banco de dados no controller de cláusula, erro: ", erro)
+            return null
+        })
+        if (!cliente) {
+            return res.status(500).json({
+                msg: "Erro interno do servidor."
+            })
+        }
         try {
+            await cliente.query('BEGIN')
             const query = `
             UPDATE clausula_motorista
             SET ${campos.join(', ')}, atualizada_em = now()
@@ -311,25 +334,26 @@ export const controllerClausula = {
 
             const edicoes = await cliente.query(query, valores)
 
-            // commita alterações
-            await cliente.query('COMMIT')
-
             // verifica se editou algum campo
             if (!edicoes.rowCount) {
+                await cliente.query('ROLLBACK')
                 return res.status(404).json({
-                    msg: "Nenhuma Clausula encontrada com a ordem fornecida."
+                    msg: "Nenhuma cláusula padrão encontrada com a ordem fornecida."
                 })
             }
             await atualizarTodosContratos({ cliente, motoristaID })
 
+            // commita alterações
+            await cliente.query('COMMIT')
+
             return res.status(200).json({
-                msg: "Clausula Editada com sucesso."
+                msg: "Cláusula padrão editada com sucesso."
             })
         } catch (erro) {
             await cliente.query('ROLLBACK')
-            console.error("erro no endpoint de editar clausulas, erro: ", erro)
+            console.error("Erro no endpoint de editar cláusula padrão, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         } finally {
             await cliente.release()
@@ -343,7 +367,7 @@ export const controllerClausula = {
         // validação
         if (!idBruto.success) {
             return res.status(400).json({
-                msg: "Ordem nécessaria edição das clausulas",
+                msg: "Ordem inválida ou ausente para excluir a cláusula padrão.",
                 erro: idBruto.error.format()
             })
         }
@@ -363,18 +387,26 @@ export const controllerClausula = {
 
             if (!response.rowCount) {
                 return res.status(404).json({
-                    msg: "Clausula não encontrada para excluir."
+                    msg: "Cláusula não encontrada para excluir."
                 })
             } else {
                 return res.status(200).json({
-                    msg: "Clausula Excluida com sucesso."
+                    msg: "Cláusula excluída com sucesso."
                 })
             }
 
         } catch (erro) {
             // se cair aqui, é pq ja ta sendo em algum lugar, nesse caso só vou dar update no campo excluido de false pra true.
-            if (possuiCodigoPostgres(erro, "23001")) {
-                const cliente = await database.connect()
+            if (possuiCodigoPostgres(erro, "23001") || possuiCodigoPostgres(erro, "23503")) {
+                const cliente = await database.connect().catch((erro: unknown) => {
+                    console.error("Erro ao conectar ao banco de dados no controller de cláusula, erro: ", erro)
+                    return null
+                })
+                if (!cliente) {
+                    return res.status(500).json({
+                        msg: "Erro interno do servidor."
+                    })
+                }
                 try {
                     // inicia a transação
                     await cliente.query('BEGIN')
@@ -397,28 +429,28 @@ export const controllerClausula = {
 
                     if (!response.rowCount) {
                         return res.status(404).json({
-                            msg: "Clausula não encontrada para excluir."
+                            msg: "Cláusula não encontrada para excluir."
                         })
                     } else {
                         return res.status(200).json({
-                            msg: "Clausula parcialmente excluida com sucesso"
+                            msg: "Cláusula padrão excluída com sucesso."
                         })
                     }
 
                 } catch (erro) {
                     await cliente.query('ROLLBACK')
-                    console.error("erro no endpoint de excluir clausulas, erro: ", erro)
+                    console.error("Erro no endpoint de excluir cláusula padrão, erro: ", erro)
                     return res.status(500).json({
-                        msg: "Erro Interno do Servidor."
+                        msg: "Erro interno do servidor."
                     })
                 } finally {
                     await cliente.release()
                 }
             }
             // se chegar aq é pq ai sim de fato o erro é desconhecido e fdskkkkkk
-            console.error("erro no endpoint de excluir clausula, erro: ", erro)
+            console.error("Erro no endpoint de excluir cláusula, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     },
@@ -437,9 +469,9 @@ export const controllerClausula = {
                 ClausulasMotorista
             })
         } catch (erro) {
-            console.error("erro no endpoint de obter clausulas padrões, erro: ", erro)
+            console.error("Erro no endpoint de obter cláusulas padrão, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     }
