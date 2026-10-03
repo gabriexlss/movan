@@ -3,6 +3,9 @@ import { CriarContratoSchema, EditarContratoSchema } from "../models/contrato.mo
 import { database } from "../db/postgre.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
+import { ParamsSchema } from "../models/utils.model.js";
+import { controllerClausula } from "./clausula.controller.js";
+import { Clausula } from "../models/clausula.model.js";
 
 export const controllerContrato = {
     // controller para criar um contrato 
@@ -129,7 +132,7 @@ export const controllerContrato = {
         // recebendo os dados
         const dadosBrutos = EditarContratoSchema.safeParse(req.body)
 
-        if(!dadosBrutos.success){
+        if (!dadosBrutos.success) {
             return res.status(400).json({
                 msg: "Dados Inválidos para editar um contrato.",
                 erro: dadosBrutos.error.format()
@@ -144,31 +147,31 @@ export const controllerContrato = {
         const valores: (string | number)[] = []
 
         // montando a query
-        if(data_inicio){
+        if (data_inicio) {
             campos.push(`data_inicio = $${valores.length + 1}`)
             valores.push(data_inicio)
         }
-        if(data_fim){
+        if (data_fim) {
             campos.push(`data_fim = $${valores.length + 1}`)
             valores.push(data_fim)
         }
-        if(dia_vencimento){
+        if (dia_vencimento) {
             campos.push(`dia_vencimento = $${valores.length + 1}`)
             valores.push(dia_vencimento)
         }
-        if(valor_mensal){
+        if (valor_mensal) {
             campos.push(`valor_mensal = $${valores.length + 1}`)
             valores.push(valor_mensal)
         }
-        
+
         // validando se pelo menos algum dos campos foi enviado
-        if(valores.length < 1){
+        if (valores.length < 1) {
             return res.status(400).json({
                 msg: "É Necessario pelo menos um campo para editar."
             })
         }
         // realizando operação
-        try{
+        try {
             const query = `
             UPDATE contrato
             SET ${campos.join(', ')}, atualizado_em = now()
@@ -181,7 +184,7 @@ export const controllerContrato = {
             return res.status(200).json({
                 msg: "Contrato Editado com Sucesso"
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("erro no endpoint de editar contrato, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor"
@@ -197,7 +200,7 @@ export const controllerContrato = {
         // iniciando a operação de deleção
         const cliente = await database.connect()
 
-        try{
+        try {
             await cliente.query('BEGIN')
             const queryDeletarContrato = `
             DELETE FROM contrato
@@ -209,7 +212,7 @@ export const controllerContrato = {
             `
             // apagando as clausulas
             await cliente.query(queryDeletarClausulas, [contratoID])
-            
+
             // apagando o contrato
             await cliente.query(queryDeletarContrato, [contratoID, motoristaID])
 
@@ -219,15 +222,71 @@ export const controllerContrato = {
             return res.status(200).json({
                 msg: "Contrato deletado com sucesso."
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("Erro no endpoint de excluir contrato, erro: ", erro)
             await cliente.query('ROLLBACK')
             return res.status(500).json({
                 msg: "Erro Interno no Servidor."
             })
-        }finally{
+        } finally {
             // libera a conexão.
             await cliente.release()
+        }
+    },
+    obterContrato: async (req: Request, res: Response) => {
+        //id do contrato, opcional
+        const idBruto = ParamsSchema.partial().safeParse(req.params)
+
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "ID Inválido para obter contrato"
+            })
+        }
+        // desestruturação
+        const { id: contratoID } = idBruto.data
+        const motoristaID = req.userId
+
+        let query: string
+        let clausulas: Clausula[] = []
+        const valores: (string | number)[] = []
+
+        if (!contratoID) {
+            // não tem ID do contrato, mostrando todos os contratos de forma resumida
+            query = 'SELECT * FROM vw_resumo_contrato WHERE motorista_id = $1'
+            valores.push(motoristaID)
+        } else {
+            query = 'SELECT * FROM vw_detalhes_contrato WHERE motorista_id = $1 AND contrato_id = $2'
+            clausulas = await controllerClausula.obterClausulas(contratoID)
+            valores.push(motoristaID)
+            valores.push(contratoID)
+        }
+
+        try {
+            const { rows: resultado } = await database.query(query, valores)
+            let contrato
+
+            // verifica se é um contrato detalhado ou varios resumidos
+            if (resultado.length === 0) {
+                return res.status(404).json({
+                    msg: "Nenhum contrato encontrado."
+                })
+            } else if (resultado.length === 1) {
+                contrato = resultado[0]
+                contrato.clausula = clausulas
+            } else {
+                contrato = resultado
+            }
+
+            return res.status(200).json({
+                msg: "Dados obtidos com sucesso!",
+                contrato
+            })
+
+        } catch (erro) {
+            console.error("erro no endpoint de obter dados de contrato(s), erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno no Servidor."
+            })
         }
     }
 }

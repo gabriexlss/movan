@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Clausula, CriarClausulaSchema, EditarClausulaSchema } from "../models/clausula.model.js";
+import { Clausula, ClausulaMotorista, CriarClausulaSchema, EditarClausulaSchema } from "../models/clausula.model.js";
 import { database } from "../db/postgre.js";
 import { PoolClient } from "pg";
 import { Contrato } from "../models/contrato.model.js";
@@ -180,6 +180,15 @@ export const controllerClausula = {
                 msg: "Erro Interno do Servidor."
             })
         }
+    },
+    // controller para obter todas as clausulas de um contrato.
+    obterClausulas: async (contratoID: number): Promise<Clausula[]> => {
+        const query = "SELECT id, titulo, conteudo, ordem, origem FROM contrato_clausula WHERE contrato_id = $1 ORDER BY ordem ASC"
+
+        const { rows: contratoClausulas } = await database.query<Clausula>(query, [contratoID])
+
+        // retorna os dados
+        return contratoClausulas
     },
     //===================CLAUSULAS PADROES==============================
     // criar uma clausula padrão de um motorista.
@@ -408,6 +417,27 @@ export const controllerClausula = {
             }
             // se chegar aq é pq ai sim de fato o erro é desconhecido e fdskkkkkk
             console.error("erro no endpoint de excluir clausula, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // controller para obter todas as clausulas do motorista
+    obterClausulaPadrao: async (req: Request, res: Response) => {
+        // pegando id do motorista
+        const motoristaID = req.userId
+
+        try {
+            const query = "SELECT id, titulo, conteudo, ordem FROM clausula_motorista WHERE motorista_id = $1 AND excluido = false ORDER BY ordem ASC"
+
+            const { rows: ClausulasMotorista } = await database.query<ClausulaMotorista>(query, [motoristaID])
+
+            return res.status(200).json({
+                msg: "Dados obtidos com sucesso.",
+                ClausulasMotorista
+            })
+        } catch (erro) {
+            console.error("erro no endpoint de obter clausulas padrões, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })

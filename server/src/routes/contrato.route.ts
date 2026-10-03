@@ -16,6 +16,12 @@ router.patch('/:contrato_id', middlewareAutenticar, middlewareContrato, controll
 // rota delete para excluir um contrato em rascunho.
 router.delete('/:contrato_id', middlewareAutenticar, middlewareContrato, controllerContrato.excluirContrato)
 
+// rota get para obter varios contratos resumidos
+router.get('/', middlewareAutenticar, controllerContrato.obterContrato)
+
+// rota get para obter um contrato detalhado.
+router.get('/:id', middlewareAutenticar, controllerContrato.obterContrato)
+
 // -----------CLAUSULAS-----------------
 // cria uma clausula personalizada para um contrato, ou seja, só existe para aquele contrato em especifico.
 router.post('/:contrato_id/clausula', middlewareAutenticar, middlewareContrato, controllerClausula.criarClausula)
@@ -35,5 +41,8 @@ router.patch('/clausula/padrao/:id', middlewareAutenticar, controllerClausula.ed
 
 // exclui permanentemente uma clausula padrão  se não estiver sendo usada em nenhum lugar ou marca apenas como excluida se estiver sendo usada em algum lugar e ai sim atualiza todas as clausulas em contratos "rascunhos"
 router.delete('/clausula/padrao/:id', middlewareAutenticar, controllerClausula.excluirClausulaPadrao)
+
+// obter os dados das clausulas do motorista
+router.get('/clausula/padrao', middlewareAutenticar, controllerClausula.obterClausulaPadrao)
 
 export default router
