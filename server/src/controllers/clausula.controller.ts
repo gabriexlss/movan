@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import { Clausula, ClausulaMotorista, CriarClausulaSchema, EditarClausulaSchema } from "../models/clausula.model.js";
+import { Clausula, ClausulaMotorista, CriarClausulaSchema, EditarClausulaSchema, MoverClausulasSchema } from "../models/clausula.model.js";
 import { database } from "../db/postgre.js";
 import { PoolClient } from "pg";
 import { Contrato } from "../models/contrato.model.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
+import { codec } from "zod";
 
 interface atualizarTodosContratosProps {
     cliente: PoolClient,
@@ -195,6 +196,60 @@ export const controllerClausula = {
 
         // retorna os dados
         return contratoClausulas
+    },
+    moverClausula: async (req: Request, res: Response) => {
+        // recebendo os dados por meio das querys, from e to.
+        const dadosBrutos = MoverClausulasSchema.safeParse(req.query)
+
+        // validação
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para mover clausulas.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { from, to } = dadosBrutos.data
+        const contratoID = req.contratoID
+
+        // conectando ao banco de dados
+        const cliente = await database.connect()
+        try{
+            // iniciando transação sql
+            await cliente.query('BEGIN')
+
+            // troca as duas clausulas de lugar em um único UPDATE.
+            // como é uma única query, as duas linhas são avaliadas com os valores originais.
+            // a constraint UNIQUE é DEFERRABLE, então só é verificada no COMMIT pelo q entendi.
+            // ps: sim, nicolly, coloquei esse deferrable no seu banco ent profanei ele, perdões
+            const query = `
+            UPDATE contrato_clausula
+            SET ordem = CASE WHEN ordem = $1 THEN $2 ELSE $1 END
+            WHERE contrato_id = $3 AND ordem IN ($1, $2)
+            `
+            const operacao = await cliente.query(query, [from, to, contratoID])
+
+            // precisa achar exatamente as duas clausulas (se from === to, só acha uma).
+            if(operacao.rowCount !== 2){
+                await cliente.query('ROLLBACK')
+                return res.status(400).json({
+                    msg: "Uma das clausulas que você quer mover não existe."
+                })
+            }
+
+            // commitando alterações.
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Clausulas movidas com sucesso."
+            })
+        }catch(erro){
+            await cliente.query('ROLLBACK')
+            console.error("erro no endpoint de mover clausulas, erro: ", erro)
+            return res.status(500).json("Erro Interno do Servidor.")
+        }finally{
+            cliente.release()
+        }
     },
     //===================CLAUSULAS PADROES==============================
     // criar uma clausula padrão de um motorista.
@@ -474,5 +529,59 @@ export const controllerClausula = {
                 msg: "Erro interno do servidor."
             })
         }
-    }
+    },
+    moverClausulaPadrao: async (req: Request, res: Response) => {
+        // recebendo os dados por meio das querys, from e to.
+        const dadosBrutos = MoverClausulasSchema.safeParse(req.query)
+
+        // validação
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados Inválidos para mover clausulas.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { from, to } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // conectando ao banco de dados
+        const cliente = await database.connect()
+        try{
+            // iniciando transação sql
+            await cliente.query('BEGIN')
+
+            // troca as duas clausulas de lugar em um único UPDATE.
+            // como é uma única query, as duas linhas são avaliadas com os valores originais.
+            // a constraint UNIQUE é DEFERRABLE, então só é verificada no COMMIT pelo q entendi.
+            // ps: sim, nicolly, coloquei esse deferrable no seu banco ent profanei ele, perdões
+            const query = `
+            UPDATE clausula_motorista
+            SET ordem = CASE WHEN ordem = $1 THEN $2 ELSE $1 END
+            WHERE motorista_id = $3 AND ordem IN ($1, $2) AND excluido = false
+            `
+            const operacao = await cliente.query(query, [from, to, motoristaID])
+
+            // precisa achar exatamente as duas clausulas (se from === to, só acha uma).
+            if(operacao.rowCount !== 2){
+                await cliente.query('ROLLBACK')
+                return res.status(400).json({
+                    msg: "Uma das clausulas que você quer mover não existe."
+                })
+            }
+
+            // commitando alterações.
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Clausulas movidas com sucesso."
+            })
+        }catch(erro){
+            await cliente.query('ROLLBACK')
+            console.error("erro no endpoint de mover clausulas, erro: ", erro)
+            return res.status(500).json("Erro Interno do Servidor.")
+        }finally{
+            cliente.release()
+        }
+    },
 }

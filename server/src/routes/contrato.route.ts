@@ -32,6 +32,9 @@ router.patch('/:contrato_id/clausula/:id', middlewareAutenticar, middlewareContr
 // exclui uma clausula pela ordem, somente se ela for editavel e o contrato estiver em rascunho.
 router.delete('/:contrato_id/clausula/:id', middlewareAutenticar, middlewareContrato, controllerClausula.excluirClausula)
 
+// move uma clausula da sua posição original para a posição desejada, e move a clausula que teve sua posição substituida para a posição da clausula anterior.
+router.post('/:contrato_id/clausula/mover', middlewareAutenticar, middlewareContrato, controllerClausula.moverClausula)
+
 // -----------CLAUSULAS PADROES-----------------
 // cria uma clausula padrão pra um motorista e atualiza todas as clausulas em contratos "rascunhos"
 router.post('/clausula/padrao', middlewareAutenticar, controllerClausula.criarClausulaPadrao)
@@ -41,6 +44,9 @@ router.patch('/clausula/padrao/:id', middlewareAutenticar, controllerClausula.ed
 
 // exclui permanentemente uma clausula padrão  se não estiver sendo usada em nenhum lugar ou marca apenas como excluida se estiver sendo usada em algum lugar e ai sim atualiza todas as clausulas em contratos "rascunhos"
 router.delete('/clausula/padrao/:id', middlewareAutenticar, controllerClausula.excluirClausulaPadrao)
+
+// move uma clausula da sua posição original para a posição desejada, e move a clausula que teve sua posição substituida para a posição da clausula anterior.
+router.post('/clausula/padrao/mover', middlewareAutenticar, controllerClausula.moverClausulaPadrao)
 
 // obter os dados das clausulas do motorista
 router.get('/clausula/padrao', middlewareAutenticar, controllerClausula.obterClausulaPadrao)
