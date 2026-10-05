@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
-import { FaChevronLeft, FaChevronRight, FaPencilAlt, FaPlus, FaSearch, FaTrash, FaUser } from 'react-icons/fa'
+import { FaChevronLeft, FaChevronRight, FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
+import fotoPlaceholder from '../../../assets/media/img/placeholders/placeholder.jpg'
 import DefaultCard from '../../../components/cards/DefaultCard'
 import DialogExcluirCliente from '../dialogs/DialogExcluirCliente'
 import DialogFormularioCliente from '../dialogs/DialogFormularioCliente'
@@ -103,7 +105,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [] }) => {
     const ultimoItem = Math.min((paginaAtual + 1) * ITENS_POR_PAGINA, resultados.length)
 
     return (
-        <DefaultCard title={title}>
+        <DefaultCard title={title} titleClassName={styles.tituloCard}>
             <div className={styles.listaClientes}>
                 <div className={styles.toolbar}>
                     <label className={styles.busca}>
@@ -135,10 +137,16 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [] }) => {
                         {registrosDaPagina.map((registro) => (
                             <li className={styles.registro} key={registro.id}>
                                 <span className={styles.avatar} aria-hidden="true">
-                                    <FaUser />
+                                    <img src={fotoPlaceholder} alt="" />
                                 </span>
                                 <div className={styles.informacoes}>
-                                    <strong>{registro.nome}</strong>
+                                    <Link
+                                        to={`/clientes/${tipo}/${registro.id}`}
+                                        state={{ registro }}
+                                        className={styles.nomeCliente}
+                                    >
+                                        {registro.nome}
+                                    </Link>
                                     {registro.detalhes.map((detalhe) => <span key={detalhe}>{detalhe}</span>)}
                                 </div>
                                 <div className={styles.acoes}>

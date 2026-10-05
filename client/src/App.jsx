@@ -20,6 +20,7 @@ import GoogleSignupRoute from './components/auth/GoogleSignupRoute'
 import ErrorPage from './pages/errors/errorPage'
 import Financeiro from './pages/financeiro/financeiro'
 import Cliente from './pages/clientes/cliente'
+import ClienteDetalhes from './pages/clientes/detalhes/ClienteDetalhes'
 
 import Perfil from './pages/perfil/perfil'
 import Notificacoes from './pages/notificacoes/notificacoes'
@@ -52,6 +53,7 @@ function App() {
                     <Route path='/' element={<HomePage />} />
                     <Route path='/financeiro' element={<Financeiro />} />
                     <Route path='/clientes' element={<Cliente />} />
+                    <Route path='/clientes/:tipo/:id' element={<ClienteDetalhes />} />
                     <Route path='/perfil' element={<Perfil />} />
                     <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
