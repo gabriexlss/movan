@@ -165,7 +165,7 @@ const Perfil = () => {
     }else{
         camposFiltrados = campos
     }
-    if(user.google_vinculado){
+    if(user.google_verificado){
         camposFiltrados = campos.filter((e) => e.id !== 'email')
     }else{
         camposFiltrados = campos
@@ -242,7 +242,7 @@ const Perfil = () => {
                                 </button>
                             </div>
 
-                            {campo.id === 'email' && user?.verificado === true && !user?.google_vinculado && (
+                            {campo.id === 'email' && user?.email_verificado === true && user?.google_verificado === false && (
                                 <div className={styles['linkGoogle']}>
                                     <GoogleLogin
                                         onSuccess={vincularGoogle}
