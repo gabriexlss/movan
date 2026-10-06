@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {isLoading ? <LoadingSpinner /> : children}
+            {isLoading ? <LoadingSpinner fullPage /> : children}
         </AuthContext.Provider>
     )
 }
