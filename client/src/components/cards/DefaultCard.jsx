@@ -10,7 +10,7 @@ const DefaultCard = ({ title, children, link, paginas, compactTitle = false }) =
 
             {link && (
                 <Link to={link} className={styles.BtnVerMensalidade}>
-                    Ver Detalhes
+                    Ver detalhes
                 </Link>
             )}
 

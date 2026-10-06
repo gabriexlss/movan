@@ -6,7 +6,7 @@ const router = Router()
 // Rota de teste pra checar a credencial.
 router.get('/teste', middlewareSistema, (req: Request, res: Response) => {
     return res.status(200).json({
-        msg: "deu certo",
+        msg: "Credencial validada com sucesso.",
     })
 })
 

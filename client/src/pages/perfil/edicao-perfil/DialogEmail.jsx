@@ -22,7 +22,7 @@ const DialogEmail = ({ valor, onValorChange, onClose }) => {
         try {
             await api.post('motorista/editar/enviar-codigo', { email: emailnovo }, {skipGlobalErrorToast: true}) //mando o email novo para o backend mandar o codigo
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'atualizar', autoSendVerification: false, emailnovo } })
-            toast.success('Código enviado para o seu e-mail')   
+            toast.success('Código enviado para o seu e-mail.')
 
         } catch (error) {
             toast.error(error.response?.data?.msg || 'Não foi possível enviar o código.')
@@ -35,7 +35,7 @@ const DialogEmail = ({ valor, onValorChange, onClose }) => {
         <DefaultDialog
             isOpen
             onClose={onClose}
-            title="Alterar E-mail"
+            title="Alterar e-mail"
             description="Seu e-mail será usado para acesso, recuperação da conta e comunicações importantes."
             icon={<PiEnvelopeSimpleBold />}
             size="small"

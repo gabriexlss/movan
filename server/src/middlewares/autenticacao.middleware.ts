@@ -19,7 +19,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
     // verifica a assinatura do jwt dentro do cookie
     const segredoJWT = process.env['SEGREDO_JWT']
     if (!segredoJWT) {
-        console.error("Segredo JWT Ausente no ENV")
+        console.error("Segredo JWT ausente nas variáveis de ambiente.")
         return res.status(500).json({
             msg: "Ocorreu um erro interno no servidor."
         })
@@ -40,7 +40,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
             // pega o verificado e coloca dentro da requisição atual
             req.verificado = rows[0].email_verificado
         } catch (erro) {
-            console.error("Erro ao verificar se usuario existe, erro:", erro)
+            console.error("Erro ao verificar se o usuário existe, erro:", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })

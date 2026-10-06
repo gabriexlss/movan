@@ -4,8 +4,8 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
 if (!import.meta.env.VITE_API_URL) {
-    throw new Error('VITE_API_URL não está definido no arquivo .env');
-    console.log('VITE_API_URL não está definido no arquivo .env');
+    throw new Error('A variável VITE_API_URL não está definida no arquivo .env.');
+    console.log('A variável VITE_API_URL não está definida no arquivo .env.');
 }
 
 //===========================
@@ -37,7 +37,7 @@ api.interceptors.response.use(
             if (error.code === 'ECONNABORTED') {
                 toast.error('Tempo de requisição esgotado. Tente novamente mais tarde.'); //caso o tempo passe de 8 segundos manda um aviso com o erro
             }else if (!error.response){
-                toast.error('Não foi possivel realizar conexão com o servidor. Verifique sua conexão com a internet ou tente novamente mais tarde.'); //informa que não houve resposta do servidor
+                toast.error('Não foi possível conectar ao servidor. Verifique sua conexão com a internet ou tente novamente mais tarde.'); //informa que não houve resposta do servidor
             }else if (error.response.status === 500) { //erro interno do servidor
                 toast.error('Erro interno do servidor. Tente novamente mais tarde.');
             }else if (error.response.status === 404) { //recurso não encontrado

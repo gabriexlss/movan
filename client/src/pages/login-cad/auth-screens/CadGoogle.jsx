@@ -56,7 +56,7 @@ const CadGoogle = () => {
             navigate('/', { replace: true }) //mando o usuario para a tela inicial
         } catch (error) {
             if (error.response?.status === 409) {
-                toast.error(error.response.data?.msg || 'E-mail, CPF, CNPJ ou conta Google já cadastrado no Movan.')
+                toast.error(error.response.data?.msg || 'Já existe uma conta no Movan com este e-mail, CPF, CNPJ ou conta Google.')
                 return
             }
 
@@ -71,7 +71,7 @@ const CadGoogle = () => {
 
     return (
         <section className={styles['auth-screens']}>
-            <h2 className={styles['auth-screens__titulo']}>Cadastro com google</h2>
+            <h2 className={styles['auth-screens__titulo']}>Cadastro com Google</h2>
 
             <form
                 className={styles['auth-screens__form']}

@@ -10,7 +10,7 @@ const CardRotas = () => {
 				{ nome: "Escola 3", horario: "noite" }
 			];
 	return(
-		<DefaultCard title="Rotas Diárias" link="/rota">
+		<DefaultCard title="Rotas diárias" link="/rota">
 
 			<div className={styles.containerEscolas}>
 				{escolas.map((escola) => (

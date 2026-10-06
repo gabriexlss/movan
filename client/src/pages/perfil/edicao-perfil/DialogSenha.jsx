@@ -65,7 +65,7 @@ const DialogSenha = ({ onClose }) => {
         <DefaultDialog
             isOpen
             onClose={onClose}
-            title="Alterar Senha"
+            title="Alterar senha"
             description="Para sua segurança, use uma senha forte com letras e números."
             icon={<PiShieldCheckBold />}
             size="small"
