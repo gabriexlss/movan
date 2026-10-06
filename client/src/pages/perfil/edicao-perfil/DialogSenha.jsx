@@ -7,7 +7,7 @@ import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
 import api from '../../../services/api'
 
-const DialogSenha = ({ valor, onValorChange, onClose }) => {
+const DialogSenha = ({ onClose }) => {
     const [senhaAtual, setSenhaAtual] = useState('')
     const [novaSenha, setNovaSenha] = useState('')
     const [confirmarSenha, setConfirmarSenha] = useState('')
@@ -26,7 +26,7 @@ const DialogSenha = ({ valor, onValorChange, onClose }) => {
     }
 
     try {
-            const response = await api.post('/motorista/comparar-senha', { senha: senhaAtual })
+        const response = await api.post('/motorista/comparar-senha', { senha: senhaAtual })
         
         const senhaValida = response.data.senhaValida
 
@@ -48,8 +48,6 @@ const DialogSenha = ({ valor, onValorChange, onClose }) => {
     //=================
     async function TrocarSenha() {
         try {
-            await compararSenhas()
-
             const senhaValida = await compararSenhas()
             if (senhaValida) {
                 await api.patch('/motorista', { senha: novaSenha }, { skipGlobalErrorToast: true }) //manda a nova senha para o backend
@@ -111,7 +109,7 @@ const DialogSenha = ({ valor, onValorChange, onClose }) => {
                         </li>
                     ))}
                 </ul>
-                <button type="button" className={styles.primaryButton} onClick={TrocarSenha}>
+                <button type="button" className={styles.primaryButton} onClick={TrocarSenha} disabled={requisitos.every((requisito) => !requisito.atendido)}>
                     Alterar senha
                 </button>
             </div>

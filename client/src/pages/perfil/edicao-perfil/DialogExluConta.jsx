@@ -32,7 +32,6 @@ const DialogExluConta = ({ onClose }) => {
     const [senhaAtual, setSenhaAtual] = useState('')
     const [confirmacao, setConfirmacao] = useState('')
     const podeConfirmar = senhaAtual.trim().length > 0 && confirmacao === 'EXCLUIR'
-    const navigate = useNavigate()
     const { logout } = useAuth() //função de logout para deslogar o usuario apos excluir a conta
 
 //======================
@@ -42,7 +41,7 @@ const handleSubmit = async (event) => {
     event.preventDefault(); //não deixo atualizar a pagina
     
     if(!senhaAtual) { //se não tiver confirmado
-        toast.error("Senha não indentificada, por favor insira uma senha")
+        toast.error("Senha não identificada, por favor insira uma senha")
         return;
     }
 

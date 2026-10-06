@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { PiBuildingsBold, PiClockBold, PiShieldCheckBold } from 'react-icons/pi'
+import { useState } from 'react'
+import { PiBuildingsBold } from 'react-icons/pi'
 import { toast } from 'react-hot-toast'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
@@ -63,18 +63,6 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
                     maxLength={18}
                     autoComplete="off"
                 />
-
-                {/* <CampoEdicao
-                    label="Confirmar código"
-                    icon={<PiShieldCheckBold />}
-                    value={codigo}
-                    onChange={(event) => setCodigo(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="Código enviado por e-mail"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    maxLength={6}
-                    suffix={<><PiClockBold aria-hidden="true" /><span aria-label="Tempo ilustrativo: 30 segundos">0:30</span></>}
-                /> */}
                 <CampoEdicao
                     label="Novo CNPJ"
                     icon={<PiBuildingsBold />}

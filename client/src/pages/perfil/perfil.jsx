@@ -160,16 +160,9 @@ const Perfil = () => {
             setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
         }
     }
-    if(user.tipo_pessoa === 'PF'){
-        camposFiltrados = campos.filter((e) => e.id !== 'credencial')
-    }else{
-        camposFiltrados = campos
-    }
-    if(user.google_verificado){
-        camposFiltrados = campos.filter((e) => e.id !== 'email')
-    }else{
-        camposFiltrados = campos
-    }
+    camposFiltrados = campos.filter((campo) =>
+    (user?.tipo_pessoa !== 'PF' || campo.id !== 'credencial') && //se o usuario for pessoa fisica não mostra o campo de alterar credencial
+    (!user?.google_verificado || campo.id !== 'email')) //se o usuario estiver logado no google mostra o campo de alterar email
 
 
     return (

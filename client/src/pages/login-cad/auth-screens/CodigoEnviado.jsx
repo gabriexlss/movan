@@ -114,7 +114,7 @@ const CodigoEnviado = () => {
                 await refreshSession()
                 navigate('/', { replace: true })
             } else if(fluxo === 'atualizar'){
-                const response = await api.patch ('/motorista' , { cod: codigo, email: emailnovo })
+                const response = await api.patch ('/motorista' , { cod: codigo, email: emailnovo }, {skipGlobalErrorToast: true})
                 sessionStorage.removeItem('movan:verificationFlow')
                 await refreshSession()
                 navigate('/perfil', {replace: true})

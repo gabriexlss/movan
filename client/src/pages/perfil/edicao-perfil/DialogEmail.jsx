@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import { PiEnvelopeSimpleBold, PiLockKeyBold, PiShieldCheckBold, PiClockBold } from 'react-icons/pi'
+import { useCallback, useState } from 'react'
+import { PiEnvelopeSimpleBold } from 'react-icons/pi'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
@@ -20,7 +20,7 @@ const DialogEmail = ({ valor, onValorChange, onClose }) => {
         }
 
         try {
-            await api.post('motorista/editar/enviar-codigo', { email: emailnovo }) //mando o email novo para o backend mandar o codigo
+            await api.post('motorista/editar/enviar-codigo', { email: emailnovo }, {skipGlobalErrorToast: true}) //mando o email novo para o backend mandar o codigo
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'atualizar', autoSendVerification: false, emailnovo } })
             toast.success('Código enviado para o seu e-mail')   
 
@@ -42,15 +42,6 @@ const DialogEmail = ({ valor, onValorChange, onClose }) => {
             className={styles.dialog}
         >
             <div className={styles.form}>
-                {/* <CampoEdicao
-                    label="Digite sua senha"
-                    icon={<PiLockKeyBold />}
-                    type="password"
-                    value={senhaAtual}
-                    onChange={(event) => setSenhaAtual(event.target.value)}
-                    placeholder="Digite sua senha atual"
-                    autoComplete="current-password"
-                /> */}
                 <CampoEdicao
                     label="Digite seu novo e-mail"
                     icon={<PiEnvelopeSimpleBold />}
