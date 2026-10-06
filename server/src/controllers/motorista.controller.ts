@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema, GoogleTokenSchema, CriarMotoristaGoogleSchema } from "../models/motorista.model.js"
+import { CriarMotoristaSchema, LoginMotoristaSchema, RecuperarSenhaSchema, CodigoRecuperarSenhaSchema, CodigoEditarEmailSchema, DeletarMotoristaSchema, EditarMotoristaSchema, GoogleTokenSchema, CriarMotoristaGoogleSchema, compararSenhaSchema } from "../models/motorista.model.js"
 import { validarCodigoSchema } from "../models/codigo_verificacao.js"
 import { database } from "../db/postgre.js"
 import bcrypt from "bcrypt"
@@ -610,10 +610,12 @@ export const controllerMotorista = {
             await database.query(queryAplicarDelete, [id])
 
             // Data de exclusão colocada (soft delete) ent agora só apagar a sessão dele e retornar
-            return res.status(200).clearCookie("token", {
+            return res.status(200).cookie("token", "", {
                 httpOnly: true,
                 secure: process.env['NODE_ENV'] === 'production',
-                sameSite: 'strict'
+                sameSite: 'strict',
+                expires: new Date(0),
+                maxAge: 0
             }).json({
                 msg: "Conta agendada para exclusão com sucesso."
             })
@@ -748,11 +750,20 @@ export const controllerMotorista = {
 
         // pega os dados do motorista e envia de volta
         try {
-            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado FROM motorista WHERE id = $1"
+            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado, google_id FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 
             const motorista = rows[0]
+            
+            // se o google id existir coloca que é google verificado, se não, coloca que não é
+            if(!motorista.google_id){
+                motorista.google_verificado = false
+            }else{
+                motorista.google_verificado = true
+            }
+            // deleta o google id do objeto
+            delete motorista.google_id
 
             return res.status(200).json({
                 msg: "Dados da conta obtidos com sucesso.",
@@ -1012,6 +1023,40 @@ export const controllerMotorista = {
             console.error("Erro ao desvincular conta google, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
+            })
+        }
+    },
+    compararSenha: async (req: Request, res: Response) => {
+        // recebendo a senha bruta do cliente
+        const senhaBruta = compararSenhaSchema.safeParse(req.body)
+
+        // pegando o id do motorista
+        const motoristaID = req.userId
+
+        // validação
+        if(!senhaBruta.success){
+            return res.status(400).json({
+                msg: "Digite uma senha válida para comparar."
+            })
+        }
+        const { senha: senhaInserida } = senhaBruta.data
+        try{
+            // pegando a senha hash do motorista
+            const query = "SELECT senha FROM motorista WHERE id = $1"
+            const { rows: dados } = await database.query(query, [motoristaID])
+            const senhaHash = dados[0].senha
+
+            // fazendo a comparação.
+            const senhaValida = await bcrypt.compare(senhaInserida, senhaHash)
+
+            return res.status(200).json({
+                msg: "Senha Comparada com Sucesso!",
+                senhaValida: senhaValida
+            })
+        }catch(erro){
+            console.error("Erro ao pegar senha hash do motorista no endpoint de compararSenha, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         }
     }

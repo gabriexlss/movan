@@ -1,12 +1,35 @@
-import { useState } from 'react'
-import { PiEnvelopeSimpleBold, PiLockKeyBold } from 'react-icons/pi'
+import { useCallback, useState } from 'react'
+import { PiEnvelopeSimpleBold } from 'react-icons/pi'
+import { toast } from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
+import api from '../../../services/api'
 
 const DialogEmail = ({ valor, onValorChange, onClose }) => {
-    const [senhaAtual, setSenhaAtual] = useState('')
+    const [emailnovo, setEmailNovo] = useState('')
+    const navigate = useNavigate()
+
+    const enviarCodigo = useCallback(async () => {
+        
+        if(!emailnovo){
+            toast.error("Preencha o campo de e-mail.")
+            return
+        }
+
+        try {
+            await api.post('motorista/editar/enviar-codigo', { email: emailnovo }, {skipGlobalErrorToast: true}) //mando o email novo para o backend mandar o codigo
+            navigate('/codigo-enviado', { replace: true, state: { fluxo: 'atualizar', autoSendVerification: false, emailnovo } })
+            toast.success('Código enviado para o seu e-mail')   
+
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível enviar o código.')
+        }
+        
+    }, [emailnovo, navigate])
+
 
     return (
         <DefaultDialog
@@ -20,30 +43,20 @@ const DialogEmail = ({ valor, onValorChange, onClose }) => {
         >
             <div className={styles.form}>
                 <CampoEdicao
-                    label="Digite sua senha"
-                    icon={<PiLockKeyBold />}
-                    type="password"
-                    value={senhaAtual}
-                    onChange={(event) => setSenhaAtual(event.target.value)}
-                    placeholder="Digite sua senha atual"
-                    autoComplete="current-password"
-                />
-                <CampoEdicao
                     label="Digite seu novo e-mail"
                     icon={<PiEnvelopeSimpleBold />}
                     type="email"
-                    value={valor}
-                    onChange={(event) => onValorChange(event.target.value)}
+                    value={emailnovo}
+                    onChange={(event) => setEmailNovo(event.target.value)}
                     placeholder="seuemail@exemplo.com"
                     autoComplete="email"
                     autoFocus
                 />
 
-                {/* Apenas fecha a interface. Nenhuma senha ou alteração de e-mail é enviada. */}
                 <button
                     type="button"
                     className={styles.primaryButton}
-                    onClick={onClose}
+                    onClick={enviarCodigo}
                 >
                     Alterar e-mail
                 </button>
@@ -51,5 +64,6 @@ const DialogEmail = ({ valor, onValorChange, onClose }) => {
         </DefaultDialog>
     )
 }
+
 
 export default DialogEmail

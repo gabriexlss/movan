@@ -1,4 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
+import { GoogleLogin } from '@react-oauth/google'
+import { toast } from 'react-hot-toast'
 
 import { PiNotePencilBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
@@ -13,6 +15,7 @@ import DialogEmail from './edicao-perfil/DialogEmail'
 import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
+import api from '../../services/api'
 
 import styles from './perfil.module.css'
 
@@ -33,7 +36,7 @@ const formatarCredencial = (credencial = '') => {
 }
 
 const Perfil = () => {
-    const { user } = useAuth()
+    const { user, refreshSession, logout } = useAuth()
     const [camposEditaveis, setCamposEditaveis] = useState({})
     const [campoSelect, setCampoSelect] = useState(null)
     const [valores, setValores] = useState({
@@ -45,6 +48,7 @@ const Perfil = () => {
     const inputRefs = useRef({})
     const [dialogEditAberto, setDialogEditAberto] = useState(false)
     const [dialogExluContaAberto, setDialogExluContaAberto] = useState(false)
+    const [vinculandoGoogle, setVinculandoGoogle] = useState(false)
     const fecharDialogExluConta = useCallback(() => setDialogExluContaAberto(false), [])
 
     const campos = [
@@ -63,8 +67,8 @@ const Perfil = () => {
         },
         {
             id: 'credencial',
-            label: 'CPF ou CNPJ',
-            placeholder: formatarCredencial(user?.credencial) || 'CPF/CNPJ não informado',
+            label: 'CNPJ',
+            placeholder: formatarCredencial(user?.credencial) || 'CNPJ não informado',
             inputMode: 'numeric',
         },
         {
@@ -75,8 +79,10 @@ const Perfil = () => {
             autoComplete: 'new-password',
         },
     ]
+    let camposFiltrados
 
     const DialogEdicao = dialogsEdicao[campoSelect]
+
 
     const fecharDialogEdicao = useCallback(() => {
         const botaoEdicao = inputRefs.current[campoSelect]?.parentElement.querySelector('button')
@@ -88,6 +94,12 @@ const Perfil = () => {
     }, [campoSelect])
 
     const habilitarEdicao = (campo) => {
+        if (dialogsEdicao[campo]) { //se o campo for de dialog
+            setCampoSelect(campo) //seto o campo que vai ser editado
+            setDialogEditAberto(true) //abro o dialog de edição
+            return //retorno aqui porque não quero que ele edite o input caso seja um campo de dialog
+        }
+
         setCamposEditaveis((estadoAtual) => ({
             ...estadoAtual,
             [campo]: true,
@@ -103,7 +115,7 @@ const Perfil = () => {
         }))
     }
 
-    const encerrarEdicao = (campo) => {
+    const encerrarEdicao = async (campo) => {
         if (!camposEditaveis[campo]) return
 
         setCamposEditaveis((estadoAtual) => ({
@@ -115,7 +127,43 @@ const Perfil = () => {
             setCampoSelect(campo)
             setDialogEditAberto(true)
         }
+        //======================
+        //ATUALIZAR CAMPO 
+        //======================
+        try {
+            await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
+            )
+            await refreshSession()
+            toast.success('Campo atualizado com sucesso.')
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível atualizar o campo.')
+        }
     }
+
+    //======================
+    //VINCULAR GOOGLE
+    //======================
+    const vincularGoogle = async ({ credential }) => {
+        if (!credential || vinculandoGoogle) return //se não tiver o token ou ja estiver vinculando, não faz nada
+
+        setVinculandoGoogle(true) //digo que estou no processo de vincular a conta do google para não permitir que o usuario clique varias vezes no botão
+
+        try {
+            const response = await api.post('/motorista/google/vincular', { token: credential }, { //mando as informações do token do google para o backend para vincular a conta do google com a conta do usuario
+                skipGlobalErrorToast: true,
+            })
+            await refreshSession() //chamo a função de refreshSession para atualizar as informações do usuario apos vincular a conta do google
+            toast.success(response.data?.msg || 'Conta Google vinculada com sucesso.')
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível vincular a conta Google.')
+        } finally {
+            setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
+        }
+    }
+    camposFiltrados = campos.filter((campo) =>
+    (user?.tipo_pessoa !== 'PF' || campo.id !== 'credencial') && //se o usuario for pessoa fisica não mostra o campo de alterar credencial
+    (!user?.google_verificado || campo.id !== 'email')) //se o usuario estiver logado no google mostra o campo de alterar email
+
 
     return (
         <main className={styles['perfil-container']}>
@@ -139,7 +187,7 @@ const Perfil = () => {
             </div>
 
             <section className={styles['campos-perfil']} aria-label="Dados do perfil">
-                {campos.map((campo) => {
+                {camposFiltrados.map((campo) => {
                     const editavel = Boolean(camposEditaveis[campo.id])
 
                     return (
@@ -186,6 +234,20 @@ const Perfil = () => {
                                     <PiNotePencilBold aria-hidden="true" />
                                 </button>
                             </div>
+
+                            {campo.id === 'email' && user?.email_verificado === true && user?.google_verificado === false && (
+                                <div className={styles['linkGoogle']}>
+                                    <GoogleLogin
+                                        onSuccess={vincularGoogle}
+                                        onError={() => toast.error('Não foi possível abrir o Google.')}
+                                        text="signup_with"
+                                        size="small"
+                                        shape="pill"
+                                    />
+                                </div>
+                            )
+                        }
+
                         </div>
                     )
                 })}
@@ -211,7 +273,7 @@ const Perfil = () => {
                 <CgTrash aria-hidden="true" style={{ strokeWidth: '.6', fontSize: '1.7rem' }} />
                 Excluir conta
             </button>
-            <button className={`${styles['BtnExclu-conta']} ${styles['BtnSair-conta']}`}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
+            <button className={`${styles['BtnExclu-conta']}  ${styles['BtnSair-conta']}` } onClick={logout}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
         </main>
     )
 }

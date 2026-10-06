@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { toast } from  'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 import {
     PiIdentificationCardBold,
     PiLockKeyBold,
@@ -13,6 +15,9 @@ import {
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
+import { useAuth } from '../../../context/useAuth'
+import api from '../../../services/api'
+
 
 const dadosExcluidos = [
     { texto: 'Seu perfil e dados atuais', Icone: PiUserBold },
@@ -21,10 +26,42 @@ const dadosExcluidos = [
     { texto: 'Contratos e mensalidades', Icone: PiReceiptBold },
 ]
 
+
+
 const DialogExluConta = ({ onClose }) => {
     const [senhaAtual, setSenhaAtual] = useState('')
     const [confirmacao, setConfirmacao] = useState('')
     const podeConfirmar = senhaAtual.trim().length > 0 && confirmacao === 'EXCLUIR'
+    const { logout } = useAuth() //função de logout para deslogar o usuario apos excluir a conta
+
+//======================
+//TRATAR EXCLUSÃO
+//======================
+const handleSubmit = async (event) => {
+    event.preventDefault(); //não deixo atualizar a pagina
+    
+    if(!senhaAtual) { //se não tiver confirmado
+        toast.error("Senha não identificada, por favor insira uma senha")
+        return;
+    }
+
+    try{
+        const response = await api.delete('/motorista', {
+            data: { senha: senhaAtual }, //mando para o backend a senha para confirmar a exclusão da conta
+            skipGlobalErrorToast: true, //falo para a api não mostrar o toast de erro global, porque vou tratar o erro de forma diferente aqui
+            skipAuthExpired: true, //falo para a api não mandar o evento de sessão expirada, porque vou tratar o erro de forma diferente aqui
+        })
+        toast.success(response.data.msg || 'Conta excluída com sucesso, caso não logue em 30 dias a conta será excluída permanentemente.')
+        await logout() //chamo a função de logout para deslogar o usuario apos excluir a cont
+        }catch(error){
+            if(error.response?.status === 401) {
+                toast.error(error.response.data?.msg || 'Senha incorreta. Por favor, tente novamente.')
+                return;
+            }
+            toast.error(error.response?.data?.msg || 'Não foi possível excluir a conta. Por favor, tente novamente mais tarde.')
+    }
+
+}
 
     return (
         <DefaultDialog
@@ -105,7 +142,7 @@ const DialogExluConta = ({ onClose }) => {
                     <button
                         type="button"
                         className={`${styles.primaryButton} ${styles.deleteButton}`}
-                        onClick={onClose}
+                        onClick={handleSubmit}
                         disabled={!podeConfirmar}
                     >
                         <PiTrashBold aria-hidden="true" />

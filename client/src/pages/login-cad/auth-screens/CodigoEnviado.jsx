@@ -14,6 +14,7 @@ const CodigoEnviado = () => {
     const [enviando, setEnviando] = useState(false) //uso para falar que o formulario esta sendo enviado
     const [reenviando, setReenviando] = useState(false) //uso para o codigo saber se ja estou reenviando
     const [tempoRestante, setTempoRestante] = useState(23)
+    const emailnovo = state?.emailnovo
     const fluxo = state?.fluxo || sessionStorage.getItem('movan:verificationFlow') || 'recuperacao' //pego o fluxo do estado ou do sessionStorage, caso não tenha nenhum defino como 'recuperacao'
     const autoEnvioRealizado = useRef(false)
 
@@ -61,16 +62,23 @@ const CodigoEnviado = () => {
         setReenviando(true) //digo que o processo de reenviar começou
 
         try {
-            const response = fluxo === 'cadastro' //se o fluxo for de cadastro
-                ? await enviarCodigoCadastro() //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
-                : await api.post('/motorista/recuperar-conta/enviar-codigo', { //se o fluxo não for cadastro eu mando o codigo ser enviado como um de recuperação de conta
-                    email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de esqueci minha senha e mandei pro backend para ele saber para qual email enviar o codigo
-                }, { skipGlobalErrorToast: true }) //recuso que o toast do api.js seja mostrado, vou tratar o erro aqui
+            let response
 
+            if (fluxo === 'atualizar') {//se o fluxo for de atualizar o email
+                response = await api.post('/motorista/editar/enviar-codigo', { email: emailnovo })//mando o email novo para o backend mandar o codigo
+            } else {
+                response = fluxo === 'cadastro' //se o fluxo for de cadastro
+                    ? await enviarCodigoCadastro() //mando o backend enviar denovo um codigo como se fosse um codigo de criação de conta
+                    : await api.post('/motorista/recuperar-conta/enviar-codigo', { //se o fluxo não for cadastro eu mando o codigo ser enviado como um de recuperação de conta
+                        email: sessionStorage.getItem('movan:recoveryEmail'), //pego o email que o usuario digitou na tela de esqueci minha senha e mandei pro backend para ele saber para qual email enviar o codigo
+                    }, { skipGlobalErrorToast: true }) //recuso que o toast do api.js seja mostrado, vou tratar o erro aqui
+            }
             setCodigo('') //limpo o campo de código para o usuário digitar denovo
             setTempoRestante(23) //reinicio o tempo para o usuário poder reenviar denovo caso ele não receba o código
             toast.success(fluxo === 'cadastro'
                 ? 'Código de verificação reenviado com sucesso.'
+                : fluxo === 'atualizar'
+                    ? response.data?.msg || 'Código para alteração de e-mail reenviado com sucesso.'
                 : response.data?.msg || 'Código reenviado com sucesso.')//mando uma mensagem amigável para o cadastro e a mensagem do backend nos demais fluxos
         } catch (error) {
             //trato o erro para ele aparecer bonitinho no toast
@@ -105,7 +113,12 @@ const CodigoEnviado = () => {
                 sessionStorage.removeItem('movan:verificationFlow') //apago o fluxo porque o usuário já verificou a conta
                 await refreshSession()
                 navigate('/', { replace: true })
-            } else {
+            } else if(fluxo === 'atualizar'){
+                const response = await api.patch ('/motorista' , { cod: codigo, email: emailnovo }, {skipGlobalErrorToast: true})
+                sessionStorage.removeItem('movan:verificationFlow')
+                await refreshSession()
+                navigate('/perfil', {replace: true})
+            }else {
                 sessionStorage.setItem('movan:recoveryCode', codigo) //guardo o código no sessionStorage porque vou usar na tela de redefinir senha
                 navigate('/redefinir-senha', { state: { codigo, fluxo: 'recuperacao' } }) //mando para a pagina de redefinir senha e falo que o fluxo é de recuperação
             }

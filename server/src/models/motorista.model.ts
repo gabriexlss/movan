@@ -63,6 +63,10 @@ export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
 export const DeletarMotoristaSchema = MotoristaSchema.pick({
     senha: true
 })
+export const compararSenhaSchema = MotoristaSchema.pick({
+    senha: true
+})
+export type compararSenha = z.infer<typeof compararSenhaSchema>
 export type CriarMotoristaGoogle = z.infer<typeof CriarMotoristaGoogleSchema>
 export type GoogleToken = z.infer<typeof GoogleTokenSchema>
 export type DeletarMotorista = z.infer<typeof DeletarMotoristaSchema>
