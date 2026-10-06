@@ -2,6 +2,7 @@ import { Router } from "express";
 const router = Router();
 import { controllerMotorista } from "../controllers/motorista.controller.js"
 import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
+import { middlewareVerificado } from "../middlewares/verificado.middleware.js";
 
 // Rota pra criar um motorista
 router.post('/', controllerMotorista.criarMotorista)
@@ -9,8 +10,8 @@ router.post('/', controllerMotorista.criarMotorista)
 // rota delete para realizar o soft delete da sua conta. a agendando para encerramento permanente após 30 dias.
 router.delete('/', middlewareAutenticar, controllerMotorista.deletarConta)
 
-// rota patch para realizar a edição de dados do perfil como nome, email, cnpj e senha
-router.patch('/', middlewareAutenticar, controllerMotorista.editarConta)
+// rota patch para realizar a edição de nome, email, CPF/CNPJ e senha
+router.patch('/', middlewareAutenticar, middlewareVerificado, controllerMotorista.editarConta)
 
 // rota get para obter todos os dados do motorista
 router.get('/', middlewareAutenticar, controllerMotorista.obterDados)
@@ -34,18 +35,18 @@ router.post('/recuperar-conta/enviar-codigo', controllerMotorista.enviarCodigoRe
 router.post('/recuperar-conta/recuperar', controllerMotorista.recuperarSenha)
 
 // rota para enviar um código ao novo email antes de alterá-lo
-router.post('/editar/enviar-codigo', middlewareAutenticar, controllerMotorista.enviarCodigoEditarEmail)
+router.post('/editar/enviar-codigo', middlewareAutenticar, middlewareVerificado, controllerMotorista.enviarCodigoEditarEmail)
 
 // rota post para autenticar com o google.
 router.post('/google', controllerMotorista.authGoogle)
 
 // rota post para vincular conta existente com o google
-router.post('/google/vincular', middlewareAutenticar, controllerMotorista.vincularGoogle)
+router.post('/google/vincular', middlewareAutenticar, middlewareVerificado, controllerMotorista.vincularGoogle)
 
 // rota post para criar uma conta, usando o google.
 router.post('/google/criar', controllerMotorista.criarContaGoogle)
 
 // rota delete para desvincular a conta google da conta do usuario logado.
-router.delete('/google/desvincular', middlewareAutenticar, controllerMotorista.desvincularGoogle)
+router.delete('/google/desvincular', middlewareAutenticar, middlewareVerificado,controllerMotorista.desvincularGoogle)
 
 export default router;
