@@ -5,7 +5,7 @@ import { UtilSchema } from './utils.model.js';
 // Modelo global pro motorista (usuario)
 const MotoristaSchema = z.object({
     id: UtilSchema.shape.id,
-    credencial: z.string("O valor deve ser um texto."), //credencial é ou cnpj ou cpf
+    credencial: z.string("O valor deve ser um texto.").toUpperCase(), //credencial é ou cnpj ou cpf
     email: z.string("O valor deve ser um texto.").min(3, "E-mail muito curto.").max(150, "E-mail muito longo.").email("E-mail inválido."),
     nome: z.string("O valor deve ser um texto.").min(3, "Nome muito curto.").max(200, "Nome muito longo."),
     senha: z.string("O valor deve ser um texto.")
