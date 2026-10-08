@@ -7,7 +7,6 @@ export const limitarRequisicoes = {
     cadastro: () => requisicoes({tempo: 30 * 60 * 1000, limite: 5}), // 5 requisições a cada 30 minutos
     get: () => requisicoes({tempo: 60 * 1000, limite: 60}), // 60 requisições por minuto
     codigoEmail: () => requisicoes({tempo: 5 * 60 * 1000, limite: 1}), // 1 requisição a cada 5 minutos
-    teste: () => requisicoes({tempo: 60 * 1000, limite: 5}),
 };
 
 interface requisicoesProps {

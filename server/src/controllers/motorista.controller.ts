@@ -617,7 +617,7 @@ export const controllerMotorista = {
                 expires: new Date(0),
                 maxAge: 0
             }).json({
-                msg: "Conta Excluida, Dentro do Periodo de 30 dias você pode reativar a conta."
+                msg: "Conta Excluida. Dentro do Periodo de 30 dias você pode logar para reativar a conta."
             })
         } catch (erro) {
             console.error("Erro ao excluir a conta do usuário, erro: ", erro)

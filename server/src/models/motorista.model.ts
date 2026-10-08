@@ -76,6 +76,7 @@ export const DeletarMotoristaSchema = MotoristaSchema.pick({
 export const compararSenhaSchema = MotoristaSchema.pick({
     senha: true
 })
+export type Motorista = z.infer<typeof MotoristaSchema>
 export type compararSenha = z.infer<typeof compararSenhaSchema>
 export type CriarMotoristaGoogle = z.infer<typeof CriarMotoristaGoogleSchema>
 export type GoogleToken = z.infer<typeof GoogleTokenSchema>
