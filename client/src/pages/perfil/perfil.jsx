@@ -164,7 +164,6 @@ const Perfil = () => {
                                     editavel ? styles['input-container--editavel'] : ''
                                 }`}
                             >
-
                                 <input
                                     ref={(elemento) => {
                                         inputRefs.current[campo.id] = elemento

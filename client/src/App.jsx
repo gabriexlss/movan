@@ -21,7 +21,6 @@ import ErrorPage from './pages/errors/errorPage'
 import Financeiro from './pages/financeiro/financeiro'
 import Cliente from './pages/clientes/cliente'
 import ClienteDetalhes from './pages/clientes/detalhes/ClienteDetalhes'
-
 import Perfil from './pages/perfil/perfil'
 import Notificacoes from './pages/notificacoes/notificacoes'
 
