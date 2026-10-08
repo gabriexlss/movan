@@ -3,14 +3,18 @@ import { useCallback, useRef, useState } from 'react'
 import { PiNotePencilBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
+import { MdPersonOutline } from "react-icons/md";
+import { LuMails } from "react-icons/lu";
+import { BiSolidBuildings } from "react-icons/bi";
+import { HiOutlineKey } from "react-icons/hi";
 import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
 
 
 import TituloTela from '../../components/layout/tituloTela'
-import DialogSenha from './edicao-perfil/DialogSenha'
-import DialogCnpj from './edicao-perfil/DialogCnpj'
-import DialogEmail from './edicao-perfil/DialogEmail'
-import DialogExluConta from './edicao-perfil/DialogExluConta'
+import DialogSenha from './dialogs/DialogSenha'
+import DialogCnpj from './dialogs/DialogCnpj'
+import DialogEmail from './dialogs/DialogEmail'
+import DialogExluConta from './dialogs/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
 
@@ -50,12 +54,14 @@ const Perfil = () => {
     const campos = [
         {
             id: 'nome',
+            Icone: MdPersonOutline,
             label: 'Nome',
             placeholder: user?.nome || 'Nome não informado',
             autoComplete: 'name',
         },
         {
             id: 'email',
+            Icone: LuMails,
             label: 'E-mail',
             placeholder: user?.email || 'E-mail não informado',
             type: 'email',
@@ -63,12 +69,14 @@ const Perfil = () => {
         },
         {
             id: 'credencial',
+            Icone: BiSolidBuildings,
             label: 'CPF ou CNPJ',
             placeholder: formatarCredencial(user?.credencial) || 'CPF/CNPJ não informado',
             inputMode: 'numeric',
         },
         {
             id: 'senha',
+            Icone: HiOutlineKey,
             label: 'Senha',
             placeholder: '********',
             type: 'password',
@@ -141,10 +149,15 @@ const Perfil = () => {
             <section className={styles['campos-perfil']} aria-label="Dados do perfil">
                 {campos.map((campo) => {
                     const editavel = Boolean(camposEditaveis[campo.id])
+                    const Icone = campo.Icone
 
                     return (
                         <div className={styles['campo-grupo']} key={campo.id}>
-                            <label htmlFor={`perfil-${campo.id}`}>{campo.label}</label>
+                            <label 
+                                className={`${styles['label']} ${editavel ? styles['label--editavel'] : ''}`} htmlFor={`perfil-${campo.id}`}><Icone className={`${styles['icon-label']} ${editavel ? styles['icon-label--editavel'] : ''}`}
+                            /> 
+                                {campo.label}
+                            </label>
 
                             <div
                                 className={`${styles['input-container']} ${

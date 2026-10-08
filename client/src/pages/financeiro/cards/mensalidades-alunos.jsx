@@ -31,6 +31,7 @@ const MensalidadesAlunos = () => {
             page={pagina}
             totalPages={TOTAL_PAGINAS}
             onPageChange={setPagina}
+            showAction={false}
         >
             <ul className={styles.lista}>
                 {mensalidadesDaPagina.map(({ nome, vencimento, status, cor }) => (
