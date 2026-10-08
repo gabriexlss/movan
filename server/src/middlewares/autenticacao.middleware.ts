@@ -30,7 +30,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         const id = tokenAberto.id
         try {
             // query verifica se o id do motorista existe e se sua conta não está agendada pra ser excluida.
-            const query = "SELECT email_verificado FROM motorista WHERE id = $1"
+            const query = "SELECT email_verificado, excluido_em FROM motorista WHERE id = $1"
             const valores = [id]
             const { rows } = await database.query<Motorista>(query, valores)
             if (rows.length < 1) {
