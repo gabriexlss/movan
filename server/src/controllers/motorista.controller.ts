@@ -641,7 +641,7 @@ export const controllerMotorista = {
             })
         }
         // determina se tal dado veio ou não e coloca a clausula dele
-        const { nome, email, credencial, senha, cod } = dadosBrutos.data
+        const { nome, email, credencial, senha, cod, senhaAtual } = dadosBrutos.data
         // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
         const campos: string[] = []
         const valores: (string | number)[] = []
@@ -703,9 +703,33 @@ export const controllerMotorista = {
         if (senha) {
             campos.push(`senha = $${valores.length + 1}`)
 
-            // transforma a senha em hash
-            const senhaHash = await bcrypt.hash(senha, 10)
-            valores.push(senhaHash)
+            // verifica se a senha atual bate com a senha do usuario.
+            try {
+                // pegando o hash da senha do usuario do banco de dados
+                const query = "SELECT senha FROM motorista WHERE id = $1"
+                const { rows: senhaColuna } = await database.query(query, [id])
+
+                // atribuindo a senha a uma constante
+                const senhaUsuario = senhaColuna[0].senha
+
+                // valida se a senha digitada é de fato a senha valida.
+                const senhaValida = await bcrypt.compare(senhaAtual ?? "ojvnervoi", senhaUsuario)
+
+                if (!senhaValida) {
+                    return res.status(401).json({
+                        msg: "Senha Inválida para realizar a troca de senha."
+                    })
+                }
+
+                // transforma a senha em hash
+                const senhaHash = await bcrypt.hash(senha, 10)
+                valores.push(senhaHash)
+            } catch (erro) {
+                console.error("erro no endpoint de editar motorista ao validar senha para troca-lá, erro: ", erro)
+                return res.status(500).json({
+                    msg: "Erro Interno no Servidor."
+                })
+            }
         }
 
         // se nenhum campo tiver sido enviado, manda embora
@@ -755,11 +779,11 @@ export const controllerMotorista = {
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 
             const motorista = rows[0]
-            
+
             // se o google id existir coloca que é google verificado, se não, coloca que não é
-            if(!motorista.google_id){
+            if (!motorista.google_id) {
                 motorista.google_verificado = false
-            }else{
+            } else {
                 motorista.google_verificado = true
             }
             // deleta o google id do objeto
@@ -1034,13 +1058,13 @@ export const controllerMotorista = {
         const motoristaID = req.userId
 
         // validação
-        if(!senhaBruta.success){
+        if (!senhaBruta.success) {
             return res.status(400).json({
                 msg: "Digite uma senha válida para comparar."
             })
         }
         const { senha: senhaInserida } = senhaBruta.data
-        try{
+        try {
             // pegando a senha hash do motorista
             const query = "SELECT senha FROM motorista WHERE id = $1"
             const { rows: dados } = await database.query(query, [motoristaID])
@@ -1053,7 +1077,7 @@ export const controllerMotorista = {
                 msg: "Senha comparada com sucesso.",
                 senhaValida: senhaValida
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("Erro ao pegar senha hash do motorista no endpoint de compararSenha, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro interno do servidor."

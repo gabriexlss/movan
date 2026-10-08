@@ -55,10 +55,14 @@ export const CodigoEditarEmailSchema = MotoristaSchema.pick({
     email: true
 })
 export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
-    cod: validarCodigoSchema.shape.cod.optional()
+    cod: validarCodigoSchema.shape.cod.optional(),
+    senhaAtual: CriarMotoristaSchema.shape.senha.optional()
 }).refine((dados) => !dados.email || !!dados.cod, {
     message: "O código é obrigatório para alterar o e-mail.",
     path: ["cod"]
+}).refine((dados) => dados.senha === undefined || !!dados.senhaAtual, {
+    message: "A confirmação da senha é obrigatória para alterar a senha.",
+    path: ["confirmarSenha"]
 })
 export const DeletarMotoristaSchema = MotoristaSchema.pick({
     senha: true
