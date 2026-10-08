@@ -8,7 +8,13 @@ const MotoristaSchema = z.object({
     credencial: z.string("O valor deve ser um texto."), //credencial é ou cnpj ou cpf
     email: z.string("O valor deve ser um texto.").min(3, "E-mail muito curto.").max(150, "E-mail muito longo.").email("E-mail inválido."),
     nome: z.string("O valor deve ser um texto.").min(3, "Nome muito curto.").max(200, "Nome muito longo."),
-    senha: z.string("O valor deve ser um texto.").max(100, "Senha muito longa."),
+    senha: z.string("O valor deve ser um texto.")
+        .max(100, "Senha muito longa.")
+        .min(8, "A senha deve ter pelo menos 8 caracteres.")
+        .regex(/[A-Z]/, "A senha deve conter uma letra maiúscula.")
+        .regex(/[a-z]/, "A senha deve conter uma letra minúscula.")
+        .regex(/\d/, "A senha deve conter um número.")
+        .regex(/[^\w\s]/, "A senha deve conter um caractere especial."),
     email_verificado: z.boolean("O valor deve ser um booleano."),
     excluido_em: z.string("O valor deve ser um texto.").datetime("Data inválida.").nullish(),
     login: z.string("O valor deve ser um texto.").min(3, "Credenciais de login muito curtas.").max(255, "Credenciais de login muito longas.")
