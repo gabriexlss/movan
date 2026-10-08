@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import mainRoutes from './mainRoutes.js';
 import cookieParser from 'cookie-parser';
+import { limitarRequisicoes } from './middlewares/rateLimit.js';
 
 const app: Application = express();
 
@@ -30,6 +31,6 @@ app.use(cookieParser())
 app.use(express.json());
 
 // conecta o app com a execução do arquivo de rotas, onde estão todas as rotas do servidor
-app.use('/', mainRoutes);
+app.use('/', limitarRequisicoes.global(), mainRoutes);
 
 export default app;
