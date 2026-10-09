@@ -21,9 +21,19 @@ jobs:
             contents: read
 
         steps:
+            - name: Configurar Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version: "3.12"
+
+            # Executa o runner oficial sem baixar a imagem do Docker Hub.
+            - name: Instalar PR Agent
+              run: python -m pip install --disable-pip-version-check "pr-agent @ git+https://github.com/The-PR-Agent/pr-agent.git@v0.47.0"
+
             - name: PR Agent
-              uses: the-pr-agent/pr-agent@main
+              run: python -m pr_agent.servers.github_action_runner
               env:
+                  LITELLM_LOCAL_MODEL_COST_MAP: "True"
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
                   GOOGLE_AI_STUDIO.GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -45,3 +55,4 @@ jobs:
                   github_action_config.auto_review: "true"
                   github_action_config.auto_describe: "true"
                   github_action_config.auto_improve: "true"
+                  github_action_config.pr_actions: '["opened", "reopened", "ready_for_review", "synchronize"]'
