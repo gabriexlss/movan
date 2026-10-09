@@ -14,9 +14,21 @@ importers:
       axios:
         specifier: ^1.20.0
         version: 1.20.0(debug@4.4.3)
+<<<<<<< HEAD
       react:
         specifier: ^19.2.6
         version: 19.3.0
+=======
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
+      react:
+        specifier: ^19.2.6
+        version: 19.3.0
+      react-chartjs-2:
+        specifier: ^5.3.1
+        version: 5.3.1(chart.js@4.5.1)(react@19.3.0)
+>>>>>>> main
       react-dom:
         specifier: ^19.2.6
         version: 19.3.0(react@19.3.0)
@@ -220,6 +232,12 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
+<<<<<<< HEAD
+=======
+  '@kurkle/color@0.3.4':
+    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
+>>>>>>> main
   '@oxc-project/types@0.151.0':
     resolution: {integrity: sha512-J1yXrIlNDZVzE3ada310xeAw7nH8yCAyLPuUIsjKatFPmfn5bS1oW+cM+QsGOtVWd5nhSpbwZWx/rue+r5Z+PA==}
 
@@ -412,6 +430,13 @@ packages:
   caniuse-lite@1.0.30001810:
     resolution: {integrity: sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg==}
 
+<<<<<<< HEAD
+=======
+  chart.js@4.5.1:
+    resolution: {integrity: sha512-GIjfiT9dbmHRiYi6Nl2yFCq7kkwdkp1W/lp2J99rX0yo9tgJGn3lKQATztIjb5tVtevcBtIdICNWqlq5+E8/Pw==}
+    engines: {pnpm: '>=8'}
+
+>>>>>>> main
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
@@ -851,6 +876,15 @@ packages:
     resolution: {integrity: sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA==}
     engines: {node: '>=20'}
 
+<<<<<<< HEAD
+=======
+  react-chartjs-2@5.3.1:
+    resolution: {integrity: sha512-h5IPXKg9EXpjoBzUfyWJvllMjG2mQ4EiuHQFhms/AjUm0XSZHhyRy2xVmLXHKrtcdrPO4mnGqRtYoD0vp95A0A==}
+    peerDependencies:
+      chart.js: ^4.1.1
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+>>>>>>> main
   react-dom@19.3.0:
     resolution: {integrity: sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q==}
     peerDependencies:
@@ -1199,6 +1233,11 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
+<<<<<<< HEAD
+=======
+  '@kurkle/color@0.3.4': {}
+
+>>>>>>> main
   '@oxc-project/types@0.151.0': {}
 
   '@react-oauth/google@0.13.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
@@ -1334,6 +1373,13 @@ snapshots:
 
   caniuse-lite@1.0.30001810: {}
 
+<<<<<<< HEAD
+=======
+  chart.js@4.5.1:
+    dependencies:
+      '@kurkle/color': 0.3.4
+
+>>>>>>> main
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
@@ -1722,6 +1768,14 @@ snapshots:
     dependencies:
       hookified: 2.2.0
 
+<<<<<<< HEAD
+=======
+  react-chartjs-2@5.3.1(chart.js@4.5.1)(react@19.3.0):
+    dependencies:
+      chart.js: 4.5.1
+      react: 19.3.0
+
+>>>>>>> main
   react-dom@19.3.0(react@19.3.0):
     dependencies:
       react: 19.3.0

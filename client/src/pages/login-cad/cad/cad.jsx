@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../../context/useAuth'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import PasswordRequirements from '../../../components/auth/PasswordRequirements'
+import { senhaValida } from '../../../utils/password'
+import { mensagemErroApi } from '../../../utils/apiError'
 import styles from './cad.module.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
@@ -9,6 +13,7 @@ import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
 const Cad = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
+    const { refreshSession } = useAuth()
     const [nome, setNome] = useState('') //guarda o nome do usuario
     const [email, setEmail] = useState('') //guarda o email
     const [credencial, setCredencial] = useState('') //guarda o CPF ou CNPJ do usuario
@@ -27,6 +32,12 @@ const Cad = () => {
             return //cancelo o envio do formulario
         }
 
+        if (enviando) return
+        if (!senhaValida(senha)) {
+            toast.error('A nova senha deve atender a todos os requisitos.')
+            return
+        }
+
         setEnviando(true) //falo que o formulario esta sendo enviado
 
         try {
@@ -41,6 +52,10 @@ const Cad = () => {
 
             toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma caixa de sucesso com a mensagem do backend, caso não tenha mensagem do backend mando uma mensagem padrão
             sessionStorage.setItem('movan:verificationFlow', 'cadastro') //falo que o fluxo de verificação é de cadastro, porque o usuário acabou de criar a conta
+<<<<<<< HEAD
+=======
+            await refreshSession()
+>>>>>>> main
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //mando o usuario para a pagina de codigo enviado
         } catch (error) {
             if (error.response?.status === 409) {
@@ -48,10 +63,7 @@ const Cad = () => {
                 return
             }
 
-            const errosDeCampo = Object.values(error.response?.data?.erro || {}) //pego os erros do backend e transformo eles em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio
-                .flatMap((campo) => campo?._errors || []) //tiro o _errors do campo
-            const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível criar sua conta.' //mando a mensagem que tratei do backend, se não tiver mensagem mando uma generica
-            toast.error(mensagem)
+            toast.error(mensagemErroApi(error, 'Não foi possível criar sua conta.'))
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }
@@ -96,7 +108,7 @@ const Cad = () => {
                         value={credencial}
                         onChange={(event) => setCredencial(event.target.value)}
                         placeholder=" "
-                        inputMode="numeric"
+                        inputMode="text"
                         maxLength={18}
                         required
                     />
@@ -132,6 +144,8 @@ const Cad = () => {
                     <label htmlFor="confirmarSenha">Confirmar senha</label>
                 </div>
 
+                <PasswordRequirements senha={senha} />
+
                 <div className={styles['campo-termos']}>
                     <input
                         type="checkbox"
@@ -144,7 +158,7 @@ const Cad = () => {
                     </label>
                 </div>
 
-                <button className={styles['cadastrar']} type="submit" disabled={enviando}>
+                <button className={styles['cadastrar']} type="submit" disabled={enviando || !senhaValida(senha) || senha !== confirmarSenha}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}
                 </button>
             </form>

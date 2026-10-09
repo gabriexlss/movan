@@ -2,6 +2,7 @@ import { GoogleLogin } from '@react-oauth/google'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { mensagemErroApi } from '../../../utils/apiError'
 import { useAuth } from '../../../context/useAuth'
 
 const ButtonGoogle = () => {
@@ -20,6 +21,7 @@ const ButtonGoogle = () => {
         try {
             const response = await api.post('/motorista/google', { token: credential }, { //mando o token pro backend para ele verificar se o usuario ja existe
                 skipGlobalErrorToast: true,
+                skipAuthExpired: true,
             })
 
             if (response.data?.CREATION_REQUIRED) { //caso o backend informe que o usuario não esta cadastrado
@@ -32,7 +34,7 @@ const ButtonGoogle = () => {
             toast.success(response.data?.msg || 'Login realizado com sucesso.') //mando uma mensagem de sucesso do backend caso ela não exista mando uma mensagem generica
             navigate('/', { replace: true }) //mando o usuario para a tela inicial
         } catch (error) {
-            toast.error(error.response?.data?.msg || 'Não foi possível autenticar com o Google.') //caso de algum erro mando uma mensagem de erro do backend caso ela não exista mando uma mensagem generica
+            toast.error(mensagemErroApi(error, 'Não foi possível autenticar com o Google.')) //caso de algum erro mando uma mensagem de erro do backend caso ela não exista mando uma mensagem generica
         }
     }
 

@@ -1,9 +1,13 @@
 import styles from './DefaultCard.module.css';
 import { Link } from 'react-router-dom';
 
+<<<<<<< HEAD
 const DefaultCard = ({ title, children, link, compactTitle = false, headerContent, titleClassName = '' }) => {
     const titleClasses = `${styles['card-header']} ${compactTitle ? styles.compact : ''} ${titleClassName}`
 
+=======
+const DefaultCard = ({ title, children, link, compactTitle = false }) => {
+>>>>>>> main
     return (
         <section className={styles.card}>
             {headerContent ? (
@@ -19,7 +23,7 @@ const DefaultCard = ({ title, children, link, compactTitle = false, headerConten
 
             {link && (
                 <Link to={link} className={styles.BtnVerMensalidade}>
-                    Ver Detalhes
+                    Ver detalhes
                 </Link>
             )}
 

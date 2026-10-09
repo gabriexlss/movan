@@ -62,7 +62,7 @@ const opcoes = {
     },
 }
 
-const Comparativo = (link) => {
+const Comparativo = () => {
     return (
         <DefaultCard title="Comparativo de lucros e despesas">
             <div className={styles['grafico']}>

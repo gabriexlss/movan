@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import PasswordRequirements from '../../../components/auth/PasswordRequirements'
+import { senhaValida } from '../../../utils/password'
+import { mensagemErroApi } from '../../../utils/apiError'
 import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -39,6 +42,12 @@ const CadGoogle = () => {
             return //cancelo o envio do formulario
         }
 
+        if (enviando) return
+        if (!senhaValida(senha)) {
+            toast.error('A nova senha deve atender a todos os requisitos.')
+            return
+        }
+
         setEnviando(true) //digo que o formulario iniciou o envio
 
         try {
@@ -48,6 +57,7 @@ const CadGoogle = () => {
                 senha, //a senha do usuario
                 token: dadosGoogle.token, //o token do google
             }, {
+                skipAuthExpired: true,
                 skipGlobalErrorToast: true, //tratarei erros aqui então impeço que o toast global de erro seja chamado
             })
             sessionStorage.removeItem('movan:googleSignup') //removo os dados do sessionStorage
@@ -56,14 +66,15 @@ const CadGoogle = () => {
             navigate('/', { replace: true }) //mando o usuario para a tela inicial
         } catch (error) {
             if (error.response?.status === 409) {
+<<<<<<< HEAD
                 toast.error(error.response.data?.msg || 'E-mail, CPF, CNPJ ou conta Google já cadastrado no Movan.')
+=======
+                toast.error(error.response.data?.msg || 'Já existe uma conta no Movan com este e-mail, CPF, CNPJ ou conta Google.')
+>>>>>>> main
                 return
             }
 
-            const errosDeCampo = Object.values(error.response?.data?.erro || {}) //transformo o erro do backend em um array, caso ele não mande nada o array fica vazio
-                .flatMap((campo) => campo?._errors || []) //tiro o _errors de cada campo e coloco tudo em um array só
-            const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível criar sua conta Google.' //se o backend mandou algo eu uso, caso não eu mando uma mensagem de erro generica
-            toast.error(mensagem) //manda a mensagem
+            toast.error(mensagemErroApi(error, 'Não foi possível criar sua conta Google.'))
         } finally {
             setEnviando(false) //digo que o envio do formulario acabou
         }
@@ -71,7 +82,7 @@ const CadGoogle = () => {
 
     return (
         <section className={styles['auth-screens']}>
-            <h2 className={styles['auth-screens__titulo']}>Cadastro com google</h2>
+            <h2 className={styles['auth-screens__titulo']}>Cadastro com Google</h2>
 
             <form
                 className={styles['auth-screens__form']}
@@ -85,7 +96,7 @@ const CadGoogle = () => {
                         value={credencial}
                         onChange={(event) => setCredencial(event.target.value)}
                         placeholder=" "
-                        inputMode="numeric"
+                        inputMode="text"
                         maxLength={18}
                         required
                     />
@@ -121,7 +132,9 @@ const CadGoogle = () => {
                     <label htmlFor="confirmarSenhaGoogle">Confirmar senha</label>
                 </div>
 
-                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
+                <PasswordRequirements senha={senha} />
+
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando || !senhaValida(senha) || senha !== confirmarSenha}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}
                 </button>
             </form>
