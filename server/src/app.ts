@@ -6,6 +6,9 @@ import { limitarRequisicoes } from './middlewares/rateLimit.js';
 
 const app: Application = express();
 
+// Confia no proxy da Vercel para identificar o IP do cliente no rate limit.
+app.set('trust proxy', 1);
+
 // Processa as origens do CORS a partir do .env (com tratamento de erro para evitar crash)
 const allowedOrigins = (() => {
   const originEnv = process.env['CORS_ORIGEM'];
