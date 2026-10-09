@@ -13,10 +13,10 @@ import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg
 
 
 import TituloTela from '../../components/layout/tituloTela'
-import DialogSenha from './dialogs/DialogSenha'
-import DialogCnpj from './dialogs/DialogCnpj'
-import DialogEmail from './dialogs/DialogEmail'
-import DialogExluConta from './dialogs/DialogExluConta'
+import DialogSenha from './edicao-perfil/DialogSenha'
+import DialogCnpj from './edicao-perfil/DialogCnpj'
+import DialogEmail from './edicao-perfil/DialogEmail'
+import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
 import api from '../../services/api'
@@ -74,16 +74,10 @@ const Perfil = () => {
         },
         {
             id: 'credencial',
-<<<<<<< HEAD
             Icone: BiSolidBuildings,
-            label: 'CPF ou CNPJ',
-            placeholder: formatarCredencial(user?.credencial) || 'CPF/CNPJ não informado',
-            inputMode: 'numeric',
-=======
             label: 'CNPJ',
             placeholder: formatarCredencial(user?.credencial) || 'CNPJ não informado',
             inputMode: 'text',
->>>>>>> main
         },
         {
             id: 'senha',

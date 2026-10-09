@@ -5,15 +5,6 @@ import { UtilSchema } from './utils.model.js';
 // Modelo global pro motorista (usuario)
 const MotoristaSchema = z.object({
     id: UtilSchema.shape.id,
-<<<<<<< HEAD
-    credencial: z.string("Não é uma String"), //credencial é ou cnpj ou cpf
-    email: z.string("Não é uma String").min(3, "Email muito curto").max(150, "Email Muito Longo").email("Email Invalido"),
-    nome: z.string("Não é uma String").min(3, "Nome muito Curto").max(200, "Nome muito Longo"),
-    senha: z.string("Não é uma String").max(100, "Senha muito Longa"),
-    email_verificado: z.boolean("Não é um Booleano"),
-    excluido_em: z.string("Não é uma String").datetime("Não é uma Data Valida").nullish(),
-    login: z.string("Não é uma String").min(3, "Credenciais de Login muito curtas").max(255, "Credenciais de Login muito longas")
-=======
     credencial: z.string("O valor deve ser um texto.").toUpperCase(), //credencial é ou cnpj ou cpf
     email: z.string("O valor deve ser um texto.").min(3, "E-mail muito curto.").max(150, "E-mail muito longo.").email("E-mail inválido."),
     nome: z.string("O valor deve ser um texto.").min(3, "Nome muito curto.").max(200, "Nome muito longo."),
@@ -27,7 +18,6 @@ const MotoristaSchema = z.object({
     email_verificado: z.boolean("O valor deve ser um booleano."),
     excluido_em: z.string("O valor deve ser um texto.").datetime("Data inválida.").nullish(),
     login: z.string("O valor deve ser um texto.").min(3, "Credenciais de login muito curtas.").max(255, "Credenciais de login muito longas.")
->>>>>>> main
 });
 // Modelo referente a autenticação utilizando o google.
 const AuthGoogleSchema = z.object({

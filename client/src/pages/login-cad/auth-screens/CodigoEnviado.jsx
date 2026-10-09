@@ -2,12 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
-<<<<<<< HEAD
-=======
 import { useCodeCooldown } from '../../../hooks/useCodeCooldown'
 import { formatarTempo, tempoCodigoRestante } from '../../../utils/codeCooldown'
 import { mensagemErroApi } from '../../../utils/apiError'
->>>>>>> main
 import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -107,16 +104,12 @@ const CodigoEnviado = () => {
                 sessionStorage.removeItem('movan:verificationFlow') //apago o fluxo porque o usuário já verificou a conta
                 await refreshSession()
                 navigate('/', { replace: true })
-<<<<<<< HEAD
-            } else {
-=======
             } else if(fluxo === 'atualizar'){
                 await api.patch ('/motorista' , { cod: codigo, email: emailnovo }, {skipGlobalErrorToast: true})
                 sessionStorage.removeItem('movan:verificationFlow')
                 await refreshSession()
                 navigate('/perfil', {replace: true})
             }else {
->>>>>>> main
                 sessionStorage.setItem('movan:recoveryCode', codigo) //guardo o código no sessionStorage porque vou usar na tela de redefinir senha
                 navigate('/redefinir-senha', { state: { codigo, fluxo: 'recuperacao' } }) //mando para a pagina de redefinir senha e falo que o fluxo é de recuperação
             }

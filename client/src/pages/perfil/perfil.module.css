@@ -109,12 +109,8 @@
 }
 
 .input-container--editavel:focus-within {
-<<<<<<< HEAD
-    border-color: #0D5DFF;
-=======
     border-color: #0d47a1;
     user-select: auto;
->>>>>>> main
 }
 
 .input-container input {

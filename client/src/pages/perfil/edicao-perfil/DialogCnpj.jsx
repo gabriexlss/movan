@@ -47,11 +47,7 @@ const DialogCnpj = ({ onClose }) => {
         <DefaultDialog
             isOpen
             onClose={onClose}
-<<<<<<< HEAD
-            title="Alterar CPF ou CNPJ"
-=======
             title="Alterar o CNPJ"
->>>>>>> main
             description="Confirme os dados antes de salvar. Alterações no documento podem impactar documentos e recebimentos."
             icon={<PiBuildingsBold />}
             size="small"
@@ -59,47 +55,28 @@ const DialogCnpj = ({ onClose }) => {
         >
             <div className={styles.form}>
                 <CampoEdicao
-                    label="CPF ou CNPJ atual"
+                    label="CNPJ atual"
                     icon={<PiBuildingsBold />}
-<<<<<<< HEAD
-                    value={cnpjAtual}
-                    onChange={(event) => setCnpjAtual(event.target.value)}
-                    placeholder="CPF ou CNPJ atual"
-                    inputMode="numeric"
-=======
                     value={credencialAtual}
                     onChange={(event) => setCredencialAtual(event.target.value)}
                     placeholder="CNPJ atual"
                     inputMode="text"
->>>>>>> main
                     maxLength={18}
                     autoComplete="off"
                 />
                 <CampoEdicao
-                    label="Novo CPF ou CNPJ"
+                    label="Novo CNPJ"
                     icon={<PiBuildingsBold />}
-<<<<<<< HEAD
-                    value={valor}
-                    onChange={(event) => onValorChange(event.target.value)}
-                    placeholder="Novo CPF ou CNPJ"
-                    inputMode="numeric"
-=======
                     value={credencialNova}
                     onChange={(event) => setCredencialNova(event.target.value)}
                     placeholder="Novo CNPJ"
                     inputMode="text"
->>>>>>> main
                     maxLength={18}
                     autoFocus
                 />
 
-<<<<<<< HEAD
-                <button type="button" className={styles.primaryButton} onClick={onClose}>
-                    Alterar CPF ou CNPJ
-=======
                 <button type="button" className={styles.primaryButton} onClick={handleAlterarCnpj}>
                     Alterar CNPJ
->>>>>>> main
                 </button>
             </div>
         </DefaultDialog>

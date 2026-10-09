@@ -52,10 +52,7 @@ const Cad = () => {
 
             toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma caixa de sucesso com a mensagem do backend, caso não tenha mensagem do backend mando uma mensagem padrão
             sessionStorage.setItem('movan:verificationFlow', 'cadastro') //falo que o fluxo de verificação é de cadastro, porque o usuário acabou de criar a conta
-<<<<<<< HEAD
-=======
             await refreshSession()
->>>>>>> main
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //mando o usuario para a pagina de codigo enviado
         } catch (error) {
             if (error.response?.status === 409) {
