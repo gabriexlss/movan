@@ -6,20 +6,21 @@ import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
 import { useAuth } from '../../../context/useAuth'
 import api from '../../../services/api'
+import { mensagemErroApi } from '../../../utils/apiError'
 
-const DialogCnpj = ({ valor, onValorChange, onClose }) => {
+const DialogCnpj = ({ onClose }) => {
     const [credencialNova, setCredencialNova] = useState('')
     const [credencialAtual, setCredencialAtual] = useState('')
     const { user, refreshSession } = useAuth()
-    const credencialOriginal = String(user?.credencial ?? '').replace(/[^a-zA-Z0-9]/g, '')
+    const credencialOriginal = String(user?.credencial ?? '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
 
     //========================
     //Verificar o cnpj e o codigo mandado
     //========================
     async function handleAlterarCnpj() {
         try {
-            const credencialAtualLimpo = credencialAtual.replace(/[^a-zA-Z0-9]/g, '') //remove apenas simbolos
-            const credencialNovaLimpo = credencialNova.replace(/[^a-zA-Z0-9]/g, '') //remove apenas simbolos
+            const credencialAtualLimpo = credencialAtual.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() //remove apenas simbolos
+            const credencialNovaLimpo = credencialNova.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() //remove apenas simbolos
 
             if (credencialAtualLimpo !== credencialOriginal) { //se o cnpj atual for diferente do cnpj original
                 toast.error('CNPJ atual não confere.')
@@ -38,7 +39,7 @@ const DialogCnpj = ({ valor, onValorChange, onClose }) => {
             onClose() //fecha o dialog
         }
         catch (error) {
-            toast.error(error.response?.data?.msg || 'Não foi possível alterar o CNPJ.')
+            toast.error(mensagemErroApi(error, 'Não foi possível alterar o CNPJ.'))
         }
     }
 

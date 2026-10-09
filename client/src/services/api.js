@@ -2,10 +2,11 @@
 import axios from 'axios';
 //biblioteca para dar um aviso caso algo de errado na verificação aqui
 import { toast } from 'react-hot-toast';
+import { registrarPrazoCodigo, segundosRetryAfter } from '../utils/codeCooldown'
+import { mensagemErroApi } from '../utils/apiError'
 
 if (!import.meta.env.VITE_API_URL) {
     throw new Error('A variável VITE_API_URL não está definida no arquivo .env.');
-    console.log('A variável VITE_API_URL não está definida no arquivo .env.');
 }
 
 //===========================
@@ -27,9 +28,20 @@ const api = axios.create({
 //===========================
 api.interceptors.response.use(
     (response) => {
+        if (response.config.method === 'post') {
+            registrarPrazoCodigo(`/${response.config.url.replace(/^\/+/, '').split('?')[0]}`)
+        }
         return response
     },
     (error) => {
+            if (error.response?.status === 429 && error.config?.method === 'post') {
+                registrarPrazoCodigo(`/${error.config.url.replace(/^\/+/, '').split('?')[0]}`, segundosRetryAfter(error.response.headers) ?? 300)
+            }
+
+            if (error.response?.status === 401 && !error.config?.skipAuthExpired) {
+                window.dispatchEvent(new Event('auth:expired'));
+            }
+
             if (error.config?.skipGlobalErrorToast) { //se essa variavel for true ele não mostra nenhum toast
                 return Promise.reject(error)
             }
@@ -45,10 +57,11 @@ api.interceptors.response.use(
             }else if (error.response.status === 403) { //conta existente mas não tem permissão para acessar o recurso
                 toast.error('Acesso negado. Você não tem permissão para acessar este recurso.'); 
             }else if (error.response.status === 401) { //não autorizado, ou seja a sessão expirou
-                toast.error('Sua sessão expirou. Por favor, faça login novamente.');
-                if (!error.config?.skipAuthExpired) { //essa variavel serve para eu não mandar o evento de sessão expirada caso eu queira tratar o erro de outra forma
-                    window.dispatchEvent(new Event('auth:expired'));
-                }
+                toast.error(error.config?.skipAuthExpired
+                    ? mensagemErroApi(error, 'Credenciais inválidas.')
+                    : 'Sua sessão expirou. Por favor, faça login novamente.');
+            }else if (error.response.status === 429) {
+                toast.error(mensagemErroApi(error, 'Muitas requisições. Tente novamente mais tarde.'));
             }else if (error.response.status === 400 && !error.config?.skipGlobalErrorToast) {
                 const mensagemBackend = error.response.data?.msg || 'Dados inválidos enviados ao servidor.';
                 toast.error(`Requisição inválida. ${mensagemBackend}`); //informa que os dados enviados são inválidos, além de mostrar a mensagem do backend caso exista

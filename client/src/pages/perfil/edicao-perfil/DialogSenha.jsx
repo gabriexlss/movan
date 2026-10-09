@@ -1,63 +1,56 @@
-import { useState } from 'react'
-import { PiCheckCircleBold, PiLockKeyBold, PiShieldCheckBold } from 'react-icons/pi'
+import { useRef, useState } from 'react'
+import { PiLockKeyBold, PiShieldCheckBold } from 'react-icons/pi'
 import { toast } from 'react-hot-toast'
 
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
 import api from '../../../services/api'
+import PasswordRequirements from '../../../components/auth/PasswordRequirements'
+import { senhaValida } from '../../../utils/password'
+import { mensagemErroApi } from '../../../utils/apiError'
+import { useAuth } from '../../../context/useAuth'
 
 const DialogSenha = ({ onClose }) => {
     const [senhaAtual, setSenhaAtual] = useState('')
     const [novaSenha, setNovaSenha] = useState('')
     const [confirmarSenha, setConfirmarSenha] = useState('')
-    const requisitos = [
-        { texto: 'Mínimo de 8 caracteres', atendido: novaSenha.length >= 8 },
-        { texto: 'Inclui letras maiúsculas e minúsculas', atendido: /[A-Z]/.test(novaSenha) && /[a-z]/.test(novaSenha) },
-        { texto: 'Inclui números e caracteres especiais', atendido: /\d/.test(novaSenha) && /[^\w\s]/.test(novaSenha) },
-    ]
-    //=======================
-    //comparar senhas
-    //=======================
-    async function compararSenhas() {
-    if (!novaSenha || !confirmarSenha || !senhaAtual) {
-        toast.error('Por favor, preencha todos os campos.')
-        return
-    }
+    const [enviando, setEnviando] = useState(false)
+    const envioEmCurso = useRef(false)
+    const { refreshSession } = useAuth()
+    const podeEnviar = Boolean(senhaAtual) && senhaValida(novaSenha) && novaSenha === confirmarSenha
 
-    try {
-        const response = await api.post('/motorista/comparar-senha', { senha: senhaAtual })
-        
-        const senhaValida = response.data.senhaValida
-
-        if (!senhaValida) {
-            toast.error('Senha atual incorreta.')
+    async function TrocarSenha() {
+        if (envioEmCurso.current) return
+        if (!senhaAtual || !novaSenha || !confirmarSenha) {
+            toast.error('Por favor, preencha todos os campos.')
             return
         }
         if (novaSenha !== confirmarSenha) {
             toast.error('As senhas não coincidem.')
             return
         }
-        return senhaValida
-    }catch(error){
-    
-    }  
-}
-    //=================
-    //trocar senha]
-    //=================
-    async function TrocarSenha() {
+        if (!senhaValida(novaSenha)) {
+            toast.error('A nova senha deve atender a todos os requisitos.')
+            return
+        }
+
+        envioEmCurso.current = true
+        setEnviando(true)
         try {
-            const senhaValida = await compararSenhas()
-            if (senhaValida) {
-                await api.patch('/motorista', { senha: novaSenha }, { skipGlobalErrorToast: true }) //manda a nova senha para o backend
-                toast.success('Senha alterada com sucesso.')
-                onClose() //fecha o dialog
-            }else{
-                return
-    }
-        }catch{
-            toast.error('Erro ao alterar senha.')
+            await api.patch('/motorista', { senha: novaSenha, senhaAtual }, {
+                skipGlobalErrorToast: true,
+                skipAuthExpired: true,
+            })
+            toast.success('Senha alterada com sucesso.')
+            onClose()
+        } catch (error) {
+            // Um 401 pode ser senha incorreta ou sessão inválida; a consulta distingue os casos.
+            if (error.response?.status === 401) await refreshSession()
+            toast.error(mensagemErroApi(error, 'Não foi possível alterar a senha.'))
+        } finally {
+            envioEmCurso.current = false
+            setEnviando(false)
         }
     }
 
@@ -101,16 +94,9 @@ const DialogSenha = ({ onClose }) => {
                     autoComplete="new-password"
                 />
 
-                <ul className={styles.requirements} aria-label="Requisitos da nova senha">
-                    {requisitos.map((requisito) => (
-                        <li key={requisito.texto} className={requisito.atendido ? styles.requirementMet : ''}>
-                            <PiCheckCircleBold aria-hidden="true" />
-                            <span>{requisito.texto}</span>
-                        </li>
-                    ))}
-                </ul>
-                <button type="button" className={styles.primaryButton} onClick={TrocarSenha} disabled={requisitos.every((requisito) => !requisito.atendido)}>
-                    Alterar senha
+                <PasswordRequirements senha={novaSenha} />
+                <button type="button" className={styles.primaryButton} onClick={TrocarSenha} disabled={!podeEnviar || enviando}>
+                    {enviando ? 'Alterando...' : 'Alterar senha'}
                 </button>
             </div>
         </DefaultDialog>

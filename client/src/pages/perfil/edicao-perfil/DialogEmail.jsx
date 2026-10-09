@@ -7,28 +7,38 @@ import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
 import api from '../../../services/api'
+import { useCodeCooldown } from '../../../hooks/useCodeCooldown'
+import { formatarTempo, tempoCodigoRestante } from '../../../utils/codeCooldown'
+import { mensagemErroApi } from '../../../utils/apiError'
 
-const DialogEmail = ({ valor, onValorChange, onClose }) => {
+const DialogEmail = ({ onClose }) => {
     const [emailnovo, setEmailNovo] = useState('')
+    const [enviando, setEnviando] = useState(false)
+    const { tempoRestante, atualizarPrazo } = useCodeCooldown('atualizar')
     const navigate = useNavigate()
 
     const enviarCodigo = useCallback(async () => {
         
+        if (enviando || tempoCodigoRestante('atualizar') > 0) return
         if(!emailnovo){
             toast.error("Preencha o campo de e-mail.")
             return
         }
 
+        setEnviando(true)
         try {
-            await api.post('motorista/editar/enviar-codigo', { email: emailnovo }, {skipGlobalErrorToast: true}) //mando o email novo para o backend mandar o codigo
+            await api.post('/motorista/editar/enviar-codigo', { email: emailnovo }, {skipGlobalErrorToast: true}) //mando o email novo para o backend mandar o codigo
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'atualizar', autoSendVerification: false, emailnovo } })
             toast.success('Código enviado para o seu e-mail.')
 
         } catch (error) {
-            toast.error(error.response?.data?.msg || 'Não foi possível enviar o código.')
+            atualizarPrazo()
+            toast.error(mensagemErroApi(error, 'Não foi possível enviar o código.'))
+        } finally {
+            setEnviando(false)
         }
         
-    }, [emailnovo, navigate])
+    }, [emailnovo, navigate, enviando, atualizarPrazo])
 
 
     return (
@@ -53,12 +63,15 @@ const DialogEmail = ({ valor, onValorChange, onClose }) => {
                     autoFocus
                 />
 
+                {tempoRestante > 0 && <p role="status">Você poderá solicitar outro código em {formatarTempo(tempoRestante)}.</p>}
+
                 <button
                     type="button"
                     className={styles.primaryButton}
                     onClick={enviarCodigo}
+                    disabled={enviando || tempoRestante > 0}
                 >
-                    Alterar e-mail
+                    {enviando ? 'Enviando...' : 'Alterar e-mail'}
                 </button>
             </div>
         </DefaultDialog>

@@ -12,6 +12,10 @@ const VerificationRoute = () => {
         return null
     }
 
+    if ((fluxo === 'cadastro' || fluxo === 'atualizar') && !isAuthenticated) {
+        return <Navigate to="/login" replace />
+    }
+
     if (!fluxo || (isAuthenticated && !fluxoEnviadoNaNavegacao && !cadastroNaoVerificado)) { //se eu não tenho fluxo ou o usuario esta logado sem um fluxo enviado pela navegação e não precisse verificar o cadastro
         return <Navigate to={isAuthenticated ? '/' : '/login'} replace /> //caso o usuario esteja logado vai pra pagina inicial, se não tiver logado vai para login
     }
