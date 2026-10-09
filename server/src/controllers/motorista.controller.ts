@@ -36,7 +36,7 @@ const desembalarGoogle = async (token: string) => {
         googleId: null
     }
     try {
-        if (!GOOGLE_CLIENT_ID) throw new Error("Google Client ID ausente.")
+        if (!GOOGLE_CLIENT_ID) throw new Error("ID do cliente Google ausente.")
         /* manda uma solicitação pros servidores do google 
         para abrir e verificar o token que nós foi passado
         onde token é o código que nos foi passado e audience é o nosso cliente id, internamente
@@ -50,14 +50,14 @@ const desembalarGoogle = async (token: string) => {
 
         // checa pra ver se os dados foram obtidos do token, quando o google processou ele. 
         if (!payload) {
-            dados.msg = "Token Inválido, expirado ou corrompido."
+            dados.msg = "Token inválido, expirado ou corrompido."
             dados.status = 401
             return dados
         }
 
         // checa pra ver se a conta google pertencente a esse token foi verificada.
         if (!payload.email_verified) {
-            dados.msg = "Email do Google não verificado."
+            dados.msg = "E-mail do Google não verificado."
             dados.status = 403
             return dados
         }
@@ -70,13 +70,13 @@ const desembalarGoogle = async (token: string) => {
 
         // verificação para ver se todos os dados vieram certos
         if (!dados.email || !dados.nome || !dados.token || !dados.googleId) {
-            throw new Error(`Erro ao receber todos os dados necessarios do payload do google`)
+            throw new Error(`Erro ao receber todos os dados necessários do token do Google.`)
         }
         return dados
     } catch (erro) {
         dados.msg = "Token do Google inválido, expirado ou corrompido."
         dados.status = 401
-        console.error("Erro ao processar o token do google, erro: ", erro)
+        console.error("Erro ao processar o token do Google, erro: ", erro)
         return dados
     }
 }
@@ -90,7 +90,7 @@ const tipoCredencial = (credencial: string): "cnpj" | "cpf" | null => {
 // Função pra verificar email, cnpj ou cpf
 const verificarEmailouCNPJouCPF = async (dado: string, tipo: "email" | "cnpj" | "cpf") => {
     // verifica se ambos os dados foram enviados
-    if (!dado || !tipo) throw new Error("Algum dos dados está faltante")
+    if (!dado || !tipo) throw new Error("Um dos dados obrigatórios está ausente.")
 
     try {
         // checando se esse email ja existe no banco de dados
@@ -103,7 +103,7 @@ const verificarEmailouCNPJouCPF = async (dado: string, tipo: "email" | "cnpj" | 
         }
         return undefined
     } catch (erro) {
-        throw new Error("Erro ao verificar no Banco de Dados", { cause: erro })
+        throw new Error("Erro ao consultar o banco de dados.", { cause: erro })
     }
 }
 
@@ -171,21 +171,21 @@ export const controllerMotorista = {
             metodo = 'cpf'
         } else {
             return res.status(400).json({
-                msg: "Credencial não é nem CPF nem CNPJ"
+                msg: "Informe um CPF ou CNPJ válido."
             })
         }
         if (metodo === 'cnpj') {
             const cnpjIsValid = cnpj.isValid(credencial)
             if (!cnpjIsValid) {
                 return res.status(400).json({
-                    msg: "CNPJ Inválido."
+                    msg: "CNPJ inválido."
                 })
             }
         } else if (metodo === 'cpf') {
             const cpfIsValid = cpf.isValid(credencial)
             if (!cpfIsValid) {
                 return res.status(400).json({
-                    msg: "CPF Inválido."
+                    msg: "CPF inválido."
                 })
             }
         }
@@ -206,7 +206,7 @@ export const controllerMotorista = {
                 })
             }
         } catch (erro) {
-            console.error("Erro ao verificar se dados ja estão cadastrados, erro: ", erro)
+            console.error("Erro ao verificar se os dados já estão cadastrados, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -234,7 +234,7 @@ export const controllerMotorista = {
 
             const segredoJWT = process.env['SEGREDO_JWT']
             if (!segredoJWT) {
-                console.error("Segredo JWT Ausente no ENV")
+                console.error("Segredo JWT ausente nas variáveis de ambiente.")
                 return res.status(500).json({
                     msg: "Ocorreu um erro interno no servidor."
                 })
@@ -282,7 +282,7 @@ export const controllerMotorista = {
             const tipo = login.includes("@") ? "email" : credencialLogin.length === 11 ? "cpf" : "cnpj"
             id = await verificarEmailouCNPJouCPF(credencialLogin, tipo)
         } catch (erro) {
-            console.error("Erro ao encontrar conta usando email, CPF ou CNPJ no login, erro: ", erro)
+            console.error("Erro ao encontrar a conta usando e-mail, CPF ou CNPJ no login, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -325,7 +325,7 @@ export const controllerMotorista = {
         // se chegou até aqui, o usuario foi encontrado e sua senha é valida, então só dar seu cookie.
         const segredoJWT = process.env['SEGREDO_JWT']
         if (!segredoJWT) {
-            console.error("Segredo JWT Ausente no ENV")
+            console.error("Segredo JWT ausente nas variáveis de ambiente.")
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -334,7 +334,7 @@ export const controllerMotorista = {
 
 
         //cria uma mensagem com base se está verificado ou não.
-        const mensagem = emailVerificado ? "Login Realizado com Sucesso." : "Login Realizado com Sucesso, Mas verificação necessaria para obter os dados."
+        const mensagem = emailVerificado ? "Login realizado com sucesso." : "Login realizado com sucesso. Verifique seu e-mail para continuar."
 
         return res.status(200).cookie('token', token, {
             httpOnly: true,
@@ -386,7 +386,7 @@ export const controllerMotorista = {
             const response = await gerarCodigo(email, tipo, id)
             if (!response) throw new Error("Não foi possível enviar o código de verificação.")
             return res.status(200).json({
-                msg: `Código para ${tipo} da conta enviado com sucesso.`
+                msg: "Código de verificação da conta enviado com sucesso."
             })
         } catch (erro) {
             console.error("Erro ao enviar código, erro:", erro)
@@ -514,7 +514,7 @@ export const controllerMotorista = {
                 msg: "Código para alteração de e-mail enviado com sucesso."
             })
         } catch (erro) {
-            console.error("Erro ao enviar código para alteração de email, erro: ", erro)
+            console.error("Erro ao enviar o código para alteração de e-mail, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -594,7 +594,7 @@ export const controllerMotorista = {
             const valoresBuscarSenha = [id]
             const { rows: ResultadoBuscarSenha } = await database.query(queryBuscarSenha, valoresBuscarSenha)
 
-            if (ResultadoBuscarSenha.length < 1) throw new Error("Não achou nenhum campo com o ID.")
+            if (ResultadoBuscarSenha.length < 1) throw new Error("Nenhum registro encontrado com o ID informado.")
             const senhaHash = ResultadoBuscarSenha[0].senha
 
             // ve se a senha digitada bate com a senha do banco de dados
@@ -617,10 +617,10 @@ export const controllerMotorista = {
                 expires: new Date(0),
                 maxAge: 0
             }).json({
-                msg: "Conta agendada para exclusão com sucesso."
+                msg: "Conta Excluida. Dentro do Periodo de 30 dias você pode logar para reativar a conta."
             })
         } catch (erro) {
-            console.error("Erro ao Deletar conta do usúario, erro: ", erro)
+            console.error("Erro ao excluir a conta do usuário, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -641,7 +641,7 @@ export const controllerMotorista = {
             })
         }
         // determina se tal dado veio ou não e coloca a clausula dele
-        const { nome, email, credencial, senha, cod } = dadosBrutos.data
+        const { nome, email, credencial, senha, cod, senhaAtual } = dadosBrutos.data
         // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
         const campos: string[] = []
         const valores: (string | number)[] = []
@@ -668,7 +668,7 @@ export const controllerMotorista = {
                 }
                 idCodigoEmail = idCodigo
             } catch (erro) {
-                console.error("Erro ao validar código para alterar email, erro: ", erro)
+                console.error("Erro ao validar o código para alterar o e-mail, erro: ", erro)
                 return res.status(500).json({
                     msg: "Ocorreu um erro interno no servidor."
                 })
@@ -703,9 +703,33 @@ export const controllerMotorista = {
         if (senha) {
             campos.push(`senha = $${valores.length + 1}`)
 
-            // transforma a senha em hash
-            const senhaHash = await bcrypt.hash(senha, 10)
-            valores.push(senhaHash)
+            // verifica se a senha atual bate com a senha do usuario.
+            try {
+                // pegando o hash da senha do usuario do banco de dados
+                const query = "SELECT senha FROM motorista WHERE id = $1"
+                const { rows: senhaColuna } = await database.query(query, [id])
+
+                // atribuindo a senha a uma constante
+                const senhaUsuario = senhaColuna[0].senha
+
+                // valida se a senha digitada é de fato a senha valida.
+                const senhaValida = await bcrypt.compare(senhaAtual ?? "ojvnervoi", senhaUsuario)
+
+                if (!senhaValida) {
+                    return res.status(401).json({
+                        msg: "Senha Inválida para realizar a troca de senha."
+                    })
+                }
+
+                // transforma a senha em hash
+                const senhaHash = await bcrypt.hash(senha, 10)
+                valores.push(senhaHash)
+            } catch (erro) {
+                console.error("erro no endpoint de editar motorista ao validar senha para troca-lá, erro: ", erro)
+                return res.status(500).json({
+                    msg: "Erro Interno no Servidor."
+                })
+            }
         }
 
         // se nenhum campo tiver sido enviado, manda embora
@@ -734,7 +758,7 @@ export const controllerMotorista = {
                     : `${camposEditados} campos editados com sucesso.`
             })
         } catch (erro) {
-            console.error("Erro ao editar dados do usuario, erro: ", erro)
+            console.error("Erro ao editar os dados do usuário, erro: ", erro)
             if ((erro as { code?: string })?.code === '23505') {
                 return res.status(409).json({ msg: "E-mail, CPF ou CNPJ já cadastrado no Movan." })
             }
@@ -755,11 +779,11 @@ export const controllerMotorista = {
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 
             const motorista = rows[0]
-            
+
             // se o google id existir coloca que é google verificado, se não, coloca que não é
-            if(!motorista.google_id){
+            if (!motorista.google_id) {
                 motorista.google_verificado = false
-            }else{
+            } else {
                 motorista.google_verificado = true
             }
             // deleta o google id do objeto
@@ -784,7 +808,7 @@ export const controllerMotorista = {
         // Validação dos dados
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para autenticar com o google.",
+                msg: "Dados inválidos para autenticar com o Google.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -820,7 +844,7 @@ export const controllerMotorista = {
                 // se chegou até aqui, o usuario foi encontrado com o google_id então só dar seu cookie.
                 const segredoJWT = process.env['SEGREDO_JWT']
                 if (!segredoJWT) {
-                    console.error("Segredo JWT Ausente no ENV")
+                    console.error("Segredo JWT ausente nas variáveis de ambiente.")
                     return res.status(500).json({
                         msg: "Ocorreu um erro interno no servidor."
                     })
@@ -844,7 +868,7 @@ export const controllerMotorista = {
                 if (resultadoEmail.rows.length > 0) {
                     achouUsuario = true
                     return res.status(409).json({
-                        msg: "Conta Encontrada, mas não vinculada ao google."
+                        msg: "Conta encontrada, mas não vinculada ao Google."
                     })
                 }
             }
@@ -855,12 +879,12 @@ export const controllerMotorista = {
                 token: token,
             }
             return res.status(200).json({
-                msg: "Conta não encontrada. iniciando criação de conta com o google.",
+                msg: "Conta não encontrada. Iniciando o cadastro com o Google.",
                 CREATION_REQUIRED: true,
                 dadosGoogle: dadosParaCriacao
             })
         } catch (erro) {
-            console.error("Erro ao  processar dados usando os dados obtidos pelo google, erro: ", erro)
+            console.error("Erro ao processar os dados obtidos pelo Google, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -877,7 +901,7 @@ export const controllerMotorista = {
         // Validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para vincular sua conta google.",
+                msg: "Dados inválidos para vincular sua conta Google.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -903,10 +927,10 @@ export const controllerMotorista = {
 
             // agr com a conta vinculada, só retornar.
             return res.status(200).json({
-                msg: "Conta vinculada ao google com sucesso."
+                msg: "Conta vinculada ao Google com sucesso."
             })
         } catch (erro) {
-            console.error("Erro ao vincular a conta google do usuario, erro: ", erro)
+            console.error("Erro ao vincular a conta Google do usuário, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -920,7 +944,7 @@ export const controllerMotorista = {
         // Validação de dados
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para criação da conta.",
+                msg: "Dados inválidos para criar a conta.",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -940,7 +964,7 @@ export const controllerMotorista = {
         }
         const { email, googleId } = usuario
         if (!email || !googleId) {
-            throw new Error("Email do google não encontrado.")
+            throw new Error("E-mail do Google não encontrado.")
         }
 
         // Verifica se email, CPF/CNPJ ou google_id já estão cadastrados.
@@ -962,7 +986,7 @@ export const controllerMotorista = {
                 return res.status(409).json({ msg: "Esta conta do Google já está vinculada a outro usuário." });
             }
         } catch (erro) {
-            console.error("Erro ao verificar se dados ja estão cadastrados, erro: ", erro)
+            console.error("Erro ao verificar se os dados já estão cadastrados, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -979,7 +1003,7 @@ export const controllerMotorista = {
 
             const segredoJWT = process.env['SEGREDO_JWT']
             if (!segredoJWT) {
-                console.error("Segredo JWT Ausente no ENV")
+                console.error("Segredo JWT ausente nas variáveis de ambiente.")
                 return res.status(500).json({
                     msg: "Ocorreu um erro interno no servidor."
                 })
@@ -997,7 +1021,7 @@ export const controllerMotorista = {
             console.error("Erro ao criar conta com Google:", erro)
             if ((erro as { code?: string })?.code === '23505') {
                 return res.status(409).json({
-                    msg: "E-mail, CPF, CNPJ ou Conta Google já cadastrado no Movan."
+                    msg: "Já existe uma conta no Movan com este e-mail, CPF, CNPJ ou conta Google."
                 })
             }
             return res.status(500).json({
@@ -1017,10 +1041,10 @@ export const controllerMotorista = {
 
             //retornando usuario
             return res.status(200).json({
-                msg: "Conta Google Desvinculada com Sucesso."
+                msg: "Conta Google desvinculada com sucesso."
             })
         } catch (erro) {
-            console.error("Erro ao desvincular conta google, erro: ", erro)
+            console.error("Erro ao desvincular a conta Google, erro: ", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })
@@ -1034,13 +1058,13 @@ export const controllerMotorista = {
         const motoristaID = req.userId
 
         // validação
-        if(!senhaBruta.success){
+        if (!senhaBruta.success) {
             return res.status(400).json({
                 msg: "Digite uma senha válida para comparar."
             })
         }
         const { senha: senhaInserida } = senhaBruta.data
-        try{
+        try {
             // pegando a senha hash do motorista
             const query = "SELECT senha FROM motorista WHERE id = $1"
             const { rows: dados } = await database.query(query, [motoristaID])
@@ -1050,13 +1074,13 @@ export const controllerMotorista = {
             const senhaValida = await bcrypt.compare(senhaInserida, senhaHash)
 
             return res.status(200).json({
-                msg: "Senha Comparada com Sucesso!",
+                msg: "Senha comparada com sucesso.",
                 senhaValida: senhaValida
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("Erro ao pegar senha hash do motorista no endpoint de compararSenha, erro: ", erro)
             return res.status(500).json({
-                msg: "Erro Interno do Servidor."
+                msg: "Erro interno do servidor."
             })
         }
     }

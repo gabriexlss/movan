@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { toast } from  'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
 import {
     PiIdentificationCardBold,
     PiLockKeyBold,
@@ -41,7 +40,7 @@ const handleSubmit = async (event) => {
     event.preventDefault(); //não deixo atualizar a pagina
     
     if(!senhaAtual) { //se não tiver confirmado
-        toast.error("Senha não identificada, por favor insira uma senha")
+        toast.error("Por favor, informe sua senha.")
         return;
     }
 
@@ -51,7 +50,7 @@ const handleSubmit = async (event) => {
             skipGlobalErrorToast: true, //falo para a api não mostrar o toast de erro global, porque vou tratar o erro de forma diferente aqui
             skipAuthExpired: true, //falo para a api não mandar o evento de sessão expirada, porque vou tratar o erro de forma diferente aqui
         })
-        toast.success(response.data.msg || 'Conta excluída com sucesso, caso não logue em 30 dias a conta será excluída permanentemente.')
+        toast.success(response.data.msg || 'Conta agendada para exclusão. Faça login em até 30 dias para restaurá-la.')
         await logout() //chamo a função de logout para deslogar o usuario apos excluir a cont
         }catch(error){
             if(error.response?.status === 401) {

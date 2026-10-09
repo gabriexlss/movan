@@ -27,7 +27,7 @@ const Financeiro = () => {
 
     return (
         <main className={styles['financ-container']}>
-            <TituloTela title="Controle Financeiro" />
+            <TituloTela title="Controle financeiro" />
 
             <div className={styles.periodo} aria-label={`Período selecionado: ${mesAno}`}>
                 <button

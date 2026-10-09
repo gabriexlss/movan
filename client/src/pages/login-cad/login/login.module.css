@@ -91,6 +91,8 @@
     height: 2.5rem;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     align-self: center;
 
     background-color: #0D47A1;

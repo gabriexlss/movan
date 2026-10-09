@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { useCodeCooldown } from '../../../hooks/useCodeCooldown'
+import { formatarTempo, tempoCodigoRestante } from '../../../utils/codeCooldown'
+import { mensagemErroApi } from '../../../utils/apiError'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
@@ -10,11 +13,14 @@ const EsqueciSenha = () => {
     const [email, setEmail] = useState('') //guarda o email do usuario
     const [enviando, setEnviando] = useState(false) //uso para falar que o formulario esta sendo enviado
 
+    const { tempoRestante, atualizarPrazo } = useCodeCooldown('recuperacao')
+
     //==========================
     //ESQUECI SENHA
     //==========================
     const handleSubmit = async (event) => { //uso essa função no para enviar os dados do formulario para o backend quando aperto o botão de enviar
         event.preventDefault() //não deixo o navegador atualizar a pagina
+        if (enviando || tempoCodigoRestante('recuperacao') > 0) return
         setEnviando(true) //falo que o formulario esta sendo enviado
 
         try {
@@ -26,10 +32,8 @@ const EsqueciSenha = () => {
             toast.success(response.data?.msg || 'Código de recuperação enviado.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
             navigate('/codigo-enviado', { state: { fluxo: 'recuperacao' } }) //mando para a pagina de codigo enviado e falo que o estado de fluxo é de recuperação
         } catch (error) {
-            const errosDeCampo = Object.values(error.response?.data?.erro || {}) //transformo a mensagem de erro do backend em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio
-                .flatMap((campo) => campo?._errors || []) //tiro o _errors do campo
-            const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível enviar o código.' //coloco a mensagem do backend, se não tiver coloco uma generica
-            toast.error(mensagem) //mando a mensagem de erro
+            atualizarPrazo()
+            toast.error(mensagemErroApi(error, 'Não foi possível enviar o código.'))
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }
@@ -60,7 +64,9 @@ const EsqueciSenha = () => {
                     <label htmlFor="emailEsqueciSenha">E-mail</label>
                 </div>
 
-                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
+                {tempoRestante > 0 && <p role="status">Você poderá solicitar outro código em {formatarTempo(tempoRestante)}.</p>}
+
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando || tempoRestante > 0}>
                     {enviando ? <LoadingSpinner /> : 'Enviar'}
                 </button>
             </form>

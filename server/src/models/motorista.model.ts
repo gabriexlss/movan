@@ -5,20 +5,26 @@ import { UtilSchema } from './utils.model.js';
 // Modelo global pro motorista (usuario)
 const MotoristaSchema = z.object({
     id: UtilSchema.shape.id,
-    credencial: z.string("Não é uma String"), //credencial é ou cnpj ou cpf
-    email: z.string("Não é uma String").min(3, "Email muito curto").max(150, "Email Muito Longo").email("Email Invalido"),
-    nome: z.string("Não é uma String").min(3, "Nome muito Curto").max(200, "Nome muito Longo"),
-    senha: z.string("Não é uma String").max(100, "Senha muito Longa"),
-    email_verificado: z.boolean("Não é um Booleano"),
-    excluido_em: z.string("Não é uma String").datetime("Não é uma Data Valida").nullish(),
-    login: z.string("Não é uma String").min(3, "Credenciais de Login muito curtas").max(255, "Credenciais de Login muito longas")
+    credencial: z.string("O valor deve ser um texto.").toUpperCase(), //credencial é ou cnpj ou cpf
+    email: z.string("O valor deve ser um texto.").min(3, "E-mail muito curto.").max(150, "E-mail muito longo.").email("E-mail inválido."),
+    nome: z.string("O valor deve ser um texto.").min(3, "Nome muito curto.").max(200, "Nome muito longo."),
+    senha: z.string("O valor deve ser um texto.")
+        .max(100, "Senha muito longa.")
+        .min(8, "A senha deve ter pelo menos 8 caracteres.")
+        .regex(/[A-Z]/, "A senha deve conter uma letra maiúscula.")
+        .regex(/[a-z]/, "A senha deve conter uma letra minúscula.")
+        .regex(/\d/, "A senha deve conter um número.")
+        .regex(/[^\w\s]/, "A senha deve conter um caractere especial."),
+    email_verificado: z.boolean("O valor deve ser um booleano."),
+    excluido_em: z.string("O valor deve ser um texto.").datetime("Data inválida.").nullish(),
+    login: z.string("O valor deve ser um texto.").min(3, "Credenciais de login muito curtas.").max(255, "Credenciais de login muito longas.")
 });
 // Modelo referente a autenticação utilizando o google.
 const AuthGoogleSchema = z.object({
-    token: z.string("Não é uma String").min(1, "Token não pode estar vazio."),
-    nome: z.string("Nome Ausente.").min(1, "Nome não pode estar vazio."),
-    email: z.string("Email Ausente.").min(1, "Email não pode estar vazio").email("tem que ser um email valido"),
-    googleId: z.string("id ausente.").min(1, "id não pode estar vazio."),
+    token: z.string("O valor deve ser um texto.").min(1, "Token não pode estar vazio."),
+    nome: z.string("Nome ausente.").min(1, "Nome não pode estar vazio."),
+    email: z.string("E-mail ausente.").min(1, "O e-mail não pode estar vazio.").email("Informe um e-mail válido."),
+    googleId: z.string("ID ausente.").min(1, "O ID não pode estar vazio."),
     status: z.number("Status ausente."),
     msg: z.string("Mensagem ausente.").min(1, "Mensagem não pode estar vazia."),
     sucesso: z.boolean("Sucesso ausente.")
@@ -55,10 +61,14 @@ export const CodigoEditarEmailSchema = MotoristaSchema.pick({
     email: true
 })
 export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
-    cod: validarCodigoSchema.shape.cod.optional()
+    cod: validarCodigoSchema.shape.cod.optional(),
+    senhaAtual: CriarMotoristaSchema.shape.senha.optional()
 }).refine((dados) => !dados.email || !!dados.cod, {
-    message: "O código é obrigatório para alterar o email.",
+    message: "O código é obrigatório para alterar o e-mail.",
     path: ["cod"]
+}).refine((dados) => dados.senha === undefined || !!dados.senhaAtual, {
+    message: "A confirmação da senha é obrigatória para alterar a senha.",
+    path: ["confirmarSenha"]
 })
 export const DeletarMotoristaSchema = MotoristaSchema.pick({
     senha: true
@@ -66,6 +76,7 @@ export const DeletarMotoristaSchema = MotoristaSchema.pick({
 export const compararSenhaSchema = MotoristaSchema.pick({
     senha: true
 })
+export type Motorista = z.infer<typeof MotoristaSchema>
 export type compararSenha = z.infer<typeof compararSenhaSchema>
 export type CriarMotoristaGoogle = z.infer<typeof CriarMotoristaGoogleSchema>
 export type GoogleToken = z.infer<typeof GoogleTokenSchema>

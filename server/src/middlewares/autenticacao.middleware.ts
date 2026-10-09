@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
 import { database } from "../db/postgre.js"
+import { Motorista } from "../models/motorista.model.js";
 
 interface dadosToken {
     id: number
@@ -19,7 +20,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
     // verifica a assinatura do jwt dentro do cookie
     const segredoJWT = process.env['SEGREDO_JWT']
     if (!segredoJWT) {
-        console.error("Segredo JWT Ausente no ENV")
+        console.error("Segredo JWT ausente nas variáveis de ambiente.")
         return res.status(500).json({
             msg: "Ocorreu um erro interno no servidor."
         })
@@ -29,18 +30,30 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         const id = tokenAberto.id
         try {
             // query verifica se o id do motorista existe e se sua conta não está agendada pra ser excluida.
-            const query = "SELECT email_verificado FROM motorista WHERE id = $1 AND excluido_em IS NULL"
+            const query = "SELECT email_verificado, excluido_em FROM motorista WHERE id = $1"
             const valores = [id]
-            const { rows } = await database.query(query, valores)
+            const { rows } = await database.query<Motorista>(query, valores)
             if (rows.length < 1) {
                 return res.status(404).json({
                     msg: "Usuário não encontrado."
                 })
             }
+            const usuario = rows[0]
+            // verifica se a conta não está excluida.
+            if (usuario?.excluido_em) {
+                return res.status(401).clearCookie("token", {
+                    httpOnly: true,
+                    secure: process.env['NODE_ENV'] === 'production',
+                    sameSite: 'strict'
+                }).json({
+                    msg: "Não é possivel obter dados de conta excluida."
+                })
+            }
+
             // pega o verificado e coloca dentro da requisição atual
-            req.verificado = rows[0].email_verificado
+            req.verificado = usuario?.email_verificado ?? false
         } catch (erro) {
-            console.error("Erro ao verificar se usuario existe, erro:", erro)
+            console.error("Erro ao verificar se o usuário existe, erro:", erro)
             return res.status(500).json({
                 msg: "Ocorreu um erro interno no servidor."
             })

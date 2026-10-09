@@ -20,7 +20,7 @@ const CardMensali = () => {
             </div>
 
             <div className={styles.proximaMensa}>
-                    <p>Próxima Mensalidade: <span>15/03 - aluno</span></p>
+                    <p>Próxima mensalidade: <span>15/03 - aluno</span></p>
             </div>
         </DefaultCard>
     );

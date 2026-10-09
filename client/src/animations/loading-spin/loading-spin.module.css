@@ -8,6 +8,15 @@
     height: auto;
     margin: auto;
 }
+/*
+morra vitor, nunca mais quero centralizar uma div na minha vida
+ass: mk gabriel incrivel
+*/
+.fullPage{
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
 .loadingSpinIcon{
     animation: loadingSpinAnimation infinite 1s;
     width: 30px;

@@ -16,6 +16,7 @@ import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
 import api from '../../services/api'
+import { mensagemErroApi } from '../../utils/apiError'
 
 import styles from './perfil.module.css'
 
@@ -69,7 +70,7 @@ const Perfil = () => {
             id: 'credencial',
             label: 'CNPJ',
             placeholder: formatarCredencial(user?.credencial) || 'CNPJ não informado',
-            inputMode: 'numeric',
+            inputMode: 'text',
         },
         {
             id: 'senha',
@@ -136,7 +137,7 @@ const Perfil = () => {
             await refreshSession()
             toast.success('Campo atualizado com sucesso.')
         } catch (error) {
-            toast.error(error.response?.data?.msg || 'Não foi possível atualizar o campo.')
+            toast.error(mensagemErroApi(error, 'Não foi possível atualizar o campo.'))
         }
     }
 
@@ -151,11 +152,13 @@ const Perfil = () => {
         try {
             const response = await api.post('/motorista/google/vincular', { token: credential }, { //mando as informações do token do google para o backend para vincular a conta do google com a conta do usuario
                 skipGlobalErrorToast: true,
+                skipAuthExpired: true,
             })
             await refreshSession() //chamo a função de refreshSession para atualizar as informações do usuario apos vincular a conta do google
             toast.success(response.data?.msg || 'Conta Google vinculada com sucesso.')
         } catch (error) {
-            toast.error(error.response?.data?.msg || 'Não foi possível vincular a conta Google.')
+            if (error.response?.status === 401) await refreshSession()
+            toast.error(mensagemErroApi(error, 'Não foi possível vincular a conta Google.'))
         } finally {
             setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
         }

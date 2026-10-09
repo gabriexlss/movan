@@ -84,20 +84,22 @@ export const AuthProvider = ({ children }) => {
         }
 
         window.addEventListener('auth:expired', handleSessionExpired) //ele vai ficar verificando se a sessão expirou, caso tenha expirado chama o HandleSessionExpired
-        const sessionLoader = window.setTimeout(loadSession, 0)//chama a variavel de carregar a sessão assim que possivel
-
         return () => { //tudo que esta aqui acontece quando o componente é desmontado, ou seja quando ele vai ser descarregado da tela
-            window.clearTimeout(sessionLoader)//tira o timeout de carregar a sessão
             window.removeEventListener('auth:expired', handleSessionExpired)//tira o evento de sessão expirada
         }
-    }, [loadSession, navigate, pathname])
+    }, [navigate, pathname])
+
+    useEffect(() => {
+        const sessionLoader = window.setTimeout(loadSession, 0)
+        return () => window.clearTimeout(sessionLoader)
+    }, [loadSession])
 
 
     //=======================
     //LOGIN
     //=======================
     const login = useCallback(async (credentials) => {
-        await api.post('/motorista/login', credentials) //pega as credenciais do usuario e devolve pra rota do backend que verifica se o usuario existe e esta correto
+        await api.post('/motorista/login', credentials, { skipGlobalErrorToast: true, skipAuthExpired: true }) //pega as credenciais do usuario e devolve pra rota do backend que verifica se o usuario existe e esta correto
         await loadSession()//espera para ver se o usuario esta correto
     }, [loadSession])
 
@@ -121,7 +123,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {isLoading ? <LoadingSpinner /> : children}
+            {isLoading ? <LoadingSpinner fullPage /> : children}
         </AuthContext.Provider>
     )
 }
