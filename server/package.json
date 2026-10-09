@@ -9,7 +9,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test:cron": "npm run build && node tests/cron.test.mjs"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/system/limpeza-usuarios",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}
