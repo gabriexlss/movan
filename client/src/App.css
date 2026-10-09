@@ -20,18 +20,74 @@
 }
 
 @font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  src: url('./assets/fonts/Poppins/Poppins-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  src: url('./assets/fonts/Poppins/Poppins-ExtraBold.ttf') format('truetype');
+}
+
+@font-face {
   font-family: 'TAN Nimbus';
   font-style: normal;
   font-weight: 400;
   src: url('./assets/fonts/TAN-Nimbus/TAN-NIMBUS.woff') format('woff');
 }
 
+:root {
+  --footer-height: 7vh;
+}
+
+.app {
+  min-height: 100vh;
+}
+
 *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar{
+  display: none;
 }
 
 body {
   background-color: #FFFFFF;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-family: 'TAN Nimbus';
+  font-weight: normal;
+  line-height: 1;
+}
+
+p {
+  text-align: center;
+  font-family: 'Bree Serif', serif;
+  font-size: 0.75rem;
+  font-weight: lighter;
+  color: #FFFFFF;
+}
+
+main {
+  display: flex;
+  min-height: 100vh;
+  padding-bottom: calc(var(--footer-height) + 1rem);
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  gap: 1rem;
 }

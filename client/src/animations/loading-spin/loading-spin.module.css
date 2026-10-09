@@ -1,0 +1,32 @@
+.loadingSpin{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: fit-content;
+    height: auto;
+    margin: auto;
+}
+/*
+morra vitor, nunca mais quero centralizar uma div na minha vida
+ass: mk gabriel incrivel
+*/
+.fullPage{
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+.loadingSpinIcon{
+    animation: loadingSpinAnimation infinite 1s;
+    width: 30px;
+    height: 30px;
+}
+@keyframes loadingSpinAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

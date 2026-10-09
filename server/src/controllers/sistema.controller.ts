@@ -1,0 +1,21 @@
+import { Request, Response } from "express"
+import { database } from "../db/postgre.js"
+
+export const controllerSistema = {
+    // Rotina de limpeza de usuarios que estão com a conta agendada para deleção tem mais de 30 dias.
+    deletarUsuarios: async (req: Request, res: Response) => {
+        try {
+            const query = `DELETE FROM motorista 
+                WHERE excluido_em IS NOT NULL
+                AND excluido_em <= CURRENT_DATE - INTERVAL '30 days'`
+            const response = await database.query(query)
+            return res.status(200).json({
+                msg: `Limpeza concluída! ${response.rowCount} usuários excluídos.`
+            })
+        } catch (erro) {
+            return res.status(500).json({
+                msg: `Erro ao excluir usuários durante a limpeza, erro: ${erro}`
+            })
+        }
+    }
+}

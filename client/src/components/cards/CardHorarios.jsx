@@ -1,0 +1,35 @@
+import DefaultCard from './DefaultCard';
+import styles from './CardHorarios.module.css';
+
+import { TbSunFilled } from "react-icons/tb";
+import { TbSunset2Filled } from "react-icons/tb";
+import { IoMoon } from "react-icons/io5";
+
+const CardHorarios = () => {
+    const horarios = [
+        { titulo: "Manhã", hora: "06:30 - 8:00", icon: <TbSunFilled size={30} color="#F4C51F" /> },
+        { titulo: "Tarde", hora: "11:30 - 13:00", icon: <TbSunset2Filled size={30} color="#e7a01c" /> },
+        { titulo: "Noite", hora: "17:00 - 19:00", icon: <IoMoon size={30} color="#a6e7f3" /> }
+    ];
+
+    return (
+        <DefaultCard title="Horários diários" compactTitle>
+            <div className={styles.containerHorarios}>
+                {horarios.map((horarios) => (
+                    <div className={styles.horario} key={horarios.titulo}>
+                        <div className={styles.iconHorario}>
+                            {horarios.icon}
+                        </div>
+
+                        <div>
+                            <h2 className={styles.tituloHorario}>{horarios.titulo}</h2>
+                            <p className={styles.hora}>{horarios.hora}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </DefaultCard>
+    )
+}
+
+export default CardHorarios

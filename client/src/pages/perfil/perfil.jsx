@@ -1,0 +1,284 @@
+import { useCallback, useRef, useState } from 'react'
+import { GoogleLogin } from '@react-oauth/google'
+import { toast } from 'react-hot-toast'
+
+import { PiNotePencilBold } from 'react-icons/pi'
+import { IoMdExit } from "react-icons/io"
+import { CgTrash } from "react-icons/cg"
+import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
+
+
+import TituloTela from '../../components/layout/tituloTela'
+import DialogSenha from './edicao-perfil/DialogSenha'
+import DialogCnpj from './edicao-perfil/DialogCnpj'
+import DialogEmail from './edicao-perfil/DialogEmail'
+import DialogExluConta from './edicao-perfil/DialogExluConta'
+
+import { useAuth } from '../../context/useAuth'
+import api from '../../services/api'
+import { mensagemErroApi } from '../../utils/apiError'
+
+import styles from './perfil.module.css'
+
+const dialogsEdicao = { senha: DialogSenha, credencial: DialogCnpj, email: DialogEmail }
+
+const formatarCredencial = (credencial = '') => {
+    const documento = String(credencial || '').replace(/[^a-z0-9]/gi, '').toUpperCase()
+
+    if (documento.length === 11) {
+        return documento.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')
+    }
+    if (documento.length !== 14) return credencial
+
+    return documento.replace(
+        /^([A-Z0-9]{2})([A-Z0-9]{3})([A-Z0-9]{3})([A-Z0-9]{4})(\d{2})$/,
+        '$1.$2.$3/$4-$5',
+    )
+}
+
+const Perfil = () => {
+    const { user, refreshSession, logout } = useAuth()
+    const [camposEditaveis, setCamposEditaveis] = useState({})
+    const [campoSelect, setCampoSelect] = useState(null)
+    const [valores, setValores] = useState({
+        nome: '',
+        email: '',
+        credencial: '',
+        senha: '',
+    })
+    const inputRefs = useRef({})
+    const [dialogEditAberto, setDialogEditAberto] = useState(false)
+    const [dialogExluContaAberto, setDialogExluContaAberto] = useState(false)
+    const [vinculandoGoogle, setVinculandoGoogle] = useState(false)
+    const fecharDialogExluConta = useCallback(() => setDialogExluContaAberto(false), [])
+
+    const campos = [
+        {
+            id: 'nome',
+            label: 'Nome',
+            placeholder: user?.nome || 'Nome não informado',
+            autoComplete: 'name',
+        },
+        {
+            id: 'email',
+            label: 'E-mail',
+            placeholder: user?.email || 'E-mail não informado',
+            type: 'email',
+            autoComplete: 'email',
+        },
+        {
+            id: 'credencial',
+            label: 'CNPJ',
+            placeholder: formatarCredencial(user?.credencial) || 'CNPJ não informado',
+            inputMode: 'text',
+        },
+        {
+            id: 'senha',
+            label: 'Senha',
+            placeholder: '********',
+            type: 'password',
+            autoComplete: 'new-password',
+        },
+    ]
+    let camposFiltrados
+
+    const DialogEdicao = dialogsEdicao[campoSelect]
+
+
+    const fecharDialogEdicao = useCallback(() => {
+        const botaoEdicao = inputRefs.current[campoSelect]?.parentElement.querySelector('button')
+        setDialogEditAberto(false)
+        setCampoSelect(null)
+        requestAnimationFrame(() => {
+            if (botaoEdicao?.isConnected) botaoEdicao.focus()
+        })
+    }, [campoSelect])
+
+    const habilitarEdicao = (campo) => {
+        if (dialogsEdicao[campo]) { //se o campo for de dialog
+            setCampoSelect(campo) //seto o campo que vai ser editado
+            setDialogEditAberto(true) //abro o dialog de edição
+            return //retorno aqui porque não quero que ele edite o input caso seja um campo de dialog
+        }
+
+        setCamposEditaveis((estadoAtual) => ({
+            ...estadoAtual,
+            [campo]: true,
+        }))
+
+        requestAnimationFrame(() => inputRefs.current[campo]?.focus())
+    }
+
+    const alterarValor = (campo, valor) => {
+        setValores((valoresAtuais) => ({
+            ...valoresAtuais,
+            [campo]: valor,
+        }))
+    }
+
+    const encerrarEdicao = async (campo) => {
+        if (!camposEditaveis[campo]) return
+
+        setCamposEditaveis((estadoAtual) => ({
+            ...estadoAtual,
+            [campo]: false,
+        }))
+
+        if (dialogsEdicao[campo]) {
+            setCampoSelect(campo)
+            setDialogEditAberto(true)
+        }
+        //======================
+        //ATUALIZAR CAMPO 
+        //======================
+        try {
+            await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
+            )
+            await refreshSession()
+            toast.success('Campo atualizado com sucesso.')
+        } catch (error) {
+            toast.error(mensagemErroApi(error, 'Não foi possível atualizar o campo.'))
+        }
+    }
+
+    //======================
+    //VINCULAR GOOGLE
+    //======================
+    const vincularGoogle = async ({ credential }) => {
+        if (!credential || vinculandoGoogle) return //se não tiver o token ou ja estiver vinculando, não faz nada
+
+        setVinculandoGoogle(true) //digo que estou no processo de vincular a conta do google para não permitir que o usuario clique varias vezes no botão
+
+        try {
+            const response = await api.post('/motorista/google/vincular', { token: credential }, { //mando as informações do token do google para o backend para vincular a conta do google com a conta do usuario
+                skipGlobalErrorToast: true,
+                skipAuthExpired: true,
+            })
+            await refreshSession() //chamo a função de refreshSession para atualizar as informações do usuario apos vincular a conta do google
+            toast.success(response.data?.msg || 'Conta Google vinculada com sucesso.')
+        } catch (error) {
+            if (error.response?.status === 401) await refreshSession()
+            toast.error(mensagemErroApi(error, 'Não foi possível vincular a conta Google.'))
+        } finally {
+            setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
+        }
+    }
+    camposFiltrados = campos.filter((campo) =>
+    (user?.tipo_pessoa !== 'PF' || campo.id !== 'credencial') && //se o usuario for pessoa fisica não mostra o campo de alterar credencial
+    (!user?.google_verificado || campo.id !== 'email')) //se o usuario estiver logado no google mostra o campo de alterar email
+
+
+    return (
+        <main className={styles['perfil-container']}>
+            <TituloTela title="Este é o seu perfil" className={styles['titulo-tela']} />
+
+            <div className={styles['conteudos-perfil']}>
+                <img
+                    src={fotoPlaceholder}
+                    alt="Foto de perfil"
+                    className={styles['foto-perfil']}
+                />
+
+                <div className={styles['info-container']}>
+                    <h1 className={styles['nome-perfil']}>
+                        {user?.nome || 'Nome não informado'}
+                    </h1>
+                    <p className={styles['cnpj-perfil']}>
+                        {user?.tipo_pessoa === 'PF' ? 'CPF' : 'CNPJ'}: {formatarCredencial(user?.credencial) || 'não informado'}
+                    </p>
+                </div>
+            </div>
+
+            <section className={styles['campos-perfil']} aria-label="Dados do perfil">
+                {camposFiltrados.map((campo) => {
+                    const editavel = Boolean(camposEditaveis[campo.id])
+
+                    return (
+                        <div className={styles['campo-grupo']} key={campo.id}>
+                            <label htmlFor={`perfil-${campo.id}`}>{campo.label}</label>
+
+                            <div
+                                className={`${styles['input-container']} ${
+                                    editavel ? styles['input-container--editavel'] : ''
+                                }`}
+                            >
+                                <input
+                                    ref={(elemento) => {
+                                        inputRefs.current[campo.id] = elemento
+                                    }}
+                                    id={`perfil-${campo.id}`}
+                                    name={campo.id}
+                                    type={campo.type || 'text'}
+                                    value={valores[campo.id]}
+                                    placeholder={campo.placeholder}
+                                    readOnly={!editavel}
+                                    tabIndex={editavel ? 0 : -1}
+                                    inputMode={campo.inputMode}
+                                    autoComplete={campo.autoComplete}
+                                    enterKeyHint="done"
+                                    onChange={(event) => alterarValor(campo.id, event.target.value)}
+                                    onBlur={() => encerrarEdicao(campo.id)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault()
+                                            event.currentTarget.blur()
+                                        }
+                                    }}
+                                />
+
+                                <button
+                                    type="button"
+                                    className={styles['botao-editar']}
+                                    aria-label={`Editar ${campo.label}`}
+                                    aria-controls={`perfil-${campo.id}`}
+                                    aria-pressed={editavel}
+                                    onClick={() => habilitarEdicao(campo.id)}
+                                >
+                                    <PiNotePencilBold aria-hidden="true" />
+                                </button>
+                            </div>
+
+                            {campo.id === 'email' && user?.email_verificado === true && user?.google_verificado === false && (
+                                <div className={styles['linkGoogle']}>
+                                    <GoogleLogin
+                                        onSuccess={vincularGoogle}
+                                        onError={() => toast.error('Não foi possível abrir o Google.')}
+                                        text="signup_with"
+                                        size="small"
+                                        shape="pill"
+                                    />
+                                </div>
+                            )
+                        }
+
+                        </div>
+                    )
+                })}
+            </section>
+
+            {dialogEditAberto && DialogEdicao && (
+                <DialogEdicao
+                    valor={valores[campoSelect]}
+                    valorAtual={user?.[campoSelect]}
+                    onValorChange={(valor) => alterarValor(campoSelect, valor)}
+                    onClose={fecharDialogEdicao}
+                />
+            )}
+
+            {dialogExluContaAberto && <DialogExluConta onClose={fecharDialogExluConta} />}
+
+            <button
+                type="button"
+                className={styles['BtnExclu-conta']}
+                onClick={() => setDialogExluContaAberto(true)}
+                aria-haspopup="dialog"
+            >
+                <CgTrash aria-hidden="true" style={{ strokeWidth: '.6', fontSize: '1.7rem' }} />
+                Excluir conta
+            </button>
+            <button className={`${styles['BtnExclu-conta']}  ${styles['BtnSair-conta']}` } onClick={logout}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
+        </main>
+    )
+}
+
+export default Perfil

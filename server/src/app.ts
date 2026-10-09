@@ -1,8 +1,13 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import mainRoutes from './mainRoutes.js';
+import cookieParser from 'cookie-parser';
+import { limitarRequisicoes } from './middlewares/rateLimit.js';
 
 const app: Application = express();
+
+// Confia no proxy da Vercel para identificar o IP do cliente no rate limit.
+app.set('trust proxy', 1);
 
 // Processa as origens do CORS a partir do .env (com tratamento de erro para evitar crash)
 const allowedOrigins = (() => {
@@ -22,11 +27,13 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true
 }));
+// Necessario para o servidor conseguir ler cookies
+app.use(cookieParser())
 
 // Necessário para o servidor conseguir ler o corpo das requisições (req.body) em JSON
 app.use(express.json());
 
 // conecta o app com a execução do arquivo de rotas, onde estão todas as rotas do servidor
-app.use('/', mainRoutes);
+app.use('/', limitarRequisicoes.global(), mainRoutes);
 
 export default app;
