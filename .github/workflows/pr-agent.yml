@@ -14,6 +14,11 @@ jobs:
     pr_agent:
         if: ${{ github.event.sender.type != 'Bot' }}
         runs-on: ubuntu-latest
+        timeout-minutes: 60
+
+        concurrency:
+            group: pr-agent-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
+            cancel-in-progress: true
 
         permissions:
             issues: write
@@ -31,7 +36,22 @@ jobs:
               run: python -m pip install --disable-pip-version-check "pr-agent @ git+https://github.com/The-PR-Agent/pr-agent.git@v0.47.0"
 
             - name: PR Agent
-              run: python -m pr_agent.servers.github_action_runner
+              # A versão fixada tenta novamente sem esperar; adiciona backoff
+              # por chamada para não repetir ferramentas que já tiveram sucesso.
+              run: |
+                  python - <<'PY'
+                  from tenacity import stop_after_attempt, wait_exponential, wait_random
+                  from pr_agent.algo.ai_handlers.litellm_ai_handler import LiteLLMAIHandler
+                  from pr_agent.servers.github_action_runner import main
+
+                  LiteLLMAIHandler._chat_completion_with_retry = (
+                      LiteLLMAIHandler._chat_completion_with_retry.retry_with(
+                          stop=stop_after_attempt(3),
+                          wait=wait_exponential(multiplier=15, max=60) + wait_random(0, 5),
+                      )
+                  )
+                  main()
+                  PY
               env:
                   LITELLM_LOCAL_MODEL_COST_MAP: "True"
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,12 +65,16 @@ jobs:
                   config.reasoning_effort: "high"
                   config.additional_reasoning_effort_models: '["gemini/gemini-3.8-flash"]'
                   config.temperature: "1.0"
+                  config.no_temperature_models: '["gemini/gemini-3.8-flash"]'
 
                   # Usa inferência Flex do Gemini
                   litellm.extra_body: '{"service_tier":"flex"}'
 
-                  # Flex pode ficar alguns minutos na fila
-                  config.ai_timeout: "1800"
+                  # Aguarda até 15 minutos no Flex, sem repetir chamadas expiradas.
+                  config.ai_timeout: "900"
+                  config.retry_same_model_on_timeout: "false"
+                  # O backoff acima controla as tentativas, sem multiplicá-las no SDK.
+                  config.num_retries: "0"
 
                   github_action_config.auto_review: "true"
                   github_action_config.auto_describe: "true"
