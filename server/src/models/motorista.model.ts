@@ -5,20 +5,20 @@ import { UtilSchema } from './utils.model.js';
 // Modelo global pro motorista (usuario)
 const MotoristaSchema = z.object({
     id: UtilSchema.shape.id,
-    credencial: z.string("Não é uma String"), //credencial é ou cnpj ou cpf
-    email: z.string("Não é uma String").min(3, "Email muito curto").max(150, "Email Muito Longo").email("Email Invalido"),
-    nome: z.string("Não é uma String").min(3, "Nome muito Curto").max(200, "Nome muito Longo"),
-    senha: z.string("Não é uma String").max(100, "Senha muito Longa"),
+    credencial: z.string("NOT_STRING"), //credencial é ou cnpj ou cpf
+    email: z.string("NOT_STRING").min(3, "EMAIL_TOO_SHORT").max(150, "EMAIL_TOO_LONG").email("EMAIL_INVALID"),
+    nome: z.string("NOT_STRING").min(3, "NAME_TOO_SHORT").max(200, "NAME_TOO_LONG"),
+    senha: z.string("NOT_STRING").max(100, "PASSWORD_TOO_LONG"),
     email_verificado: z.boolean("Não é um Booleano"),
     excluido_em: z.string("Não é uma String").datetime("Não é uma Data Valida").nullish(),
-    login: z.string("Não é uma String").min(3, "Credenciais de Login muito curtas").max(255, "Credenciais de Login muito longas")
+    login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG")
 });
 // Modelo referente a autenticação utilizando o google.
 const AuthGoogleSchema = z.object({
-    token: z.string("Não é uma String").min(1, "Token não pode estar vazio."),
-    nome: z.string("Nome Ausente.").min(1, "Nome não pode estar vazio."),
-    email: z.string("Email Ausente.").min(1, "Email não pode estar vazio").email("tem que ser um email valido"),
-    googleId: z.string("id ausente.").min(1, "id não pode estar vazio."),
+    token: z.string("NOT_STRING").min(1, "GOOGLE_TOKEN_REQUIRED"),
+    nome: z.string("GOOGLE_NAME_REQUIRED").min(1, "GOOGLE_NAME_REQUIRED"),
+    email: z.string("GOOGLE_EMAIL_REQUIRED").min(1, "GOOGLE_EMAIL_REQUIRED").email("GOOGLE_EMAIL_INVALID"),
+    googleId: z.string("GOOGLE_ID_REQUIRED").min(1, "GOOGLE_ID_REQUIRED"),
     status: z.number("Status ausente."),
     msg: z.string("Mensagem ausente.").min(1, "Mensagem não pode estar vazia."),
     sucesso: z.boolean("Sucesso ausente.")
@@ -57,7 +57,7 @@ export const CodigoEditarEmailSchema = MotoristaSchema.pick({
 export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
     cod: validarCodigoSchema.shape.cod.optional()
 }).refine((dados) => !dados.email || !!dados.cod, {
-    message: "O código é obrigatório para alterar o email.",
+    message: "EMAIL_VERIFICATION_CODE_REQUIRED",
     path: ["cod"]
 })
 export const DeletarMotoristaSchema = MotoristaSchema.pick({

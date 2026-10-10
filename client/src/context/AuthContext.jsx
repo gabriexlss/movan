@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 
             const status = error.response?.status
             const usuarioDaSessaoNaoExiste = status === 404
-                && error.response?.data?.msg === 'Usuário não encontrado.'
+                && error.response?.data?.['msg-code'] === 'USER_NOT_FOUND'
 
             if (usuarioDaSessaoNaoExiste) {
                 // O cookie ainda pode apontar para um usuário removido do banco.
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     //LOGIN
     //=======================
     const login = useCallback(async (credentials) => {
-        await api.post('/motorista/login', credentials) //pega as credenciais do usuario e devolve pra rota do backend que verifica se o usuario existe e esta correto
+        await api.post('/motorista/login', credentials, { skipGlobalErrorToast: true }) //pega as credenciais do usuario e devolve pra rota do backend que verifica se o usuario existe e esta correto
         await loadSession()//espera para ver se o usuario esta correto
     }, [loadSession])
 

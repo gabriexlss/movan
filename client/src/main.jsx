@@ -1,9 +1,9 @@
 import { BrowserRouter } from 'react-router-dom';
 import { createRoot } from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google'
-import { Toaster } from 'react-hot-toast'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { AppToaster } from './services/toastManager.jsx'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
@@ -12,6 +12,6 @@ createRoot(document.getElementById('root')).render(
         <App />
       </AuthProvider>
     </GoogleOAuthProvider>
-    <Toaster position="top-right" />
+    <AppToaster />
   </BrowserRouter>,
 )

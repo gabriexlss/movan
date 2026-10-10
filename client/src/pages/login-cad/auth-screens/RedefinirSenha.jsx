@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
@@ -21,12 +21,12 @@ const RedefinirSenha = () => {
         event.preventDefault() //não deixo o navegador atualizar a pagina
 
         if (senha !== confirmarSenha) { //se a senha de confirmação for diferente da senha
-            toast.error('As senhas precisam ser iguais.') //mando uma mensagem de erro
+            errorToast('PASSWORDS_DIFFERENT') //mando uma mensagem de erro
             return //cancelo o envio do formulario
         }
 
         if (!email || !codigo) { //se não tiver email ou código no estado ou no sessionStorage
-            toast.error('Solicite um novo código de recuperação.') //mando uma mensagem de erro
+            errorToast('RECOVERY_CODE_REQUIRED') //mando uma mensagem de erro
             navigate('/esqueci-senha', { replace: true }) //mando o usuário para a tela de esqueci minha senha
             return //cancelo o envio do formulario
         }
@@ -41,16 +41,13 @@ const RedefinirSenha = () => {
             }, {
                 skipGlobalErrorToast: true, //o erro sera tratado aqui então não deixo as mensagens do api.js aparecerem
             })
-            toast.success(response.data?.msg || 'Senha alterada com sucesso.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
+            responseSuccessToast(response, 'PASSWORD_CHANGED') //mando uma mensagem de sucesso centralizada
             sessionStorage.removeItem('movan:recoveryEmail') //tiro o email do sessionStorage porque o usuário já redefiniu a senha
             sessionStorage.removeItem('movan:recoveryCode') //tiro o código do sessionStorage porque o usuário já redefiniu a senha
             sessionStorage.removeItem('movan:verificationFlow')
             navigate('/login', { replace: true }) //mando o usuário para a tela de login
         } catch (error) {
-            const errosDeCampo = Object.values(error.response?.data?.erro || {}) //transformo o erro do backend em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio
-                .flatMap((campo) => campo?._errors || []) //tiro o _errors do campo, caso não tenha nada ele so manda um array vazio
-            const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível alterar a senha.' //junto as mensagens de erro, caso não tenha mensagens de erro do backend mando uma generica
-            toast.error(mensagem) //mando a mensagem
+            apiErrorToast(error, 'PASSWORD_CHANGE_FAILED')
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }

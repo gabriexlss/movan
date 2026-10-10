@@ -11,6 +11,6 @@ export const middlewareVerificado = async (req: Request, res: Response, next: Ne
     }
     // se nao for verificado, retorna.
     else{
-        return res.status(403).json("Sua Conta precisa estar verificada para realizar essa ação.");
+        return res.status(403).json({ 'msg-code': "ACCOUNT_VERIFICATION_REQUIRED" });
     }
 } 

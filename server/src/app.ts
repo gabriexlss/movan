@@ -35,7 +35,7 @@ app.use('/', mainRoutes);
 // Mantém as respostas de erro da API em JSON mesmo fora dos controllers.
 app.use((_req: Request, res: Response) => {
   return res.status(404).json({
-    msg: 'Rota não encontrada.'
+    'msg-code': 'ROUTE_NOT_FOUND'
   });
 });
 
@@ -44,19 +44,19 @@ app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
   if (erroHttp.type === 'entity.parse.failed') {
     return res.status(400).json({
-      msg: 'JSON inválido.'
+      'msg-code': 'INVALID_JSON'
     });
   }
 
   if (erroHttp.status === 413 || erroHttp.type === 'entity.too.large') {
     return res.status(413).json({
-      msg: 'Corpo da requisição excede o limite permitido.'
+      'msg-code': 'PAYLOAD_TOO_LARGE'
     });
   }
 
   console.error('Erro não tratado pela aplicação:', erro);
   return res.status(500).json({
-    msg: 'Erro interno do servidor.'
+    'msg-code': 'INTERNAL_SERVER_ERROR'
   });
 });
 

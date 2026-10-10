@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -29,12 +29,12 @@ const CadGoogle = () => {
         event.preventDefault() //não deixa a pagina recarregar
 
         if (senha !== confirmarSenha) { //verifico se as senhas são diferentes
-            toast.error('As senhas precisam ser iguais.') //se forem diferentes mando esse erro
+            errorToast('PASSWORDS_DIFFERENT') //se forem diferentes mando esse erro
             return //cancelo o envio do formulario
         }
 
         if (!dadosGoogle?.token || !dadosGoogle?.nome) { //verifico se os dados foram mandados
-            toast.error('Não foi possível recuperar os dados da conta Google.') //se não foram mando um erro
+            errorToast('GOOGLE_DATA_NOT_FOUND') //se não foram mando um erro
             navigate('/cadastro', { replace: true }) //jogo o usuario para o cadastro padrão
             return //cancelo o envio do formulario
         }
@@ -52,18 +52,10 @@ const CadGoogle = () => {
             })
             sessionStorage.removeItem('movan:googleSignup') //removo os dados do sessionStorage
             await refreshSession() //atualizo a sessão do usuario para logar
-            toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma mensagem de sucesso do backend caso ela não exista mando uma mensagem generica
+            responseSuccessToast(response, 'ACCOUNT_CREATED') //mando uma mensagem de sucesso centralizada
             navigate('/', { replace: true }) //mando o usuario para a tela inicial
         } catch (error) {
-            if (error.response?.status === 409) {
-                toast.error(error.response.data?.msg || 'E-mail, CPF, CNPJ ou conta Google já cadastrado no Movan.')
-                return
-            }
-
-            const errosDeCampo = Object.values(error.response?.data?.erro || {}) //transformo o erro do backend em um array, caso ele não mande nada o array fica vazio
-                .flatMap((campo) => campo?._errors || []) //tiro o _errors de cada campo e coloco tudo em um array só
-            const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível criar sua conta Google.' //se o backend mandou algo eu uso, caso não eu mando uma mensagem de erro generica
-            toast.error(mensagem) //manda a mensagem
+            apiErrorToast(error, 'GOOGLE_ACCOUNT_CREATE_FAILED')
         } finally {
             setEnviando(false) //digo que o envio do formulario acabou
         }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import styles from './cad.module.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
@@ -23,7 +23,7 @@ const Cad = () => {
         event.preventDefault() //não deixo o navegador atualizar a pagina
 
         if (senha !== confirmarSenha) { //se a senha e a confirmação de senha forem diferentes
-            toast.error('As senhas precisam ser iguais.') //falo que as senhas precissa ser iguais
+            errorToast('PASSWORDS_DIFFERENT') //falo que as senhas precissa ser iguais
             return //cancelo o envio do formulario
         }
 
@@ -39,19 +39,11 @@ const Cad = () => {
                 skipGlobalErrorToast: true, //eu recuso a mensagem de erro do backend que tratei no api.js, porque tratarei ele de forma diferente aqui
             })
 
-            toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma caixa de sucesso com a mensagem do backend, caso não tenha mensagem do backend mando uma mensagem padrão
+            responseSuccessToast(response, 'ACCOUNT_CREATED') //mando uma caixa de sucesso com a mensagem centralizada
             sessionStorage.setItem('movan:verificationFlow', 'cadastro') //falo que o fluxo de verificação é de cadastro, porque o usuário acabou de criar a conta
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //mando o usuario para a pagina de codigo enviado
         } catch (error) {
-            if (error.response?.status === 409) {
-                toast.error(error.response.data?.msg || 'E-mail, CPF ou CNPJ já cadastrado no Movan.')
-                return
-            }
-
-            const errosDeCampo = Object.values(error.response?.data?.erro || {}) //pego os erros do backend e transformo eles em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio
-                .flatMap((campo) => campo?._errors || []) //tiro o _errors do campo
-            const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível criar sua conta.' //mando a mensagem que tratei do backend, se não tiver mensagem mando uma generica
-            toast.error(mensagem)
+            apiErrorToast(error, 'ACCOUNT_CREATE_FAILED')
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }

@@ -22,7 +22,7 @@ const desembalarGoogle = async (token: string) => {
         nome: string | undefined,
         token: string | null,
         status: number | null,
-        msg: string | null,
+        msgCode: string | null,
         sucesso: boolean,
         googleId: string | null
     }
@@ -31,7 +31,7 @@ const desembalarGoogle = async (token: string) => {
         nome: undefined,
         token: null,
         status: null,
-        msg: null,
+        msgCode: null,
         sucesso: false,
         googleId: null
     }
@@ -50,14 +50,14 @@ const desembalarGoogle = async (token: string) => {
 
         // checa pra ver se os dados foram obtidos do token, quando o google processou ele. 
         if (!payload) {
-            dados.msg = "Token Inválido, expirado ou corrompido."
+            dados.msgCode = "GOOGLE_TOKEN_INVALID"
             dados.status = 401
             return dados
         }
 
         // checa pra ver se a conta google pertencente a esse token foi verificada.
         if (!payload.email_verified) {
-            dados.msg = "Email do Google não verificado."
+            dados.msgCode = "GOOGLE_EMAIL_NOT_VERIFIED"
             dados.status = 403
             return dados
         }
@@ -74,7 +74,7 @@ const desembalarGoogle = async (token: string) => {
         }
         return dados
     } catch (erro) {
-        dados.msg = "Token do Google inválido, expirado ou corrompido."
+        dados.msgCode = "GOOGLE_TOKEN_INVALID"
         dados.status = 401
         console.error("Erro ao processar o token do google, erro: ", erro)
         return dados
@@ -156,7 +156,7 @@ export const controllerMotorista = {
         //checa se os dados enviados são validos
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados inválidos para criar a conta.",
+                'msg-code': "ACCOUNT_CREATE_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             });
         }
@@ -171,21 +171,21 @@ export const controllerMotorista = {
             metodo = 'cpf'
         } else {
             return res.status(400).json({
-                msg: "Credencial não é nem CPF nem CNPJ"
+                'msg-code': "INVALID_CREDENTIAL"
             })
         }
         if (metodo === 'cnpj') {
             const cnpjIsValid = cnpj.isValid(credencial)
             if (!cnpjIsValid) {
                 return res.status(400).json({
-                    msg: "CNPJ Inválido."
+                    'msg-code': "INVALID_CNPJ"
                 })
             }
         } else if (metodo === 'cpf') {
             const cpfIsValid = cpf.isValid(credencial)
             if (!cpfIsValid) {
                 return res.status(400).json({
-                    msg: "CPF Inválido."
+                    'msg-code': "INVALID_CPF"
                 })
             }
         }
@@ -195,20 +195,20 @@ export const controllerMotorista = {
             const responseEmail = await verificarEmailouCNPJouCPF(email, "email")
             if (responseEmail) {
                 return res.status(409).json({
-                    msg: "E-mail já cadastrado no Movan."
+                    'msg-code': "EMAIL_ALREADY_REGISTERED"
                 })
             }
             // aqui verifica pelo metódo se ou o email ou o cnpj ja estão cadastrados.
             const responseCredencial = await verificarEmailouCNPJouCPF(credencial, metodo)
             if (responseCredencial) {
                 return res.status(409).json({
-                    msg: `${metodo === 'cnpj' ? 'CNPJ' : 'CPF'} já cadastrado no Movan.`
+                    'msg-code': metodo === 'cnpj' ? 'CNPJ_ALREADY_REGISTERED' : 'CPF_ALREADY_REGISTERED'
                 })
             }
         } catch (erro) {
             console.error("Erro ao verificar se dados ja estão cadastrados, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
 
@@ -236,7 +236,7 @@ export const controllerMotorista = {
             if (!segredoJWT) {
                 console.error("Segredo JWT Ausente no ENV")
                 return res.status(500).json({
-                    msg: "Ocorreu um erro interno no servidor."
+                    'msg-code': "INTERNAL_SERVER_ERROR"
                 })
             }
             const token = jwt.sign({ id }, segredoJWT, { expiresIn: '30d' })
@@ -246,17 +246,17 @@ export const controllerMotorista = {
                 sameSite: 'strict',
                 maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
             }).json({
-                msg: "Conta criada com sucesso."
+                'msg-code': "ACCOUNT_CREATED"
             })
         } catch (erro: unknown) {
             console.error("Erro ao criar conta do motorista:", erro)
             if ((erro as { code?: string })?.code === '23505') {
                 return res.status(409).json({
-                    msg: "E-mail, CPF ou CNPJ já cadastrado no Movan."
+                    'msg-code': "ACCOUNT_ALREADY_REGISTERED"
                 })
             }
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -268,7 +268,7 @@ export const controllerMotorista = {
         // Validação pra ver se todos os dados são validos
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados inválidos para fazer login.",
+                'msg-code': "LOGIN_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -284,14 +284,14 @@ export const controllerMotorista = {
         } catch (erro) {
             console.error("Erro ao encontrar conta usando email, CPF ou CNPJ no login, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
 
         // Se não houver conta para a credencial informada, retorna erro de autenticação.
         if (!id) {
             return res.status(401).json({
-                msg: "E-mail, CPF, CNPJ ou senha inválidos."
+                'msg-code': "INVALID_CREDENTIALS"
             })
         }
         let emailVerificado: boolean
@@ -308,7 +308,7 @@ export const controllerMotorista = {
 
             if (!senhaValida) {
                 return res.status(401).json({
-                    msg: "E-mail, CPF, CNPJ ou senha inválidos."
+                    'msg-code': "INVALID_CREDENTIALS"
                 })
             }
             // verifica se a conta está agendada para exclusão. se sim, cancela.
@@ -319,7 +319,7 @@ export const controllerMotorista = {
         } catch (erro) {
             console.error("Erro ao puxar hash de senha salva no banco de dados, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
         // se chegou até aqui, o usuario foi encontrado e sua senha é valida, então só dar seu cookie.
@@ -327,14 +327,14 @@ export const controllerMotorista = {
         if (!segredoJWT) {
             console.error("Segredo JWT Ausente no ENV")
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
         const token = jwt.sign({ id }, segredoJWT, { expiresIn: '30d' })
 
 
         //cria uma mensagem com base se está verificado ou não.
-        const mensagem = emailVerificado ? "Login Realizado com Sucesso." : "Login Realizado com Sucesso, Mas verificação necessaria para obter os dados."
+        const codigoMensagem = emailVerificado ? "LOGIN_SUCCESS" : "LOGIN_SUCCESS_VERIFICATION_REQUIRED"
 
         return res.status(200).cookie('token', token, {
             httpOnly: true,
@@ -342,7 +342,7 @@ export const controllerMotorista = {
             sameSite: 'strict',
             maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
         }).json({
-            msg: mensagem,
+            'msg-code': codigoMensagem,
             email_verificado: emailVerificado
         })
     },
@@ -353,7 +353,7 @@ export const controllerMotorista = {
             secure: process.env['NODE_ENV'] === 'production',
             sameSite: 'strict'
         }).json({
-            msg: "Logout realizado com sucesso."
+            'msg-code': "LOGOUT_SUCCESS"
         })
     },
     // rota para pegar o id do usuario logado e o tipo de codigo que ele quer receber (por enquanto somente criação)
@@ -368,12 +368,12 @@ export const controllerMotorista = {
         // se o tipo não for indicado ou não for nem criação ou recuperação, dá erro de bad request
         if (!tipo) {
             return res.status(400).json({
-                msg: "O tipo do código não foi informado."
+                'msg-code': "VERIFICATION_CODE_TYPE_MISSING"
             })
         }
         if (tipo !== "CRIACAO" && tipo !== "RECUPERACAO") {
             return res.status(400).json({
-                msg: "Tipo de código inválido."
+                'msg-code': "VERIFICATION_CODE_TYPE_INVALID"
             })
         }
         try {
@@ -386,12 +386,12 @@ export const controllerMotorista = {
             const response = await gerarCodigo(email, tipo, id)
             if (!response) throw new Error("Não foi possível enviar o código de verificação.")
             return res.status(200).json({
-                msg: `Código para ${tipo} da conta enviado com sucesso.`
+                'msg-code': "VERIFICATION_CODE_SENT"
             })
         } catch (erro) {
             console.error("Erro ao enviar código, erro:", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -404,14 +404,14 @@ export const controllerMotorista = {
         // Verifica se a conta já foi verificada anteriormente, se sim, não tem motivo para ser verificada dnv
         if (verificado) {
             return res.status(409).json({
-                msg: "Conta já verificada."
+                'msg-code': "ACCOUNT_ALREADY_VERIFIED"
             })
         }
 
         //checa se o código enviado é valido
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados inválidos para verificar a conta.",
+                'msg-code': "VERIFICATION_CODE_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             });
         }
@@ -422,7 +422,7 @@ export const controllerMotorista = {
             const idCodigo = await validarCodigo(id, "CRIACAO", cod) //mudei esse nomes porque por algum motivo que nao sei ele tava reclamando disso, já que a norma é nao colocar acento mudei aqui
             if (idCodigo === null) {
                 return res.status(400).json({
-                    msg: "Código inválido ou expirado."
+                    'msg-code': "VERIFICATION_CODE_INVALID_OR_EXPIRED"
                 })
             }
             // se o usuario chegou até aqui, então o codigo dele é valido, só verificar a conta dele
@@ -435,12 +435,12 @@ export const controllerMotorista = {
 
             // retorna
             return res.status(200).json({
-                msg: "Conta verificada com sucesso."
+                'msg-code': "ACCOUNT_VERIFIED"
             })
         } catch (erro) {
             console.error("Erro ao salvar o status de verificado como true no banco de dados, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -452,7 +452,7 @@ export const controllerMotorista = {
         //Validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados inválidos para recuperação de senha.",
+                'msg-code': "PASSWORD_RECOVERY_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -462,7 +462,7 @@ export const controllerMotorista = {
             const id = await verificarEmailouCNPJouCPF(email, "email")
             if (!id) {
                 return res.status(404).json({
-                    msg: "Nenhuma conta encontrada com o e-mail informado."
+                    'msg-code': "ACCOUNT_NOT_FOUND_BY_EMAIL"
                 })
             }
             // se ja chegou aqui, a conta existe e já temos um id de conta, então hora de enviar o código
@@ -471,12 +471,12 @@ export const controllerMotorista = {
 
             // deu tudo certo, só retornar.
             return res.status(200).json({
-                msg: "Código de recuperação enviado com sucesso."
+                'msg-code': "RECOVERY_CODE_SENT"
             })
         } catch (erro) {
             console.error("Erro ao enviar código para recuperação de conta, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -488,7 +488,7 @@ export const controllerMotorista = {
         // verifica se os dados são validos
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados inválidos para alterar o e-mail.",
+                'msg-code': "EMAIL_CHANGE_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -499,11 +499,11 @@ export const controllerMotorista = {
             if (idEmail) {
                 if (idEmail === id) {
                     return res.status(400).json({
-                        msg: "Este já é o seu e-mail atual."
+                        'msg-code': "EMAIL_UNCHANGED"
                     })
                 }
                 return res.status(409).json({
-                    msg: "E-mail já cadastrado no Movan."
+                    'msg-code': "EMAIL_ALREADY_REGISTERED"
                 })
             }
 
@@ -511,12 +511,12 @@ export const controllerMotorista = {
             if (!response) throw new Error("Não foi possível enviar o código de alteração de e-mail.")
 
             return res.status(200).json({
-                msg: "Código para alteração de e-mail enviado com sucesso."
+                'msg-code': "EMAIL_CHANGE_CODE_SENT"
             })
         } catch (erro) {
             console.error("Erro ao enviar código para alteração de email, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -528,7 +528,7 @@ export const controllerMotorista = {
         // Validação dos dados
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados inválidos para recuperação de senha.",
+                'msg-code': "PASSWORD_RECOVERY_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -539,14 +539,14 @@ export const controllerMotorista = {
             const id = await verificarEmailouCNPJouCPF(email, "email")
             if (!id) {
                 return res.status(404).json({
-                    msg: "Nenhuma conta encontrada com o e-mail informado."
+                    'msg-code': "ACCOUNT_NOT_FOUND_BY_EMAIL"
                 })
             }
             // beleza, conta existe, agora verificar código se bate com o banco de dados. 
             const idCodigo = await validarCodigo(id, "RECUPERACAO", cod)
             if (idCodigo === null) {
                 return res.status(400).json({
-                    msg: "Código inválido ou expirado."
+                    'msg-code': "VERIFICATION_CODE_INVALID_OR_EXPIRED"
                 })
             }
             // Se chegou até aqui, o codigo é valido, só substituir a senha antiga pela nova.
@@ -564,12 +564,12 @@ export const controllerMotorista = {
 
             // senha recuperada. só retornar
             return res.status(200).json({
-                msg: "Senha alterada com sucesso."
+                'msg-code': "PASSWORD_CHANGED"
             })
         } catch (erro) {
             console.error("Erro ao salvar senha nova do usuário, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -581,7 +581,7 @@ export const controllerMotorista = {
         // Checagem basica pra ver se o usuario digitou a senha e se ela é valida
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Senha para excluir a conta ausente ou inválida.",
+                'msg-code': "ACCOUNT_DELETE_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -602,7 +602,7 @@ export const controllerMotorista = {
 
             if (!senhaValida) {
                 return res.status(401).json({
-                    msg: "Senha inválida."
+                    'msg-code': "INVALID_PASSWORD"
                 })
             }
             // senha valida, então agr so aplicar o delete do garoto
@@ -615,12 +615,12 @@ export const controllerMotorista = {
                 secure: process.env['NODE_ENV'] === 'production',
                 sameSite: 'strict'
             }).json({
-                msg: "Conta agendada para exclusão com sucesso."
+                'msg-code': "ACCOUNT_DELETE_SCHEDULED"
             })
         } catch (erro) {
             console.error("Erro ao Deletar conta do usúario, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -634,7 +634,7 @@ export const controllerMotorista = {
 
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados inválidos para editar a conta.",
+                'msg-code': "ACCOUNT_EDIT_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -654,21 +654,21 @@ export const controllerMotorista = {
                 const idEmail = await verificarEmailouCNPJouCPF(email, "email")
                 if (idEmail && idEmail !== id) {
                     return res.status(409).json({
-                        msg: "E-mail já cadastrado no Movan."
+                        'msg-code': "EMAIL_ALREADY_REGISTERED"
                     })
                 }
 
                 const idCodigo = await validarCodigo(id, "ALTERACAO", cod!, email)
                 if (idCodigo === null) {
                     return res.status(400).json({
-                        msg: "Código inválido ou expirado."
+                        'msg-code': "VERIFICATION_CODE_INVALID_OR_EXPIRED"
                     })
                 }
                 idCodigoEmail = idCodigo
             } catch (erro) {
                 console.error("Erro ao validar código para alterar email, erro: ", erro)
                 return res.status(500).json({
-                    msg: "Ocorreu um erro interno no servidor."
+                    'msg-code': "INTERNAL_SERVER_ERROR"
                 })
             }
             campos.push(`email = $${valores.length + 1}`)
@@ -677,19 +677,19 @@ export const controllerMotorista = {
         if (credencial !== undefined) {
             const tipo = tipoCredencial(credencial)
             if (!tipo) {
-                return res.status(400).json({ msg: "CPF ou CNPJ inválido." })
+                return res.status(400).json({ 'msg-code': "INVALID_DOCUMENT" })
             }
             try {
                 const idCredencial = await verificarEmailouCNPJouCPF(credencial, tipo)
                 if (idCredencial && idCredencial !== id) {
                     return res.status(409).json({
-                        msg: "CPF ou CNPJ já cadastrado no Movan."
+                        'msg-code': "DOCUMENT_ALREADY_REGISTERED"
                     })
                 }
             } catch (erro) {
                 console.error("Erro ao verificar CPF ou CNPJ do motorista, erro: ", erro)
                 return res.status(500).json({
-                    msg: "Ocorreu um erro interno no servidor."
+                    'msg-code': "INTERNAL_SERVER_ERROR"
                 })
             }
             campos.push(`${tipo} = $${valores.length + 1}`)
@@ -709,7 +709,7 @@ export const controllerMotorista = {
         // se nenhum campo tiver sido enviado, manda embora
         if (campos.length < 1) {
             return res.status(400).json({
-                msg: "Informe pelo menos um campo para editar a conta."
+                'msg-code': "ACCOUNT_EDIT_REQUIRES_FIELD"
             })
         }
         try {
@@ -727,17 +727,17 @@ export const controllerMotorista = {
             //se chegou aqui, tudo ocorreu bem. hora de retornar.
             const camposEditados = [nome, email, credencial, senha].filter((valor) => valor !== undefined).length
             return res.status(200).json({
-                msg: camposEditados === 1
-                    ? "1 campo editado com sucesso."
-                    : `${camposEditados} campos editados com sucesso.`
+                'msg-code': camposEditados === 1
+                    ? "ACCOUNT_EDITED_ONE_FIELD"
+                    : `ACCOUNT_EDITED_${camposEditados}_FIELDS`
             })
         } catch (erro) {
             console.error("Erro ao editar dados do usuario, erro: ", erro)
             if ((erro as { code?: string })?.code === '23505') {
-                return res.status(409).json({ msg: "E-mail, CPF ou CNPJ já cadastrado no Movan." })
+                return res.status(409).json({ 'msg-code': "ACCOUNT_ALREADY_REGISTERED" })
             }
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -755,13 +755,13 @@ export const controllerMotorista = {
             const motorista = rows[0]
 
             return res.status(200).json({
-                msg: "Dados da conta obtidos com sucesso.",
+                'msg-code': "ACCOUNT_DATA_RECEIVED",
                 motorista
             })
         } catch (erro) {
             console.error("Erro ao obter dados do motorista, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -773,7 +773,7 @@ export const controllerMotorista = {
         // Validação dos dados
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para autenticar com o google.",
+                'msg-code': "GOOGLE_AUTH_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -781,7 +781,7 @@ export const controllerMotorista = {
         const usuario = await desembalarGoogle(token)
         if (!usuario.sucesso) {
             return res.status(usuario.status!).json({
-                msg: usuario.msg
+                'msg-code': usuario.msgCode
             })
         }
         // Se chegou aqui, já temos todos os dados do google certinho, então vamos tentar buscar o usuario pelo id google
@@ -811,7 +811,7 @@ export const controllerMotorista = {
                 if (!segredoJWT) {
                     console.error("Segredo JWT Ausente no ENV")
                     return res.status(500).json({
-                        msg: "Ocorreu um erro interno no servidor."
+                        'msg-code': "INTERNAL_SERVER_ERROR"
                     })
                 }
                 const jwtToken = jwt.sign({ id }, segredoJWT, { expiresIn: '30d' })
@@ -821,7 +821,7 @@ export const controllerMotorista = {
                     sameSite: 'strict',
                     maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
                 }).json({
-                    msg: "Login realizado com sucesso."
+                    'msg-code': "GOOGLE_LOGIN_SUCCESS"
                 })
             }
 
@@ -833,7 +833,7 @@ export const controllerMotorista = {
                 if (resultadoEmail.rows.length > 0) {
                     achouUsuario = true
                     return res.status(409).json({
-                        msg: "Conta Encontrada, mas não vinculada ao google."
+                        'msg-code': "GOOGLE_ACCOUNT_NOT_LINKED"
                     })
                 }
             }
@@ -844,14 +844,14 @@ export const controllerMotorista = {
                 token: token,
             }
             return res.status(200).json({
-                msg: "Conta não encontrada. iniciando criação de conta com o google.",
+                'msg-code': "GOOGLE_ACCOUNT_CREATION_REQUIRED",
                 CREATION_REQUIRED: true,
                 dadosGoogle: dadosParaCriacao
             })
         } catch (erro) {
             console.error("Erro ao  processar dados usando os dados obtidos pelo google, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -866,7 +866,7 @@ export const controllerMotorista = {
         // Validação
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para vincular sua conta google.",
+                'msg-code': "GOOGLE_LINK_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -876,7 +876,7 @@ export const controllerMotorista = {
         const usuario = await desembalarGoogle(token)
         if (!usuario.sucesso) {
             return res.status(usuario.status!).json({
-                msg: usuario.msg
+                'msg-code': usuario.msgCode
             })
         }
 
@@ -884,7 +884,7 @@ export const controllerMotorista = {
         try {
             const check = await database.query("SELECT id FROM motorista WHERE google_id = $1", [usuario.googleId]);
             if (check.rows.length > 0) {
-                return res.status(409).json({ msg: "Esta conta do Google já está vinculada a outro usuário." });
+                return res.status(409).json({ 'msg-code': "GOOGLE_ACCOUNT_ALREADY_LINKED" });
             }
             const query = "UPDATE motorista SET google_id = $1 WHERE id = $2"
             const valores = [usuario.googleId, id]
@@ -892,12 +892,12 @@ export const controllerMotorista = {
 
             // agr com a conta vinculada, só retornar.
             return res.status(200).json({
-                msg: "Conta vinculada ao google com sucesso."
+                'msg-code': "GOOGLE_ACCOUNT_LINKED"
             })
         } catch (erro) {
             console.error("Erro ao vincular a conta google do usuario, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -909,7 +909,7 @@ export const controllerMotorista = {
         // Validação de dados
         if (!dadosBrutos.success) {
             return res.status(400).json({
-                msg: "Dados Inválidos para criação da conta.",
+                'msg-code': "GOOGLE_ACCOUNT_CREATE_INVALID_DATA",
                 erro: dadosBrutos.error.format()
             })
         }
@@ -919,12 +919,12 @@ export const controllerMotorista = {
         const { nome, credencial, token, senha } = dadosBrutos.data
         const tipo = tipoCredencial(credencial)
         if (!tipo) {
-            return res.status(400).json({ msg: "CPF ou CNPJ inválido." })
+            return res.status(400).json({ 'msg-code': "INVALID_DOCUMENT" })
         }
         const usuario = await desembalarGoogle(token)
         if (!usuario.sucesso) {
             return res.status(usuario.status!).json({
-                msg: usuario.msg
+                'msg-code': usuario.msgCode
             })
         }
         const { email, googleId } = usuario
@@ -937,23 +937,23 @@ export const controllerMotorista = {
             const responseEmail = await verificarEmailouCNPJouCPF(email, "email")
             if (responseEmail) {
                 return res.status(409).json({
-                    msg: "E-mail já cadastrado no Movan."
+                    'msg-code': "EMAIL_ALREADY_REGISTERED"
                 })
             }
             const responseCredencial = await verificarEmailouCNPJouCPF(credencial, tipo)
             if (responseCredencial) {
                 return res.status(409).json({
-                    msg: "CPF ou CNPJ já cadastrado no Movan."
+                    'msg-code': "DOCUMENT_ALREADY_REGISTERED"
                 })
             }
             const check = await database.query("SELECT id FROM motorista WHERE google_id = $1", [usuario.googleId]);
             if (check.rows.length > 0) {
-                return res.status(409).json({ msg: "Esta conta do Google já está vinculada a outro usuário." });
+                return res.status(409).json({ 'msg-code': "GOOGLE_ACCOUNT_ALREADY_LINKED" });
             }
         } catch (erro) {
             console.error("Erro ao verificar se dados ja estão cadastrados, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
 
@@ -970,7 +970,7 @@ export const controllerMotorista = {
             if (!segredoJWT) {
                 console.error("Segredo JWT Ausente no ENV")
                 return res.status(500).json({
-                    msg: "Ocorreu um erro interno no servidor."
+                    'msg-code': "INTERNAL_SERVER_ERROR"
                 })
             }
             const token = jwt.sign({ id }, segredoJWT, { expiresIn: '30d' })
@@ -980,17 +980,17 @@ export const controllerMotorista = {
                 sameSite: 'strict',
                 maxAge: 30 * 24 * 60 * 60 * 1000 // o cookie expira em 30 dias
             }).json({
-                msg: "Conta criada com sucesso."
+                'msg-code': "ACCOUNT_CREATED"
             })
         } catch (erro: unknown) {
             console.error("Erro ao criar conta com Google:", erro)
             if ((erro as { code?: string })?.code === '23505') {
                 return res.status(409).json({
-                    msg: "E-mail, CPF, CNPJ ou Conta Google já cadastrado no Movan."
+                    'msg-code': "GOOGLE_ACCOUNT_ALREADY_REGISTERED"
                 })
             }
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     },
@@ -1006,12 +1006,12 @@ export const controllerMotorista = {
 
             //retornando usuario
             return res.status(200).json({
-                msg: "Conta Google Desvinculada com Sucesso."
+                'msg-code': "GOOGLE_ACCOUNT_UNLINKED"
             })
         } catch (erro) {
             console.error("Erro ao desvincular conta google, erro: ", erro)
             return res.status(500).json({
-                msg: "Ocorreu um erro interno no servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
     }
