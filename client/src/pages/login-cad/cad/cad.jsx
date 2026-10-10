@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/useAuth'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import PasswordRequirements from '../../../components/auth/PasswordRequirements'
 import { senhaValida } from '../../../utils/password'
-import { mensagemErroApi } from '../../../utils/apiError'
 import styles from './cad.module.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
@@ -28,13 +27,13 @@ const Cad = () => {
         event.preventDefault() //não deixo o navegador atualizar a pagina
 
         if (senha !== confirmarSenha) { //se a senha e a confirmação de senha forem diferentes
-            toast.error('As senhas precisam ser iguais.') //falo que as senhas precissa ser iguais
+            errorToast('PASSWORDS_DIFFERENT') //falo que as senhas precissa ser iguais
             return //cancelo o envio do formulario
         }
 
         if (enviando) return
         if (!senhaValida(senha)) {
-            toast.error('A nova senha deve atender a todos os requisitos.')
+            errorToast('PASSWORD_REQUIREMENTS')
             return
         }
 
@@ -50,17 +49,14 @@ const Cad = () => {
                 skipGlobalErrorToast: true, //eu recuso a mensagem de erro do backend que tratei no api.js, porque tratarei ele de forma diferente aqui
             })
 
-            toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma caixa de sucesso com a mensagem do backend, caso não tenha mensagem do backend mando uma mensagem padrão
+            responseSuccessToast(response, 'ACCOUNT_CREATED') //mando uma caixa de sucesso com a mensagem centralizada
             sessionStorage.setItem('movan:verificationFlow', 'cadastro') //falo que o fluxo de verificação é de cadastro, porque o usuário acabou de criar a conta
             await refreshSession()
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'cadastro', autoSendVerification: true } }) //mando o usuario para a pagina de codigo enviado
         } catch (error) {
-            if (error.response?.status === 409) {
-                toast.error(error.response.data?.msg || 'E-mail, CPF ou CNPJ já cadastrado no Movan.')
-                return
-            }
-
-            toast.error(mensagemErroApi(error, 'Não foi possível criar sua conta.'))
+            apiErrorToast(error, error.response?.status === 409
+                ? 'ACCOUNT_ALREADY_REGISTERED'
+                : 'ACCOUNT_CREATE_FAILED')
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }

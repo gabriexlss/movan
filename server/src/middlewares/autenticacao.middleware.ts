@@ -14,7 +14,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
     // se o cookie nao estiver presente, retorna imediatamente
     if (!token) {
         return res.status(401).json({
-            msg: "Acesso negado. Faça login para continuar."
+            'msg-code': "AUTH_REQUIRED"
         })
     }
     // verifica a assinatura do jwt dentro do cookie
@@ -22,7 +22,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
     if (!segredoJWT) {
         console.error("Segredo JWT ausente nas variáveis de ambiente.")
         return res.status(500).json({
-            msg: "Erro interno do servidor."
+            'msg-code': "INTERNAL_SERVER_ERROR"
         })
     }
     try {
@@ -35,7 +35,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
             const { rows } = await database.query<Motorista>(query, valores)
             if (rows.length < 1) {
                 return res.status(404).json({
-                    msg: "Usuário não encontrado."
+                    'msg-code': "USER_NOT_FOUND"
                 })
             }
             const usuario = rows[0]
@@ -46,7 +46,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
                     secure: process.env['NODE_ENV'] === 'production',
                     sameSite: 'strict'
                 }).json({
-                    msg: "Não é possivel obter dados de conta excluida."
+                    'msg-code': "AUTH_EXCLUDED_ACCOUNT"
                 })
             }
 
@@ -55,7 +55,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         } catch (erro) {
             console.error("Erro ao verificar se o usuário existe, erro:", erro)
             return res.status(500).json({
-                msg: "Erro interno do servidor."
+                'msg-code': "INTERNAL_SERVER_ERROR"
             })
         }
         // pega o id e coloca dentro da requisição atual
@@ -69,7 +69,7 @@ export const middlewareAutenticar = async (req: Request, res: Response, next: Ne
         return
     } catch {
         return res.status(401).json({
-            msg: "Acesso negado. Faça login para continuar."
+            'msg-code': "AUTH_REQUIRED"
         })
     }
 }

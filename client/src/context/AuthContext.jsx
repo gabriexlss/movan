@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
 
             const status = error.response?.status
             const usuarioDaSessaoNaoExiste = status === 404
-                && error.response?.data?.msg === 'Usuário não encontrado.'
+                && error.response?.data?.['msg-code'] === 'USER_NOT_FOUND'
 
             if (usuarioDaSessaoNaoExiste) {
                 // O cookie ainda pode apontar para um usuário removido do banco.

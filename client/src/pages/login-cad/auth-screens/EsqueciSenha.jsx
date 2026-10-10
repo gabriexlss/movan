@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, responseSuccessToast } from '../../../services/toastManager'
 import { useCodeCooldown } from '../../../hooks/useCodeCooldown'
 import { formatarTempo, tempoCodigoRestante } from '../../../utils/codeCooldown'
-import { mensagemErroApi } from '../../../utils/apiError'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
@@ -29,11 +28,11 @@ const EsqueciSenha = () => {
             })
             sessionStorage.setItem('movan:recoveryEmail', email) //guardo o email no sessionStorage porque vou usar na tela de enviar codigo
             sessionStorage.setItem('movan:verificationFlow', 'recuperacao')//falo que o fluxo agora é de verificação
-            toast.success(response.data?.msg || 'Código de recuperação enviado.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
+            responseSuccessToast(response, 'RECOVERY_CODE_SENT') //mando uma mensagem de sucesso centralizada
             navigate('/codigo-enviado', { state: { fluxo: 'recuperacao' } }) //mando para a pagina de codigo enviado e falo que o estado de fluxo é de recuperação
         } catch (error) {
             atualizarPrazo()
-            toast.error(mensagemErroApi(error, 'Não foi possível enviar o código.'))
+            apiErrorToast(error, 'VERIFICATION_CODE_SEND_FAILED')
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }

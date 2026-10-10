@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { toast } from  'react-hot-toast'
 import {
     PiIdentificationCardBold,
     PiLockKeyBold,
@@ -16,6 +15,7 @@ import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
 import { useAuth } from '../../../context/useAuth'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 
 
 const dadosExcluidos = [
@@ -40,7 +40,7 @@ const handleSubmit = async (event) => {
     event.preventDefault(); //não deixo atualizar a pagina
     
     if(!senhaAtual) { //se não tiver confirmado
-        toast.error("Por favor, informe sua senha.")
+        errorToast('PASSWORD_REQUIRED')
         return;
     }
 
@@ -50,14 +50,12 @@ const handleSubmit = async (event) => {
             skipGlobalErrorToast: true, //falo para a api não mostrar o toast de erro global, porque vou tratar o erro de forma diferente aqui
             skipAuthExpired: true, //falo para a api não mandar o evento de sessão expirada, porque vou tratar o erro de forma diferente aqui
         })
-        toast.success(response.data.msg || 'Conta agendada para exclusão. Faça login em até 30 dias para restaurá-la.')
+        responseSuccessToast(response, 'ACCOUNT_DELETE_SCHEDULED')
         await logout() //chamo a função de logout para deslogar o usuario apos excluir a cont
         }catch(error){
-            if(error.response?.status === 401) {
-                toast.error(error.response.data?.msg || 'Senha incorreta. Por favor, tente novamente.')
-                return;
-            }
-            toast.error(error.response?.data?.msg || 'Não foi possível excluir a conta. Por favor, tente novamente mais tarde.')
+            apiErrorToast(error, error.response?.status === 401
+                ? 'INVALID_PASSWORD'
+                : 'ACCOUNT_DELETE_FAILED')
     }
 
 }
