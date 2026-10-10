@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import PasswordRequirements from '../../../components/auth/PasswordRequirements'
 import { senhaValida } from '../../../utils/password'
-import { mensagemErroApi } from '../../../utils/apiError'
 import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -32,19 +31,19 @@ const CadGoogle = () => {
         event.preventDefault() //não deixa a pagina recarregar
 
         if (senha !== confirmarSenha) { //verifico se as senhas são diferentes
-            toast.error('As senhas precisam ser iguais.') //se forem diferentes mando esse erro
+            errorToast('PASSWORDS_DIFFERENT') //se forem diferentes mando esse erro
             return //cancelo o envio do formulario
         }
 
         if (!dadosGoogle?.token || !dadosGoogle?.nome) { //verifico se os dados foram mandados
-            toast.error('Não foi possível recuperar os dados da conta Google.') //se não foram mando um erro
+            errorToast('GOOGLE_DATA_NOT_FOUND') //se não foram mando um erro
             navigate('/cadastro', { replace: true }) //jogo o usuario para o cadastro padrão
             return //cancelo o envio do formulario
         }
 
         if (enviando) return
         if (!senhaValida(senha)) {
-            toast.error('A nova senha deve atender a todos os requisitos.')
+            errorToast('PASSWORD_REQUIREMENTS')
             return
         }
 
@@ -62,15 +61,12 @@ const CadGoogle = () => {
             })
             sessionStorage.removeItem('movan:googleSignup') //removo os dados do sessionStorage
             await refreshSession() //atualizo a sessão do usuario para logar
-            toast.success(response.data?.msg || 'Conta criada com sucesso.') //mando uma mensagem de sucesso do backend caso ela não exista mando uma mensagem generica
+            responseSuccessToast(response, 'ACCOUNT_CREATED') //mando uma mensagem de sucesso centralizada
             navigate('/', { replace: true }) //mando o usuario para a tela inicial
         } catch (error) {
-            if (error.response?.status === 409) {
-                toast.error(error.response.data?.msg || 'Já existe uma conta no Movan com este e-mail, CPF, CNPJ ou conta Google.')
-                return
-            }
-
-            toast.error(mensagemErroApi(error, 'Não foi possível criar sua conta Google.'))
+            apiErrorToast(error, error.response?.status === 409
+                ? 'GOOGLE_ACCOUNT_ALREADY_REGISTERED'
+                : 'GOOGLE_ACCOUNT_CREATE_FAILED')
         } finally {
             setEnviando(false) //digo que o envio do formulario acabou
         }

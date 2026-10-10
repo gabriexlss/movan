@@ -24,7 +24,7 @@ function requisicoes({ tempo, limite }: requisicoesProps) {
         legacyHeaders: false,
 
         message: {
-            msg: "Muitas requisições. Tente novamente mais tarde."
+            'msg-code': "TOO_MANY_REQUESTS"
         }
     });
 }
