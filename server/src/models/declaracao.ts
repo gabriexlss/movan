@@ -3,9 +3,13 @@ import "express"
 /*
 Arquivo feito pro corno do Typescript deixar eu colocar o id na requisição
 */
-declare module "express-serve-static-core" {
-    interface Request {
-        userId: number;
-        verificado: boolean;
+declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Express {
+        interface Request {
+            userId: number;
+            verificado: boolean;
+            contratoID: number
+        }
     }
 }

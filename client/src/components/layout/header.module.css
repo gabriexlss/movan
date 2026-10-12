@@ -1,0 +1,52 @@
+.header {
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    inset: 0 auto auto 0;
+
+    
+    top: 0;
+    width: 100%;
+    height: clamp(5rem, 10vh, 7rem);
+    overflow: hidden;
+
+    background-image: url('../../assets/media/img/header-imgs/header-stain.svg');
+    background-size: 120%;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    transition: transform .5s ease;
+}
+
+.header.hidden{
+    transform: translateY(-100%)
+}
+
+.texto-titulo{
+    position: static;
+    transform: none;
+    text-align: center;
+    color: #FFC33A;
+    margin-left: 1rem;
+}
+
+.movan {
+    font-size: 1.5rem;
+    font-family: 'TAN Nimbus';
+    font-weight: normal;
+    line-height: 1;
+}
+
+.movan-span {
+    color: #FFFFFF;
+}
+
+.subtitulo {
+    text-align: center;
+    font-family: 'Bree Serif', serif;
+    font-size: 0.75rem;
+    font-weight: lighter;
+    color: #FFFFFF;
+}
