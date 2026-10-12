@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { mensagemErroApi } from '../../../utils/apiError'
 import { useAuth } from '../../../context/useAuth';
 
 
@@ -24,7 +25,7 @@ const Login = () => {
         try {
             await authenticate({ login, senha }) //chamo a função de login 
         } catch (error) {
-            toast.error(error.response?.data?.msg || 'Não foi possível realizar o login.')
+            toast.error(mensagemErroApi(error, 'Não foi possível realizar o login.'))
         } finally {
             setEnviando(false) //ativo o botão de entrar de novo
         }

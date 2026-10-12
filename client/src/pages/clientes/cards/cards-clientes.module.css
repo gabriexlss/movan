@@ -1,0 +1,269 @@
+.listaClientes {
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+}
+
+.tituloCard.tituloCard {
+    font-size: .82rem;
+}
+
+.toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .35rem;
+    width: 100%;
+    margin-bottom: .3rem;
+}
+
+.busca {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    min-width: 0;
+    height: 1.8rem;
+    padding: 0 .45rem;
+    border: 1px solid #d7dce4;
+    border-radius: .25rem;
+    background: #fff;
+    color: #7a8798;
+    font-size: .65rem;
+}
+
+.busca svg {
+    flex: 0 0 auto;
+}
+
+.busca input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #333;
+    font: inherit;
+}
+
+.busca input::placeholder {
+    color: #9aa1aa;
+    opacity: 1;
+}
+
+.novo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    min-height: 1.8rem;
+    max-width: 100%;
+    padding: .25rem .4rem;
+    border: 0;
+    border-radius: .25rem;
+    background: #0d47a1;
+    color: #fff;
+    font-family: inherit;
+    font-size: .6rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.novo svg {
+    flex: 0 0 auto;
+    font-size: .62rem;
+}
+
+.registros {
+    list-style: none;
+}
+
+.registro {
+    display: grid;
+    grid-template-columns: 1.45rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .35rem;
+    min-height: 3.55rem;
+    padding: .3rem .1rem;
+    border-top: 1px solid #dedede;
+}
+
+.avatar {
+    display: grid;
+    overflow: hidden;
+    justify-self: center;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 1px solid #aaa;
+    border-radius: 50%;
+    background: #d7d7d7;
+    color: #a4a4a4;
+    font-size: .7rem;
+}
+
+.avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.informacoes {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    color: #858585;
+    font-size: .58rem;
+    line-height: 1.45;
+}
+
+.nomeCliente {
+    overflow: hidden;
+    color: #555;
+    font-size: .68rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nomeCliente:hover {
+    text-decoration: underline;
+}
+
+.informacoes span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.acoes {
+    display: flex;
+    align-items: center;
+    gap: .12rem;
+}
+
+.badge {
+    margin-right: .1rem;
+    padding: .13rem .25rem;
+    border-radius: .2rem;
+    background: #d7f2d9;
+    color: #278b36;
+    font-size: .52rem;
+    white-space: nowrap;
+}
+
+.editar,
+.excluir,
+.paginacao button {
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.35rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.editar {
+    color: #0d47a1;
+}
+
+.excluir {
+    color: #bf3737;
+}
+
+.editar svg,
+.excluir svg {
+    font-size: .68rem;
+}
+
+.editar:focus-visible,
+.excluir:focus-visible,
+.novo:focus-visible,
+.nomeCliente:focus-visible,
+.paginacao button:focus-visible {
+    border-radius: .2rem;
+    outline: 2px solid #0d47a1;
+    outline-offset: 1px;
+}
+
+.vazio {
+    padding: 1rem .4rem;
+    color: #777;
+    font-size: .7rem;
+    text-align: center;
+}
+
+.rodapeLista {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .4rem;
+    min-height: 1.75rem;
+    padding-top: .2rem;
+    border-top: 1px solid #dedede;
+    color: #777;
+    font-size: .56rem;
+}
+
+.paginacao {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    color: #0d47a1;
+    white-space: nowrap;
+}
+
+.paginacao button {
+    width: 1rem;
+    height: 1.2rem;
+    color: #0d47a1;
+    font-size: .62rem;
+}
+
+.paginacao button:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.somenteLeitor {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+@media (max-width: 360px) {
+    .toolbar {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: .25rem;
+    }
+
+    .busca {
+        padding-inline: .3rem;
+        font-size: .6rem;
+    }
+
+    .novo {
+        gap: .15rem;
+        padding-inline: .3rem;
+        font-size: .56rem;
+    }
+
+    .registro {
+        grid-template-columns: 1.3rem minmax(0, 1fr) auto;
+        gap: .25rem;
+    }
+
+    .badge {
+        font-size: .48rem;
+    }
+}

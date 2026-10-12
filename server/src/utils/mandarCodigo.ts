@@ -13,7 +13,7 @@ export const gerarCodigo = async (email: string, tipo: "CRIACAO" | "RECUPERACAO"
 
     // verifica se pelo menos os valores de email, tipo e id foram enviados
     if (!email || !tipo || !id) {
-        throw new Error("Email, tipo e id sao obrigatorios")
+        throw new Error("E-mail, tipo e ID são obrigatórios.")
     }
 
     // salva codigo no banco de dados
@@ -27,7 +27,7 @@ export const gerarCodigo = async (email: string, tipo: "CRIACAO" | "RECUPERACAO"
             await database.query(query, valores)
         }
     }catch(erro){
-        throw new Error("Erro ao Salvar Codigo no Banco de Dados", { cause: erro });
+        throw new Error("Erro ao salvar o código no banco de dados.", { cause: erro });
     }
     // Define o codigo html para enviar o email
     let htmlcod:string
@@ -38,7 +38,7 @@ export const gerarCodigo = async (email: string, tipo: "CRIACAO" | "RECUPERACAO"
         break
         case "ALTERACAO": htmlcod = `<p>Olá! Seu código de verificação para alterar o e-mail da sua conta do Movan é:</p><h2><b>${codigo}</b></h2>`
         break
-        default: throw new Error("tipo invalido")
+        default: throw new Error("Tipo inválido.")
     }
 
     // Manda o Email com o codigo pro destinatario
@@ -47,12 +47,12 @@ export const gerarCodigo = async (email: string, tipo: "CRIACAO" | "RECUPERACAO"
         const response = await resend.emails.send({
             from: "Movan <noreply@movan.org>",
             to: email,
-            subject: "Código de Verificação do Movan",
+            subject: "Código de verificação do Movan",
             html: htmlcod,
         });
         if(response.error) throw new Error(response.error.message)
     }catch(erro: unknown){
-        throw new Error("Erro ao enviar codigo por email", { cause: erro })
+        throw new Error("Erro ao enviar o código por e-mail.", { cause: erro })
     }
     return true
 }

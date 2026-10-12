@@ -1,0 +1,373 @@
+.container {
+    width: min(100%, 52rem);
+    margin-inline: auto;
+}
+
+.barraNavegacao,
+.identificacao,
+.secoes,
+.naoEncontrado {
+    width: 90%;
+}
+
+.barraNavegacao {
+    display: flex;
+    margin-top: -.45rem;
+}
+
+.voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: #0d47a1;
+    font-family: 'Poppins', sans-serif;
+    font-size: .7rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.voltar:hover {
+    text-decoration: underline;
+}
+
+.identificacao,
+.secao,
+.naoEncontrado {
+    border-radius: .65rem;
+    background: #f8f5f5;
+    box-shadow: 0 5px 6px rgb(0 0 0 / 22%);
+}
+
+.identificacao {
+    display: grid;
+    grid-template-columns: 2.6rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .65rem;
+    min-height: 4rem;
+    padding: .65rem .75rem;
+}
+
+.avatar {
+    display: grid;
+    overflow: hidden;
+    justify-self: center;
+    place-items: center;
+    width: 2.45rem;
+    height: 2.45rem;
+    border: 1px solid #aaa;
+    border-radius: 50%;
+    background: #dedede;
+    color: #8b8b8b;
+    font-size: 1rem;
+}
+
+.avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.identificacaoTexto {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .12rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.tipoCliente {
+    color: #8a8a8a;
+    font-size: .58rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.nomeCliente {
+    overflow: hidden;
+    max-width: 100%;
+    color: #555;
+    font-family: 'Poppins', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nome-ativo {
+    color: #15720c;
+}
+
+.nome-pendente {
+    color: #b67a00;
+}
+
+.nome-atrasado {
+    color: #a32020;
+}
+
+.acoes {
+    display: flex;
+    align-items: center;
+    gap: .2rem;
+}
+
+.editar,
+.excluir {
+    display: grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    padding: 0;
+    border: 0;
+    border-radius: .2rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.editar {
+    color: #0d47a1;
+}
+
+.excluir {
+    color: #bf3737;
+}
+
+.editar:hover,
+.excluir:hover {
+    background: #ececec;
+}
+
+.editar:focus-visible,
+.excluir:focus-visible,
+.voltar:focus-visible,
+.itemRelacionado:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
+}
+
+.secoes {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.secao {
+    overflow: hidden;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+}
+
+.tituloSecao {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    min-height: 2rem;
+    padding: .45rem .75rem;
+    border-bottom: 1px solid #d8d8d8;
+    color: #0d47a1;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+.tituloSecao svg {
+    flex: 0 0 auto;
+    color: #f3ae18;
+}
+
+.corpoSecao {
+    padding: .55rem .75rem .65rem;
+}
+
+.gradeDados {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem .8rem;
+}
+
+.campo {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .08rem;
+}
+
+.campoDestaque {
+    grid-column: 1 / -1;
+}
+
+.rotulo {
+    color: #0d47a1;
+    font-size: .62rem;
+    font-weight: 600;
+}
+
+.valor,
+.endereco,
+.estadoVazio {
+    color: #666;
+    font-family: 'Poppins', sans-serif;
+    font-size: .68rem;
+    font-style: normal;
+    line-height: 1.45;
+    text-align: left;
+}
+
+.listaRelacionada,
+.listaContratos {
+    list-style: none;
+}
+
+.itemRelacionado {
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .3rem;
+    min-height: 1.55rem;
+    border-radius: .2rem;
+    color: #555;
+    font-family: 'Poppins', sans-serif;
+    font-size: .68rem;
+    text-decoration: none;
+}
+
+.itemRelacionado:hover {
+    background: #eee;
+    color: #0d47a1;
+}
+
+.itemRelacionado > svg:first-child {
+    color: #0d47a1;
+    font-size: .66rem;
+}
+
+.setaItem {
+    color: #777;
+    font-size: .58rem;
+}
+
+.contagem {
+    margin-top: .35rem;
+    padding-top: .35rem;
+    border-top: 1px solid #dedede;
+    color: #777;
+    font-family: 'Poppins', sans-serif;
+    font-size: .58rem;
+    text-align: center;
+}
+
+.listaContratos {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+}
+
+.contrato {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding: .5rem;
+    border: 1px solid #dedede;
+    border-radius: .4rem;
+    background: #fff;
+    color: #777;
+    font-size: .6rem;
+}
+
+.contratoCabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.contratoCabecalho strong {
+    overflow: hidden;
+    color: #555;
+    font-size: .68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status {
+    flex: 0 0 auto;
+    padding: .13rem .3rem;
+    border-radius: 999px;
+    font-family: 'Poppins', sans-serif;
+    font-size: .52rem;
+    font-weight: 600;
+}
+
+.status-ativo {
+    background: #d8eddd;
+    color: #15720c;
+}
+
+.status-pendente {
+    background: #faedc8;
+    color: #b67a00;
+}
+
+.status-atrasado {
+    background: #f0dada;
+    color: #a32020;
+}
+
+.naoEncontrado {
+    padding: 1.25rem;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+}
+
+.naoEncontrado h1 {
+    color: #0d47a1;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.naoEncontrado p {
+    margin: .5rem 0 .8rem;
+    color: #666;
+    font-family: 'Poppins', sans-serif;
+    font-size: .7rem;
+}
+
+.naoEncontrado a {
+    color: #0d47a1;
+    font-size: .7rem;
+}
+
+@media (max-width: 360px) {
+    .identificacao {
+        grid-template-columns: 2.35rem minmax(0, 1fr) auto;
+        gap: .45rem;
+        padding-inline: .55rem;
+    }
+
+    .avatar {
+        width: 2.2rem;
+        height: 2.2rem;
+    }
+
+    .nomeCliente {
+        font-size: .8rem;
+    }
+
+    .editar,
+    .excluir {
+        width: 1.35rem;
+        height: 1.45rem;
+    }
+
+    .gradeDados {
+        grid-template-columns: 1fr;
+    }
+
+    .campoDestaque {
+        grid-column: auto;
+    }
+}

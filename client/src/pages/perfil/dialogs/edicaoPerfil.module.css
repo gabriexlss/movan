@@ -1,0 +1,387 @@
+.dialog {
+    max-width: 25rem;
+    padding: 3.25rem 1.4rem 1.4rem;
+    border: 1px solid #eeeeee;
+    border-radius: .75rem;
+    box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
+}
+
+.dialog > div[aria-hidden='true'] {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: .5rem;
+    border-width: 1px;
+    font-size: 1.5rem;
+}
+
+.dialog > header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.dialog > header p {
+    max-width: 18rem;
+    margin: .4rem auto 0;
+    color: #7a7a7a;
+    font-family: 'Poppins', sans-serif;
+    font-size: .75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.form {
+    display: grid;
+    gap: .65rem;
+}
+
+.field {
+    position: relative;
+    min-width: 0;
+    padding-top: .35rem;
+}
+
+.field > label {
+    position: absolute;
+    top: 0;
+    left: 1.75rem;
+    z-index: 1;
+    max-width: calc(100% - 3.5rem);
+    padding: 0 .35rem;
+    background: #fff;
+    color: #0d47a1;
+    font-size: .65rem;
+    line-height: 1.1;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    border: 1px solid #b8b8b8;
+    border-radius: 999px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.inputWrapper:focus-within {
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 3px rgb(13 71 161 / 10%);
+}
+
+.fieldIcon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2rem;
+    padding-left: .4rem;
+    color: #0d47a1;
+}
+
+.inputWrapper input {
+    width: 100%;
+    min-width: 0;
+    padding: .55rem .5rem .55rem 0;
+    border: 0;
+    border-radius: 999px;
+    outline: 0;
+    background: transparent;
+    color: #454545;
+    font-family: 'Poppins', sans-serif;
+    font-size: .85rem;
+}
+
+.inputWrapper input::placeholder,
+.inputWrapper input[readonly] {
+    color: #888;
+    opacity: 1;
+}
+
+.visibilityButton {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    margin-right: .15rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #0d47a1;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.suffix {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: .25rem;
+    padding-right: .65rem;
+    color: #0d47a1;
+    font-size: .7rem;
+}
+
+.requirements {
+    display: grid;
+    gap: .3rem;
+    padding: .2rem .35rem;
+    list-style: none;
+    color: #7a7a7a;
+    font-size: .65rem;
+}
+
+.requirements li {
+    display: flex;
+    align-items: flex-start;
+    gap: .3rem;
+    line-height: 1.4;
+}
+
+.requirements svg {
+    flex-shrink: 0;
+    margin-top: .1rem;
+}
+
+.requirements .requirementMet {
+    color: #398e43;
+}
+
+.primaryButton {
+    width: 100%;
+    min-height: 2.75rem;
+    margin-top: .5rem;
+    padding: .6rem 1rem;
+    border: 0;
+    border-radius: .3rem;
+    background: #0d47a1;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.primaryButton:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.primaryButton:focus-visible,
+.visibilityButton:focus-visible,
+.cancelButton:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 3px;
+}
+
+.dialog.deleteDialog {
+    max-width: 28rem;
+    padding: 1.4rem 1.5rem 2rem;
+}
+
+.deleteDialog > div[aria-hidden='true'] {
+    width: 4.1rem;
+    height: 4.1rem;
+    margin-bottom: .6rem;
+    border-color: #c72c2c;
+    color: #c72c2c;
+    font-size: 3rem;
+}
+
+.deleteDialog > header h2 {
+    color: #c72c2c;
+    font-size: 1.05rem;
+}
+
+.deleteDialog > header p {
+    max-width: 22rem;
+}
+
+.deleteContent {
+    display: grid;
+    gap: 1rem;
+}
+
+.deletedData {
+    padding: .9rem 1rem;
+    border-radius: .75rem;
+    box-shadow: 0 3px 5px rgb(0 0 0 / 18%);
+}
+
+.deletedData h3,
+.deleteConfirmation h3 {
+    color: #7a7a7a;
+    font-size: .85rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.deletedData ul {
+    display: grid;
+    gap: .5rem;
+    margin-top: .65rem;
+    list-style: none;
+}
+
+.deletedData li {
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+    color: #7a7a7a;
+    font-size: .7rem;
+    line-height: 1.5;
+}
+
+.deletedData svg {
+    flex-shrink: 0;
+    margin-top: .1rem;
+    color: #c72c2c;
+    font-size: .9rem;
+}
+
+.deleteConfirmation h3 {
+    margin-bottom: .75rem;
+    text-align: center;
+}
+
+.confirmationSteps {
+    display: grid;
+    gap: .8rem;
+    list-style: none;
+}
+
+.confirmationSteps > li {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+}
+
+.stepNumber {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: #0d47a1;
+    color: #fff;
+    font-size: .8rem;
+}
+
+.confirmationSteps .field {
+    flex: 1;
+    padding-top: 0;
+}
+
+.confirmationSteps .field > label {
+    position: static;
+    display: block;
+    max-width: none;
+    margin-bottom: .3rem;
+    padding: 0;
+    font-size: .7rem;
+    line-height: 1.4;
+}
+
+.confirmationSteps > li:nth-child(2) .fieldIcon {
+    color: #c72c2c;
+}
+
+.cancellationNotice {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-top: .4rem;
+    padding: .75rem;
+    border: 1px solid #0d47a1;
+    border-radius: .7rem;
+    background: #f2f5fa;
+    color: #0d47a1;
+}
+
+.cancellationNotice svg {
+    flex-shrink: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+.cancellationNotice p {
+    color: inherit;
+    font-family: 'Poppins', sans-serif;
+    font-size: .7rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.deleteActions {
+    display: grid;
+    justify-items: center;
+    gap: .6rem;
+}
+
+.cancelButton,
+.deleteButton {
+    width: 100%;
+    max-width: 17rem;
+    min-height: 2.5rem;
+    border-radius: .35rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancelButton {
+    border: 1px solid #0d47a1;
+    background: #fff;
+    color: #0d47a1;
+    cursor: pointer;
+}
+
+.restorationNotice {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: .25rem;
+    color: #c72c2c;
+    font-family: 'Poppins', sans-serif;
+    font-size: .65rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.restorationNotice svg {
+    flex-shrink: 0;
+    margin-top: .1rem;
+    font-size: .9rem;
+}
+
+.primaryButton.deleteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    margin-top: 0;
+    background: #c72c2c;
+}
+
+.deleteButton svg {
+    font-size: 1.1rem;
+}
+
+.deleteButton:disabled {
+    cursor: not-allowed;
+}
+
+@media (max-width: 380px) {
+    .dialog {
+        padding-inline: 1rem;
+    }
+
+    .inputWrapper input {
+        font-size: 1rem;
+    }
+}

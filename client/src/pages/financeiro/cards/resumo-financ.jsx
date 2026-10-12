@@ -11,7 +11,7 @@ const infos = [
 
 const ResumoFinanc = () => {
     return (
-        <DefaultCard title="Resumo Financeiro">
+        <DefaultCard title="Resumo financeiro">
             <div className={styles['resumo-container']}>
                 {infos.map(({ label, valor, Icone, tipo }) => (
                     <div className={`${styles.item} ${styles[tipo]}`} key={label}>

@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import PasswordRequirements from '../../../components/auth/PasswordRequirements'
+import { senhaValida } from '../../../utils/password'
+import { mensagemErroApi } from '../../../utils/apiError'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
@@ -31,6 +34,12 @@ const RedefinirSenha = () => {
             return //cancelo o envio do formulario
         }
 
+        if (enviando) return
+        if (!senhaValida(senha)) {
+            toast.error('A nova senha deve atender a todos os requisitos.')
+            return
+        }
+
         setEnviando(true) //falo que o formulario esta sendo enviado
 
         try {
@@ -47,10 +56,7 @@ const RedefinirSenha = () => {
             sessionStorage.removeItem('movan:verificationFlow')
             navigate('/login', { replace: true }) //mando o usuário para a tela de login
         } catch (error) {
-            const errosDeCampo = Object.values(error.response?.data?.erro || {}) //transformo o erro do backend em um array de mensagens de erro, caso não tenha erros do backend mando um array vazio
-                .flatMap((campo) => campo?._errors || []) //tiro o _errors do campo, caso não tenha nada ele so manda um array vazio
-            const mensagem = errosDeCampo.join(' ') || error.response?.data?.msg || 'Não foi possível alterar a senha.' //junto as mensagens de erro, caso não tenha mensagens de erro do backend mando uma generica
-            toast.error(mensagem) //mando a mensagem
+            toast.error(mensagemErroApi(error, 'Não foi possível alterar a senha.'))
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }
@@ -97,7 +103,9 @@ const RedefinirSenha = () => {
                     </label>
                 </div>
 
-                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando}>
+                <PasswordRequirements senha={senha} />
+
+                <button className={styles['auth-screens__botao']} type="submit" disabled={enviando || !senhaValida(senha) || senha !== confirmarSenha}>
                     {enviando ? <LoadingSpinner /> : 'Redefinir'}
                 </button>
             </form>
