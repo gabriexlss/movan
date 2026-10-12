@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react'
 import { PiEnvelopeSimpleBold } from 'react-icons/pi'
-import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
 import DefaultDialog from '../../../components/dialog/dialogDefault'
@@ -9,7 +8,7 @@ import styles from './edicaoPerfil.module.css'
 import api from '../../../services/api'
 import { useCodeCooldown } from '../../../hooks/useCodeCooldown'
 import { formatarTempo, tempoCodigoRestante } from '../../../utils/codeCooldown'
-import { mensagemErroApi } from '../../../utils/apiError'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 
 const DialogEmail = ({ onClose }) => {
     const [emailnovo, setEmailNovo] = useState('')
@@ -21,19 +20,19 @@ const DialogEmail = ({ onClose }) => {
         
         if (enviando || tempoCodigoRestante('atualizar') > 0) return
         if(!emailnovo){
-            toast.error("Preencha o campo de e-mail.")
+            errorToast('EMAIL_REQUIRED')
             return
         }
 
         setEnviando(true)
         try {
-            await api.post('/motorista/editar/enviar-codigo', { email: emailnovo }, {skipGlobalErrorToast: true}) //mando o email novo para o backend mandar o codigo
+            const response = await api.post('/motorista/editar/enviar-codigo', { email: emailnovo }, {skipGlobalErrorToast: true}) //mando o email novo para o backend mandar o codigo
             navigate('/codigo-enviado', { replace: true, state: { fluxo: 'atualizar', autoSendVerification: false, emailnovo } })
-            toast.success('Código enviado para o seu e-mail.')
+            responseSuccessToast(response, 'EMAIL_CHANGE_CODE_SENT')
 
         } catch (error) {
             atualizarPrazo()
-            toast.error(mensagemErroApi(error, 'Não foi possível enviar o código.'))
+            apiErrorToast(error, 'VERIFICATION_CODE_SEND_FAILED')
         } finally {
             setEnviando(false)
         }

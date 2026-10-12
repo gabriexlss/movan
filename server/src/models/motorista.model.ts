@@ -5,29 +5,29 @@ import { UtilSchema } from './utils.model.js';
 // Modelo global pro motorista (usuario)
 const MotoristaSchema = z.object({
     id: UtilSchema.shape.id,
-    credencial: z.string("O valor deve ser um texto.").toUpperCase(), //credencial é ou cnpj ou cpf
-    email: z.string("O valor deve ser um texto.").min(3, "E-mail muito curto.").max(150, "E-mail muito longo.").email("E-mail inválido."),
-    nome: z.string("O valor deve ser um texto.").min(3, "Nome muito curto.").max(200, "Nome muito longo."),
-    senha: z.string("O valor deve ser um texto.")
-        .max(100, "Senha muito longa.")
-        .min(8, "A senha deve ter pelo menos 8 caracteres.")
-        .regex(/[A-Z]/, "A senha deve conter uma letra maiúscula.")
-        .regex(/[a-z]/, "A senha deve conter uma letra minúscula.")
-        .regex(/\d/, "A senha deve conter um número.")
-        .regex(/[^\w\s]/, "A senha deve conter um caractere especial."),
-    email_verificado: z.boolean("O valor deve ser um booleano."),
-    excluido_em: z.string("O valor deve ser um texto.").datetime("Data inválida.").nullish(),
-    login: z.string("O valor deve ser um texto.").min(3, "Credenciais de login muito curtas.").max(255, "Credenciais de login muito longas.")
+    credencial: z.string("NOT_STRING").toUpperCase(), //credencial é ou cnpj ou cpf
+    email: z.string("NOT_STRING").min(3, "EMAIL_TOO_SHORT").max(150, "EMAIL_TOO_LONG").email("EMAIL_INVALID"),
+    nome: z.string("NOT_STRING").min(3, "NAME_TOO_SHORT").max(200, "NAME_TOO_LONG"),
+    senha: z.string("NOT_STRING")
+        .max(100, "PASSWORD_TOO_LONG")
+        .min(8, "PASSWORD_TOO_SHORT")
+        .regex(/[A-Z]/, "PASSWORD_UPPERCASE_REQUIRED")
+        .regex(/[a-z]/, "PASSWORD_LOWERCASE_REQUIRED")
+        .regex(/\d/, "PASSWORD_NUMBER_REQUIRED")
+        .regex(/[^\w\s]/, "PASSWORD_SPECIAL_REQUIRED"),
+    email_verificado: z.boolean("NOT_BOOLEAN"),
+    excluido_em: z.string("NOT_STRING").datetime("INVALID_DATE").nullish(),
+    login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG")
 });
 // Modelo referente a autenticação utilizando o google.
 const AuthGoogleSchema = z.object({
-    token: z.string("O valor deve ser um texto.").min(1, "Token não pode estar vazio."),
-    nome: z.string("Nome ausente.").min(1, "Nome não pode estar vazio."),
-    email: z.string("E-mail ausente.").min(1, "O e-mail não pode estar vazio.").email("Informe um e-mail válido."),
-    googleId: z.string("ID ausente.").min(1, "O ID não pode estar vazio."),
-    status: z.number("Status ausente."),
-    msg: z.string("Mensagem ausente.").min(1, "Mensagem não pode estar vazia."),
-    sucesso: z.boolean("Sucesso ausente.")
+    token: z.string("NOT_STRING").min(1, "GOOGLE_TOKEN_REQUIRED"),
+    nome: z.string("GOOGLE_NAME_REQUIRED").min(1, "GOOGLE_NAME_REQUIRED"),
+    email: z.string("GOOGLE_EMAIL_REQUIRED").min(1, "GOOGLE_EMAIL_REQUIRED").email("GOOGLE_EMAIL_INVALID"),
+    googleId: z.string("GOOGLE_ID_REQUIRED").min(1, "GOOGLE_ID_REQUIRED"),
+    status: z.number("STATUS_REQUIRED"),
+    msg: z.string("MESSAGE_REQUIRED").min(1, "MESSAGE_REQUIRED"),
+    sucesso: z.boolean("SUCCESS_REQUIRED")
 })
 export const CriarMotoristaGoogleSchema = z.object({
     nome: MotoristaSchema.shape.nome,
@@ -64,10 +64,10 @@ export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
     cod: validarCodigoSchema.shape.cod.optional(),
     senhaAtual: CriarMotoristaSchema.shape.senha.optional()
 }).refine((dados) => !dados.email || !!dados.cod, {
-    message: "O código é obrigatório para alterar o e-mail.",
+    message: "EMAIL_VERIFICATION_CODE_REQUIRED",
     path: ["cod"]
 }).refine((dados) => dados.senha === undefined || !!dados.senhaAtual, {
-    message: "A confirmação da senha é obrigatória para alterar a senha.",
+    message: "CURRENT_PASSWORD_REQUIRED",
     path: ["confirmarSenha"]
 })
 export const DeletarMotoristaSchema = MotoristaSchema.pick({

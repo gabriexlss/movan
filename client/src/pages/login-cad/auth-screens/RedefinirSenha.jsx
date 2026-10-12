@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import PasswordRequirements from '../../../components/auth/PasswordRequirements'
 import { senhaValida } from '../../../utils/password'
-import { mensagemErroApi } from '../../../utils/apiError'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 
@@ -24,19 +23,19 @@ const RedefinirSenha = () => {
         event.preventDefault() //não deixo o navegador atualizar a pagina
 
         if (senha !== confirmarSenha) { //se a senha de confirmação for diferente da senha
-            toast.error('As senhas precisam ser iguais.') //mando uma mensagem de erro
+            errorToast('PASSWORDS_DIFFERENT') //mando uma mensagem de erro
             return //cancelo o envio do formulario
         }
 
         if (!email || !codigo) { //se não tiver email ou código no estado ou no sessionStorage
-            toast.error('Solicite um novo código de recuperação.') //mando uma mensagem de erro
+            errorToast('RECOVERY_CODE_REQUIRED') //mando uma mensagem de erro
             navigate('/esqueci-senha', { replace: true }) //mando o usuário para a tela de esqueci minha senha
             return //cancelo o envio do formulario
         }
 
         if (enviando) return
         if (!senhaValida(senha)) {
-            toast.error('A nova senha deve atender a todos os requisitos.')
+            errorToast('PASSWORD_REQUIREMENTS')
             return
         }
 
@@ -50,13 +49,13 @@ const RedefinirSenha = () => {
             }, {
                 skipGlobalErrorToast: true, //o erro sera tratado aqui então não deixo as mensagens do api.js aparecerem
             })
-            toast.success(response.data?.msg || 'Senha alterada com sucesso.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
+            responseSuccessToast(response, 'PASSWORD_CHANGED') //mando uma mensagem de sucesso centralizada
             sessionStorage.removeItem('movan:recoveryEmail') //tiro o email do sessionStorage porque o usuário já redefiniu a senha
             sessionStorage.removeItem('movan:recoveryCode') //tiro o código do sessionStorage porque o usuário já redefiniu a senha
             sessionStorage.removeItem('movan:verificationFlow')
             navigate('/login', { replace: true }) //mando o usuário para a tela de login
         } catch (error) {
-            toast.error(mensagemErroApi(error, 'Não foi possível alterar a senha.'))
+            apiErrorToast(error, 'PASSWORD_CHANGE_FAILED')
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }

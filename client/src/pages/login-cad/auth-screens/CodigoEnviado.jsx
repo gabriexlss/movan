@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
 import api from '../../../services/api'
+import { apiErrorToast, errorToast, responseSuccessToast, successToast } from '../../../services/toastManager'
 import { useCodeCooldown } from '../../../hooks/useCodeCooldown'
 import { formatarTempo, tempoCodigoRestante } from '../../../utils/codeCooldown'
-import { mensagemErroApi } from '../../../utils/apiError'
 import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
@@ -36,11 +35,11 @@ const CodigoEnviado = () => {
         enviarCodigoCadastro()
             .then(() => {
                 atualizarPrazo()
-                toast.success('Código de verificação enviado com sucesso.')
+                successToast('VERIFICATION_CODE_SENT')
             })
             .catch((error) => {
                 atualizarPrazo()
-                toast.error(mensagemErroApi(error, 'Não foi possível enviar o código.'))
+                apiErrorToast(error, 'VERIFICATION_CODE_SEND_FAILED')
             })
             .finally(() => setReenviando(false))
     }, [enviarCodigoCadastro, fluxo, state?.autoSendVerification, atualizarPrazo])
@@ -68,14 +67,16 @@ const CodigoEnviado = () => {
             }
             setCodigo('') //limpo o campo de código para o usuário digitar denovo
             atualizarPrazo() //reinicio o tempo para o usuário poder reenviar denovo caso ele não receba o código
-            toast.success(fluxo === 'cadastro'
-                ? 'Código de verificação reenviado com sucesso.'
-                : fluxo === 'atualizar'
-                    ? response.data?.msg || 'Código para alteração de e-mail reenviado com sucesso.'
-                : response.data?.msg || 'Código reenviado com sucesso.')//mando uma mensagem amigável para o cadastro e a mensagem do backend nos demais fluxos
+            if (fluxo === 'cadastro') {
+                successToast('VERIFICATION_CODE_RESENT')
+            } else if (fluxo === 'atualizar') {
+                responseSuccessToast(response, 'EMAIL_CHANGE_CODE_SENT')
+            } else {
+                responseSuccessToast(response, 'RECOVERY_CODE_RESENT')
+            }
         } catch (error) {
             atualizarPrazo()
-            toast.error(mensagemErroApi(error, 'Não foi possível reenviar o código.'))
+            apiErrorToast(error, 'VERIFICATION_CODE_RESEND_FAILED')
         } finally {
             setReenviando(false) //falo que o processo de reenviar acabou
         }
@@ -89,7 +90,7 @@ const CodigoEnviado = () => {
 
         if (enviando) return
         if (!/^\d{6}$/.test(codigo)) { //verifico se o código tem uma quantidade de digitos diferente de 6
-            toast.error('Digite um código válido com seis dígitos.') //mando uma mensagem de erro caso o código seja inválido
+            errorToast('VERIFICATION_CODE_FORMAT') //mando uma mensagem de erro caso o código seja inválido
             return
         }
 
@@ -100,7 +101,7 @@ const CodigoEnviado = () => {
                 const response = await api.post('/motorista/verificar-conta', { cod: codigo }, { //mando o código pro backend
                     skipGlobalErrorToast: true, //vou tratar o erro aqui então recuso que o toast do api.js seja mostrado
                 })
-                toast.success(response.data?.msg || 'Conta verificada com sucesso.') //mando uma mensagem de sucesso do backend, se não tiver mando uma generica
+                responseSuccessToast(response, 'ACCOUNT_VERIFIED') //mando uma mensagem de sucesso centralizada
                 sessionStorage.removeItem('movan:verificationFlow') //apago o fluxo porque o usuário já verificou a conta
                 await refreshSession()
                 navigate('/', { replace: true })
@@ -114,7 +115,7 @@ const CodigoEnviado = () => {
                 navigate('/redefinir-senha', { state: { codigo, fluxo: 'recuperacao' } }) //mando para a pagina de redefinir senha e falo que o fluxo é de recuperação
             }
         } catch (error) {
-            toast.error(mensagemErroApi(error, 'Não foi possível validar o código.'))
+            apiErrorToast(error, 'VERIFICATION_CODE_VALIDATION_FAILED')
         } finally {
             setEnviando(false) //falo que o formulario não esta mais sendo enviado
         }
