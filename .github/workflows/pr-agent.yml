@@ -68,7 +68,7 @@ jobs:
                   config.no_temperature_models: '["gemini/gemini-3.8-flash"]'
 
                   # Usa inferência Flex do Gemini
-                  litellm.extra_body: '{"service_tier":"flex"}'
+                  litellm.extra_body: '{"service_tier":"standard"}'
 
                   # Aguarda até 15 minutos no Flex, sem repetir chamadas expiradas.
                   config.ai_timeout: "900"
