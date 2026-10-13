@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 import { FaChevronLeft, FaChevronRight, FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import fotoPlaceholder from '../../../assets/media/img/placeholders/placeholder.jpg'
@@ -6,6 +6,7 @@ import DefaultCard from '../../../components/cards/DefaultCard'
 import DialogExcluirCliente from '../dialogs/DialogExcluirCliente'
 import DialogFormularioCliente from '../dialogs/DialogFormularioCliente'
 import styles from './cards-clientes.module.css'
+import toast from 'react-hot-toast'
 
 const ITENS_POR_PAGINA = 4
 
@@ -48,11 +49,15 @@ const montarDetalhes = (tipo, registro) => {
     ].filter(Boolean)
 }
 
-const ListaClientes = ({ title, tipo, registros, responsaveis = [] }) => {
+const ListaClientes = ({ title, tipo, registros, responsaveis = [], onCriar }) => {
     const [itens, setItens] = useState(registros)
     const [busca, setBusca] = useState('')
     const [pagina, setPagina] = useState(0)
     const [dialog, setDialog] = useState(null)
+
+    useEffect(() => { //quando os registros mudarem
+        setItens(registros) //atualiza os itens com os novos registros
+    }, [registros]) //depende dos registros, ou seja, quando eles mudarem, o efeito será executado
 
     const resultados = useMemo(() => {
         const termo = busca.trim().toLocaleLowerCase('pt-BR')
@@ -73,22 +78,46 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [] }) => {
         setDialog({ acao, registro })
     }
 
-    const salvarRegistro = (valores) => {
-        const registroAtualizado = {
-            ...dialog.registro,
-            ...valores,
-            id: dialog.registro?.id || `${tipo}-${Date.now()}`,
-            detalhes: montarDetalhes(tipo, valores),
+    const salvarRegistro = async (valores) => { //função para salvar um registro, seja adicionando ou editando
+        if (dialog.acao === 'adicionar' && onCriar) { //se o dialog for de adicionar e onCriar existir, chama a função onCriar com os valores do formulário
+            try {
+                await onCriar(valores) //chama a função onCriar com os valores do formulário
+                setPagina(0) //falo que a pagina atual é a inicial
+                fecharDialog() //fecho o dialog
+                return
+            } catch (error) {
+                const mensagemDoServidor = error.response?.data?.msg
+
+                if (mensagemDoServidor) {
+                    toast.error(mensagemDoServidor) //mando a mensagem de erro do servidor caso tenha
+                } else {
+                    apiErrorToast(error, 'UNEXPECTED_ERROR')
+                }
+            }
+        return
         }
 
-        setItens((estadoAtual) => (
-            dialog.acao === 'editar'
-                ? estadoAtual.map((item) => (item.id === registroAtualizado.id ? registroAtualizado : item))
-                : [registroAtualizado, ...estadoAtual]
-        ))
-        setPagina(0)
-        fecharDialog()
+        const registroAtualizado = { //falo que os registros atualizados são os registros do dialog mais os valores do formulário, se o registro tiver id, usa ele, se não, cria um id com o tipo e a data atual
+        ...dialog.registro,
+        ...valores,
+        id: dialog.registro?.id || `${tipo}-${Date.now()}`,
+        detalhes: montarDetalhes(tipo, valores),
     }
+
+    setItens((estadoAtual) => ( //falo que os itens atualizados são os itens atuais mais o novo registro atualizado
+        dialog.acao === 'editar'
+            ? estadoAtual.map((item) => (
+                item.id === registroAtualizado.id
+                    ? registroAtualizado
+                    : item
+            ))
+            : [registroAtualizado, ...estadoAtual]
+    ))
+
+    setPagina(0)
+    fecharDialog()
+    }
+
 
     const excluirRegistro = () => {
         setItens((estadoAtual) => estadoAtual.filter((item) => item.id !== dialog.registro.id))
@@ -226,6 +255,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [] }) => {
             )}
         </DefaultCard>
     )
+
 }
 
 export default ListaClientes
