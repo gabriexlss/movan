@@ -5,6 +5,10 @@ import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { controllerClausula } from "./clausula.controller.js";
+import { AssinaturaMotorista } from "../models/assinatura.model.js";
+import { BUCKET_NAME, CDN_URL, r2 } from "../db/r2.js";
+import { randomUUID } from "crypto";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const controllerContrato = {
     // controller para criar um contrato 
@@ -323,6 +327,87 @@ export const controllerContrato = {
             console.error("Erro no endpoint de obter dados de contrato(s), erro: ", erro)
             return res.status(500).json({
                 msg: "Erro interno do servidor."
+            })
+        }
+    },
+    // adicionar assinatura do motorista.
+    assinarMotorista: async (req: Request, res: Response) => {
+        // recebe a imagem webp da assinatura.
+        const assinatura = req.file
+
+        // checa pra ver se a imagem da assinatura foi enviada.
+        if(!assinatura){
+            return res.status(400).json({
+                msg: "Obrigatorio enviar imagem da assinatura."
+            })
+        }
+        // desestruturação
+        const motoristaID = req.userId
+
+        // verifica se o motorista já tem uma assinatura cadastrada.
+        let possuiAssinatura = false
+        let caminho_imagem: string = ''
+        try{
+            const query = "SELECT * FROM assinatura_motorista WHERE motorista_id = $1"
+
+            const resposta = await database.query<AssinaturaMotorista>(query, [motoristaID])
+            const assinaturaMotorista = resposta.rows[0]
+
+            // se ja tiver assinatura, marco que ela já existe pq ai so vamos atualiza-la
+            if(assinaturaMotorista){
+                possuiAssinatura = true
+                caminho_imagem = assinaturaMotorista.caminho_arquivo.replace(`${CDN_URL}/`, "") // 
+            }
+        }catch(erro){
+            console.error("erro no endpoint de assinarMotorista ao verificar se motorista já possui assinatura, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+
+        // realizar a operação de fato 
+        try{
+            let query: string
+
+            // se já possuir assinatura, então iremos atualiza-la
+            if(possuiAssinatura){
+                query = `
+                UPDATE assinatura_motorista
+                SET caminho_arquivo = $1, atualizado_em = now()
+                WHERE motorista_id = $2
+                `
+            }else{
+                query = `
+                INSERT INTO assinatura_motorista (caminho_arquivo, motorista_id)
+                VALUES ($1, $2)
+                `
+                // definindo o caminho da imagem.
+                caminho_imagem = `assinaturas/${motoristaID}/${randomUUID()}.webp`
+            }
+
+            // cria ou substitui a assinatura original
+            await r2.send(
+                new PutObjectCommand({
+                    Bucket: BUCKET_NAME,
+                    Key: caminho_imagem,
+                    Body: assinatura.buffer,
+                    ContentType: assinatura.mimetype
+                })
+            )
+            // salvando numa constante a localização da imagem da assinatura publica na internet.
+            const localizacaoImagem = `${CDN_URL}/${caminho_imagem}`
+
+            // salvando no banco de dados ou fazendo o update
+            await database.query(query, [localizacaoImagem, motoristaID])
+
+            // retornando usuario
+            return res.status(201).json({
+                msg: `Assinatura ${possuiAssinatura ? "Atualizada" : "Criada"} com sucesso.`
+            })
+        }catch(erro){
+            console.error("erro no endpoint de assinarMotorista ao adicionar assinatura do motorista, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         }
     }

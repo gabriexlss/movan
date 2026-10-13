@@ -3,6 +3,7 @@ import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js"
 import { controllerContrato } from "../controllers/contrato.controller.js";
 import { middlewareContrato } from "../middlewares/contrato.middleware.js";
 import { controllerClausula } from "../controllers/clausula.controller.js";
+import { receberImagem } from "../middlewares/receberImagem.middleware.js";
 
 const router = Router()
 
@@ -21,6 +22,9 @@ router.get('/', middlewareAutenticar, controllerContrato.obterContrato)
 
 // rota get para obter um contrato detalhado.
 router.get('/:id', middlewareAutenticar, controllerContrato.obterContrato)
+
+// rota post para criar ou atualizar a assinatura do motorista.
+router.post('/assinatura-motorista', middlewareAutenticar, receberImagem.single("assinatura"), controllerContrato.assinarMotorista)
 
 // -----------CLAUSULAS-----------------
 // cria uma clausula personalizada para um contrato, ou seja, só existe para aquele contrato em especifico.
