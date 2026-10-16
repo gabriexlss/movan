@@ -26,6 +26,9 @@ router.get('/:id', middlewareAutenticar, controllerContrato.obterContrato)
 // rota post para criar ou atualizar a assinatura do motorista.
 router.post('/assinatura-motorista', middlewareAutenticar, receberImagem.single("assinatura"), controllerContrato.assinarMotorista)
 
+// rota post para concluir o contrato e gerar o link pro responsavel assinar
+router.post('/finalizar-contrato/:contrato_id', middlewareAutenticar, middlewareContrato, controllerContrato.concluirContrato)
+
 // -----------CLAUSULAS-----------------
 // cria uma clausula personalizada para um contrato, ou seja, só existe para aquele contrato em especifico.
 router.post('/:contrato_id/clausula', middlewareAutenticar, middlewareContrato, controllerClausula.criarClausula)

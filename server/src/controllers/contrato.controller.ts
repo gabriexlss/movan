@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
+import { ContratoDocumento, CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
 import { database } from "../db/postgre.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
@@ -336,7 +336,7 @@ export const controllerContrato = {
         const assinatura = req.file
 
         // checa pra ver se a imagem da assinatura foi enviada.
-        if(!assinatura){
+        if (!assinatura) {
             return res.status(400).json({
                 msg: "Obrigatorio enviar imagem da assinatura."
             })
@@ -346,19 +346,17 @@ export const controllerContrato = {
 
         // verifica se o motorista já tem uma assinatura cadastrada.
         let possuiAssinatura = false
-        let caminho_imagem: string = ''
-        try{
+        try {
             const query = "SELECT * FROM assinatura_motorista WHERE motorista_id = $1"
 
             const resposta = await database.query<AssinaturaMotorista>(query, [motoristaID])
             const assinaturaMotorista = resposta.rows[0]
 
             // se ja tiver assinatura, marco que ela já existe pq ai so vamos atualiza-la
-            if(assinaturaMotorista){
+            if (assinaturaMotorista) {
                 possuiAssinatura = true
-                caminho_imagem = assinaturaMotorista.caminho_arquivo.replace(`${CDN_URL}/`, "") // 
             }
-        }catch(erro){
+        } catch (erro) {
             console.error("erro no endpoint de assinarMotorista ao verificar se motorista já possui assinatura, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
@@ -366,24 +364,24 @@ export const controllerContrato = {
         }
 
         // realizar a operação de fato 
-        try{
+        try {
             let query: string
 
             // se já possuir assinatura, então iremos atualiza-la
-            if(possuiAssinatura){
+            if (possuiAssinatura) {
                 query = `
                 UPDATE assinatura_motorista
                 SET caminho_arquivo = $1, atualizado_em = now()
                 WHERE motorista_id = $2
                 `
-            }else{
+            } else {
                 query = `
                 INSERT INTO assinatura_motorista (caminho_arquivo, motorista_id)
                 VALUES ($1, $2)
                 `
-                // definindo o caminho da imagem.
-                caminho_imagem = `assinaturas/${motoristaID}/${randomUUID()}.webp`
             }
+            // definindo o caminho da imagem.
+            const caminho_imagem = `motoristas/${motoristaID}/assinaturas/${randomUUID()}.webp`
 
             // cria ou substitui a assinatura original
             await r2.send(
@@ -404,11 +402,117 @@ export const controllerContrato = {
             return res.status(201).json({
                 msg: `Assinatura ${possuiAssinatura ? "Atualizada" : "Criada"} com sucesso.`
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("erro no endpoint de assinarMotorista ao adicionar assinatura do motorista, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })
+        }
+    },
+    // endpoint para concluir um contrato, ou seja, dizer q ele está pronto para ser assinado e além disso travar suas modificações.
+    concluirContrato: async (req: Request, res: Response) => {
+        // pegando o ID do contrato que está concluido.
+        const contratoID = req.contratoID
+
+        // pegando ID do motorista
+        const motoristaID = req.userId
+
+        // pegando ID do responsavel atribuido aquele contrato
+        const responsavelID = req.contratoResponsavelID
+
+        // iniciando a constante da conexão do usuario.
+        const cliente = await database.connect()
+
+        // iniciando variavel pra guardar a assinatura do motorista.
+        let assinaturaMotorista: AssinaturaMotorista
+
+        // verificando se o motorista já tem assinatura.
+        try {
+            // iniciando transação.
+            await cliente.query('BEGIN')
+
+            // query
+            const query = "SELECT * FROM assinatura_motorista WHERE motorista_id = $1"
+
+            const resposta = await cliente.query<AssinaturaMotorista>(query, [motoristaID])
+            const assinatura = resposta.rows[0]
+
+            // se ja tiver assinatura, marco que ela já existe pq ai so vamos atualiza-la
+            if (!assinatura) {
+                return res.status(401).json({
+                    msg: "O Motorista precisa ter sua assinatura cadastrada antes de finalizar um contrato."
+                })
+            } else {
+                assinaturaMotorista = assinatura
+            }
+        } catch (erro) {
+            cliente.release()
+            console.error("erro no endpoint de Concluir contrato ao verificar se motorista já possui assinatura, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+
+        //agr sim vem a operação de vdd, um milhão de querys em um monte de tabelas diferentes, misericordia.
+
+        try {
+            // primeiro vamos atualizar o status da tabela contrato de rascunho pra aguardando assinatura.
+            const queryStatusContrato = `
+            UPDATE contrato
+            SET status = $1, atualizado_em = now()
+            WHERE id = $2
+            `
+            await cliente.query(queryStatusContrato, ["AGUARDANDO_ASSINATURA", contratoID])
+
+            // gerando UUID aleatoria que será usado pra identificar tanto o documento tanto o link de assinatura.
+            const UUID = randomUUID()
+
+            // agora vamos gerar um documento pra esse contrato.
+            const queryCriarDocumento = `
+            INSERT INTO contrato_documento
+            (hash_documento, versao, contrato_id, responsavel_id, status_documento)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+            `
+            const valoresCriarDocumento = [UUID, 1, contratoID, responsavelID, 'ENVIADO']
+            const DocumentoResposta = await cliente.query<ContratoDocumento>(queryCriarDocumento, valoresCriarDocumento)
+
+            const ContratoDocumento = DocumentoResposta.rows[0]!
+
+            // agora vamos gerar o link pro responsavel assinar esse contrato. 
+            const queryCriarLink = `
+            INSERT INTO link_assinatura
+            (token_hash, expira_em, contrato_documento_id, responsavel_id)
+            VALUES ($1, now() + INTERVAL '15 days', $2, $3)
+            `
+            const valoresCriarLink = [UUID, ContratoDocumento.id, responsavelID]
+
+            await cliente.query(queryCriarLink, valoresCriarLink)
+
+            // agora gerar a assinatura do motorista para aquele contrato.
+            const queryCriarAssinaturaMotorista = `
+            INSERT INTO assinatura_contrato
+            (tipo_signatario, assinatura_imagem, contrato_documento_id)
+            VALUES ($1, $2, $3)
+            `
+            const valoresCriarAssinaturaMotorista = ['MOTORISTA', assinaturaMotorista.caminho_arquivo, ContratoDocumento.id]
+            await cliente.query(queryCriarAssinaturaMotorista, valoresCriarAssinaturaMotorista)
+
+            // depois de todas essas operações, hora de retornar. 
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Contrato Finalizado com sucesso.",
+                link: UUID
+            })
+        } catch (erro) {
+            await cliente.query('ROLLBACK')
+            console.error("erro no endpoint de Concluir contrato ao processar logica principal para concluir contrato, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        } finally {
+            cliente.release()
         }
     }
 }

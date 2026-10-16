@@ -37,7 +37,17 @@ export const EditarContratoSchema = CriarContratoSchema.omit({
     aluno_id: true
 }).partial()
 
+export const ContratoDocumentoSchema = z.object({
+    id: UtilSchema.shape.id,
+    hash_documento: z.string().max(255),
+    versao: z.number(),
+    gerado_em: z.iso.datetime(),
+    contrato_id: UtilSchema.shape.id,
+    responsavel_id: UtilSchema.shape.id,
+    status_documento: z.enum(['ENVIADO', 'ASSINADO', 'SUBSTITUIDO'])
+})
 // tipos
 export type Contrato = z.infer<typeof ContratoSchema>
 export type CriarContrato = z.infer<typeof CriarContratoSchema>
 export type EditarContrato = z.infer<typeof EditarContratoSchema>
+export type ContratoDocumento = z.infer<typeof ContratoDocumentoSchema>
