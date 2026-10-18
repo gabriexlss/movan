@@ -1,14 +1,25 @@
 import { Request, Response } from "express";
-import { ContratoDocumento, CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
+import { ContratoDocumento, ContratoView, CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
 import { database } from "../db/postgre.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { controllerClausula } from "./clausula.controller.js";
-import { AssinaturaMotorista } from "../models/assinatura.model.js";
+import { AssinaturaMotorista, LinkAssinatura } from "../models/assinatura.model.js";
 import { BUCKET_NAME, CDN_URL, r2 } from "../db/r2.js";
-import { randomUUID } from "crypto";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { createHash, randomBytes, randomUUID } from "crypto";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { gerarContratoPdf } from "../services/gerarPDF.js";
+import { Clausula } from "../models/clausula.model.js";
+import { Motorista } from "../models/motorista.model.js";
+
+const substituirDadosClausula = (texto: string, substituicoes: Record<string, string>) => {
+    // Percorre o objeto trocando tudo no texto
+    for (const [busca, troca] of Object.entries(substituicoes)) {
+        texto = texto.replaceAll(busca, troca);
+    }
+    return texto
+}
 
 export const controllerContrato = {
     // controller para criar um contrato 
@@ -431,10 +442,10 @@ export const controllerContrato = {
             // iniciando transação.
             await cliente.query('BEGIN')
 
-            // query
-            const query = "SELECT * FROM assinatura_motorista WHERE motorista_id = $1"
-
-            const resposta = await cliente.query<AssinaturaMotorista>(query, [motoristaID])
+            const resposta = await cliente.query<AssinaturaMotorista>(
+                "SELECT * FROM assinatura_motorista WHERE motorista_id = $1",
+                [motoristaID]
+            )
             const assinatura = resposta.rows[0]
 
             // se ja tiver assinatura, marco que ela já existe pq ai so vamos atualiza-la
@@ -452,60 +463,146 @@ export const controllerContrato = {
                 msg: "Erro Interno do Servidor."
             })
         }
+        // setando o caminho que o pdf vai ter
+        const key = `motoristas/${motoristaID}/contrato/${randomUUID()}.pdf`
 
         //agr sim vem a operação de vdd, um milhão de querys em um monte de tabelas diferentes, misericordia.
 
         try {
             // primeiro vamos atualizar o status da tabela contrato de rascunho pra aguardando assinatura.
-            const queryStatusContrato = `
-            UPDATE contrato
-            SET status = $1, atualizado_em = now()
-            WHERE id = $2
-            `
-            await cliente.query(queryStatusContrato, ["AGUARDANDO_ASSINATURA", contratoID])
-
-            // gerando UUID aleatoria que será usado pra identificar tanto o documento tanto o link de assinatura.
-            const UUID = randomUUID()
+            await cliente.query(
+                `
+                UPDATE contrato
+                SET status = $1, atualizado_em = now()
+                WHERE id = $2
+                `,
+                ["AGUARDANDO_ASSINATURA", contratoID]
+            ) 
 
             // agora vamos gerar um documento pra esse contrato.
-            const queryCriarDocumento = `
-            INSERT INTO contrato_documento
-            (hash_documento, versao, contrato_id, responsavel_id, status_documento)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING *
-            `
-            const valoresCriarDocumento = [UUID, 1, contratoID, responsavelID, 'ENVIADO']
-            const DocumentoResposta = await cliente.query<ContratoDocumento>(queryCriarDocumento, valoresCriarDocumento)
+            //primeiro vamos criar o PDF
+            const { rows: contratos } = await cliente.query<ContratoView>( // pegando os dados necessarios para criar ele
+                "SELECT * FROM vw_detalhes_contrato WHERE motorista_id = $1 AND contrato_id = $2",
+                [motoristaID, contratoID]
+            )
+            const DadosContrato = contratos[0]
+            if (!DadosContrato) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Detalhes do contrato não encontrados para gerar o documento."
+                })
+            }
+            // pegar dados do motorista que são necessarios pro contrato
+            const { rows: Motorista } = await cliente.query<Pick<Motorista, "nome" | "credencial">>(
+                "SELECT nome, COALESCE(cpf, cnpj) AS credencial FROM motorista WHERE id = $1",
+                [motoristaID]
+            )
+            const DadosMotorista = Motorista[0]!
+            // agr pegar os dados da clausula
+            const Clausulas = await controllerClausula.obterClausulas(contratoID)
+
+            // as substituições que vão ser feitas no texto das clausulas originais pelo seu valor definitivo
+            const substituicoes: Record<string, string> = {
+                // Cláusula 1 - Valor e pagamento
+                "{{contrato_valor_mensal}}": `${DadosContrato.valor_mensal}`,
+                "{{contrato_dia_vencimento}}": `${DadosContrato.dia_vencimento}`,
+
+                // Cláusula 2 - Objeto e prestação do serviço
+                "{{motorista_nome}}": `${DadosMotorista.nome}`,
+                "{{motorista_documento}}": `${DadosMotorista.credencial}`,
+                "{{aluno_nome}}": `${DadosContrato.nome_aluno}`,
+                "{{responsavel_nome}}": `${DadosContrato.nome_responsavel}`,
+                "{{responsavel_cpf}}": `${DadosContrato.cpf_responsavel}`,
+                "{{escola_nome}}": `${DadosContrato.nome_escola}`,
+                "{{escola_endereco}}": `${DadosContrato.endereco_escola}`,
+                "{{aluno_endereco}}": `${DadosContrato.endereco_aluno}`,
+                "{{contrato_periodo}}": `${DadosContrato.data_inicio.toLocaleDateString("pt-BR")} a ${DadosContrato.data_fim.toLocaleDateString("pt-BR")}`,
+            };
+
+            // chamando a função que vai efetivamente realizar essa troca
+            const clausulasFinais: Clausula[] = Clausulas.map(c => {
+                const conteudoSubstituido = substituirDadosClausula(c.conteudo, substituicoes)
+                const ClausulaSubstituida: Clausula = {
+                    ...c,
+                    conteudo: conteudoSubstituido
+                }
+                return ClausulaSubstituida
+            })
+            // criando objeto final
+            const ContratoeClausulas = {
+                ...DadosContrato,
+                clausulas: clausulasFinais
+            }
+            const PDFBuffer = await gerarContratoPdf(ContratoeClausulas)
+
+            // agr vamos gerar um token sha256 que será usado pra identificar o documento. ou seja, se for o mesmo documento vai gerar o mesmo código, mas se alguem modificar o documento o codigo será diferente.
+            const hashDocumento = createHash("sha256").update(PDFBuffer).digest("hex")
+
+            // informando o caminho do pdf no bucket e na internet.
+            const localizacaoPDF = `${CDN_URL}/${key}`
+            // hora de enviar esse pdf pro cloudflare
+            await r2.send(
+                new PutObjectCommand({
+                    Bucket: BUCKET_NAME,
+                    Key: key,
+                    Body: PDFBuffer,
+                    ContentType: 'application/pdf'
+                })
+            )
+
+            // criando o documento do contrato
+            const DocumentoResposta = await cliente.query<ContratoDocumento>(
+                `
+                INSERT INTO contrato_documento
+                (hash_documento, caminho_arquivo, contrato_id, responsavel_id, status_documento)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING *
+                `,
+                [hashDocumento, localizacaoPDF, contratoID, responsavelID, 'ENVIADO']
+            )
 
             const ContratoDocumento = DocumentoResposta.rows[0]!
 
             // agora vamos gerar o link pro responsavel assinar esse contrato. 
-            const queryCriarLink = `
-            INSERT INTO link_assinatura
-            (token_hash, expira_em, contrato_documento_id, responsavel_id)
-            VALUES ($1, now() + INTERVAL '15 days', $2, $3)
-            `
-            const valoresCriarLink = [UUID, ContratoDocumento.id, responsavelID]
+            // gerando o token do link
+            const tokenLink = randomBytes(32).toString("hex")
+            // gerando um hash sha256
+            const hashLink = createHash("sha256").update(tokenLink).digest("hex");
 
-            await cliente.query(queryCriarLink, valoresCriarLink)
+            // inserindo no banco de dados
+            await cliente.query(
+                `
+                INSERT INTO link_assinatura
+                (token_hash, expira_em, contrato_documento_id, responsavel_id)
+                VALUES ($1, now() + INTERVAL '15 days', $2, $3)
+                `, 
+                [hashLink, ContratoDocumento.id, responsavelID]
+            )
 
             // agora gerar a assinatura do motorista para aquele contrato.
-            const queryCriarAssinaturaMotorista = `
-            INSERT INTO assinatura_contrato
-            (tipo_signatario, assinatura_imagem, contrato_documento_id)
-            VALUES ($1, $2, $3)
-            `
-            const valoresCriarAssinaturaMotorista = ['MOTORISTA', assinaturaMotorista.caminho_arquivo, ContratoDocumento.id]
-            await cliente.query(queryCriarAssinaturaMotorista, valoresCriarAssinaturaMotorista)
+            await cliente.query(
+                `
+                INSERT INTO assinatura_contrato
+                (tipo_signatario, assinatura_imagem, contrato_documento_id)
+                VALUES ($1, $2, $3)
+                `,
+                ['MOTORISTA', assinaturaMotorista.caminho_arquivo, ContratoDocumento.id]
+            )
 
             // depois de todas essas operações, hora de retornar. 
             await cliente.query('COMMIT')
 
             return res.status(200).json({
                 msg: "Contrato Finalizado com sucesso.",
-                link: UUID
+                link: `https://www.movan.org/assinar/${tokenLink}`
             })
         } catch (erro) {
+            await r2.send(
+                new DeleteObjectCommand({
+                    Bucket: BUCKET_NAME,
+                    Key: key
+                })
+            )
             await cliente.query('ROLLBACK')
             console.error("erro no endpoint de Concluir contrato ao processar logica principal para concluir contrato, erro: ", erro)
             return res.status(500).json({
@@ -514,5 +611,65 @@ export const controllerContrato = {
         } finally {
             cliente.release()
         }
+    },
+    // controller pro responsavel visualizar o contrato que irá assinar
+    visualizarContrato: async (req: Request, res: Response) => {
+        // pegando o token do body
+        const { tokenBruto } = req.params
+
+        // verifica se o token existe
+        if(!tokenBruto){
+            return res.status(400).json({
+                msg: "O Token é necessario para visualizar um contrato."
+            })
+        }
+        // transforma o token no que quer q ele seja em string
+        const token = tokenBruto.toString().trim()
+
+        const hashToken = createHash("sha256").update(token).digest("hex")
+
+        //operação
+        try{
+            // tenta achar registros em que o token hash seja o mesmo, nao tenha sido utilizado ou revogado e que a data de expiração seja maior que a data atual.
+            const { rows: linksValidos } = await database.query<LinkAssinatura>(
+                `
+                SELECT * FROM link_assinatura
+                WHERE token_hash = $1 AND utilizado_em IS NULL AND revogado_em IS NULL AND expira_em > now()
+                `,
+                [hashToken]
+            )
+
+            // verifica se achou algum contrato
+            if(!linksValidos.length){
+                return res.status(404).json({
+                    msg: "Nenhum Contrato encontrado com o token fornecido."
+                })
+            }
+            const link = linksValidos[0]!
+            
+            // pegando os dados do contrato documento
+            const { rows: documentos } = await database.query<ContratoDocumento>(
+                "SELECT * FROM contrato_documento WHERE id = $1",
+                [link.contrato_documento_id]
+            )
+            const contratoDocumento = documentos[0]!
+
+            // devolvendo o usuario
+            return res.status(200).json({
+                msg: "Dados Obtidos com Sucesso",
+                pdf: contratoDocumento.caminho_arquivo
+            })
+
+        }catch(erro){
+            console.error("erro no endpoint de visualizar contrato, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
     }
+
+    // controller para o responsável assinar um contrato.
+    /*assinarContrato: async (req: Request, res: Response) => {
+
+    } */
 }
