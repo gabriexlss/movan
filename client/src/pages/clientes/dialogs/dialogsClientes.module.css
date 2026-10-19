@@ -43,6 +43,32 @@
     padding-top: .35rem;
 }
 
+.autocompleteField {
+    z-index: 2;
+}
+
+.sugestoesEndereco { /* estilo para a lista de sugestões de endereço é um ul */
+
+}
+
+.sugestoesEndereco button { /* estilo para os botões da lista de sugestões */
+
+}
+
+.sugestoesEndereco button:hover,
+.sugestoesEndereco button:focus-visible {
+
+}
+
+.sugestoesEndereco button span {
+
+}
+
+.autocompleteError, /* estilo para a mensagem de erro do autocomplete */
+.coordenadasPendentes {/* estilo para as coordenadas pendentes span (é um aviso para quando o usuario digitou o endereço mas nao escolheu uma sugestão) */
+
+}
+
 .field > label {
     position: absolute;
     top: 0;

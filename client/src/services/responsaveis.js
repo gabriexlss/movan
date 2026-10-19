@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast'
 import api from './api'
 
 //================================
@@ -16,7 +17,27 @@ export const criarResponsavel = async (valores) => {
     return response.data.responsavel //devolvo a resposta do backend
 }
 
+//==============================
+//LISTAR RESPONSAVEL
+//==============================
 export const listarResponsaveis = async () => {
     const response = await api.get('/responsavel', {skipGlobalErrorToast: true}) //peço as informações para o backend
     return response.data.responsaveis //devolvo a resposta do backend
+}
+
+
+//==============================
+//ALTERAR RESPONSAVEL
+//==============================
+export const alterarResponsavel = async (id, valores) => {
+    const responsavel = { //guardo o valor mandado pelo formulario e transformo em um objeto com as chaves que o backend espera
+        nome: valores.nome,
+        email: valores.email,
+        cpf: valores.cpf.replace(/\D/g, ''), //removo os caracteres que não são números do cpf
+        telefone: valores.telefone.replace(/\D/g, ''), //removo os caracteres que não são números do telefone
+        endereco: valores.endereco,
+    }
+
+    const response = await api.patch(`/responsavel/${id}`, responsavel, {skipGlobalErrorToast: true}) //mando as informações para o backend
+    return response.data.responsavel //devolvo a resposta do backend
 }

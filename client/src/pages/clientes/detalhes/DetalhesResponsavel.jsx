@@ -9,7 +9,6 @@ const nomesSituacao = {
     pendente: 'Pendente',
     atrasado: 'Atrasado',
 }
-
 const DetalhesResponsavel = ({ cliente: responsavel }) => {
     const alunosVinculados = alunos.filter((aluno) => (
         aluno.responsavelId === responsavel.id || aluno.responsavel === responsavel.nome

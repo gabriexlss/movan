@@ -19,6 +19,7 @@ import {
 
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoCliente from './CampoCliente'
+import CampoEnderecoAutocomplete from './CampoEnderecoAutocomplete'
 import styles from './dialogsClientes.module.css'
 
 const valoresIniciais = {
@@ -27,6 +28,8 @@ const valoresIniciais = {
         telefone: '',
         funcionamento: '',
         endereco: '',
+        latitude: null,
+        longitude: null,
     },
     aluno: {
         nome: '',
@@ -89,6 +92,11 @@ const DialogFormularioCliente = ({
 
     const salvar = (event) => {
         event.preventDefault()
+
+        if (tipo === 'escola' && (!Number.isFinite(valores.latitude) || !Number.isFinite(valores.longitude))) {
+            return
+        }
+
         onSave(valores)
     }
 
@@ -130,14 +138,23 @@ const DialogFormularioCliente = ({
                             placeholder="Ex.: 07:00 às 18:00"
                             required
                         />
-                        <CampoCliente
-                            label="Endereço"
+                        <CampoEnderecoAutocomplete
                             icon={<PiMapPinBold />}
-                            {...propsCampo('endereco')}
-                            placeholder="Rua, número, bairro e cidade"
-                            autoComplete="street-address"
-                            required
+                            value={valores.endereco}
+                            onChange={(endereco) => setValores((estadoAtual) => ({
+                                ...estadoAtual,
+                                endereco,
+                                latitude: null,
+                                longitude: null,
+                            }))}
+                            onSelecionar={(enderecoSelecionado) => setValores((estadoAtual) => ({
+                                ...estadoAtual,
+                                ...enderecoSelecionado,
+                            }))}
                         />
+                        {(!Number.isFinite(valores.latitude) || !Number.isFinite(valores.longitude)) && (
+                            <p className={styles.coordenadasPendentes}>Escolha uma sugestão para registrar as coordenadas.</p>
+                        )}
                     </>
                 )}
 
