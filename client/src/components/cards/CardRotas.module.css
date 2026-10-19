@@ -1,23 +1,24 @@
 .containerEscolas {
-    display: flex;
-    justify-content: center;
-    gap: .5rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    width: 100%;
     align-self: center;
-
-    margin-top: auto;
-    margin-bottom: auto;
+    margin: auto 0 .75rem;
 }
 
 .escola{
     display: flex;
-    flex-direction: row;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    min-width: 0;
 }
 
 .iconEscola{
-    color: #7a7a7a;
-    margin-right: 0.5rem;
+    flex: 0 0 auto;
+    margin-right: .4rem;
+    color: #0d47a1;
+    font-size: 1.15rem;
 }
 
 .textoEscola{
@@ -29,11 +30,68 @@
 
 .textoEscola p{
     font-family: 'Poppins', sans-serif;
-    color: #7a7a7a;
-    font-size: .7rem;
+    color: #0d47a1;
+    font-size: .65rem;
+    font-weight: 600;
+    text-align: left;
 }
 
 .textoEscola span{
-    font-size: .7rem;
+    overflow: hidden;
     color: #7a7a7a;
+    font-size: .56rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.paginacao {
+    display: flex;
+    align-items: center;
+    gap: .28rem;
+    color: #0d47a1;
+    font-family: 'Poppins', sans-serif;
+    font-size: .68rem;
+}
+
+.paginacao button {
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1.2rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0d47a1;
+    font-size: .68rem;
+    cursor: pointer;
+}
+
+.paginacao button:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.paginacao button:focus-visible {
+    border-radius: .2rem;
+    outline: 2px solid #0d47a1;
+    outline-offset: 1px;
+}
+
+@media (max-width: 350px) {
+    .containerEscolas {
+        gap: .35rem;
+    }
+
+    .iconEscola {
+        margin-right: .25rem;
+        font-size: 1.05rem;
+    }
+
+    .textoEscola p {
+        font-size: .6rem;
+    }
+
+    .textoEscola span {
+        font-size: .52rem;
+    }
 }

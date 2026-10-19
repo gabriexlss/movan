@@ -5,14 +5,16 @@ import { GoHome } from 'react-icons/go';
 import { MdAltRoute, MdOutlineAccountBalanceWallet } from 'react-icons/md';
 import { BsFillPeopleFill } from 'react-icons/bs';
 import { CgProfile } from 'react-icons/cg';
+import { LuScrollText } from 'react-icons/lu';
 
 const footer = () => {
 
     const navFooter = [
         {to: '/', label: 'Home', icon: GoHome},
         {to: '/financeiro', label: 'Financeiro', icon: MdOutlineAccountBalanceWallet},
-        {to: '/rota', label: 'Rota', icon: MdAltRoute},
+        {to: '/contratos', label: 'Contratos', icon: LuScrollText},
         {to: '/clientes', label: 'Clientes', icon: BsFillPeopleFill},
+        {to: '/rota', label: 'Rotas', icon: MdAltRoute},
         {to: '/perfil', label: 'Perfil', icon: CgProfile}
     ];
 
@@ -28,7 +30,7 @@ const footer = () => {
                             to={item.to}
                             className={({ isActive }) => `${styles['footer-link']} ${isActive ? styles.active : ''}`}
                         >
-                            <Icon className={styles['footer-icon']} />
+                            <Icon className={styles['footer-icon']} aria-hidden="true" />
                             <span>{item.label}</span>
                         </NavLink>
                     );

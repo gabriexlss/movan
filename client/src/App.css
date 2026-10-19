@@ -41,7 +41,7 @@
 }
 
 :root {
-  --footer-height: 7vh;
+  --footer-height: clamp(4.25rem, 9vh, 5.25rem);
 }
 
 .app {
