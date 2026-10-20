@@ -9,11 +9,16 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test:cron": "npm run build && node tests/cron.test.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "allowScripts": {
+    "bcrypt@6.0.0": true,
+    "esbuild@0.28.1": true
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -21,11 +26,12 @@
     "cpf-cnpj-validator": "^2.1.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "google-auth-library": "^11.0.0",
+    "express-rate-limit": "^8.7.1",
+    "google-auth-library": "^11.1.0",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.22.0",
-    "resend": "^6.17.1",
-    "zod": "^4.4.1"
+    "pg": "^8.23.1",
+    "resend": "^6.32.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -34,12 +40,12 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.6.0",
-    "@types/pg": "^8.20.0",
-    "eslint": "^10.5.0",
-    "globals": "^17.6.0",
-    "tsx": "^4.21.0",
+    "@types/node": "^25.9.9",
+    "@types/pg": "^8.23.1",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.1"
+    "typescript-eslint": "^8.71.1"
   }
 }

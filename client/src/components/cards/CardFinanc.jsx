@@ -1,5 +1,5 @@
 import DefaultCard from './DefaultCard';
-import './CardFinanc.css';
+import styles from './CardFinanc.module.css';
 
 const CardFinanc = () => {
     const financeiro =[
@@ -9,9 +9,9 @@ const CardFinanc = () => {
     ];
 
     return(
-        <DefaultCard title="Resumo Financeiro" link="/financeiro" compactTitle>
-            <div className="financeiro-container">
-                <div className="texto-financ">
+        <DefaultCard title="Resumo financeiro" link="/financeiro" compactTitle>
+            <div className={styles['financeiro-container']}>
+                <div className={styles['texto-financ']}>
                     {financeiro.map((item, index) => (
                         <div key={index}>
                             <h1 style={{ color: item.cor }}>{item.titulo}</h1>

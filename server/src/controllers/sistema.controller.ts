@@ -6,15 +6,15 @@ export const controllerSistema = {
     deletarUsuarios: async (req: Request, res: Response) => {
         try {
             const query = `DELETE FROM motorista 
-                WHERE data_exclusao IS NOT NULL 
-                AND data_exclusao <= CURRENT_DATE - INTERVAL '30 days'`
+                WHERE excluido_em IS NOT NULL
+                AND excluido_em <= CURRENT_DATE - INTERVAL '30 days'`
             const response = await database.query(query)
             return res.status(200).json({
-                msg: `Limpeza concluida! ${response.rowCount} usuarios deletados`
+                msg: `Limpeza concluída! ${response.rowCount} usuários excluídos.`
             })
         } catch (erro) {
             return res.status(500).json({
-                msg: `Erro ao fazer limpeza de usuarios deletados, erro: ${erro}`
+                msg: `Erro ao excluir usuários durante a limpeza, erro: ${erro}`
             })
         }
     }

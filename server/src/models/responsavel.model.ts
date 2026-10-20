@@ -14,7 +14,7 @@ const ResponsavelSchema = z.object({
         .string("Endereço deve ser uma string.")
         .min(10, "Endereço deve ter pelo menos 10 caracteres.")
         .max(255, "Endereço deve ter no máximo 255 caracteres."),
-    tel: z
+    telefone: z
         .string("Telefone deve ser uma string.")
         .regex(/^\d{11}$/, "Telefone deve conter exatamente 11 dígitos."),
     email: z
@@ -28,13 +28,13 @@ export const CriarResponsavelSchema = ResponsavelSchema.pick({
     cpf: true,
     nome: true,
     endereco: true,
-    tel: true,
+    telefone: true,
     email: true
 })
 export const EditarResponsavelSchema = ResponsavelSchema.pick({
     nome: true,
     endereco: true,
-    tel: true,
+    telefone: true,
     email: true
 }).partial()
 

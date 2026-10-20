@@ -1,0 +1,104 @@
+.footer {
+    position: fixed;
+    z-index: 30;
+    bottom: 0;
+    width: 100%;
+    height: var(--footer-height);
+    padding: .35rem max(.2rem, env(safe-area-inset-right)) max(.25rem, env(safe-area-inset-bottom)) max(.2rem, env(safe-area-inset-left));
+    background-color: #F8F5F5;
+    box-shadow: 10px 10px 10px 12px rgba(0, 0, 0, 0.5);
+}
+
+.footer nav {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: stretch;
+    width: min(100%, 48rem);
+    height: 100%;
+    margin-inline: auto;
+}
+
+.footer-icon{
+    display: block;
+    flex: 0 0 auto;
+    width: clamp(1.65rem, 7vw, 2.1rem);
+    height: clamp(1.65rem, 7vw, 2.1rem);
+}
+
+.footer-link{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .15rem;
+    min-width: 0;
+    padding: .2rem .05rem;
+    text-decoration: none;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(.54rem, 2.35vw, .75rem);
+    font-weight: 600;
+    line-height: 1;
+    color: #7A7A7A;
+
+    transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.footer-link span {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.footer-link::before{
+    content: '';
+    position: absolute;
+    top: .05rem;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    border-radius: 2px;
+    background-color: #0D47A1;
+
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+.footer-link:hover::before,
+.footer-link.active::before{
+    transform: scaleX(1);
+}
+
+.footer-link:hover,
+.footer-link.active{
+    color: #0D47A1;
+    transform: scale(1.06);
+}
+
+.footer-link:focus-visible{
+    color: #0D47A1;
+    transform: scale(1.06);
+    border-radius: .25rem;
+    outline: 2px solid #0D47A1;
+    outline-offset: -2px;
+}
+
+@media (max-width: 360px) {
+    .footer {
+        padding-inline: .1rem;
+    }
+
+    .footer-link {
+        gap: .12rem;
+        font-size: .52rem;
+    }
+
+    .footer-icon {
+        width: 1.6rem;
+        height: 1.6rem;
+    }
+}
