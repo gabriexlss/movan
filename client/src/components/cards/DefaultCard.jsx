@@ -9,6 +9,7 @@ const DefaultCard = ({
     compactTitle = false,
     headerContent,
     titleClassName = '',
+    headerContentClassName = '',
 }) => {
     return (
         <section className={styles.card}>
@@ -17,7 +18,7 @@ const DefaultCard = ({
                     <h1 className={`${styles['card-header']} ${compactTitle ? styles.compact : ''} ${titleClassName}`}>
                         {title}
                     </h1>
-                    <div className={styles['card-header-content']}>{headerContent}</div>
+                    <div className={`${styles['card-header-content']} ${headerContentClassName}`}>{headerContent}</div>
                 </div>
             ) : (
                 <h1 className={`${styles['card-header']} ${compactTitle ? styles.compact : ''} ${titleClassName}`}>

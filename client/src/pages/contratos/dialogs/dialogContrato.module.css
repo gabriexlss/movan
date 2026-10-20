@@ -1,0 +1,91 @@
+.dialog {
+    max-width: 29rem;
+    padding: 3.25rem 1.4rem 1.4rem;
+    border: 1px solid #eee;
+    border-radius: .75rem;
+    box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
+}
+
+.dialog > header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.dialog > header p {
+    margin-top: .4rem;
+    color: #7a7a7a;
+    font-family: 'Poppins', sans-serif;
+    font-size: .82rem;
+}
+
+.formulario {
+    display: grid;
+    gap: .75rem;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    min-width: 0;
+    color: #0d47a1;
+    font-size: .72rem;
+}
+
+.campo input,
+.campo select {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding: .55rem .7rem;
+    border: 1px solid #b8b8b8;
+    border-radius: 999px;
+    background: #fff;
+    color: #454545;
+    font-family: inherit;
+    font-size: .88rem;
+}
+
+.duasColunas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.salvar {
+    min-height: 2.75rem;
+    margin-top: .35rem;
+    padding: .6rem 1rem;
+    border: 0;
+    border-radius: .3rem;
+    background: #0d47a1;
+    color: #fff;
+    font-family: inherit;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.campo input:focus-visible,
+.campo select:focus-visible,
+.salvar:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+    .dialog {
+        padding-inline: 1rem;
+    }
+
+    .duasColunas {
+        grid-template-columns: 1fr;
+    }
+
+    .campo input,
+    .campo select {
+        font-size: 1rem;
+    }
+}

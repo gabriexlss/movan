@@ -1,0 +1,367 @@
+.listaContratos {
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+}
+
+.tituloCard.tituloCard {
+    font-size: .82rem;
+}
+
+.acoesCabecalho.acoesCabecalho {
+    display: grid;
+    flex: 0 0 66.6667%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    font-family: 'Poppins', sans-serif;
+}
+
+.paginacao {
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    gap: .2rem;
+    color: #0d47a1;
+    font-size: .62rem;
+    white-space: nowrap;
+}
+
+.paginacao button,
+.filtro {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.6rem;
+    padding: .2rem;
+    border: 0;
+    border-radius: .2rem;
+    background: transparent;
+    color: #0d47a1;
+    cursor: pointer;
+}
+
+.paginacao button {
+    width: 1.1rem;
+    font-size: .65rem;
+}
+
+.paginacao button:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.filtroContainer {
+    position: relative;
+    justify-self: end;
+}
+
+.filtro {
+    gap: .25rem;
+    font: inherit;
+    font-size: .62rem;
+}
+
+.filtro[aria-expanded='true'] {
+    background: #e8eef8;
+}
+
+.filtro svg {
+    font-size: .85rem;
+}
+
+.miniFiltro {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + .4rem);
+    right: 0;
+    width: min(14.5rem, calc(100vw - 2rem));
+    padding: .55rem;
+    border: 1px solid #d9e1ed;
+    border-radius: .35rem;
+    background: #fff;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 15%);
+}
+
+.tituloFiltro {
+    color: #173d75;
+    font-size: .7rem;
+}
+
+.opcoesFiltro {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .3rem;
+    margin-top: .35rem;
+}
+
+.opcaoFiltro {
+    min-height: 2rem;
+    padding: .25rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    background: #f3f6fa;
+    color: #34445b;
+    font-family: inherit;
+    font-size: .65rem;
+    cursor: pointer;
+}
+
+.opcaoFiltro:hover,
+.opcaoFiltro[aria-pressed='true'] {
+    border-color: currentColor;
+}
+
+.opcaoFiltro[aria-pressed='true'] {
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .35rem;
+    margin-bottom: .65rem;
+}
+
+.busca {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    min-width: 0;
+    min-height: 1.8rem;
+    padding: 0 .45rem;
+    border: 1px solid #d7dce4;
+    border-radius: .25rem;
+    background: #fff;
+    color: #7a8798;
+    font-size: .65rem;
+}
+
+.busca svg {
+    flex: 0 0 auto;
+}
+
+.busca input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #333;
+    font: inherit;
+}
+
+.busca input::placeholder {
+    color: #9aa1aa;
+    opacity: 1;
+}
+
+.busca:focus-within {
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 2px rgb(13 71 161 / 10%);
+}
+
+.novo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    min-height: 1.8rem;
+    padding: .25rem .5rem;
+    border: 0;
+    border-radius: .25rem;
+    background: #0d47a1;
+    color: #fff;
+    font-family: inherit;
+    font-size: .6rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.registros {
+    display: grid;
+    gap: .55rem;
+    list-style: none;
+}
+
+.contrato {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: .35rem;
+    width: 100%;
+    min-height: 5.5rem;
+    overflow: hidden;
+    padding: .6rem .45rem .6rem .7rem;
+    border-radius: .65rem;
+    background: #fff;
+    box-shadow: 0 3px 3px rgb(0 0 0 / 25%);
+    font-family: inherit;
+}
+
+/* A faixa fica separada do conteúdo para permitir um recorte com gradiente. */
+.contrato::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: .3rem;
+    background: #0d47a1;
+}
+
+.iconeContrato {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 1.7rem;
+    height: 1.8rem;
+    border-radius: .25rem;
+    background: #dce7f7;
+    color: #0d47a1;
+    font-size: 1.05rem;
+}
+
+.conteudo {
+    flex: 1;
+    min-width: 0;
+}
+
+.cabecalhoContrato {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .35rem;
+}
+
+.tituloContrato {
+    min-width: 0;
+    color: #0d47a1;
+    font-size: .7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.status {
+    flex-shrink: 0;
+    min-width: 3rem;
+    padding: .12rem .35rem;
+    border-radius: .2rem;
+    font-size: .55rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.ativo {
+    background: #c1ddbf;
+    color: #15720c;
+}
+
+.finalizado {
+    background: #dce7f7;
+    color: #0d47a1;
+}
+
+.cancelado {
+    background: #f8d7da;
+    color: #a12631;
+}
+
+.rascunho {
+    background: #e6e8ec;
+    color: #666;
+}
+
+.pendente {
+    background: #fff0c7;
+    color: #866000;
+}
+
+.informacoes {
+    display: grid;
+    gap: .25rem;
+    margin-top: .3rem;
+    min-width: 0;
+    color: #7a7a7a;
+    font-size: .55rem;
+    line-height: 1.5;
+}
+
+.linhaDetalhes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .1rem .35rem;
+}
+
+.linhaDetalhes span {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .25rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.linhaDetalhes span + span {
+    padding-left: .35rem;
+    border-left: 1px solid #b8c8df;
+}
+
+.linhaDetalhes svg {
+    flex: 0 0 auto;
+    color: #0d47a1;
+    font-size: .6rem;
+}
+
+.seta {
+    flex-shrink: 0;
+    align-self: center;
+    color: #0d47a1;
+    font-size: .75rem;
+}
+
+.contagem {
+    display: block;
+    padding-top: .65rem;
+    color: #777;
+    font-size: .56rem;
+}
+
+.vazio {
+    padding: 1.5rem .4rem;
+    color: #777;
+    font-family: inherit;
+    font-size: .7rem;
+    text-align: center;
+}
+
+.paginacao button:focus-visible,
+.filtro:focus-visible,
+.novo:focus-visible,
+.opcaoFiltro:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
+}
+
+@media (max-width: 360px) {
+    .contrato {
+        gap: .25rem;
+        padding-left: .6rem;
+    }
+
+    .iconeContrato {
+        width: 1.4rem;
+        height: 1.55rem;
+        font-size: .9rem;
+    }
+
+    .tituloContrato {
+        font-size: .64rem;
+    }
+
+    .status {
+        min-width: 2.6rem;
+        padding-inline: .2rem;
+        font-size: .5rem;
+    }
+}
