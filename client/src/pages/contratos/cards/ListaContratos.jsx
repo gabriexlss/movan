@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FaChevronLeft, FaChevronRight, FaPlus, FaRegCalendarAlt, FaRegFileAlt, FaSearch, FaUser } from 'react-icons/fa'
 import { IoFilterSharp } from 'react-icons/io5'
 import { LuScrollText } from 'react-icons/lu'
+import { useNavigate } from 'react-router-dom'
 import DefaultCard from '../../../components/cards/DefaultCard'
 import { contratos, formatarData, situacoesContrato } from '../contratos-data'
 import DialogContrato from '../dialogs/DialogContrato'
@@ -10,7 +11,7 @@ import styles from './listaContratos.module.css'
 const ITENS_POR_PAGINA = 5
 
 const ListaContratos = () => {
-    const [itens, setItens] = useState(contratos)
+    const navigate = useNavigate()
     const [busca, setBusca] = useState('')
     const [situacao, setSituacao] = useState('todos')
     const [pagina, setPagina] = useState(0)
@@ -18,7 +19,7 @@ const ListaContratos = () => {
     const [formularioAberto, setFormularioAberto] = useState(false)
 
     const termo = busca.trim().toLocaleLowerCase('pt-BR')
-    const resultados = itens.filter((contrato) => (
+    const resultados = contratos.filter((contrato) => (
         (situacao === 'todos' || contrato.situacao === situacao)
         && `${contrato.id} ${contrato.titulo} ${contrato.cliente}`
             .toLocaleLowerCase('pt-BR')
@@ -43,16 +44,11 @@ const ListaContratos = () => {
     const salvarContrato = (valores) => {
         const novoContrato = {
             ...valores,
-            id: `C-${String(itens.length + 1).padStart(3, '0')}`,
+            id: `C-${String(contratos.length + 1).padStart(3, '0')}`,
             situacao: 'ativo',
         }
 
-        setItens((estadoAtual) => [novoContrato, ...estadoAtual])
-        setBusca('')
-        setSituacao('todos')
-        setPagina(0)
-        setFiltroAberto(false)
-        setFormularioAberto(false)
+        navigate('/contratos/clausulas', { state: { contrato: novoContrato } })
     }
 
     return (

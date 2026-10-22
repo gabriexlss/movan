@@ -23,3 +23,15 @@ export const formatarData = (data) => {
     const [ano, mes, dia] = data.split('-')
     return ano && mes && dia ? `${dia}/${mes}/${ano}` : data
 }
+
+export const contratoExemplo = {
+    ...contratos[0],
+    aluno: 'Bruno Nogueira',
+    escola: 'ETEC Jardim Ângela',
+    geradoEm: '2026-10-22',
+}
+
+export const textoClausula = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'
+
+export const clausulasFixas = ['Cláusula', 'Prazo', 'Pagamento', 'Confidencialidade', 'Rescisão']
+export const clausulasExtras = ['Cláusula extra 1', 'Cláusula extra 2']

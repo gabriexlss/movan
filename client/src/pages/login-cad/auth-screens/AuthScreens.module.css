@@ -26,7 +26,7 @@
     margin-top: 0.5rem;
 
     color: #0D47A1;
-    font-size: 0.85rem;
+    font-size: 0.9125rem;
     line-height: 1.35;
     text-align: center;
 }
@@ -58,7 +58,7 @@
 
     color: #263238;
     font-family: 'Bree Serif', serif;
-    font-size: 0.95rem;
+    font-size: 1.0125rem;
 
     transition: border-color .2s ease, box-shadow .2s ease;
 }
@@ -73,7 +73,7 @@
     background-color: #FFFFFF;
 
     color: #6B7280;
-    font-size: 0.95rem;
+    font-size: 1.0125rem;
     transform: translateY(-50%);
     pointer-events: none;
     transition: top .2s ease, color .2s ease, font-size .2s ease;
@@ -89,12 +89,15 @@
 .auth-screens__campo input:-webkit-autofill + label {
     top: 0;
     color: #0D47A1;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
 }
 
 .auth-screens__botao {
     width: 50%;
-    height: 2.5rem;
+    min-width: min(100%, 12rem);
+    min-height: 2.75rem;
+    padding: .4rem .75rem;
+    line-height: 1.25;
 
     display: flex;
     flex-direction: column;
@@ -107,17 +110,19 @@
 
     color: #FFFFFF;
     font-family: 'Bree Serif', serif;
-    font-size: 1.5rem;
+    font-size: 1.5625rem;
     cursor: pointer;
 }
 
 .auth-screens__codigo-meta {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: 0.75rem;
     padding-inline: 0.5rem;
 
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
 }
 
 .auth-screens__reenviar {
@@ -125,6 +130,8 @@
     padding: 0;
     background: transparent;
     color: #0D47A1;
+    font: inherit;
+    font-size: .9rem;
     font-weight: 600;
     cursor: pointer;
 }

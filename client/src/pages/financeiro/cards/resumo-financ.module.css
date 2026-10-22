@@ -35,19 +35,20 @@
     flex-direction: column;
     min-width: 0;
     font-family: 'Poppins', sans-serif;
-    line-height: 1.15;
+    line-height: 1.4;
 }
 
 .label {
     overflow: hidden;
     color: #686868;
-    font-size: .62rem;
+    font-size: 0.6825rem;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .valor {
-    font-size: .68rem;
+    overflow-wrap: anywhere;
+    font-size: 0.7425rem;
     font-weight: 600;
 }
 
@@ -62,6 +63,6 @@
     }
 
     .valor {
-        font-size: .62rem;
+        font-size: 0.6825rem;
     }
 }

@@ -13,19 +13,21 @@
     flex-direction: row;
     justify-content: start;
     align-items: center;
-    gap: 2rem;
+    gap: clamp(.5rem, 5vw, 2rem);
+    flex-wrap: wrap;
 }
 
 .texto-financ h1{
     font-family: 'Poppins', sans-serif;
-    font-size: .8rem;
+    font-size: 0.8625rem;
     font-weight: 600;
     text-align: start;
+    line-height: 1.4;
 }
 
 .texto-financ p{
     font-family: 'Poppins', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.7625rem;
     font-weight: 400;
     color:#7A7A7A;
     text-align: start;

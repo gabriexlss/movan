@@ -37,9 +37,9 @@
     text-decoration: none;
 
     font-family: 'Poppins', sans-serif;
-    font-size: clamp(.54rem, 2.35vw, .75rem);
+    font-size: calc(clamp(.54rem, 2.35vw, .75rem) + .0625rem);
     font-weight: 600;
-    line-height: 1;
+    line-height: 1.2;
     color: #7A7A7A;
 
     transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
@@ -94,7 +94,7 @@
 
     .footer-link {
         gap: .12rem;
-        font-size: .52rem;
+        font-size: 0.5825rem;
     }
 
     .footer-icon {

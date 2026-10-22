@@ -25,6 +25,9 @@ import ClienteDetalhes from './pages/clientes/detalhes/ClienteDetalhes'
 import Perfil from './pages/perfil/perfil'
 import Notificacoes from './pages/notificacoes/notificacoes'
 import Contratos from './pages/contratos/contratos'
+import ClausulasContrato from './pages/contratos/ClausulasContrato'
+import LinkContrato from './pages/contratos/LinkContrato'
+import AssinaturaContrato from './pages/contratos/AssinaturaContrato'
 import Rotas from './pages/rotas/rota'
 
 function App() {
@@ -43,6 +46,7 @@ function App() {
     ]
 
     const logCad = rotasLogCad.includes(location.pathname)
+    const fluxoContrato = location.pathname.startsWith('/contratos/') || location.pathname === '/contrato/assinatura'
 
     return (
         <div className='app'>
@@ -60,6 +64,9 @@ function App() {
                     <Route path='/clientes/:tipo/:id' element={<ClienteDetalhes />} />
                     <Route path='/perfil' element={<Perfil />} />
                     <Route path='/contratos' element={<Contratos />} />
+                    <Route path='/contratos/clausulas' element={<ClausulasContrato />} />
+                    <Route path='/contratos/link' element={<LinkContrato />} />
+                    <Route path='/contrato/assinatura' element={<AssinaturaContrato />} />
                     <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
 
@@ -83,7 +90,7 @@ function App() {
                 </Route>
             </Routes>
 
-            {!logCad && <Footer />}
+            {!logCad && !fluxoContrato && <Footer />}
         </div>
 )
 }

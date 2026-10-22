@@ -21,13 +21,13 @@
     align-items: center;
     gap: .3rem;
     min-width: 0;
-    height: 1.8rem;
+    min-height: 1.8rem;
     padding: 0 .45rem;
     border: 1px solid #d7dce4;
     border-radius: .25rem;
     background: #fff;
     color: #7a8798;
-    font-size: .65rem;
+    font-size: 0.7125rem;
 }
 
 .busca svg {
@@ -63,7 +63,7 @@
     background: #0d47a1;
     color: #fff;
     font-family: inherit;
-    font-size: .6rem;
+    font-size: 0.6625rem;
     white-space: nowrap;
     cursor: pointer;
 }
@@ -111,14 +111,14 @@
     min-width: 0;
     flex-direction: column;
     color: #858585;
-    font-size: .58rem;
+    font-size: 0.6425rem;
     line-height: 1.45;
 }
 
 .nomeCliente {
     overflow: hidden;
     color: #555;
-    font-size: .68rem;
+    font-size: 0.7425rem;
     font-weight: 600;
     text-decoration: none;
     text-overflow: ellipsis;
@@ -147,7 +147,7 @@
     border-radius: .2rem;
     background: #d7f2d9;
     color: #278b36;
-    font-size: .52rem;
+    font-size: 0.5825rem;
     white-space: nowrap;
 }
 
@@ -190,7 +190,7 @@
 .vazio {
     padding: 1rem .4rem;
     color: #777;
-    font-size: .7rem;
+    font-size: 0.7625rem;
     text-align: center;
 }
 
@@ -203,7 +203,7 @@
     padding-top: .2rem;
     border-top: 1px solid #dedede;
     color: #777;
-    font-size: .56rem;
+    font-size: 0.6225rem;
 }
 
 .paginacao {
@@ -240,19 +240,20 @@
 
 @media (max-width: 360px) {
     .toolbar {
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr);
         gap: .25rem;
     }
 
     .busca {
         padding-inline: .3rem;
-        font-size: .6rem;
+        font-size: 0.6625rem;
     }
 
     .novo {
+        justify-self: end;
         gap: .15rem;
         padding-inline: .3rem;
-        font-size: .56rem;
+        font-size: 0.6225rem;
     }
 
     .registro {
@@ -261,6 +262,6 @@
     }
 
     .badge {
-        font-size: .48rem;
+        font-size: 0.5425rem;
     }
 }

@@ -17,7 +17,7 @@
     margin-top: .4rem;
     color: #7a7a7a;
     font-family: 'Poppins', sans-serif;
-    font-size: .82rem;
+    font-size: 0.8825rem;
 }
 
 .formulario {
@@ -31,7 +31,7 @@
     gap: .25rem;
     min-width: 0;
     color: #0d47a1;
-    font-size: .72rem;
+    font-size: 0.7825rem;
 }
 
 .campo input,
@@ -45,7 +45,7 @@
     background: #fff;
     color: #454545;
     font-family: inherit;
-    font-size: .88rem;
+    font-size: 0.9425rem;
 }
 
 .duasColunas {
@@ -63,9 +63,53 @@
     background: #0d47a1;
     color: #fff;
     font-family: inherit;
-    font-size: .88rem;
+    font-size: 0.9425rem;
     font-weight: 600;
     cursor: pointer;
+}
+
+.campoClausula {
+    position: relative;
+    padding-top: .4rem;
+}
+
+.campoClausula span {
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    padding: 0 .3rem;
+    background: #fff;
+    color: #56769e;
+    font-size: .75rem;
+}
+
+.campoClausula input,
+.campoClausula textarea {
+    width: 100%;
+    min-width: 0;
+    padding: .7rem .9rem;
+    border: 1px solid #b8b8b8;
+    border-radius: .85rem;
+    background: #fff;
+    color: #454545;
+    font-family: inherit;
+    font-size: .85rem;
+    line-height: 1.5;
+}
+
+.campoClausula input {
+    border-radius: 999px;
+}
+
+.campoClausula textarea {
+    display: block;
+    resize: vertical;
+}
+
+.campoClausula input:focus-visible,
+.campoClausula textarea:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
 }
 
 .campo input:focus-visible,
@@ -86,6 +130,6 @@
 
     .campo input,
     .campo select {
-        font-size: 1rem;
+        font-size: 1.0625rem;
     }
 }

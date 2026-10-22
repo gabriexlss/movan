@@ -21,7 +21,7 @@
     gap: .35rem;
     color: #0d47a1;
     font-family: 'Poppins', sans-serif;
-    font-size: .7rem;
+    font-size: 0.7625rem;
     font-weight: 600;
     text-decoration: none;
 }
@@ -77,7 +77,7 @@
 
 .tipoCliente {
     color: #8a8a8a;
-    font-size: .58rem;
+    font-size: 0.6425rem;
     text-transform: uppercase;
     letter-spacing: .04em;
 }
@@ -87,11 +87,10 @@
     max-width: 100%;
     color: #555;
     font-family: 'Poppins', sans-serif;
-    font-size: .88rem;
+    font-size: 0.9425rem;
     font-weight: 600;
     line-height: 1.25;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
 }
 
 .nome-ativo {
@@ -190,6 +189,7 @@
     min-width: 0;
     flex-direction: column;
     gap: .08rem;
+    overflow-wrap: anywhere;
 }
 
 .campoDestaque {
@@ -198,7 +198,7 @@
 
 .rotulo {
     color: #0d47a1;
-    font-size: .62rem;
+    font-size: 0.6825rem;
     font-weight: 600;
 }
 
@@ -207,7 +207,7 @@
 .estadoVazio {
     color: #666;
     font-family: 'Poppins', sans-serif;
-    font-size: .68rem;
+    font-size: 0.7425rem;
     font-style: normal;
     line-height: 1.45;
     text-align: left;
@@ -227,8 +227,9 @@
     border-radius: .2rem;
     color: #555;
     font-family: 'Poppins', sans-serif;
-    font-size: .68rem;
+    font-size: 0.7425rem;
     text-decoration: none;
+    overflow-wrap: anywhere;
 }
 
 .itemRelacionado:hover {
@@ -252,7 +253,7 @@
     border-top: 1px solid #dedede;
     color: #777;
     font-family: 'Poppins', sans-serif;
-    font-size: .58rem;
+    font-size: 0.6425rem;
     text-align: center;
 }
 
@@ -271,11 +272,12 @@
     border-radius: .4rem;
     background: #fff;
     color: #777;
-    font-size: .6rem;
+    font-size: 0.6625rem;
 }
 
 .contratoCabecalho {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: .5rem;
@@ -284,7 +286,7 @@
 .contratoCabecalho strong {
     overflow: hidden;
     color: #555;
-    font-size: .68rem;
+    font-size: 0.7425rem;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -294,7 +296,7 @@
     padding: .13rem .3rem;
     border-radius: 999px;
     font-family: 'Poppins', sans-serif;
-    font-size: .52rem;
+    font-size: 0.5825rem;
     font-weight: 600;
 }
 
@@ -330,12 +332,12 @@
     margin: .5rem 0 .8rem;
     color: #666;
     font-family: 'Poppins', sans-serif;
-    font-size: .7rem;
+    font-size: 0.7625rem;
 }
 
 .naoEncontrado a {
     color: #0d47a1;
-    font-size: .7rem;
+    font-size: 0.7625rem;
 }
 
 @media (max-width: 360px) {
@@ -351,7 +353,7 @@
     }
 
     .nomeCliente {
-        font-size: .8rem;
+        font-size: 0.8625rem;
     }
 
     .editar,

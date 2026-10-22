@@ -251,7 +251,13 @@ const globalApiErrorToast = (error) => {
 
 const AppToaster = () => {
     return (
-        <Toaster position="top-right" toastOptions={{ duration: 6000 }}>
+        <Toaster
+            position="top-right"
+            toastOptions={{
+                duration: 6000,
+                style: { fontSize: '1.0625rem', lineHeight: 1.4, overflowWrap: 'anywhere' },
+            }}
+        >
             {(currentToast) => (
                 <div
                     onTouchEnd={() => toast.dismiss(currentToast.id)}

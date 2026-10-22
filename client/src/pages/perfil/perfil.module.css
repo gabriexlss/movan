@@ -43,6 +43,7 @@
     align-items: flex-start;
     min-width: 0;
     line-height: 1.5;
+    overflow-wrap: anywhere;
 }
 
 .perfil-container h1,
@@ -53,7 +54,7 @@
 }
 
 .perfil-container p {
-    font-size: .9rem;
+    font-size: 0.9625rem;
     font-weight: lighter;
     text-align: left;
 }
@@ -87,7 +88,7 @@
     
     color: #0d47a1;
     font-family: 'Poppins', sans-serif;
-    font-size: .9rem;
+    font-size: 0.9625rem;
     font-weight: 600;
     padding-left: 1rem;
 }
@@ -123,7 +124,7 @@
     background-color: transparent;
     color: #3f3f3f;
     font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
+    font-size: 1.0625rem;
 }
 
 .input-container input[readonly] {
@@ -175,7 +176,7 @@
     align-items: center;
     margin-left: auto;
 
-    font-size: .9rem;
+    font-size: 0.9625rem;
     font-family: 'Poppins', sans-serif;
     color: #5A5A5A;
     text-decoration: none;
@@ -194,7 +195,9 @@
     overflow: hidden;
 
     width: 70%;
-    height: 6vh;
+    min-height: max(6vh, 2.75rem);
+    padding: .5rem;
+    gap: .35rem;
     margin-top: 2vh;
 
     display: flex;
@@ -209,7 +212,7 @@
 
     color: #C72C2C;
     font-family: 'Poppins', sans-serif;
-    font-size: .8rem;
+    font-size: 0.8625rem;
     text-align: center;
     font-weight: 700;
 
