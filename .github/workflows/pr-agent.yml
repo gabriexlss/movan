@@ -63,9 +63,9 @@ jobs:
                   config.max_model_tokens: "1048576"
                   config.max_output_tokens: "65536"
                   config.reasoning_effort: "high"
-                  config.additional_reasoning_effort_models: '["gemini/gemini-3.8-flash"]'
+                  config.additional_reasoning_effort_models: '["gemini/gemini-4-argon"]'
                   config.temperature: "1.0"
-                  config.no_temperature_models: '["gemini/gemini-3.8-flash"]'
+                  config.no_temperature_models: '["gemini/gemini-4-argon"]'
 
                   # Usa inferência Flex do Gemini
                   litellm.extra_body: '{"service_tier":"standard"}'
