@@ -1,51 +1,7 @@
 import { Request, Response } from "express"
 import { database } from "../db/postgre.js"
 import { Motorista } from "../models/motorista.model.js";
-import { BUCKET_NAME, r2 } from "../db/r2.js";
-import { DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
-
-// função feita pelo goat gpt 6.1 Sol
-async function deletarPasta(prefix: string) {
-    if (!prefix.trim()) {
-        throw new Error("Prefixo inválido");
-    }
-
-    const Prefix = prefix.endsWith("/") ? prefix : `${prefix}/`;
-    const Bucket = BUCKET_NAME;
-
-    let total = 0;
-
-    while (true) {
-        const resultado = await r2.send(
-            new ListObjectsV2Command({
-                Bucket,
-                Prefix,
-                MaxKeys: 1000
-            })
-        );
-
-        const arquivos = (resultado.Contents ?? [])
-            .filter(obj => obj.Key !== undefined)
-            .map(obj => ({ Key: obj.Key! }));
-
-        if (arquivos.length === 0) break;
-
-        const exclusao = await r2.send(
-            new DeleteObjectsCommand({
-                Bucket,
-                Delete: { Objects: arquivos }
-            })
-        );
-
-        if (exclusao.Errors?.length) {
-            throw new Error("Falha ao excluir alguns arquivos do R2");
-        }
-
-        total += arquivos.length;
-    }
-
-    return total;
-}
+import { deletarPastaR2 } from "../utils/deletarPastaR2.js";
 
 export const controllerSistema = {
     // Rotina de limpeza de usuarios que estão com a conta agendada para deleção tem mais de 30 dias.
@@ -63,7 +19,7 @@ export const controllerSistema = {
                 const key = `motoristas/${usuario.id}`
 
                 // chamo a função god feita pelo chatgpt ja que o maldito cloudflare não aceita deletar uma pasta toda
-                arquivosDeletados += await deletarPasta(key)
+                arquivosDeletados += await deletarPastaR2(key)
 
                 // agr sim excluo do banco de dados
                 await database.query(`DELETE FROM motorista WHERE id = $1`, [usuario.id])
