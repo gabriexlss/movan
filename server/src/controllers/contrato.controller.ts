@@ -12,6 +12,8 @@ import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { gerarContratoPdf } from "../services/gerarPDF.js";
 import { Clausula } from "../models/clausula.model.js";
 import { Motorista } from "../models/motorista.model.js";
+import { Responsavel } from "../models/responsavel.model.js";
+import { deletarR2 } from "../utils/deletarR2.js";
 
 const substituirDadosClausula = (texto: string, substituicoes: Record<string, string>) => {
     // Percorre o objeto trocando tudo no texto
@@ -554,11 +556,11 @@ export const controllerContrato = {
             const DocumentoResposta = await cliente.query<ContratoDocumento>(
                 `
                 INSERT INTO contrato_documento
-                (hash_documento, caminho_arquivo, contrato_id, responsavel_id, status_documento)
-                VALUES ($1, $2, $3, $4, $5)
+                (hash_documento, caminho_arquivo, contrato_id, responsavel_id, status_documento, versao)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING *
                 `,
-                [hashDocumento, localizacaoPDF, contratoID, responsavelID, 'ENVIADO']
+                [hashDocumento, localizacaoPDF, contratoID, responsavelID, 'ENVIADO', 1]
             )
 
             const ContratoDocumento = DocumentoResposta.rows[0]!
@@ -615,7 +617,7 @@ export const controllerContrato = {
     // controller pro responsavel visualizar o contrato que irá assinar
     visualizarContrato: async (req: Request, res: Response) => {
         // pegando o token do body
-        const { tokenBruto } = req.params
+        const { token: tokenBruto } = req.params
 
         // verifica se o token existe
         if(!tokenBruto){
@@ -657,7 +659,8 @@ export const controllerContrato = {
             // devolvendo o usuario
             return res.status(200).json({
                 msg: "Dados Obtidos com Sucesso",
-                pdf: contratoDocumento.caminho_arquivo
+                pdf: contratoDocumento.caminho_arquivo,
+                token: token
             })
 
         }catch(erro){
@@ -666,10 +669,172 @@ export const controllerContrato = {
                 msg: "Erro Interno do Servidor"
             })
         }
-    }
-
+    },
     // controller para o responsável assinar um contrato.
-    /*assinarContrato: async (req: Request, res: Response) => {
+    assinarContrato: async (req: Request, res: Response) => {
+        // pegando a imagem do responsavel
+        const assinatura = req.file
 
-    } */
+        // pegando o token
+        const { token: tokenBruto } = req.params
+
+        // valida se a assinatura (imagem) foi enviada
+        if(!assinatura){
+            return res.status(400).json({
+                msg: "A Assinatura é necessaria para assinar contrato."
+            })
+        }
+
+        // valida se token bruto e id do motorista foram enviados
+        if(!tokenBruto){
+            return res.status(400).json({
+                msg: "Token é necessario para assinar contrato."
+            })
+        }
+        // pegando o token e gerando seu hash
+        const token = tokenBruto.toString().trim()
+        const tokenHash  = createHash('sha256').update(token).digest('hex')
+
+        // iniciando conexão
+        const cliente = await database.connect().catch((erro) => {
+            console.error("erro ao iniciar conexão ao banco de dados no endpoint de assinar contrato, erro: ", erro)
+            return undefined
+        })
+        if(!cliente){
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
+        let LinkAssinatura: LinkAssinatura | undefined
+        let Responsavel: Responsavel | undefined
+        let ContratoDocumento: ContratoDocumento | undefined
+
+        // buscando os dados que vou precisar                                                                                                                                                                                                                  
+        try{
+            // inicia transação
+            await cliente.query('BEGIN')
+
+            // primeiro vou buscar o link assinatura, inclusive com todos aqueles padrões chatos
+            const { rows: [dadosAssinatura] } = await cliente.query<LinkAssinatura>(
+                `
+                SELECT * FROM link_assinatura
+                WHERE token_hash = $1 AND revogado_em IS NULL AND utilizado_em IS NULL AND expira_em > now()
+                ORDER BY criado_em DESC
+                `,
+                [tokenHash]
+            )
+            LinkAssinatura = dadosAssinatura
+            
+            // verifico se achou o link
+            if(!LinkAssinatura){
+                return res.status(404).json({
+                    msg: "Contrato não encontrado com o token fornecido, ou token não é mais válido."
+                })
+            }
+            // agr busco os dados do responsavel
+            const { rows: [dadosResponsavel] } = await cliente.query<Responsavel>(
+                `
+                SELECT * FROM responsavel
+                WHERE id = $1
+                `,
+                [LinkAssinatura.responsavel_id]
+            )
+            Responsavel = dadosResponsavel
+            if(!Responsavel){
+                throw new Error("Responsável não encontrado")
+            }
+            // agr busco os dados do contrato documento
+            const { rows: [dadosDocumento] } = await cliente.query<ContratoDocumento>(
+                `
+                SELECT * FROM contrato_documento
+                WHERE id = $1
+                `,
+                [LinkAssinatura.contrato_documento_id]
+            )
+            ContratoDocumento = dadosDocumento
+            if(!ContratoDocumento){
+                throw new Error("Documento do contrato não encontrado")
+            }
+        }catch(erro){
+            await cliente.query('ROLLBACK')
+            cliente.release()
+            console.error("erro ao buscar dados necessarios no bd no endpoint de assinar contrato, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
+        // criando o caminho da assinatura do responsavel
+        const key = `motoristas/${Responsavel.motorista_id}/responsavel/${Responsavel.id}/assinatura/${randomUUID()}.webp`
+
+        // pegando IP do usuario
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress
+        const userAgent = req.get('User-Agent')
+
+        try{
+            // atualizando o link assinatura pra marcar como utilizado e além disso registrar coisas
+            await cliente.query(
+                `
+                UPDATE link_assinatura
+                SET utilizado_em = now(), agente_usuario = $1, endereco_ip = $2
+                WHERE token_hash = $3
+                `,
+                [userAgent, ip, tokenHash]
+            )
+
+            // enviando assinatura pro cloudflare
+            await r2.send(new PutObjectCommand({
+                Bucket: BUCKET_NAME,
+                Key: key,
+                Body: assinatura.buffer,
+                ContentType: assinatura.mimetype
+            }))
+
+            // criando a assinatura do responsavel pro contrato.
+            const caminhoArquivo = `${CDN_URL}/${key}`
+            await cliente.query(
+                `
+                INSERT INTO assinatura_contrato
+                (tipo_signatario, assinatura_imagem, contrato_documento_id, link_assinatura_id)
+                VALUES ($1, $2, $3, $4)
+                `,
+                ['RESPONSAVEL', caminhoArquivo, ContratoDocumento.id, LinkAssinatura.id]
+            )
+
+            // atualizando o contrato documento
+            await cliente.query(
+                `
+                UPDATE contrato_documento
+                SET status_documento = $1
+                WHERE id = $2
+                `,
+                ['ASSINADO', ContratoDocumento.id]
+            )
+
+            // atualizando o contrato
+            await cliente.query(
+                `
+                UPDATE contrato
+                SET status = $1, atualizado_em = now()
+                WHERE id = $2
+                `,
+                ['ATIVO', ContratoDocumento.contrato_id]
+            )
+            // commito coisas no banco
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Contrato Assinado."
+            })
+
+        }catch(erro){
+            await deletarR2(key)
+            await cliente.query('ROLLBACK')
+            console.error("erro ao atualizar dados no endpoint de assinar contrato, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }finally{
+            cliente.release()
+        }
+    }
 }

@@ -32,6 +32,9 @@ router.post('/finalizar-contrato/:contrato_id', middlewareAutenticar, middleware
 // rota get pro responsavel obter os dados por meio de um token.
 router.get('/assinar/:token', controllerContrato.visualizarContrato)
 
+// rota post pro responsavel enviar sua assinatura e ativar o contrato por meio de um token.
+router.post('/assinar/:token', receberImagem.single('assinatura'), controllerContrato.assinarContrato)
+
 // -----------CLAUSULAS-----------------
 // cria uma clausula personalizada para um contrato, ou seja, só existe para aquele contrato em especifico.
 router.post('/:contrato_id/clausula', middlewareAutenticar, middlewareContrato, controllerClausula.criarClausula)
