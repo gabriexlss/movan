@@ -10,6 +10,8 @@ import { BUCKET_NAME, CDN_URL, r2 } from "../../db/r2.js";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { deletarR2 } from "../../utils/deletarR2.js";
+import { obterArquivoR2, obterChaveR2 } from "../../utils/obterArquivoR2.js";
+import { assinarContratoPdf } from "../../services/assinaturaPDF.js";
 
 export const controllerAssinatura = {
     // adicionar assinatura do motorista.
@@ -132,11 +134,13 @@ export const controllerAssinatura = {
                 [link.contrato_documento_id]
             )
             const contratoDocumento = documentos[0]!
+            const pdf = new URL(contratoDocumento.caminho_arquivo)
+            pdf.searchParams.set('v', contratoDocumento.hash_documento)
 
             // devolvendo o usuario
             return res.status(200).json({
                 msg: "Dados Obtidos com Sucesso",
-                pdf: contratoDocumento.caminho_arquivo,
+                pdf: pdf.toString(),
                 token: token
             })
 
@@ -184,6 +188,9 @@ export const controllerAssinatura = {
         }
         let key: string | undefined
         let assinaturaEnviada = false
+        let pdfOriginal: Buffer | undefined
+        let pdfKey: string | undefined
+        let pdfSubstituido = false
 
         // verifica os dados e registra a assinatura na mesma transação
         try{
@@ -261,6 +268,26 @@ export const controllerAssinatura = {
                 })
             }
 
+            // usa o PDF que foi finalizado, preservando o texto e a assinatura do motorista
+            pdfOriginal = await obterArquivoR2(ContratoDocumento.caminho_arquivo)
+            pdfKey = obterChaveR2(ContratoDocumento.caminho_arquivo)
+            const hashOriginal = createHash('sha256').update(pdfOriginal).digest('hex')
+            if(hashOriginal !== ContratoDocumento.hash_documento){
+                throw new Error("O PDF armazenado não corresponde ao hash do documento.")
+            }
+
+            // usa a assinatura registrada para esse documento, sem pegar uma assinatura mais recente do motorista
+            const { rows: [assinaturaMotorista] } = await cliente.query<{ assinatura_imagem: string }>(
+                "SELECT assinatura_imagem FROM assinatura_contrato WHERE contrato_documento_id = $1 AND tipo_signatario = $2",
+                [ContratoDocumento.id, 'MOTORISTA']
+            )
+            if(!assinaturaMotorista){
+                throw new Error("Assinatura do motorista não encontrada para esse documento.")
+            }
+            const imagemMotorista = await obterArquivoR2(assinaturaMotorista.assinatura_imagem)
+            const pdfAssinado = await assinarContratoPdf(pdfOriginal, assinatura.buffer, imagemMotorista)
+            const hashDocumento = createHash('sha256').update(pdfAssinado).digest('hex')
+
             // criando o caminho da assinatura do responsavel
             key = `motoristas/${Responsavel.motorista_id}/responsavel/${Responsavel.id}/assinatura/${randomUUID()}.webp`
 
@@ -285,13 +312,13 @@ export const controllerAssinatura = {
             }
 
             // enviando assinatura pro cloudflare
+            assinaturaEnviada = true
             await r2.send(new PutObjectCommand({
                 Bucket: BUCKET_NAME,
                 Key: key,
                 Body: assinatura.buffer,
                 ContentType: assinatura.mimetype
             }))
-            assinaturaEnviada = true
 
             // criando a assinatura do responsavel pro contrato.
             const caminhoArquivo = `${CDN_URL}/${key}`
@@ -308,10 +335,10 @@ export const controllerAssinatura = {
             await cliente.query(
                 `
                 UPDATE contrato_documento
-                SET status_documento = $1
+                SET status_documento = $1, hash_documento = $3
                 WHERE id = $2
                 `,
-                ['ASSINADO', ContratoDocumento.id]
+                ['ASSINADO', ContratoDocumento.id, hashDocumento]
             )
 
             // atualizando o contrato
@@ -326,15 +353,42 @@ export const controllerAssinatura = {
             if(!atualizacaoContrato.rowCount){
                 throw new Error("O Contrato não está mais aguardando assinatura.")
             }
+
+            // sobrepõe o PDF no mesmo caminho do R2, agora com as duas assinaturas
+            pdfSubstituido = true
+            await r2.send(new PutObjectCommand({
+                Bucket: BUCKET_NAME,
+                Key: pdfKey,
+                Body: pdfAssinado,
+                ContentType: 'application/pdf',
+                CacheControl: 'no-store, max-age=0'
+            }))
+
             // commito coisas no banco
             await cliente.query('COMMIT')
 
+            const pdf = new URL(ContratoDocumento.caminho_arquivo)
+            pdf.searchParams.set('v', hashDocumento)
             return res.status(200).json({
-                msg: "Contrato Assinado."
+                msg: "Contrato Assinado.",
+                pdf: pdf.toString()
             })
 
         }catch(erro){
-            await cliente.query('ROLLBACK')
+            await cliente.query('ROLLBACK').catch((erro: unknown) => {
+                console.error("erro ao reverter a assinatura do contrato, erro: ", erro)
+            })
+            if(pdfSubstituido && pdfOriginal && pdfKey){
+                await r2.send(new PutObjectCommand({
+                    Bucket: BUCKET_NAME,
+                    Key: pdfKey,
+                    Body: pdfOriginal,
+                    ContentType: 'application/pdf',
+                    CacheControl: 'no-store, max-age=0'
+                })).catch((erro: unknown) => {
+                    console.error("erro ao restaurar o PDF anterior do contrato, erro: ", erro)
+                })
+            }
             if(assinaturaEnviada && key){
                 await deletarR2(key).catch((erro: unknown) => {
                     console.error("erro ao excluir imagem de uma assinatura que não foi concluída, erro: ", erro)

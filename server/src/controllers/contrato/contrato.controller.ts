@@ -11,10 +11,12 @@ import { controllerClausula } from "./clausula.controller.js";
 import type { AssinaturaMotorista } from "../../models/contrato/assinatura.model.js";
 import { BUCKET_NAME, CDN_URL, r2 } from "../../db/r2.js";
 import { createHash, randomBytes, randomUUID } from "crypto";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { gerarContratoPdf } from "../../services/gerarPDF.js";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { ClausulaMuitoLongaError, gerarContratoPdf } from "../../services/gerarPDF.js";
 import { Clausula } from "../../models/contrato/clausula.model.js";
 import { Motorista } from "../../models/motorista.model.js";
+import { obterArquivoR2 } from "../../utils/obterArquivoR2.js";
+import { deletarR2 } from "../../utils/deletarR2.js";
 
 const substituirDadosClausula = (texto: string, substituicoes: Record<string, string>) => {
     // Percorre o objeto trocando tudo no texto
@@ -356,43 +358,34 @@ export const controllerContrato = {
         const responsavelID = req.contratoResponsavelID
 
         // iniciando a constante da conexão do usuario.
-        const cliente = await database.connect()
-
-        // iniciando variavel pra guardar a assinatura do motorista.
-        let assinaturaMotorista: AssinaturaMotorista
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("erro ao iniciar conexão no endpoint de concluir contrato, erro: ", erro)
+            return undefined
+        })
+        if(!cliente){
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+        const key = `motoristas/${motoristaID}/contrato/${randomUUID()}.pdf`
+        let pdfEnviado = false
 
         // verificando se o motorista já tem assinatura.
         try {
             // iniciando transação.
             await cliente.query('BEGIN')
 
-            const resposta = await cliente.query<AssinaturaMotorista>(
+            const { rows: [assinaturaMotorista] } = await cliente.query<AssinaturaMotorista>(
                 "SELECT * FROM assinatura_motorista WHERE motorista_id = $1",
                 [motoristaID]
             )
-            const assinatura = resposta.rows[0]
-
-            // se ja tiver assinatura, marco que ela já existe pq ai so vamos atualiza-la
-            if (!assinatura) {
+            if (!assinaturaMotorista) {
+                await cliente.query('ROLLBACK')
                 return res.status(401).json({
                     msg: "O Motorista precisa ter sua assinatura cadastrada antes de finalizar um contrato."
                 })
-            } else {
-                assinaturaMotorista = assinatura
             }
-        } catch (erro) {
-            cliente.release()
-            console.error("erro no endpoint de Concluir contrato ao verificar se motorista já possui assinatura, erro: ", erro)
-            return res.status(500).json({
-                msg: "Erro Interno do Servidor."
-            })
-        }
-        // setando o caminho que o pdf vai ter
-        const key = `motoristas/${motoristaID}/contrato/${randomUUID()}.pdf`
 
-        //agr sim vem a operação de vdd, um milhão de querys em um monte de tabelas diferentes, misericordia.
-
-        try {
             // primeiro vamos atualizar o status da tabela contrato de rascunho pra aguardando assinatura.
             const atualizacao = await cliente.query(
                 `
@@ -461,7 +454,9 @@ export const controllerContrato = {
             // criando objeto final
             const ContratoeClausulas = {
                 ...DadosContrato,
-                clausulas: clausulasFinais
+                clausulas: clausulasFinais,
+                nome_motorista: DadosMotorista.nome,
+                assinatura_motorista: await obterArquivoR2(assinaturaMotorista.caminho_arquivo)
             }
             const PDFBuffer = await gerarContratoPdf(ContratoeClausulas)
 
@@ -471,12 +466,14 @@ export const controllerContrato = {
             // informando o caminho do pdf no bucket e na internet.
             const localizacaoPDF = `${CDN_URL}/${key}`
             // hora de enviar esse pdf pro cloudflare
+            pdfEnviado = true
             await r2.send(
                 new PutObjectCommand({
                     Bucket: BUCKET_NAME,
                     Key: key,
                     Body: PDFBuffer,
-                    ContentType: 'application/pdf'
+                    ContentType: 'application/pdf',
+                    CacheControl: 'no-store, max-age=0'
                 })
             )
 
@@ -527,13 +524,19 @@ export const controllerContrato = {
                 link: `https://www.movan.org/assinar/${tokenLink}`
             })
         } catch (erro) {
-            await r2.send(
-                new DeleteObjectCommand({
-                    Bucket: BUCKET_NAME,
-                    Key: key
+            await cliente.query('ROLLBACK').catch((erro: unknown) => {
+                console.error("erro ao reverter a finalização do contrato, erro: ", erro)
+            })
+            if(pdfEnviado){
+                await deletarR2(key).catch((erro: unknown) => {
+                    console.error("erro ao excluir PDF de um contrato que não foi finalizado, erro: ", erro)
                 })
-            )
-            await cliente.query('ROLLBACK')
+            }
+            if(erro instanceof ClausulaMuitoLongaError){
+                return res.status(400).json({
+                    msg: erro.message
+                })
+            }
             console.error("erro no endpoint de Concluir contrato ao processar logica principal para concluir contrato, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."

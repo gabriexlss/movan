@@ -1,10 +1,14 @@
 import { fileURLToPath } from "node:url";
-import { Document, Font, Page, Path, Svg, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Font, Image, Page, Path, Svg, Text, TextInput, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { PDFDocument } from "pdf-lib";
 import type { ContratoView } from "../models/contrato/contratoView.model.js";
 import type { Clausula } from "../models/contrato/clausula.model.js";
+import { CAMPO_ASSINATURA_RESPONSAVEL, converterAssinaturaPng } from "./assinaturaPDF.js";
 
 export interface DadosContrato extends ContratoView {
     clausulas: Clausula[];
+    assinatura_motorista: Buffer;
+    nome_motorista: string;
 }
 
 // Assets do próprio servidor: funcionam tanto em src/services quanto em dist/services.
@@ -89,10 +93,10 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 18,
     },
-    resumoValor: { width: "38%", paddingRight: 12 },
+    resumoValor: { width: "38%", paddingHorizontal: 12, justifyContent: "center", alignItems: "center" },
     resumoDetalhes: { flex: 1, borderLeftWidth: 1, borderLeftColor: "#527BB9", paddingLeft: 16 },
     resumoRotulo: { fontSize: 7, color: cores.branco, marginBottom: 4, letterSpacing: 0.5 },
-    valor: { fontSize: 21, fontWeight: 600, color: cores.amarelo },
+    valor: { fontSize: 21, fontWeight: 600, color: cores.amarelo, textAlign: "center" },
     resumoTexto: { fontSize: 9, color: cores.branco, fontWeight: 600 },
     vigencia: { marginTop: 9 },
     secao: { fontSize: 12, fontWeight: 600, color: cores.azul, marginBottom: 8 },
@@ -123,6 +127,13 @@ const styles = StyleSheet.create({
     subtitulo: { flex: 1, fontWeight: 600, fontSize: 10, color: cores.azul, paddingTop: 2 },
     paragrafo: { textAlign: "justify" },
     vazio: { color: cores.secundario },
+    assinaturas: { marginTop: 20 },
+    assinaturasCampos: { flexDirection: "row", marginTop: 12 },
+    assinaturaCampo: { width: "50%", paddingHorizontal: 12, alignItems: "center" },
+    assinaturaImagem: { width: 220, height: 80, objectFit: "contain" },
+    assinaturaLinha: { width: "100%", borderTopWidth: 0.7, borderTopColor: cores.azul, marginTop: 6, paddingTop: 6 },
+    assinaturaNome: { fontSize: 9, fontWeight: 600, textAlign: "center" },
+    assinaturaTipo: { fontSize: 8, color: cores.secundario, textAlign: "center", marginTop: 3 },
     rodape: {
         position: "absolute",
         bottom: 25,
@@ -149,6 +160,18 @@ function formatarData(data: string | Date): string {
     // As datas do contrato são civis (YYYY-MM-DD), sem conversão de fuso horário.
     const [ano, mes, dia] = data.slice(0, 10).split("-");
     return `${dia}/${mes}/${ano}`;
+}
+
+function ClausulaDocumento({ clausula, indice }: { clausula: Clausula; indice: number }) {
+    return (
+        <View style={styles.clausula} wrap={false}>
+            <View style={styles.tituloClausula}>
+                <Text style={styles.indice}>{String(indice + 1).padStart(2, "0")}</Text>
+                <Text style={styles.subtitulo}>{clausula.titulo}</Text>
+            </View>
+            <Text style={styles.paragrafo}>{clausula.conteudo}</Text>
+        </View>
+    );
 }
 
 function ContratoDocumento({ dados }: { dados: DadosContrato }) {
@@ -230,14 +253,28 @@ function ContratoDocumento({ dados }: { dados: DadosContrato }) {
                 <Text style={styles.secao} minPresenceAhead={70}>Condições do contrato</Text>
                 {dados.clausulas.length === 0 && <Text style={styles.vazio}>Nenhuma cláusula cadastrada.</Text>}
                 {dados.clausulas.map((clausula, indice) => (
-                    <View key={clausula.id} style={styles.clausula}>
-                        <View style={styles.tituloClausula} wrap={false} minPresenceAhead={42}>
-                            <Text style={styles.indice}>{String(indice + 1).padStart(2, "0")}</Text>
-                            <Text style={styles.subtitulo}>{clausula.titulo}</Text>
-                        </View>
-                        <Text style={styles.paragrafo} orphans={3} widows={3}>{clausula.conteudo}</Text>
-                    </View>
+                    <ClausulaDocumento key={clausula.id} clausula={clausula} indice={indice} />
                 ))}
+
+                <View style={styles.assinaturas} wrap={false}>
+                    <Text style={styles.secao}>Assinaturas</Text>
+                    <View style={styles.assinaturasCampos}>
+                        <View style={styles.assinaturaCampo}>
+                            <Image src={{ data: dados.assinatura_motorista, format: 'png' }} style={styles.assinaturaImagem} />
+                            <View style={styles.assinaturaLinha}>
+                                <Text style={styles.assinaturaNome}>{dados.nome_motorista}</Text>
+                                <Text style={styles.assinaturaTipo}>Motorista</Text>
+                            </View>
+                        </View>
+                        <View style={styles.assinaturaCampo}>
+                            <TextInput name={CAMPO_ASSINATURA_RESPONSAVEL} readOnly value="" style={styles.assinaturaImagem} />
+                            <View style={styles.assinaturaLinha}>
+                                <Text style={styles.assinaturaNome}>{dados.nome_responsavel}</Text>
+                                <Text style={styles.assinaturaTipo}>Responsável · CPF {dados.cpf_responsavel}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
 
                 <View style={styles.rodape} fixed>
                     <Text><Text style={styles.rodapeMarca}>MOVAN</Text>  /  Contrato nº {numeroContrato}</Text>
@@ -249,5 +286,27 @@ function ContratoDocumento({ dados }: { dados: DadosContrato }) {
 }
 
 export async function gerarContratoPdf(dados: DadosContrato): Promise<Buffer> {
-    return renderToBuffer(<ContratoDocumento dados={dados} />);
+    // Mede os blocos na mesma largura do A4 para não gerar cláusulas cortadas.
+    if(dados.clausulas.length){
+        const medidas = await renderToBuffer(
+            <Document>
+                {dados.clausulas.map((clausula, indice) => (
+                    <Page key={clausula.id} size={{ width: 595.28 }} wrap={false} style={[styles.pagina, { paddingTop: 0, paddingBottom: 0 }]}>
+                        <ClausulaDocumento clausula={clausula} indice={indice} />
+                    </Page>
+                ))}
+            </Document>
+        );
+        const documento = await PDFDocument.load(medidas);
+        for(const [indice, pagina] of documento.getPages().entries()){
+            if(pagina.getHeight() > 841.89 - 126 - 64){
+                throw new ClausulaMuitoLongaError(`A cláusula "${dados.clausulas[indice]!.titulo}" excede uma página A4. Reduza o conteúdo para manter a cláusula inteira.`);
+            }
+        }
+    }
+
+    const assinatura = await converterAssinaturaPng(dados.assinatura_motorista);
+    return renderToBuffer(<ContratoDocumento dados={{ ...dados, assinatura_motorista: assinatura }} />);
 }
+
+export class ClausulaMuitoLongaError extends Error {}
