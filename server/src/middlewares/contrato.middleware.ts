@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ContratoParamsSchema } from "../models/utils.model.js";
 import { database } from "../db/postgre.js";
-import { Contrato } from "../models/contrato.model.js";
+import { Contrato } from "../models/contrato/contrato.model.js";
 
 export const middlewareContrato = async (req: Request, res: Response, next: NextFunction) => {
     // pega o ID dos parametros.

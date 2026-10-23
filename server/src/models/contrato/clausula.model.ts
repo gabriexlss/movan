@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "./utils.model.js";
+import { UtilSchema } from "../utils.model.js";
 
 // Schema da Clausula do contrato
 const ClausulaContratoSchema = z.object({
