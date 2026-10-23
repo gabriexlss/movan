@@ -8,13 +8,13 @@ const errorMessages = {
 	400: {
 		code: "400",
 		title: "Requisição inválida",
-		desc: "Os dados enviados foram preenchidos indevidamente. Verifique as informações e tente novamente"
+		desc: "Os dados enviados são inválidos. Verifique as informações e tente novamente."
 	},
 
 	401: {
 		code: "401",
 		title: "Não autorizado",
-		desc: "Não foi possível validar suas credenciais. Tente novamente mais tarde."
+		desc: "Não foi possível validar suas credenciais. Faça login novamente para continuar."
 	},
 
 	403: {
@@ -32,7 +32,7 @@ const errorMessages = {
 	409: {
 		code: "409",
 		title: "Conflito de dados",
-		desc: "Operação não pode ser concluída pois existem conflitos nos dados."
+		desc: "A operação não pode ser concluída, pois existem conflitos nos dados."
 	},
 
 	413: {
@@ -79,7 +79,7 @@ const ErrorPage = () => {
 			<h2>{error.title}</h2>
 			<p>{error.desc}</p>
 
-			<Link to="/">Voltar ao Início</Link>
+			<Link to="/">Voltar ao início</Link>
 		</div>
 	)
 }
