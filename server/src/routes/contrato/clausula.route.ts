@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { controllerClausula } from "../../controllers/clausula.controller.js";
+import { controllerClausula } from "../../controllers/contrato/clausula.controller.js";
 import { middlewareAutenticar } from "../../middlewares/autenticacao.middleware.js";
 import { middlewareContrato } from "../../middlewares/contrato.middleware.js";
 

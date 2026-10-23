@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { middlewareAutenticar } from "../../middlewares/autenticacao.middleware.js";
-import { controllerContrato } from "../../controllers/contrato.controller.js";
+import { controllerContrato } from "../../controllers/contrato/contrato.controller.js";
 import { middlewareContrato } from "../../middlewares/contrato.middleware.js";
 import rotasAssinatura from "./assinatura.route.js";
 import rotasClausula from "./clausula.route.js";
