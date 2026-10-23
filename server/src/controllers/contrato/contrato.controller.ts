@@ -314,34 +314,51 @@ export const controllerContrato = {
         const motoristaID = req.userId
 
         let query: string
-        const valores: (string | number)[] = []
+        const valores: number[] = [motoristaID]
 
-        if (!contratoID) {
-            // não tem ID do contrato, mostrando todos os contratos de forma resumida
-            query = 'SELECT * FROM vw_resumo_contrato WHERE motorista_id = $1'
-            valores.push(motoristaID)
-        } else {
+        if (contratoID) {
             query = 'SELECT * FROM vw_detalhes_contrato WHERE motorista_id = $1 AND contrato_id = $2'
-            valores.push(motoristaID)
             valores.push(contratoID)
+        } else {
+            query = 'SELECT * FROM vw_resumo_contrato WHERE motorista_id = $1'
         }
 
         try {
             const { rows: resultado } = await database.query(query, valores)
-            let contrato
-
-            // verifica se é um contrato detalhado ou varios resumidos
             if (contratoID && resultado.length === 0) {
                 return res.status(404).json({
                     msg: "Nenhum contrato encontrado."
                 })
-            } else if (contratoID) {
-                const clausulas = await controllerClausula.obterClausulas(contratoID)
-                contrato = resultado[0]
-                contrato.clausula = clausulas
-            } else {
-                contrato = resultado
             }
+
+            const queryClausulas = `
+            SELECT id, titulo, conteudo, ordem, origem, editavel
+            FROM contrato_clausula
+            WHERE contrato_id = $1
+            ORDER BY ordem ASC
+            `
+            const queryDocumento = `
+            SELECT caminho_arquivo, hash_documento
+            FROM contrato_documento
+            WHERE contrato_id = $1
+            ORDER BY gerado_em DESC, id DESC
+            LIMIT 1
+            `
+
+            // busca as cláusulas e o documento separadamente para cada contrato encontrado.
+            for (const dados of resultado) {
+                const { rows: clausulas } = await database.query(queryClausulas, [dados.contrato_id])
+                const { rows: [documento] } = await database.query<ContratoDocumento>(queryDocumento, [dados.contrato_id])
+
+                dados.clausula = clausulas
+                dados.pdf = null
+                if (documento?.caminho_arquivo) {
+                    const endereco = new URL(documento.caminho_arquivo)
+                    endereco.searchParams.set('v', documento.hash_documento)
+                    dados.pdf = endereco.toString()
+                }
+            }
+            const contrato = contratoID ? resultado[0] : resultado
 
             return res.status(200).json({
                 msg: "Dados obtidos com sucesso.",
