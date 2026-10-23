@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { Clausula, ClausulaMotorista, CriarClausulaSchema, EditarClausulaSchema, MoverClausulasSchema } from "../models/clausula.model.js";
+import { Clausula, ClausulaMotorista, CriarClausulaSchema, EditarClausulaSchema, MoverClausulasSchema } from "../models/contrato/clausula.model.js";
 import { database } from "../db/postgre.js";
 import { PoolClient } from "pg";
-import { Contrato } from "../models/contrato.model.js";
+import { Contrato } from "../models/contrato/contrato.model.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";

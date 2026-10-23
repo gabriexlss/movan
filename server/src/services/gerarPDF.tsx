@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { Document, Font, Page, Path, Svg, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
-import type { ContratoView } from "../models/contrato.model.js";
-import type { Clausula } from "../models/clausula.model.js";
+import type { ContratoView } from "../models/contrato/contratoView.model.js";
+import type { Clausula } from "../models/contrato/clausula.model.js";
 
 export interface DadosContrato extends ContratoView {
     clausulas: Clausula[];

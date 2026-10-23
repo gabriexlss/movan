@@ -13,6 +13,6 @@ router.get('/assinar/:token', controllerContrato.visualizarContrato)
 router.post('/assinar/:token', receberImagem.single('assinatura'), controllerContrato.assinarContrato)
 
 // Revoga o link anterior e cria outro.
-router.post('/recriar-link', middlewareAutenticar, controllerContrato.recriarLink)
+router.post('/recriar-link/:id', middlewareAutenticar, controllerContrato.recriarLink)
 
 export default router

@@ -4,7 +4,7 @@ import rotasSistema from './routes/system.route.js'
 import rotasResponsavel from "./routes/responsavel.route.js"
 import rotasEscola from "./routes/escola.route.js"
 import rotasAluno from "./routes/aluno.route.js"
-import rotasContrato from "./routes/contrato.route.js"
+import rotasContrato from "./routes/contrato/contrato.route.js"
 import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
 
 const router = Router();

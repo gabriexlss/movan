@@ -1,16 +1,20 @@
 import { Request, Response } from "express";
-import { ContratoDocumento, ContratoView, CriarContratoSchema, EditarContratoSchema } from "../models/contrato.model.js";
+import { CriarContratoSchema, EditarContratoSchema } from "../models/contrato/contrato.model.js";
+import type { Contrato } from "../models/contrato/contrato.model.js";
+import type { ContratoDocumento } from "../models/contrato/contratoDocumento.model.js";
+import type { ContratoView } from "../models/contrato/contratoView.model.js";
 import { database } from "../db/postgre.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 import { atualizarClausulasContrato } from "../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { controllerClausula } from "./clausula.controller.js";
-import { AssinaturaMotorista, LinkAssinatura } from "../models/assinatura.model.js";
+import type { AssinaturaMotorista } from "../models/contrato/assinatura.model.js";
+import type { LinkAssinatura } from "../models/contrato/linkAssinatura.model.js";
 import { BUCKET_NAME, CDN_URL, r2 } from "../db/r2.js";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { gerarContratoPdf } from "../services/gerarPDF.js";
-import { Clausula } from "../models/clausula.model.js";
+import { Clausula } from "../models/contrato/clausula.model.js";
 import { Motorista } from "../models/motorista.model.js";
 import { Responsavel } from "../models/responsavel.model.js";
 import { deletarR2 } from "../utils/deletarR2.js";
@@ -830,6 +834,118 @@ export const controllerContrato = {
             await deletarR2(key)
             await cliente.query('ROLLBACK')
             console.error("erro ao atualizar dados no endpoint de assinar contrato, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }finally{
+            cliente.release()
+        }
+    },
+    // função para revogar um link e criar outro
+    recriarLink: async (req: Request, res: Response) => {
+        // pega o id do contrato dos parametros da requisição
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        // valida
+        if(!idBruto.success){
+            return res.status(400).json({
+                msg: "Um ID válido de contrato deve ser enviado.",
+                erro: idBruto.error.format()
+            })
+        }
+        // desestruturação e criação de variaveis
+        const { id: ContratoID } = idBruto.data
+        const motoristaID = req.userId
+
+        // iniciando conexão
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("erro ao iniciar conexão ao banco de dados no endpoint de recriar link, erro: ", erro)
+            return undefined
+        })
+        if(!cliente){
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
+
+        // revoga o link anterior e cria o novo na mesma transação
+        try{
+            await cliente.query('BEGIN')
+
+            // verifica se o contrato pertence ao motorista e trava ele durante a operação
+            const { rows: [contratoDados] } = await cliente.query<Contrato>(
+                "SELECT * FROM contrato WHERE id = $1 AND motorista_id = $2 FOR UPDATE",
+                [ContratoID, motoristaID]
+            )
+            if(!contratoDados){
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Contrato não encontrado com o ID fornecido."
+                })
+            }
+            if(contratoDados.status !== 'AGUARDANDO_ASSINATURA'){
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível recriar o link de um contrato que esteja aguardando assinatura."
+                })
+            }
+
+            // pega o documento mais recente do contrato
+            const { rows: [contratoDocumento] } = await cliente.query<ContratoDocumento>(
+                `
+                SELECT * FROM contrato_documento
+                WHERE contrato_id = $1
+                ORDER BY gerado_em DESC, id DESC
+                LIMIT 1
+                FOR UPDATE
+                `,
+                [ContratoID]
+            )
+            if(!contratoDocumento){
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Documento do contrato não encontrado."
+                })
+            }
+            if(contratoDocumento.status_documento !== 'ENVIADO'){
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível recriar o link de um documento que ainda esteja aguardando assinatura."
+                })
+            }
+
+            // revoga os links anteriores que ainda não foram utilizados ou revogados
+            await cliente.query(
+                `
+                UPDATE link_assinatura
+                SET revogado_em = now()
+                WHERE contrato_documento_id = $1 AND utilizado_em IS NULL AND revogado_em IS NULL
+                `,
+                [contratoDocumento.id]
+            )
+
+            // gera o token do novo link e salva somente o hash, como na finalização do contrato
+            const tokenLink = randomBytes(32).toString("hex")
+            const hashLink = createHash("sha256").update(tokenLink).digest("hex")
+
+            await cliente.query(
+                `
+                INSERT INTO link_assinatura
+                (token_hash, expira_em, contrato_documento_id, responsavel_id)
+                VALUES ($1, now() + INTERVAL '15 days', $2, $3)
+                `,
+                [hashLink, contratoDocumento.id, contratoDocumento.responsavel_id]
+            )
+
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Link recriado com sucesso.",
+                link: `https://www.movan.org/assinar/${tokenLink}`
+            })
+        }catch(erro){
+            await cliente.query('ROLLBACK')
+            console.error("erro no endpoint de recriar link ao revogar o link anterior e criar um novo, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor"
             })
