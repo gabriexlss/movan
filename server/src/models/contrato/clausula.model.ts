@@ -67,8 +67,8 @@ export const EditarClausulaSchema = ClausulaMotoristaSchema.pick({
 }).partial()
 
 export const MoverClausulasSchema = z.object({
-    from: z.coerce.number().positive(),
-    to: z.coerce.number().positive()
+    from: z.coerce.number().int().positive(),
+    to: z.coerce.number().int().positive()
 })
 
 export type Clausula = z.infer<typeof ClausulaContratoSchema>

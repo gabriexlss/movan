@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test:cron": "npm run build && node tests/cron.test.mjs"
+    "test:cron": "npm run build && node tests/cron.test.mjs",
+    "test:contrato": "npm run build && node --experimental-test-module-mocks --test tests/contrato.e2e.mjs"
   },
   "keywords": [],
   "author": "",

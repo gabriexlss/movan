@@ -17,6 +17,7 @@ import { Clausula } from "../../models/contrato/clausula.model.js";
 import { Motorista } from "../../models/motorista.model.js";
 import { obterArquivoR2 } from "../../utils/obterArquivoR2.js";
 import { deletarR2 } from "../../utils/deletarR2.js";
+import { travarContratoRascunho } from "../../utils/travarContratoRascunho.js";
 
 const substituirDadosClausula = (texto: string, substituicoes: Record<string, string>) => {
     // Percorre o objeto trocando tudo no texto
@@ -81,6 +82,8 @@ export const controllerContrato = {
         try {
             // iniciando a transação
             await cliente.query('BEGIN')
+            // serializa a cópia com alterações nas cláusulas padrão do motorista.
+            await cliente.query('SELECT id FROM motorista WHERE id = $1 FOR NO KEY UPDATE', [motoristaID])
 
             const query = `
             INSERT INTO contrato
@@ -208,14 +211,14 @@ export const controllerContrato = {
             const query = `
             UPDATE contrato
             SET ${campos.join(', ')}, atualizado_em = now()
-            WHERE motorista_id = $${campos.length + 1} AND id = $${campos.length + 2}
+            WHERE motorista_id = $${campos.length + 1} AND id = $${campos.length + 2} AND status = 'RASCUNHO'
             `
             valores.push(motoristaID)
             valores.push(contratoID)
             const contrato = await database.query(query, valores)
             if (!contrato.rowCount) {
-                return res.status(404).json({
-                    msg: "Contrato não encontrado."
+                return res.status(409).json({
+                    msg: "Só é possível editar um contrato que esteja em rascunho."
                 })
             }
 
@@ -253,6 +256,12 @@ export const controllerContrato = {
 
         try {
             await cliente.query('BEGIN')
+            if (!await travarContratoRascunho(cliente, contratoID, motoristaID)) {
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível excluir um contrato que esteja em rascunho."
+                })
+            }
             const queryDeletarContrato = `
             DELETE FROM contrato
             WHERE id = $1 AND motorista_id = $2

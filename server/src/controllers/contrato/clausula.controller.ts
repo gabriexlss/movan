@@ -3,6 +3,7 @@ import { Clausula, CriarClausulaSchema, EditarClausulaSchema, MoverClausulasSche
 import { database } from "../../db/postgre.js";
 import { ParamsSchema } from "../../models/utils.model.js";
 import { possuiCodigoPostgres } from "../../utils/erroBanco.js";
+import { travarContratoRascunho } from "../../utils/travarContratoRascunho.js";
 
 export const controllerClausula = {
     criarClausula: async (req: Request, res: Response) => {
@@ -20,11 +21,19 @@ export const controllerClausula = {
         const { titulo, conteudo } = dadosBrutos.data
         const contratoID = req.contratoID
 
+        const cliente = await database.connect()
         try {
+            await cliente.query('BEGIN')
+            if (!await travarContratoRascunho(cliente, contratoID, req.userId)) {
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível alterar cláusulas de um contrato em rascunho."
+                })
+            }
             // primeiro buscar a ordem atual das clausulas
             const queryBuscarOrdem = "SELECT * FROM contrato_clausula WHERE contrato_id = $1 ORDER BY ordem ASC"
 
-            const { rows: contratoClausulas } = await database.query<Clausula>(queryBuscarOrdem, [contratoID])
+            const { rows: contratoClausulas } = await cliente.query<Clausula>(queryBuscarOrdem, [contratoID])
             const ordemAtual = (contratoClausulas.at(-1)?.ordem ?? 0) + 1
 
             // agr fazer a operação
@@ -35,7 +44,8 @@ export const controllerClausula = {
             `
             const valores = [titulo, conteudo, ordemAtual, true, 'PERSONALIZADO', contratoID]
 
-            await database.query(query, valores)
+            await cliente.query(query, valores)
+            await cliente.query('COMMIT')
 
             // devolve o usuario
             return res.status(201).json({
@@ -43,6 +53,7 @@ export const controllerClausula = {
             })
 
         } catch (erro) {
+            await cliente.query('ROLLBACK')
             console.error("Erro no endpoint de criar cláusula personalizada, erro: ", erro)
             if (possuiCodigoPostgres(erro, "23503")) {
                 return res.status(409).json({
@@ -52,6 +63,8 @@ export const controllerClausula = {
             return res.status(500).json({
                 msg: "Erro interno do servidor."
             })
+        } finally {
+            cliente.release()
         }
     },
     // editar uma clausula editavel do contrato pela ordem.
@@ -97,7 +110,15 @@ export const controllerClausula = {
             })
         }
 
+        const cliente = await database.connect()
         try {
+            await cliente.query('BEGIN')
+            if (!await travarContratoRascunho(cliente, contratoID, req.userId)) {
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível alterar cláusulas de um contrato em rascunho."
+                })
+            }
             const query = `
             UPDATE contrato_clausula
             SET ${campos.join(', ')}, atualizada_em = now()
@@ -107,22 +128,27 @@ export const controllerClausula = {
             valores.push(ordem)
             valores.push(true)
 
-            const edicoes = await database.query(query, valores)
+            const edicoes = await cliente.query(query, valores)
 
             if (!edicoes.rowCount) {
+                await cliente.query('ROLLBACK')
                 return res.status(404).json({
                     msg: "Nenhuma cláusula editável encontrada com a ordem fornecida."
                 })
             }
 
+            await cliente.query('COMMIT')
             return res.status(200).json({
                 msg: "Cláusula editada com sucesso."
             })
         } catch (erro) {
+            await cliente.query('ROLLBACK')
             console.error("Erro no endpoint de editar cláusula, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro interno do servidor."
             })
+        } finally {
+            cliente.release()
         }
     },
     // excluir uma clausula editavel do contrato pela ordem.
@@ -141,29 +167,42 @@ export const controllerClausula = {
         const { id: ordem } = idBruto.data
         const contratoID = req.contratoID
 
+        const cliente = await database.connect()
         try {
+            await cliente.query('BEGIN')
+            if (!await travarContratoRascunho(cliente, contratoID, req.userId)) {
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível alterar cláusulas de um contrato em rascunho."
+                })
+            }
             const query = `
             DELETE FROM contrato_clausula
             WHERE contrato_id = $1 AND ordem = $2 AND editavel = $3
             `
             const valores = [contratoID, ordem, true]
 
-            const exclusoes = await database.query(query, valores)
+            const exclusoes = await cliente.query(query, valores)
 
             if (!exclusoes.rowCount) {
+                await cliente.query('ROLLBACK')
                 return res.status(404).json({
                     msg: "Nenhuma cláusula editável encontrada com a ordem fornecida."
                 })
             }
 
+            await cliente.query('COMMIT')
             return res.status(200).json({
                 msg: "Cláusula excluída com sucesso."
             })
         } catch (erro) {
+            await cliente.query('ROLLBACK')
             console.error("Erro no endpoint de excluir cláusula, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro interno do servidor."
             })
+        } finally {
+            cliente.release()
         }
     },
     // controller para obter todas as clausulas de um contrato.
@@ -195,6 +234,12 @@ export const controllerClausula = {
         try{
             // iniciando transação sql
             await cliente.query('BEGIN')
+            if (!await travarContratoRascunho(cliente, contratoID, req.userId)) {
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível alterar cláusulas de um contrato em rascunho."
+                })
+            }
 
             // troca as duas clausulas de lugar em um único UPDATE.
             // como é uma única query, as duas linhas são avaliadas com os valores originais.

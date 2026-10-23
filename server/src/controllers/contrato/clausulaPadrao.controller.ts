@@ -5,7 +5,6 @@ import { PoolClient } from "pg";
 import { Contrato } from "../../models/contrato/contrato.model.js";
 import { atualizarClausulasContrato } from "../../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../../models/utils.model.js";
-import { possuiCodigoPostgres } from "../../utils/erroBanco.js";
 
 interface atualizarTodosContratosProps {
     cliente: PoolClient,
@@ -16,6 +15,8 @@ const atualizarTodosContratos = async ({ cliente, motoristaID }: atualizarTodosC
     const query = `
     SELECT * FROM contrato
     WHERE motorista_id = $1 AND status = $2
+    ORDER BY id
+    FOR UPDATE
     `
     const { rows: contratos } = await cliente.query<Contrato>(query, [motoristaID, 'RASCUNHO'])
 
@@ -55,6 +56,7 @@ export const controllerClausulaPadrao = {
         try {
             // iniciando transação
             await cliente.query('BEGIN')
+            await cliente.query('SELECT id FROM motorista WHERE id = $1 FOR NO KEY UPDATE', [motoristaID])
 
             // procura a ordem atual das clausulas do motorista
             const queryBuscarOrdem = "SELECT ordem FROM clausula_motorista WHERE motorista_id = $1 ORDER BY ordem DESC"
@@ -152,6 +154,7 @@ export const controllerClausulaPadrao = {
         }
         try {
             await cliente.query('BEGIN')
+            await cliente.query('SELECT id FROM motorista WHERE id = $1 FOR NO KEY UPDATE', [motoristaID])
             const query = `
             UPDATE clausula_motorista
             SET ${campos.join(', ')}, atualizada_em = now()
@@ -204,83 +207,49 @@ export const controllerClausulaPadrao = {
         const { id: ordem } = idBruto.data
         const motoristaID = req.userId
 
-        // deletar a ordem se ela não estiver em uso em mais nenhum lugar. 
-        try {
-            const query = `
-            DELETE FROM clausula_motorista
-            WHERE ordem = $1 AND motorista_id = $2
-            `
-            const valores = [ordem, motoristaID]
-
-            const response = await database.query(query, valores)
-
-            if (!response.rowCount) {
-                return res.status(404).json({
-                    msg: "Cláusula não encontrada para excluir."
-                })
-            } else {
-                return res.status(200).json({
-                    msg: "Cláusula excluída com sucesso."
-                })
-            }
-
-        } catch (erro) {
-            // se cair aqui, é pq ja ta sendo em algum lugar, nesse caso só vou dar update no campo excluido de false pra true.
-            if (possuiCodigoPostgres(erro, "23001") || possuiCodigoPostgres(erro, "23503")) {
-                const cliente = await database.connect().catch((erro: unknown) => {
-                    console.error("Erro ao conectar ao banco de dados no controller de cláusula, erro: ", erro)
-                    return null
-                })
-                if (!cliente) {
-                    return res.status(500).json({
-                        msg: "Erro interno do servidor."
-                    })
-                }
-                try {
-                    // inicia a transação
-                    await cliente.query('BEGIN')
-
-                    const query = `
-                    UPDATE clausula_motorista
-                    SET excluido = $1, atualizada_em = now()
-                    WHERE ordem = $2 AND motorista_id = $3 AND excluido = false
-                    `
-                    const valores = [true, ordem, motoristaID]
-
-                    // atualiza o status de excluido de falso pra verdadeiro
-                    const response = await cliente.query(query, valores)
-
-                    // atualiza todas os contratos em rascunho pra nova condição
-                    await atualizarTodosContratos({ cliente, motoristaID })
-
-                    // commita tudo
-                    await cliente.query('COMMIT')
-
-                    if (!response.rowCount) {
-                        return res.status(404).json({
-                            msg: "Cláusula não encontrada para excluir."
-                        })
-                    } else {
-                        return res.status(200).json({
-                            msg: "Cláusula padrão excluída com sucesso."
-                        })
-                    }
-
-                } catch (erro) {
-                    await cliente.query('ROLLBACK')
-                    console.error("Erro no endpoint de excluir cláusula padrão, erro: ", erro)
-                    return res.status(500).json({
-                        msg: "Erro interno do servidor."
-                    })
-                } finally {
-                    await cliente.release()
-                }
-            }
-            // se chegar aq é pq ai sim de fato o erro é desconhecido e fdskkkkkk
-            console.error("Erro no endpoint de excluir cláusula, erro: ", erro)
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("Erro ao conectar ao banco de dados para excluir cláusula padrão, erro: ", erro)
+            return null
+        })
+        if (!cliente) {
             return res.status(500).json({
                 msg: "Erro interno do servidor."
             })
+        }
+
+        try {
+            await cliente.query('BEGIN')
+            await cliente.query('SELECT id FROM motorista WHERE id = $1 FOR NO KEY UPDATE', [motoristaID])
+
+            // mantém a cláusula original para os contratos já enviados ou assinados.
+            // o DELETE físico apagava essas cópias pela chave estrangeira com ON DELETE CASCADE.
+            const query = `
+            UPDATE clausula_motorista
+            SET excluido = true, atualizada_em = now()
+            WHERE ordem = $1 AND motorista_id = $2 AND excluido = false
+            `
+            const valores = [ordem, motoristaID]
+            const response = await cliente.query(query, valores)
+
+            if (!response.rowCount) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Cláusula não encontrada para excluir."
+                })
+            }
+            await atualizarTodosContratos({ cliente, motoristaID })
+            await cliente.query('COMMIT')
+            return res.status(200).json({
+                msg: "Cláusula padrão excluída com sucesso."
+            })
+        } catch (erro) {
+            await cliente.query('ROLLBACK')
+            console.error("Erro no endpoint de excluir cláusula padrão, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro interno do servidor."
+            })
+        } finally {
+            cliente.release()
         }
     },
     // controller para obter todas as clausulas do motorista
@@ -324,6 +293,7 @@ export const controllerClausulaPadrao = {
         try{
             // iniciando transação sql
             await cliente.query('BEGIN')
+            await cliente.query('SELECT id FROM motorista WHERE id = $1 FOR NO KEY UPDATE', [motoristaID])
 
             // troca as duas clausulas de lugar em um único UPDATE.
             // como é uma única query, as duas linhas são avaliadas com os valores originais.
@@ -343,6 +313,9 @@ export const controllerClausulaPadrao = {
                     msg: "Uma das clausulas que você quer mover não existe."
                 })
             }
+
+            // atualiza a ordem das cláusulas nos contratos que ainda estão em rascunho.
+            await atualizarTodosContratos({ cliente, motoristaID })
 
             // commitando alterações.
             await cliente.query('COMMIT')
