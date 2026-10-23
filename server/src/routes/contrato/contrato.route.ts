@@ -31,4 +31,7 @@ router.get('/:id', middlewareAutenticar, controllerContrato.obterContrato)
 // rota post para concluir o contrato e gerar o link pro responsavel assinar
 router.post('/finalizar-contrato/:contrato_id', middlewareAutenticar, middlewareContrato, controllerContrato.concluirContrato)
 
+// rota post para cancelar um contrato ativo ou aguardando assinatura
+router.post('/cancelar-contrato/:contrato_id', middlewareAutenticar, controllerContrato.cancelarContrato)
+
 export default router

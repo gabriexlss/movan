@@ -182,81 +182,107 @@ export const controllerAssinatura = {
                 msg: "Erro Interno do Servidor"
             })
         }
-        let LinkAssinatura: LinkAssinatura | undefined
-        let Responsavel: Responsavel | undefined
-        let ContratoDocumento: ContratoDocumento | undefined
+        let key: string | undefined
+        let assinaturaEnviada = false
 
-        // buscando os dados que vou precisar                                                                                                                                                                                                                  
+        // verifica os dados e registra a assinatura na mesma transação
         try{
             // inicia transação
             await cliente.query('BEGIN')
 
+            // trava o contrato antes de verificar o link, como no cancelamento e na recriação do link
+            const { rows: [contratoDados] } = await cliente.query<Contrato>(
+                `
+                SELECT contrato.* FROM contrato
+                JOIN contrato_documento AS documento ON documento.contrato_id = contrato.id
+                JOIN link_assinatura AS link ON link.contrato_documento_id = documento.id
+                WHERE link.token_hash = $1
+                FOR UPDATE OF contrato
+                `,
+                [tokenHash]
+            )
+            if(!contratoDados){
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Contrato não encontrado com o token fornecido."
+                })
+            }
+            if(contratoDados.status !== 'AGUARDANDO_ASSINATURA'){
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível assinar um contrato que esteja aguardando assinatura."
+                })
+            }
+
             // primeiro vou buscar o link assinatura, inclusive com todos aqueles padrões chatos
-            const { rows: [dadosAssinatura] } = await cliente.query<LinkAssinatura>(
+            const { rows: [LinkAssinatura] } = await cliente.query<LinkAssinatura>(
                 `
                 SELECT * FROM link_assinatura
                 WHERE token_hash = $1 AND revogado_em IS NULL AND utilizado_em IS NULL AND expira_em > now()
                 ORDER BY criado_em DESC
+                FOR UPDATE
                 `,
                 [tokenHash]
             )
-            LinkAssinatura = dadosAssinatura
-            
             // verifico se achou o link
             if(!LinkAssinatura){
+                await cliente.query('ROLLBACK')
                 return res.status(404).json({
                     msg: "Contrato não encontrado com o token fornecido, ou token não é mais válido."
                 })
             }
             // agr busco os dados do responsavel
-            const { rows: [dadosResponsavel] } = await cliente.query<Responsavel>(
+            const { rows: [Responsavel] } = await cliente.query<Responsavel>(
                 `
                 SELECT * FROM responsavel
                 WHERE id = $1
                 `,
                 [LinkAssinatura.responsavel_id]
             )
-            Responsavel = dadosResponsavel
             if(!Responsavel){
                 throw new Error("Responsável não encontrado")
             }
             // agr busco os dados do contrato documento
-            const { rows: [dadosDocumento] } = await cliente.query<ContratoDocumento>(
+            const { rows: [ContratoDocumento] } = await cliente.query<ContratoDocumento>(
                 `
                 SELECT * FROM contrato_documento
                 WHERE id = $1
+                FOR UPDATE
                 `,
                 [LinkAssinatura.contrato_documento_id]
             )
-            ContratoDocumento = dadosDocumento
             if(!ContratoDocumento){
                 throw new Error("Documento do contrato não encontrado")
             }
-        }catch(erro){
-            await cliente.query('ROLLBACK')
-            cliente.release()
-            console.error("erro ao buscar dados necessarios no bd no endpoint de assinar contrato, erro: ", erro)
-            return res.status(500).json({
-                msg: "Erro Interno do Servidor"
-            })
-        }
-        // criando o caminho da assinatura do responsavel
-        const key = `motoristas/${Responsavel.motorista_id}/responsavel/${Responsavel.id}/assinatura/${randomUUID()}.webp`
+            if(ContratoDocumento.status_documento !== 'ENVIADO'){
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "O Documento do contrato não está disponível para assinatura."
+                })
+            }
 
-        // pegando IP do usuario
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress
-        const userAgent = req.get('User-Agent')
+            // criando o caminho da assinatura do responsavel
+            key = `motoristas/${Responsavel.motorista_id}/responsavel/${Responsavel.id}/assinatura/${randomUUID()}.webp`
 
-        try{
+            // pegando IP do usuario
+            const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress
+            const userAgent = req.get('User-Agent')
+
             // atualizando o link assinatura pra marcar como utilizado e além disso registrar coisas
-            await cliente.query(
+            const atualizacaoLink = await cliente.query(
                 `
                 UPDATE link_assinatura
                 SET utilizado_em = now(), agente_usuario = $1, endereco_ip = $2
-                WHERE token_hash = $3
+                WHERE id = $3 AND utilizado_em IS NULL AND revogado_em IS NULL AND expira_em > now()
                 `,
-                [userAgent, ip, tokenHash]
+                [userAgent, ip, LinkAssinatura.id]
             )
+            if(!atualizacaoLink.rowCount){
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "O Link de assinatura não é mais válido."
+                })
+            }
 
             // enviando assinatura pro cloudflare
             await r2.send(new PutObjectCommand({
@@ -265,6 +291,7 @@ export const controllerAssinatura = {
                 Body: assinatura.buffer,
                 ContentType: assinatura.mimetype
             }))
+            assinaturaEnviada = true
 
             // criando a assinatura do responsavel pro contrato.
             const caminhoArquivo = `${CDN_URL}/${key}`
@@ -288,14 +315,17 @@ export const controllerAssinatura = {
             )
 
             // atualizando o contrato
-            await cliente.query(
+            const atualizacaoContrato = await cliente.query(
                 `
                 UPDATE contrato
                 SET status = $1, atualizado_em = now()
-                WHERE id = $2
+                WHERE id = $2 AND status = $3
                 `,
-                ['ATIVO', ContratoDocumento.contrato_id]
+                ['ATIVO', ContratoDocumento.contrato_id, 'AGUARDANDO_ASSINATURA']
             )
+            if(!atualizacaoContrato.rowCount){
+                throw new Error("O Contrato não está mais aguardando assinatura.")
+            }
             // commito coisas no banco
             await cliente.query('COMMIT')
 
@@ -304,8 +334,12 @@ export const controllerAssinatura = {
             })
 
         }catch(erro){
-            await deletarR2(key)
             await cliente.query('ROLLBACK')
+            if(assinaturaEnviada && key){
+                await deletarR2(key).catch((erro: unknown) => {
+                    console.error("erro ao excluir imagem de uma assinatura que não foi concluída, erro: ", erro)
+                })
+            }
             console.error("erro ao atualizar dados no endpoint de assinar contrato, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor"

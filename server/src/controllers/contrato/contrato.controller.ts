@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import { CriarContratoSchema, EditarContratoSchema } from "../../models/contrato/contrato.model.js";
+import { CancelarContratoSchema, CriarContratoSchema, EditarContratoSchema } from "../../models/contrato/contrato.model.js";
+import type { Contrato } from "../../models/contrato/contrato.model.js";
 import type { ContratoDocumento } from "../../models/contrato/contratoDocumento.model.js";
 import type { ContratoView } from "../../models/contrato/contratoView.model.js";
 import { database } from "../../db/postgre.js";
 import { possuiCodigoPostgres } from "../../utils/erroBanco.js";
 import { atualizarClausulasContrato } from "../../utils/atualizarClausulasContrato.js";
-import { ParamsSchema } from "../../models/utils.model.js";
+import { ContratoParamsSchema, ParamsSchema } from "../../models/utils.model.js";
 import { controllerClausula } from "./clausula.controller.js";
 import type { AssinaturaMotorista } from "../../models/contrato/assinatura.model.js";
 import { BUCKET_NAME, CDN_URL, r2 } from "../../db/r2.js";
@@ -393,14 +394,20 @@ export const controllerContrato = {
 
         try {
             // primeiro vamos atualizar o status da tabela contrato de rascunho pra aguardando assinatura.
-            await cliente.query(
+            const atualizacao = await cliente.query(
                 `
                 UPDATE contrato
                 SET status = $1, atualizado_em = now()
-                WHERE id = $2
+                WHERE id = $2 AND motorista_id = $3 AND status = $4
                 `,
-                ["AGUARDANDO_ASSINATURA", contratoID]
+                ["AGUARDANDO_ASSINATURA", contratoID, motoristaID, 'RASCUNHO']
             ) 
+            if(!atualizacao.rowCount){
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível finalizar um contrato que esteja em rascunho."
+                })
+            }
 
             // agora vamos gerar um documento pra esse contrato.
             //primeiro vamos criar o PDF
@@ -532,6 +539,97 @@ export const controllerContrato = {
                 msg: "Erro Interno do Servidor."
             })
         } finally {
+            cliente.release()
+        }
+    },
+    // controller para cancelar um contrato ativo ou aguardando assinatura
+    cancelarContrato: async (req: Request, res: Response) => {
+        // recebe o id do contrato e o motivo do cancelamento
+        const idBruto = ContratoParamsSchema.safeParse(req.params)
+        const dadosBrutos = CancelarContratoSchema.safeParse(req.body)
+
+        if(!idBruto.success){
+            return res.status(400).json({
+                msg: "Um ID válido de contrato deve ser enviado.",
+                erro: idBruto.error.format()
+            })
+        }
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Dados inválidos para cancelar o contrato.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { contrato_id: contratoID } = idBruto.data
+        const { motivo_cancelamento } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // iniciando conexão
+        const cliente = await database.connect().catch((erro: unknown) => {
+            console.error("erro ao iniciar conexão ao banco de dados no endpoint de cancelar contrato, erro: ", erro)
+            return undefined
+        })
+        if(!cliente){
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }
+
+        try{
+            await cliente.query('BEGIN')
+
+            // verifica se o contrato pertence ao motorista e trava ele durante a operação
+            const { rows: [contratoDados] } = await cliente.query<Contrato>(
+                "SELECT * FROM contrato WHERE id = $1 AND motorista_id = $2 FOR UPDATE",
+                [contratoID, motoristaID]
+            )
+            if(!contratoDados){
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Contrato não encontrado com o ID fornecido."
+                })
+            }
+            if(contratoDados.status !== 'ATIVO' && contratoDados.status !== 'AGUARDANDO_ASSINATURA'){
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({
+                    msg: "Só é possível cancelar um contrato ativo ou aguardando assinatura."
+                })
+            }
+
+            // registra o cancelamento do contrato
+            await cliente.query(
+                `
+                UPDATE contrato
+                SET status = $1, cancelado_em = now(), motivo_cancelamento = $2, atualizado_em = now()
+                WHERE id = $3 AND motorista_id = $4
+                `,
+                ['CANCELADO', motivo_cancelamento, contratoID, motoristaID]
+            )
+
+            // revoga os links pendentes de todos os documentos desse contrato
+            await cliente.query(
+                `
+                UPDATE link_assinatura
+                SET revogado_em = now()
+                WHERE contrato_documento_id IN (SELECT id FROM contrato_documento WHERE contrato_id = $1)
+                AND utilizado_em IS NULL AND revogado_em IS NULL
+                `,
+                [contratoID]
+            )
+
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Contrato cancelado com sucesso."
+            })
+        }catch(erro){
+            await cliente.query('ROLLBACK')
+            console.error("erro no endpoint de cancelar contrato, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        }finally{
             cliente.release()
         }
     },
