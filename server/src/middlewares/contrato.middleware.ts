@@ -40,7 +40,7 @@ export const middlewareContrato = async (req: Request, res: Response, next: Next
         }
         // guarda o id do contrato na requisição
         req.contratoID = contratoID
-        req.contratoResponsavelID = contratoDado?.responsavel_id
+        req.contratoResponsavelID = contratoDado!.responsavel_id
         // verifica e avança.
         next()
         return
