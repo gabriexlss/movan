@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import { ClausulaMotorista, ClausulaPadrao, InserirClausulaContrato } from "../models/clausula.model.js";
+import { ClausulaMotorista, ClausulaPadrao, InserirClausulaContrato } from "../models/contrato/clausula.model.js";
 
 interface atualizarClausulasProps{
     cliente: PoolClient,

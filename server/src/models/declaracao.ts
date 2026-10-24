@@ -10,6 +10,7 @@ declare global {
             userId: number;
             verificado: boolean;
             contratoID: number
+            contratoResponsavelID: number
         }
     }
 }
