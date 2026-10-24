@@ -1,6 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3"
 
-export const CDN_URL: string = String(process.env['CDN_URL']!)
+export const CDN_URL: string = String(process.env['CDN_URL']!).replace(/\/+$/, '')
 export const BUCKET_NAME: string = String(process.env['R2_BUCKET_NAME']!)
 
 // configura o r2 do cloudflare
