@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ContratoParamsSchema } from "../models/utils.model.js";
 import { database } from "../db/postgre.js";
-import { Contrato } from "../models/contrato.model.js";
+import { Contrato } from "../models/contrato/contrato.model.js";
 
 export const middlewareContrato = async (req: Request, res: Response, next: NextFunction) => {
     // pega o ID dos parametros.
@@ -20,7 +20,7 @@ export const middlewareContrato = async (req: Request, res: Response, next: Next
 
     // verificar se o contrato pode ser editado.
     try {
-        const query = "SELECT status FROM contrato WHERE id = $1 AND motorista_id = $2"
+        const query = "SELECT status, responsavel_id FROM contrato WHERE id = $1 AND motorista_id = $2"
         const valores = [contratoID, motoristaID]
 
         const { rows: contratoDados } = await database.query<Contrato>(query, valores)
@@ -40,6 +40,7 @@ export const middlewareContrato = async (req: Request, res: Response, next: Next
         }
         // guarda o id do contrato na requisição
         req.contratoID = contratoID
+        req.contratoResponsavelID = contratoDado!.responsavel_id
         // verifica e avança.
         next()
         return

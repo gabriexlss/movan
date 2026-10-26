@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "./utils.model.js";
+import { UtilSchema } from "../utils.model.js";
 
 // Schema do contrato
 const ContratoSchema = z.object({
@@ -18,7 +18,10 @@ const ContratoSchema = z.object({
     status: z.enum(['RASCUNHO', 'AGUARDANDO_ASSINATURA', 'ATIVO', 'FINALIZADO', 'CANCELADO'], "Status do contrato inválido."),
     criado_em: z.iso.datetime("Data de criação deve estar no formato ISO 8601."),
     cancelado_em: z.iso.datetime("Data de cancelamento deve estar no formato ISO 8601."),
-    motivo_cancelamento: z.string("Motivo de cancelamento deve ser uma string."),
+    motivo_cancelamento: z
+        .string("Motivo de cancelamento deve ser uma string.")
+        .trim()
+        .min(1, "Motivo de cancelamento não pode estar vazio."),
     aluno_id: UtilSchema.shape.id,
     responsavel_id: UtilSchema.shape.id,
     motorista_id: UtilSchema.shape.id,
@@ -37,7 +40,13 @@ export const EditarContratoSchema = CriarContratoSchema.omit({
     aluno_id: true
 }).partial()
 
+// Cancelar Contrato
+export const CancelarContratoSchema = ContratoSchema.pick({
+    motivo_cancelamento: true
+})
+
 // tipos
 export type Contrato = z.infer<typeof ContratoSchema>
 export type CriarContrato = z.infer<typeof CriarContratoSchema>
 export type EditarContrato = z.infer<typeof EditarContratoSchema>
+export type CancelarContrato = z.infer<typeof CancelarContratoSchema>

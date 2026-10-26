@@ -3,6 +3,7 @@ import cors from 'cors';
 import mainRoutes from './mainRoutes.js';
 import cookieParser from 'cookie-parser';
 import { limitarRequisicoes } from './middlewares/rateLimit.js';
+import multer from 'multer';
 
 const app: Application = express();
 
@@ -44,24 +45,54 @@ app.use((_req: Request, res: Response) => {
 });
 
 app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  const erroHttp = erro as { status?: unknown; type?: unknown };
+    // Erros do Multer
+    if (erro instanceof multer.MulterError) {
+        switch (erro.code) {
+            case "LIMIT_FILE_SIZE":
+                return res.status(413).json({
+                    msg: "Arquivo excede o tamanho máximo permitido."
+                });
 
-  if (erroHttp.type === 'entity.parse.failed') {
-    return res.status(400).json({
-      msg: 'JSON inválido.'
+            case "LIMIT_UNEXPECTED_FILE":
+                return res.status(400).json({
+                    msg: "Campo de arquivo inesperado ou arquivos demais."
+                });
+
+            default:
+                return res.status(400).json({
+                    msg: "Erro ao processar o arquivo."
+                });
+        }
+    }
+
+    const erroHttp = erro as { status?: unknown; type?: unknown };
+
+    // JSON inválido
+    if (erroHttp.type === "entity.parse.failed") {
+        return res.status(400).json({
+            msg: "JSON inválido."
+        });
+    }
+
+    // Corpo da requisição muito grande
+    if (erroHttp.status === 413 || erroHttp.type === "entity.too.large") {
+        return res.status(413).json({
+            msg: "Corpo da requisição excede o limite permitido."
+        });
+    }
+
+    // Tipo de arquivo inválido
+    if (erroHttp.status === 415) {
+        return res.status(415).json({
+            msg: "Tipo de arquivo não permitido."
+        });
+    }
+
+    console.error("Erro não tratado pela aplicação:", erro);
+
+    return res.status(500).json({
+        msg: "Erro interno do servidor."
     });
-  }
-
-  if (erroHttp.status === 413 || erroHttp.type === 'entity.too.large') {
-    return res.status(413).json({
-      msg: 'Corpo da requisição excede o limite permitido.'
-    });
-  }
-
-  console.error('Erro não tratado pela aplicação:', erro);
-  return res.status(500).json({
-    msg: 'Erro interno do servidor.'
-  });
 });
 
 export default app;
