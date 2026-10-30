@@ -1,0 +1,83 @@
+.painelLista,
+.conteudo {
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+}
+
+.tituloCard.tituloCard {
+    font-size: .82rem;
+}
+
+.novo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    min-height: 1.8rem;
+    padding: .25rem .5rem;
+    border: 0;
+    border-radius: .25rem;
+    background: #0d47a1;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: .6rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.novo svg {
+    flex: 0 0 auto;
+    font-size: .62rem;
+}
+
+.rodapeLista {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .4rem;
+    min-height: 1.75rem;
+    padding-top: .2rem;
+    border-top: 1px solid #dedede;
+    color: #777;
+    font-size: .56rem;
+}
+
+.paginacao {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    color: #0d47a1;
+    white-space: nowrap;
+}
+
+.paginacao button {
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1.2rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0d47a1;
+    font-size: .62rem;
+    cursor: pointer;
+}
+
+.paginacao button:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.novo:focus-visible,
+.paginacao button:focus-visible {
+    border-radius: .2rem;
+    outline: 2px solid #0d47a1;
+    outline-offset: 1px;
+}
+
+@media (max-width: 350px) {
+    .novo {
+        padding-inline: .3rem;
+        font-size: .56rem;
+    }
+}

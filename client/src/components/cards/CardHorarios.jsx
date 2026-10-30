@@ -1,5 +1,5 @@
 import DefaultCard from './DefaultCard';
-import './CardHorarios.css';
+import styles from './CardHorarios.module.css';
 
 import { TbSunFilled } from "react-icons/tb";
 import { TbSunset2Filled } from "react-icons/tb";
@@ -13,17 +13,17 @@ const CardHorarios = () => {
     ];
 
     return (
-        <DefaultCard title="Horários Diários" compactTitle>
-            <div className="containerHorarios">
+        <DefaultCard title="Horários diários" compactTitle>
+            <div className={styles.containerHorarios}>
                 {horarios.map((horarios) => (
-                    <div className="horario" key={horarios.titulo}>
-                        <div className="iconHorario">
+                    <div className={styles.horario} key={horarios.titulo}>
+                        <div className={styles.iconHorario}>
                             {horarios.icon}
                         </div>
 
-                        <div className="texto">
-                            <h2 className="tituloHorario">{horarios.titulo}</h2>
-                            <p className="hora">{horarios.hora}</p>
+                        <div>
+                            <h2 className={styles.tituloHorario}>{horarios.titulo}</h2>
+                            <p className={styles.hora}>{horarios.hora}</p>
                         </div>
                     </div>
                 ))}

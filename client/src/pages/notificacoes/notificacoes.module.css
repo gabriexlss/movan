@@ -1,0 +1,50 @@
+.pagina {
+    width: min(100%, 38rem);
+    margin-inline: auto;
+    padding: calc(var(--header-height, 6rem) + 1.5rem) 1.25rem calc(var(--footer-height) + 1.5rem);
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.cabecalho {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+}
+
+.voltar {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    color: #0d47a1;
+    font-size: 1.25rem;
+    text-decoration: none;
+}
+
+.voltar:hover,
+.voltar:focus-visible {
+    background: #edf3ff;
+}
+
+.voltar:focus-visible {
+    outline: 2px solid #07368a;
+    outline-offset: 2px;
+}
+
+.cabecalho h1 {
+    color: #07368a;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.cabecalho p {
+    margin-top: .1rem;
+    color: #7a7a7a;
+    font-family: 'Poppins', sans-serif;
+    font-size: .7rem;
+    text-align: left;
+}

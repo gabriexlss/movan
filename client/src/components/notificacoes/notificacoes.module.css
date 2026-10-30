@@ -1,0 +1,119 @@
+.lista {
+    display: grid;
+    padding: 0;
+    list-style: none;
+}
+
+.itemPopup {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr) .5rem;
+    align-items: center;
+    gap: .45rem;
+    min-height: 2.45rem;
+    padding: .35rem 0;
+    border-bottom: 1px solid #ececec;
+}
+
+.itemPopup:last-child {
+    border-bottom: 0;
+}
+
+.icone {
+    display: grid;
+    place-items: center;
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: .3rem;
+    background: var(--cor-notificacao);
+    color: #fff;
+    font-size: 1rem;
+}
+
+.texto {
+    min-width: 0;
+}
+
+.texto h3 {
+    color: #555;
+    font-family: 'Poppins', sans-serif;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.texto p {
+    margin-top: .1rem;
+    color: #969696;
+    font-family: 'Poppins', sans-serif;
+    font-size: .65rem;
+    line-height: 1.35;
+    text-align: left;
+}
+
+.indicador {
+    width: .2rem;
+    height: .2rem;
+    border-radius: 50%;
+    background: var(--cor-notificacao);
+}
+
+.listaPagina {
+    gap: .75rem;
+}
+
+.itemPagina {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: .65rem;
+    padding: .85rem;
+    border: 1px solid #e1e1e1;
+    border-radius: .65rem;
+    background: #fafafa;
+    box-shadow: 0 .2rem .35rem rgb(0 0 0 / 16%);
+}
+
+.itemPagina .icone {
+    width: 1.9rem;
+    height: 1.9rem;
+    font-size: 1.15rem;
+}
+
+.tempo {
+    position: absolute;
+    top: .7rem;
+    right: .8rem;
+    color: #aaa;
+    font-family: 'Poppins', sans-serif;
+    font-size: .6rem;
+}
+
+.acoes {
+    display: grid;
+    grid-column: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+    margin-top: .25rem;
+}
+
+.acoes button {
+    min-height: 1.7rem;
+    border: 1px solid #9d9d9d;
+    border-radius: .3rem;
+    background: #fff;
+    color: #777;
+    font-family: 'Poppins', sans-serif;
+    font-size: .6rem;
+    cursor: pointer;
+}
+
+.acoes .acaoPrincipal {
+    border-color: #0d47a1;
+    background: #0d47a1;
+    color: #fff;
+}
+
+.acoes button:focus-visible {
+    outline: 2px solid #07368a;
+    outline-offset: 2px;
+}

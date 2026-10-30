@@ -2,8 +2,12 @@ import express, { Application, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import mainRoutes from './mainRoutes.js';
 import cookieParser from 'cookie-parser';
+import { limitarRequisicoes } from './middlewares/rateLimit.js';
 
 const app: Application = express();
+
+// Confia no proxy da Vercel para identificar o IP do cliente no rate limit.
+app.set('trust proxy', 1);
 
 // Processa as origens do CORS a partir do .env (com tratamento de erro para evitar crash)
 const allowedOrigins = (() => {
@@ -30,12 +34,12 @@ app.use(cookieParser())
 app.use(express.json());
 
 // conecta o app com a execução do arquivo de rotas, onde estão todas as rotas do servidor
-app.use('/', mainRoutes);
+app.use('/', limitarRequisicoes.global(), mainRoutes);
 
 // Mantém as respostas de erro da API em JSON mesmo fora dos controllers.
 app.use((_req: Request, res: Response) => {
   return res.status(404).json({
-    msg: 'Rota não encontrada.'
+    'msg-code': 'ROUTE_NOT_FOUND'
   });
 });
 
@@ -44,19 +48,19 @@ app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
   if (erroHttp.type === 'entity.parse.failed') {
     return res.status(400).json({
-      msg: 'JSON inválido.'
+      'msg-code': 'INVALID_JSON'
     });
   }
 
   if (erroHttp.status === 413 || erroHttp.type === 'entity.too.large') {
     return res.status(413).json({
-      msg: 'Corpo da requisição excede o limite permitido.'
+      'msg-code': 'PAYLOAD_TOO_LARGE'
     });
   }
 
   console.error('Erro não tratado pela aplicação:', erro);
   return res.status(500).json({
-    msg: 'Erro interno do servidor.'
+    'msg-code': 'INTERNAL_SERVER_ERROR'
   });
 });
 

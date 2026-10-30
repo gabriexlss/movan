@@ -1,16 +1,35 @@
-import './DefaultCard.css';
+import styles from './DefaultCard.module.css';
 import { Link } from 'react-router-dom';
 
-const DefaultCard = ({ title, children, link, compactTitle = false }) => {
+const DefaultCard = ({
+    title,
+    children,
+    link,
+    linkLabel = 'Ver detalhes',
+    compactTitle = false,
+    headerContent,
+    titleClassName = '',
+}) => {
     return (
-        <section className="card">
-            <h1 className={`card-header ${compactTitle ? "compact" : ""}`}>{title}</h1>
+        <section className={styles.card}>
+            {headerContent ? (
+                <div className={styles['card-header-container']}>
+                    <h1 className={`${styles['card-header']} ${compactTitle ? styles.compact : ''} ${titleClassName}`}>
+                        {title}
+                    </h1>
+                    <div className={styles['card-header-content']}>{headerContent}</div>
+                </div>
+            ) : (
+                <h1 className={`${styles['card-header']} ${compactTitle ? styles.compact : ''} ${titleClassName}`}>
+                    {title}
+                </h1>
+            )}
 
             {children}
 
             {link && (
-                <Link to={link} className="BtnVerMensalidade">
-                    Ver Detalhes
+                <Link to={link} className={styles.BtnVerMensalidade}>
+                    {linkLabel}
                 </Link>
             )}
 
