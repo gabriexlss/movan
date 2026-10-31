@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { optional, z } from "zod";
 import { UtilSchema } from "../utils.model.js";
 
 const RotaSchema = z.object({
@@ -9,17 +9,21 @@ const RotaSchema = z.object({
         .max(100, "Nome deve ter no máximo 100 caracteres.")
         .optional(),
     sentido: z.enum(['IDA', 'VOLTA'], "Sentido da rota inválido."),
-    ativa: z.boolean("Ativa deve ser um booleano.").default(true),
-    motorista_id: UtilSchema.shape.id
+    ativa: z.boolean("Ativa deve ser um booleano."),
+    motorista_id: UtilSchema.shape.id,
+    turno: z.enum(['MANHA', 'TARDE', 'NOITE'])
 })
-export const CriarRotaSchema = RotaSchema.omit({
-    id: true,
-    motorista_id: true
+const RotaDiaSemanaSchema = z.object({
+    rota_id: RotaSchema.shape.id,
+    dia_semana: z.number().positive()
 })
-export const EditarRotaSchema = RotaSchema.omit({
-    id: true,
-    motorista_id: true
-}).partial()
-
+const CriarRotaSchema = RotaSchema.pick({
+    nome: true,
+    sentido: true,
+    ativa: true,
+    motorista_id: true,
+    turno: true
+})
+export type Rota = z.infer<typeof RotaSchema>
+export type RotaDiaSemana = z.infer<typeof RotaDiaSemanaSchema>
 export type CriarRota = z.infer<typeof CriarRotaSchema>
-export type EditarRota = z.infer<typeof EditarRotaSchema>
