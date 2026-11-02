@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
 import { database } from "../db/postgre.js"
-import { Motorista } from "../models/motorista.model.js";
+import { Motorista } from "../models/motorista/motorista.model.js";
 
 interface dadosToken {
     id: number

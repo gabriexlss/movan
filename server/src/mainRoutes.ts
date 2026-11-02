@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import rotasMotorista from './routes/motorista.route.js';
+import rotasMotorista from './routes/motorista/motorista.route.js';
 import rotasSistema from './routes/system.route.js'
 import rotasResponsavel from "./routes/responsavel.route.js"
 import rotasEscola from "./routes/escola.route.js"
