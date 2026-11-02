@@ -36,6 +36,7 @@ export const controllerRotas = {
             // fazendo varias querys pra inserir todas as rotas pra cada dia da semana, ou seja, 5x6. ja que cada dia da semana tem 6 rotas diferentes
             for(let i = 1; i <= 5; i++){
                 // for dentro do for kkkkkkkkkkkkk, me julguem mas nao pensei numa solução melhor
+                // insere os dados do array das rotas criadas na tabela de rotas
                 for(const Rota of Rotas){
                     const RotaCriada = await cliente.query<Rota>(
                         `
@@ -66,6 +67,7 @@ export const controllerRotas = {
                 i++
             }
             // se chegar tudo corretamente, retorna
+            await cliente.query('COMMIT')
             return
         }catch(erro){
             await cliente.query('ROLLBACK')
