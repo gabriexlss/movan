@@ -25,5 +25,6 @@ export const EditarPontoRotaSchema = PontoRotaSchema.omit({
     motorista_id: true
 }).partial()
 
+export type PontoRota = z.infer<typeof PontoRotaSchema>
 export type CriarPontoRota = z.infer<typeof CriarPontoRotaSchema>
 export type EditarPontoRota = z.infer<typeof EditarPontoRotaSchema>

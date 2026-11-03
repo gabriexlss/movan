@@ -1,6 +1,11 @@
-import { Request, Response } from "express";
+import { Request } from "express";
 import { database } from "../db/postgre.js";
 import { CriarRota, Rota } from "../models/rotas/rota.js";
+import { PoolClient } from "pg";
+import { Aluno } from "../models/aluno.model.js";
+import { Escola } from "../models/escola/escola.model.js";
+import { PontoRota } from "../models/rotas/pontoRota.js";
+import { EscolaTurno } from "../models/escola/turno.model.js";
 
 export const controllerRotas = {
     // gera todas as rotas assim que o motorista é criado
@@ -10,7 +15,7 @@ export const controllerRotas = {
         const cliente = await database.connect().catch(() => {
             throw new Error("Erro ao conectar ao banco de dados.")
         })
-        
+
         // iniciando array com as rotas que vão ser criadas em CADA DIA DA SEMANA.
         const Rotas: CriarRota[] = []
 
@@ -34,10 +39,10 @@ export const controllerRotas = {
             await cliente.query('BEGIN')
 
             // fazendo varias querys pra inserir todas as rotas pra cada dia da semana, ou seja, 5x6. ja que cada dia da semana tem 6 rotas diferentes
-            for(let i = 1; i <= 5; i++){
+            for (let i = 1; i <= 5; i++) {
                 // for dentro do for kkkkkkkkkkkkk, me julguem mas nao pensei numa solução melhor
                 // insere os dados do array das rotas criadas na tabela de rotas
-                for(const Rota of Rotas){
+                for (const Rota of Rotas) {
                     const RotaCriada = await cliente.query<Rota>(
                         `
                         INSERT INTO rota
@@ -53,7 +58,7 @@ export const controllerRotas = {
 
             // inserindo agr no dia da semana as rotas.
             let i = 1
-            for(const Rota of RotasCriadas){
+            for (const Rota of RotasCriadas) {
                 // PERDAO PRA QUEM TENTAR ENTENDER ISSO, mas resumindo, vai definir com base no valor de i, se é segunda, terça, quarta, quinta ou sexta.
                 const diaSemana = i > 0 && i <= 6 ? 2 : i > 6 && i <= 12 ? 3 : i > 12 && i <= 18 ? 4 : i > 18 && i <= 24 ? 5 : 6
                 await cliente.query(
@@ -69,11 +74,106 @@ export const controllerRotas = {
             // se chegar tudo corretamente, retorna
             await cliente.query('COMMIT')
             return
-        }catch(erro){
+        } catch (erro) {
             await cliente.query('ROLLBACK')
-            throw new Error(`Erro ao criar registros das rotas durante criação do motorista`, {cause: erro})
-        }finally{
+            throw new Error(`Erro ao criar registros das rotas durante criação do motorista`, { cause: erro })
+        } finally {
             cliente.release()
         }
+    },
+    // controller para adicionar um aluno (e a escola se ainda não tiver sido adicionada) a rota
+    adicionarAluno: async (alunoID: number, cliente: PoolClient, req: Request) => {
+        // pegando o id do motorista
+        const motoristaID = req.userId
+
+        // iniciando operação
+        // pega os dados do aluno por meio do ID e verifica se realmente chegaram.
+        const { rows: [aluno] } = await cliente.query<Aluno>(
+            `
+                SELECT * FROM aluno
+                WHERE id = $1
+                `,
+            [alunoID]
+        )
+        if (!aluno) throw new Error('ALUNO_NOT_FOUND');
+
+        // pega os dados da escola por meio do ID e verifica se realmente chegaram.
+        const { rows: [escola] } = await cliente.query<Escola>(
+            `
+                SELECT * FROM escola
+                WHERE id = $1
+                `,
+            [aluno.escola_id]
+        )
+        if (!escola) throw new Error('ESCOLA_NOT_FOUND');
+
+        // pega os dados do turno da escola por meio do ID e verifica se realmente chegaram.
+        const { rows: [turnoEscola] } = await cliente.query<EscolaTurno>(
+            `
+                SELECT * FROM escola_turno
+                WHERE id = $1
+                `,
+            [aluno.escola_turno_id]
+        )
+        if (!turnoEscola) throw new Error('TURNO_NOT_FOUND');
+
+        // busca todas as rotas daquele motorista.
+        const { rows: rotas } = await cliente.query<Rota>(
+            `
+                SELECT * FROM rota
+                WHERE motorista_id = $1 AND turno = $2
+                `,
+            [motoristaID, turnoEscola.turno]
+        )
+        if (rotas.length < 1) throw new Error('ROTAS_NOT_FOUND'); // penso em trocar isso aqui pra gerar as rotas se ainda não estiverem sido geradas, mas to pensando ainda.
+
+        // for para conseguir checar e inserir em todas as rotas do motorista.
+        for (const rota of rotas) {
+            // busco todos os pontos rota dessa rota.
+            const { rows: pontosRota } = await cliente.query<PontoRota>(
+                `
+                    SELECT * FROM ponto_rota
+                    WHERE rota_id = $1
+                    `,
+                [rota.id]
+            )
+            // verifico se algum deles tem a escola do aluno que vai ser adicionado.
+            if (!pontosRota.some(ponto => ponto.escola_id === escola.id)) {
+                // se entrou no if, não achou essa escola em nenhum ponto rota. então vamos adiciona-la. 
+                const { rows: [escolaAdicionada] } = await cliente.query<PontoRota>(
+                    `
+                    INSERT INTO ponto_rota
+                    (ordem, tipo_ponto, rota_id, motorista_id, escola_id, escola_turno_id)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    RETURNING *
+                    `,
+                    [
+                        pontosRota.length + 1,
+                        rota.sentido === 'IDA' ? 'DESEMBARQUE' : 'EMBARQUE',
+                        rota.id,
+                        motoristaID,
+                        escola.id,
+                        turnoEscola.id
+                    ]
+                )
+                pontosRota.push(escolaAdicionada!)
+            }
+            // independente de ter entrado no if ou não, pq se nao tinha a escola agora tem, vamos adicionar o aluno a rota.
+            await cliente.query(
+                `
+                    INSERT INTO ponto_rota
+                    (ordem, tipo_ponto, rota_id, motorista_id, aluno_id)
+                    VALUES ($1, $2, $3, $4, $5)
+                    `,
+                [
+                    pontosRota.length + 1,
+                    rota.sentido === 'IDA' ? 'EMBARQUE' : 'DESEMBARQUE',
+                    rota.id,
+                    motoristaID,
+                    alunoID
+                ]
+            )
+        }
+        return
     }
 }

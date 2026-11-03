@@ -6,6 +6,8 @@ import rotasEscola from "./routes/escola/escola.route.js"
 import rotasAluno from "./routes/aluno.route.js"
 import rotasContrato from "./routes/contrato/contrato.route.js"
 import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
+import { controllerRotas } from './controllers/rotas.controller.js';
+import { database } from './db/postgre.js';
 
 const router = Router();
 
@@ -13,6 +15,29 @@ const router = Router();
 router.get('/health', (req, res) => {
     res.status(200).json({ 'msg-code': 'OK' });
 });
+router.post('/teste', middlewareAutenticar,async (req, res) => {
+    const cliente = await database.connect()
+    try{
+        await cliente.query('BEGIN')
+        await controllerRotas.adicionarAluno(42, cliente, req)
+        await cliente.query('COMMIT')
+        return res.status(200).json()
+    }catch(erro){
+        await cliente.query('ROLLBACK')
+        console.error(erro)
+        if(erro instanceof Error){
+            switch(erro.message){
+                case 'ALUNO_NOT_FOUND':
+                    return res.status(404).json({
+                        msg: "Aluno não encontrado."
+                    })
+            }
+        }
+        return res.status(500).json()
+    }finally{
+        cliente.release()
+    }
+})
 
 // Rota para os endpoints relacionados aos motoristas(usuario)
 router.use('/motorista', rotasMotorista);
