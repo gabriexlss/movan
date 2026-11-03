@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import rotasMotorista from './routes/motorista.route.js';
+import rotasMotorista from './routes/motorista/motorista.route.js';
 import rotasSistema from './routes/system.route.js'
 import rotasResponsavel from "./routes/responsavel.route.js"
-import rotasEscola from "./routes/escola.route.js"
+import rotasEscola from "./routes/escola/escola.route.js"
 import rotasAluno from "./routes/aluno.route.js"
 import rotasContrato from "./routes/contrato/contrato.route.js"
 import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
@@ -11,7 +11,7 @@ const router = Router();
 
 // Rota de teste para verificar se o servidor está funcionando corretamente
 router.get('/health', (req, res) => {
-    res.status(200).json({ msg: 'OK' });
+    res.status(200).json({ 'msg-code': 'OK' });
 });
 
 // Rota para os endpoints relacionados aos motoristas(usuario)

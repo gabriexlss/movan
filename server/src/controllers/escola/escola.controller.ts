@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { CriarEscolaSchema, EditarEscolaSchema } from "../models/escola.model.js";
-import { database } from "../db/postgre.js";
-import { ParamsSchema } from "../models/utils.model.js";
-import { possuiCodigoPostgres } from "../utils/erroBanco.js";
+import { CriarEscolaSchema, EditarEscolaSchema } from "../../models/escola/escola.model.js";
+import { database } from "../../db/postgre.js";
+import { ParamsSchema } from "../../models/utils.model.js";
+import { possuiCodigoPostgres } from "../../utils/erroBanco.js";
 
 export const controllerEscola = {
     // controller para criar uma nova escola
