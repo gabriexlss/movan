@@ -20,15 +20,15 @@ export const controllerAluno = {
             })
         }
         // realizar desestruturação dos dados
-        const { nome, data_nasc, ano_escolar, observacao, responsavel_id, escola_id, latitude, longitude, endereco } = dadosBrutos.data
+        const { nome, data_nasc, ano_escolar, observacao, responsavel_id, escola_id, latitude, longitude, endereco, escola_turno_id } = dadosBrutos.data
 
         // Iniciando Operação.
         try {
             const query = `INSERT INTO aluno 
-            (nome, data_nasc, ano_escolar, responsavel_id, escola_id, latitude, longitude, motorista_id, endereco${observacao ? ', observacao' : ''}) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9${observacao ? ', $10' : ''})
+            (nome, data_nasc, ano_escolar, responsavel_id, escola_id, escola_turno_id, latitude, longitude, motorista_id, endereco${observacao ? ', observacao' : ''}) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10${observacao ? ', $11' : ''})
             RETURNING *`
-            const valores = [nome, data_nasc, ano_escolar, responsavel_id, escola_id, latitude, longitude, motoristaId, endereco]
+            const valores = [nome, data_nasc, ano_escolar, responsavel_id, escola_id, escola_turno_id, latitude, longitude, motoristaId, endereco]
             if (observacao) valores.push(observacao)
 
             const aluno = await database.query(query, valores)
@@ -40,8 +40,21 @@ export const controllerAluno = {
         } catch (erro) {
             console.error("Erro no endpoint de criar aluno, erro: ", erro)
             if (possuiCodigoPostgres(erro, "23503")) {
+                // pode ser escola/responsável inexistente OU turno que não pertence à escola do aluno (fk_aluno_escola_turno)
+                const restricao = (erro as { constraint?: string }).constraint
+                if (restricao === "fk_aluno_escola_turno") {
+                    return res.status(409).json({
+                        msg: "O turno informado não pertence à escola do aluno."
+                    })
+                }
                 return res.status(409).json({
                     msg: "Não foi possível criar o aluno porque a escola ou o responsável informado não está mais disponível."
+                })
+            }
+            // ck_aluno_turno_requer_escola
+            if (possuiCodigoPostgres(erro, "23514")) {
+                return res.status(400).json({
+                    msg: "Não é possível informar um turno sem informar a escola do aluno."
                 })
             }
             return res.status(500).json({
@@ -74,7 +87,7 @@ export const controllerAluno = {
         }
         // desestruturação dos dados
         const { id } = idBruto.data
-        const { nome, data_nasc, ano_escolar, observacao, latitude, longitude, escola_id, endereco } = dadosBrutos.data
+        const { nome, data_nasc, ano_escolar, observacao, latitude, longitude, escola_id, endereco, escola_turno_id } = dadosBrutos.data
 
         // iniciando arrays para guardar os dados recebidos.
         const campos: string[] = []
@@ -118,6 +131,10 @@ export const controllerAluno = {
             campos.push(`escola_id = $${valores.length + 1}`)
             valores.push(escola_id)
         }
+        if (escola_turno_id) {
+            campos.push(`escola_turno_id = $${valores.length + 1}`)
+            valores.push(escola_turno_id)
+        }
         // se nenhum campo for recebido, manda embora
         if (campos.length < 1) {
             return res.status(400).json({
@@ -149,8 +166,21 @@ export const controllerAluno = {
         } catch (erro) {
             console.error("Erro no endpoint de editar aluno, erro: ", erro)
             if (possuiCodigoPostgres(erro, "23503")) {
+                // turno que não pertence à escola do aluno (fk_aluno_escola_turno)
+                const restricao = (erro as { constraint?: string }).constraint
+                if (restricao === "fk_aluno_escola_turno") {
+                    return res.status(409).json({
+                        msg: "O turno informado não pertence à escola do aluno."
+                    })
+                }
                 return res.status(409).json({
                     msg: "Não foi possível editar o aluno porque a escola informada não está mais disponível."
+                })
+            }
+            // ck_aluno_turno_requer_escola
+            if (possuiCodigoPostgres(erro, "23514")) {
+                return res.status(400).json({
+                    msg: "Não é possível informar um turno sem informar a escola do aluno."
                 })
             }
             return res.status(500).json({

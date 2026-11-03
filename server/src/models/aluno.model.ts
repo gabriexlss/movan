@@ -21,7 +21,8 @@ const AlunoSchema = z.object({
     longitude: UtilSchema.shape.longitude,
     responsavel_id: UtilSchema.shape.id,
     escola_id: UtilSchema.shape.id,
-    motorista_id: UtilSchema.shape.id
+    motorista_id: UtilSchema.shape.id,
+    escola_turno_id: UtilSchema.shape.id
 })
 export const CriarAlunoSchema = AlunoSchema.omit({
     id: true,
