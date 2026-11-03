@@ -7,6 +7,7 @@ import rotasAluno from "./routes/aluno.route.js"
 import rotasContrato from "./routes/contrato/contrato.route.js"
 import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
 import { controllerRotas } from './controllers/rotas.controller.js';
+import rotasRota from './routes/rotas.route.js'
 import { database } from './db/postgre.js';
 
 const router = Router();
@@ -56,5 +57,8 @@ router.use('/aluno', middlewareAutenticar, rotasAluno)
 
 // Rota para os endpoints relacionado aos contratos e suas clausulas.
 router.use('/contrato', rotasContrato)
+
+// rota para os endpoints relacionados as rotas. (puts, os dois são rotas)
+router.use('/rota', middlewareAutenticar, rotasRota)
 
 export default router;

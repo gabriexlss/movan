@@ -1,6 +1,6 @@
-import { Request } from "express";
+import { Request, Response } from "express";
 import { database } from "../db/postgre.js";
-import { CriarRota, Rota } from "../models/rotas/rota.js";
+import { CriarRota, FiltrosRotaSchema, Rota } from "../models/rotas/rota.js";
 import { PoolClient } from "pg";
 import { Aluno } from "../models/aluno.model.js";
 import { Escola } from "../models/escola/escola.model.js";
@@ -175,5 +175,69 @@ export const controllerRotas = {
             )
         }
         return
+    },
+    // obter rotas ou uma unica rota
+    obterRotas: async (req: Request, res: Response) => {
+        // os filtros que a busca vai ter vão ser id, turno e sentido
+        const dadosBrutos = FiltrosRotaSchema.safeParse(req.query)
+
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Querys Inválidas Para filtrar rotas.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { id, turno, sentido, dia } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // operação
+        try{
+            let query = `
+            SELECT DISTINCT rota.*, CASE rds.dia_semana 
+            WHEN 2 THEN 'SEGUNDA' WHEN 3 THEN 'TERÇA' WHEN 4 THEN 'QUARTA' WHEN 5 THEN 'QUINTA' WHEN 6 THEN 'SEXTA' END AS "diaSemana" 
+            FROM rota 
+            INNER JOIN rota_dia_semana rds 
+            ON rds.rota_id = rota.id 
+            WHERE rota.motorista_id = $1
+            `
+            const valores: (string|number)[] = [motoristaID]
+
+            if(id){
+                query += ` AND rota.id = $${valores.length + 1}`
+                valores.push(id)
+            }
+            if(turno){
+                query += ` AND rota.turno = $${valores.length + 1}`
+                valores.push(turno)
+            }
+            if(sentido){
+                query += ` AND rota.sentido = $${valores.length + 1}`
+                valores.push(sentido)
+            }
+            if(dia){
+                const diasSemana = { SEGUNDA: 2, 'TERÇA': 3, QUARTA: 4, QUINTA: 5, SEXTA: 6 }
+                query += ` AND rds.dia_semana = $${valores.length + 1}`
+                valores.push(diasSemana[dia])
+            }
+            // busca no banco de dados
+            const { rows: rotas } = await database.query<Rota & { diaSemana: string }>(query, valores)
+
+            // se não tiver achado nenhuma rota
+            if(!rotas){
+                return res.status(404).json({
+                    msg: "Nenhuma Rota encontrada com os filtros fornecidos"
+                })
+            }
+
+            // retorna
+            return res.status(200).json({
+                rotas
+            })
+        }catch{
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
     }
 }
