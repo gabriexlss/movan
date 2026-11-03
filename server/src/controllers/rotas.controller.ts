@@ -239,5 +239,28 @@ export const controllerRotas = {
                 msg: "Erro Interno do Servidor."
             })
         }
+    },
+    // obter os pontos de uma rota pelo id da rota (params)
+    obterPontosRota: async (req: Request, res: Response) => {
+        const rotaID = Number(req.params['id'])
+        const motoristaID = req.userId
+
+        if(!Number.isInteger(rotaID) || rotaID <= 0){
+            return res.status(400).json({ msg: "ID da rota inválido." })
+        }
+
+        try{
+            const { rows: pontos } = await database.query<PontoRota>(
+                `
+                SELECT * FROM ponto_rota
+                WHERE rota_id = $1 AND motorista_id = $2
+                ORDER BY ordem
+                `,
+                [rotaID, motoristaID]
+            )
+            return res.status(200).json({ pontos })
+        }catch{
+            return res.status(500).json({ msg: "Erro Interno do Servidor." })
+        }
     }
 }

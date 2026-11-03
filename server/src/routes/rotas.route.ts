@@ -4,5 +4,6 @@ import { controllerRotas } from "../controllers/rotas.controller.js";
 const router = Router()
 
 router.get('/', controllerRotas.obterRotas)
+router.get('/:id/pontos', controllerRotas.obterPontosRota)
 
 export default router
