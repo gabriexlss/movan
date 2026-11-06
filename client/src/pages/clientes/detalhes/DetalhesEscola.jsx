@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { FaChevronRight, FaInfoCircle, FaMapMarkerAlt, FaUserGraduate } from 'react-icons/fa'
+import { FaChevronRight, FaClock, FaInfoCircle, FaMapMarkerAlt, FaUserGraduate } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { obterEndereco } from '../../../services/googlePlaces'
 import { listarAluno } from '../../../services/aluno'
 import SecaoDetalhes, { CampoDetalhe } from './SecaoDetalhes'
+import { nomesTurnos } from '../turnos-escola'
 import styles from './clienteDetalhes.module.css'
 
-const DetalhesEscola = ({ cliente: escola }) => {
+const DetalhesEscola = ({ cliente: escola, turnos = [] }) => {
     const [alunos, setAlunos] = useState([])
     const [enderecoPorCoordenadas, setEnderecoPorCoordenadas] = useState('')
 
@@ -50,6 +51,7 @@ const DetalhesEscola = ({ cliente: escola }) => {
     const alunosVinculados = alunos.filter((aluno) => (
         String(aluno.escola_id ?? aluno.escolaId) === String(escola.id)
     ))
+    const turnosDaEscola = turnos.filter((turno) => String(turno.escola_id) === String(escola.id))
 
     return (
         <>
@@ -67,6 +69,22 @@ const DetalhesEscola = ({ cliente: escola }) => {
                         </address>
                     </CampoDetalhe>
                 </div>
+            </SecaoDetalhes>
+
+            <SecaoDetalhes title="Turnos da escola" Icone={FaClock}>
+                {turnosDaEscola.length > 0 ? (
+                    <div className={styles.gradeDados}>
+                        {turnosDaEscola.map((turno) => (
+                            <CampoDetalhe key={turno.id} label={nomesTurnos[turno.turno] || turno.turno}>
+                                Entrada: {turno.hora_entrada?.slice(0, 5) || 'Não informada'}
+                                {' · '}
+                                Saída: {turno.hora_saida?.slice(0, 5) || 'Não informada'}
+                            </CampoDetalhe>
+                        ))}
+                    </div>
+                ) : (
+                    <p className={styles.estadoVazio}>Nenhum turno cadastrado nesta escola.</p>
+                )}
             </SecaoDetalhes>
 
             <SecaoDetalhes title="Alunos registrados na escola" Icone={FaUserGraduate}>

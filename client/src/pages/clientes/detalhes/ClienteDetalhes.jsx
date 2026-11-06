@@ -81,13 +81,13 @@ const ClienteDetalhes = () => {
 
     const registroRecebido = state?.registro && String(state.registro.id) === id ? state.registro : null
     const registroEncontrado = registroApi || registroRecebido || buscarCliente(tipo, id)
-    const cliente = registroAlterado?.id === id ? registroAlterado : registroEncontrado
+    const cliente = String(registroAlterado?.id) === id ? registroAlterado : registroEncontrado
     const ConteudoDetalhes = componentesPorTipo[tipo]
 
     if (!cliente || !ConteudoDetalhes) {
         return (
             <main className={styles.container}>
-                <TituloTela title="Veja seus clientes." />
+                <TituloTela title="Detalhes do cliente" />
                 <section className={styles.naoEncontrado}>
                     <h1>Cliente não encontrado</h1>
                     <p>O tipo ou o identificador informado não corresponde a um cliente cadastrado.</p>
@@ -129,7 +129,10 @@ const ClienteDetalhes = () => {
 
     return (
         <main className={styles.container}>
-            <TituloTela title="Veja seus clientes." />
+            <TituloTela
+                title={`Detalhes ${tipo === 'escola' ? 'da' : 'do'} ${nomesPorTipo[tipo].toLocaleLowerCase('pt-BR')}: ${cliente.nome}`}
+                className={styles.tituloDetalhes}
+            />
 
             <div className={styles.barraNavegacao}>
                 <Link to="/clientes" className={styles.voltar}>

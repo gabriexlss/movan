@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { alterarEscola, criarEscola, excluirEscola, listarEscola } from "../../../services/escola"
 import { criarTurnoEscola, listarTurnosEscola } from "../../../services/turnosEscola"
 import ListaClientes from "./ListaClientes"
+import toast from 'react-hot-toast'
 
 const adaptarParaLista = (escola) => ({
     ...escola,
@@ -23,20 +24,22 @@ const Escolas = () => {
 
     const salvarNovaEscola = async (valores) => {
         const escolaCriada = await criarEscola(valores)
-        const turnoInicial = valores.turnoInicial
-
-        if (turnoInicial?.horaEntrada && turnoInicial?.horaSaida) {
-            const turnoCriado = await criarTurnoEscola({
-                ...turnoInicial,
-                escolaId: escolaCriada.id,
-            })
-            setTurnos((listaAtual) => [...listaAtual, turnoCriado])
-        }
-
         setEscola((listaAtual) => [
             adaptarParaLista(escolaCriada),
             ...listaAtual,
         ])
+
+        const resultados = await Promise.allSettled((valores.turnos || []).map((turno) => (
+            criarTurnoEscola({ ...turno, escolaId: escolaCriada.id })
+        )))
+        setTurnos((listaAtual) => [
+            ...listaAtual,
+            ...resultados.filter((resultado) => resultado.status === 'fulfilled').map((resultado) => resultado.value),
+        ])
+
+        if (resultados.some((resultado) => resultado.status === 'rejected')) {
+            toast.error('A escola foi cadastrada, mas alguns turnos não foram salvos. Abra a edição da escola para adicioná-los novamente.')
+        }
     }
 
     //====================

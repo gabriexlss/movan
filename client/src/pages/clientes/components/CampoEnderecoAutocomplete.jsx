@@ -1,12 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
 import { carregarGooglePlaces } from '../../../services/googlePlaces'
-import styles from './dialogsClientes.module.css'
+import styles from './CampoEnderecoAutocomplete.module.css'
 
-const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar }) => {
+const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar, coordenadasPendentes = false }) => {
     const fieldId = useId()
     const [sugestoes, setSugestoes] = useState([])
     const [erro, setErro] = useState('')
+    const [sugestaoAtiva, setSugestaoAtiva] = useState(-1)
     const bibliotecaPlaces = useRef(null)
     const tokenSessao = useRef(null)
     const requisicaoAtual = useRef(0)
@@ -37,6 +38,9 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar }) => {
         onChange(endereco) //chamo a função que foi passada como prop para atualizar o valor do campo
         setErro('') //limpo o erro que estava sendo mostrado
         clearTimeout(espera.current) //limpo o timeout que estava esperando para buscar as sugestões
+        const idRequisicao = ++requisicaoAtual.current
+        setSugestoes([])
+        setSugestaoAtiva(-1)
 
         if (endereco.trim().length < 3 || !bibliotecaPlaces.current) { //se o endereço tiver menos de 3 caracteres ou a biblioteca de places não estiver carregada
             setSugestoes([]) //limpo as sugestões que estavam sendo mostradas
@@ -44,8 +48,6 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar }) => {
         }
 
         espera.current = setTimeout(async () => { //uso um timeout para esperar 250ms  antes de buscar as sugestões, assim não faço requisições a cada letra digitada
-            const idRequisicao = ++requisicaoAtual.current //guardo o id da requisição atual para saber se a resposta que chegar é da ultima requisição feita
-
             try {
                 const { AutocompleteSuggestion } = bibliotecaPlaces.current //pego a classe AutocompleteSuggestion da biblioteca de places
                 const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({ //chamo a função que busca as sugestões de endereço
@@ -68,12 +70,15 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar }) => {
     }
 
     const selecionarEndereco = async (previsao) => { //função para quando o usuario selecionar um endereço da lista de sugestões
+        clearTimeout(espera.current)
+        const idRequisicao = ++requisicaoAtual.current
         setSugestoes([]) //limpo as sugestões que estavam sendo mostradas
         setErro('') //limpo o erro que estava sendo mostrado
 
         try {
             const local = previsao.toPlace() //pego o local que foi selecionado pelo usuario
             await local.fetchFields({ fields: ['formattedAddress', 'location'] }) //pego o endereço formatado e as cordenadas do local selecionado, que são os campos que o backend espera receber
+            if (idRequisicao !== requisicaoAtual.current) return
 
             if (!local.location) { //se o local não tiver localização
                 throw new Error('O endereço selecionado não possui coordenadas.') //mando um erro dizendo que o endereço selecionado não possui coordenadas
@@ -87,44 +92,77 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar }) => {
 
             tokenSessao.current = new bibliotecaPlaces.current.AutocompleteSessionToken() //quando o usuario seleciona um endereço, crio um novo token de sessão para o autocomplete, para que as próximas requisições de autocomplete não sejam afetadas pelo endereço que foi selecionado
         } catch (error) {
+            if (idRequisicao !== requisicaoAtual.current) return
             setErro(error.message || 'Não foi possível obter as coordenadas desse endereço.') //mostro o erro na tela, se não tiver mensagem de erro, mostro uma mensagem padrão dizendo que não foi possível obter as coordenadas do endereço
         }
     }
 
+    const navegarSugestoes = (event) => {
+        if (!sugestoes.length) return
+
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault()
+            setSugestaoAtiva((atual) => (
+                event.key === 'ArrowDown'
+                    ? (atual + 1) % sugestoes.length
+                    : (atual <= 0 ? sugestoes.length - 1 : atual - 1)
+            ))
+        } else if (event.key === 'Enter' && sugestaoAtiva >= 0) {
+            event.preventDefault()
+            selecionarEndereco(sugestoes[sugestaoAtiva].placePrediction)
+        } else if (event.key === 'Escape') {
+            event.preventDefault()
+            event.stopPropagation()
+            setSugestoes([])
+        }
+    }
+
     return ( //aqui é o retorno do componente, que é o que vai ser renderizado na tela
-        <div className={`${styles.field} ${styles.autocompleteField}`}>
-            <label htmlFor={fieldId}>Endereço</label>
-            <div className={styles.inputWrapper}>
-                <span className={styles.fieldIcon} aria-hidden="true">{icon}</span>
-                <input
-                    id={fieldId}
-                    value={value}
-                    onChange={(event) => buscarSugestoes(event.target.value)}
-                    onBlur={() => setTimeout(() => setSugestoes([]), 150)}
-                    placeholder="Digite e escolha o endereço da escola"
-                    autoComplete="off"
-                    aria-autocomplete="list"
-                    aria-controls={`${fieldId}-sugestoes`}
-                    aria-expanded={sugestoes.length > 0}
-                    required
-                />
+        <>
+            <div className={styles.autocompleteField}>
+                <label htmlFor={fieldId}>Endereço</label>
+                <div className={styles.inputWrapper}>
+                    <span className={styles.fieldIcon} aria-hidden="true">{icon}</span>
+                    <input
+                        id={fieldId}
+                        value={value}
+                        onChange={(event) => buscarSugestoes(event.target.value)}
+                        onKeyDown={navegarSugestoes}
+                        onBlur={() => {
+                            clearTimeout(espera.current)
+                            requisicaoAtual.current += 1
+                            setSugestoes([])
+                        }}
+                        placeholder="Digite e escolha um endereço"
+                        autoComplete="off"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-controls={`${fieldId}-sugestoes`}
+                        aria-expanded={sugestoes.length > 0}
+                        aria-activedescendant={sugestoes[sugestaoAtiva] ? `${fieldId}-sugestao-${sugestaoAtiva}` : undefined}
+                        required
+                    />
+                </div>
+
+                {sugestoes.length > 0 && (
+                    <ul id={`${fieldId}-sugestoes`} className={styles.sugestoesEndereco} role="listbox">
+                        {sugestoes.map(({ placePrediction }, indice) => (
+                            <li id={`${fieldId}-sugestao-${indice}`} key={placePrediction.placeId} role="option" aria-selected={indice === sugestaoAtiva}>
+                                <button type="button" tabIndex={-1} onPointerDown={(event) => event.preventDefault()} onMouseDown={(event) => event.preventDefault()} onClick={() => selecionarEndereco(placePrediction)}>
+                                    <strong>{placePrediction.mainText?.toString() || placePrediction.text.toString()}</strong>
+                                    <span>{placePrediction.secondaryText?.toString()}</span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                {erro && <p className={styles.autocompleteError} role="alert">{erro}</p>}
             </div>
-
-            {sugestoes.length > 0 && (
-                <ul id={`${fieldId}-sugestoes`} className={styles.sugestoesEndereco} role="listbox">
-                    {sugestoes.map(({ placePrediction }) => (
-                        <li key={placePrediction.placeId} role="option" aria-selected="false">
-                            <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => selecionarEndereco(placePrediction)}>
-                                <strong>{placePrediction.mainText?.toString()}</strong>
-                                <span>{placePrediction.secondaryText?.toString()}</span>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+            {coordenadasPendentes && (
+                <p className={styles.coordenadasPendentes}>Escolha uma sugestão para registrar as coordenadas.</p>
             )}
-
-            {erro && <p className={styles.autocompleteError} role="alert">{erro}</p>}
-        </div>
+        </>
     )
 }
 
