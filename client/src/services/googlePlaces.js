@@ -1,5 +1,8 @@
 let carregamentoMaps
 
+//================================
+// CARREGAR O AUTO COMPLETE
+//================================
 // A chave é pública no navegador por definição. Restrinja-a no Google Cloud ao
 // domínio da aplicação e habilite somente as APIs que este fluxo utiliza.
 export const carregarGooglePlaces = () => { //função para fazer o carregameno do Google Places API
@@ -46,4 +49,23 @@ export const carregarGooglePlaces = () => { //função para fazer o carregameno 
     })
 
     return carregamentoMaps //retorno a promise que vai ser resolvida ou rejeitada no futuro
+}
+
+//================================
+// UTILIZAR O REVERSE GEOCODE PARA OBTER O ENDEREÇO
+//================================
+export const obterEndereco = async (latitude, longitude) => { //função para obter o endereço a partir da latitude e longitude
+    const maps = await carregarGooglePlaces() //carrego a biblioteca do Google Maps
+
+    const geocoder = new maps.Geocoder() //crio um objeto Geocoder para fazer o reverse geocode
+
+    return new Promise((resolve, reject) => { //retorno uma promise que vai ser resolvida ou rejeitada no futuro
+        geocoder.geocode({ location: { lat: latitude, lng: longitude } }, (results, status) => { //chamo o método geocode do Geocoder, passando a localização e uma função de callback
+            if (status === 'OK') { //se o status for OK, significa que o endereço foi encontrado
+                resolve(results[0]?.formatted_address || '') //resolvo a promise com o endereço formatado ou uma string vazia se não houver resultados
+            } else { //se o status não for OK, significa que houve um erro
+                reject(new Error(`Não foi possível obter o endereço. Status: ${status}`)) //rejeito a promise com um erro
+            }
+        })
+    })
 }

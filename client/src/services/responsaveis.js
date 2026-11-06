@@ -1,4 +1,3 @@
-import toast from 'react-hot-toast'
 import api from './api'
 
 //================================
@@ -25,6 +24,14 @@ export const listarResponsaveis = async () => {
     return response.data.responsaveis //devolvo a resposta do backend
 }
 
+//==============================
+//OBTER RESPONSAVEL ESPECIFICO
+//==============================
+export const obterResponsavel = async (id) => {
+    const response = await api.get(`/responsavel/${id}`, {skipGlobalErrorToast: true}) //peço os dados de um responsavel especifico para o backend
+    return response.data.responsavel //devolvo os dados do responsavel para o cliente
+}
+
 
 //==============================
 //ALTERAR RESPONSAVEL
@@ -40,4 +47,11 @@ export const alterarResponsavel = async (id, valores) => {
 
     const response = await api.patch(`/responsavel/${id}`, responsavel, {skipGlobalErrorToast: true}) //mando as informações para o backend
     return response.data.responsavel //devolvo a resposta do backend
+}
+
+//==============================
+//EXCLUIR RESPONSAVEL
+//==============================
+export const excluirResponsavel = async (id) => {
+    await api.delete(`/responsavel/${id}`, {skipGlobalErrorToast: true}) //mando o id do responsavel para o backend excluir o cadastro
 }

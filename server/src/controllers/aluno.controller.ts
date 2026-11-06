@@ -260,7 +260,7 @@ export const controllerAluno = {
                 })
             }
 
-            const query = "SELECT id, nome FROM aluno WHERE motorista_id = $1 ORDER BY id ASC"
+            const query = "SELECT * FROM aluno WHERE motorista_id = $1 ORDER BY id ASC"
             const { rows } = await database.query(query, [motoristaId])
 
             return res.status(200).json({

@@ -7,6 +7,7 @@ import DialogExcluirCliente from '../dialogs/DialogExcluirCliente'
 import DialogFormularioCliente from '../dialogs/DialogFormularioCliente'
 import styles from './cards-clientes.module.css'
 import toast from 'react-hot-toast'
+import { apiErrorToast } from '../../../services/toastManager'
 
 const ITENS_POR_PAGINA = 4
 
@@ -45,11 +46,11 @@ const montarDetalhes = (tipo, registro) => {
 
     return [
         registro.endereco,
-        [registro.telefone, registro.funcionamento].filter(Boolean).join(' · '),
+        registro.telefone,
     ].filter(Boolean)
 }
 
-const ListaClientes = ({ title, tipo, registros, responsaveis = [], onCriar }) => {
+const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = [], turnos = [], onTurnosChange, onCriar, onEditar, onExcluir }) => {
     const [itens, setItens] = useState(registros)
     const [busca, setBusca] = useState('')
     const [pagina, setPagina] = useState(0)
@@ -75,7 +76,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], onCriar }) =
     const fecharDialog = useCallback(() => setDialog(null), [])
 
     const abrirFormulario = (acao, registro = null) => {
-        setDialog({ acao, registro })
+        setDialog({ acao, registro }) //abro o formulario com a acao e o registro selecionado
     }
 
     const salvarRegistro = async (valores) => { //função para salvar um registro, seja adicionando ou editando
@@ -104,6 +105,20 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], onCriar }) =
         detalhes: montarDetalhes(tipo, valores),
     }
 
+    if (dialog.acao === 'editar' && onEditar) {
+        try {
+            const salvo = await onEditar(dialog.registro.id, valores) //mando os dados alterados para o backend
+            const atualizado = { ...registroAtualizado, ...salvo, detalhes: montarDetalhes(tipo, { ...registroAtualizado, ...salvo }) } //monto o registro atualizado para mostrar na lista
+            setItens((estadoAtual) => estadoAtual.map((item) => item.id === atualizado.id ? atualizado : item)) //atualizo o registro na lista
+            setPagina(0)
+            fecharDialog()
+            return
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível alterar este cadastro.')
+            return
+        }
+    }
+
     setItens((estadoAtual) => ( //falo que os itens atualizados são os itens atuais mais o novo registro atualizado
         dialog.acao === 'editar'
             ? estadoAtual.map((item) => (
@@ -119,9 +134,14 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], onCriar }) =
     }
 
 
-    const excluirRegistro = () => {
-        setItens((estadoAtual) => estadoAtual.filter((item) => item.id !== dialog.registro.id))
-        fecharDialog()
+    const excluirRegistro = async () => {
+        try {
+            if (onExcluir) await onExcluir(dialog.registro.id) //mando o id do registro para o backend excluir
+            setItens((estadoAtual) => estadoAtual.filter((item) => item.id !== dialog.registro.id)) //removo o registro da lista
+            fecharDialog() //fecho o dialog de exclusao
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível excluir este cadastro.')
+        }
     }
 
     const totalPaginas = Math.max(1, Math.ceil(resultados.length / ITENS_POR_PAGINA))
@@ -240,6 +260,9 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], onCriar }) =
                     tipo={tipo}
                     registro={dialog.registro}
                     responsaveis={responsaveis}
+                    escolas={escolas}
+                    turnos={turnos}
+                    onTurnosChange={onTurnosChange}
                     onClose={fecharDialog}
                     onSave={salvarRegistro}
                 />

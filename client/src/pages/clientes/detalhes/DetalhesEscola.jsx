@@ -1,23 +1,72 @@
+import { useEffect, useState } from 'react'
 import { FaChevronRight, FaInfoCircle, FaMapMarkerAlt, FaUserGraduate } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import { alunos } from '../clientes-data'
+import { obterEndereco } from '../../../services/googlePlaces'
+import { listarAluno } from '../../../services/aluno'
 import SecaoDetalhes, { CampoDetalhe } from './SecaoDetalhes'
 import styles from './clienteDetalhes.module.css'
 
 const DetalhesEscola = ({ cliente: escola }) => {
-    const alunosVinculados = alunos.filter((aluno) => aluno.escolaId === escola.id)
+    const [alunos, setAlunos] = useState([])
+    const [enderecoPorCoordenadas, setEnderecoPorCoordenadas] = useState('')
+
+    useEffect(() => {
+        let ativo = true
+
+        listarAluno().then((dados) => {
+            if (ativo) setAlunos(dados)
+        })
+
+        return () => {
+            ativo = false
+        }
+    }, [])
+
+    useEffect(() => {
+        const latitude = Number(escola.latitude)
+        const longitude = Number(escola.longitude)
+        const possuiCoordenadas = escola.latitude !== null && escola.latitude !== ''
+            && escola.longitude !== null && escola.longitude !== ''
+            && Number.isFinite(latitude) && Number.isFinite(longitude)
+
+        if (escola.endereco || !possuiCoordenadas) {
+            return undefined
+        }
+
+        let ativo = true
+        obterEndereco(latitude, longitude)
+            .then((endereco) => {
+                if (ativo) setEnderecoPorCoordenadas(endereco)
+            })
+            .catch(() => {
+                if (ativo) setEnderecoPorCoordenadas('')
+            })
+
+        return () => {
+            ativo = false
+        }
+    }, [escola.endereco, escola.latitude, escola.longitude])
+
+    const alunosVinculados = alunos.filter((aluno) => (
+        String(aluno.escola_id ?? aluno.escolaId) === String(escola.id)
+    ))
 
     return (
         <>
             <SecaoDetalhes title="Informações de cadastro" Icone={FaInfoCircle}>
                 <div className={styles.gradeDados}>
                     <CampoDetalhe label="Telefone para contato">{escola.telefone}</CampoDetalhe>
-                    <CampoDetalhe label="Horário de funcionamento">{escola.funcionamento}</CampoDetalhe>
                 </div>
             </SecaoDetalhes>
 
             <SecaoDetalhes title="Endereço" Icone={FaMapMarkerAlt}>
-                <address className={styles.endereco}>{escola.endereco}</address>
+                <div className={styles.gradeDados}>
+                    <CampoDetalhe label="Endereço" destaque>
+                        <address className={styles.endereco}>
+                            {escola.endereco || enderecoPorCoordenadas || 'Endereço não informado'}
+                        </address>
+                    </CampoDetalhe>
+                </div>
             </SecaoDetalhes>
 
             <SecaoDetalhes title="Alunos registrados na escola" Icone={FaUserGraduate}>
@@ -27,7 +76,13 @@ const DetalhesEscola = ({ cliente: escola }) => {
                             <li key={aluno.id}>
                                 <Link
                                     to={`/clientes/aluno/${aluno.id}`}
-                                    state={{ registro: aluno }}
+                                    state={{ registro: {
+                                        ...aluno,
+                                        dataNascimento: aluno.dataNascimento || aluno.data_nasc,
+                                        anoEscolar: aluno.anoEscolar || aluno.ano_escolar,
+                                        responsavelId: aluno.responsavelId || aluno.responsavel_id,
+                                        escolaId: aluno.escolaId || aluno.escola_id,
+                                    } }}
                                     className={styles.itemRelacionado}
                                 >
                                     <FaUserGraduate aria-hidden="true" />
