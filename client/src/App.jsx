@@ -66,6 +66,7 @@ function App() {
                     <Route path='/contratos' element={<Contratos />} />
                     <Route path='/contratos/clausulas' element={<ClausulasContrato />} />
                     <Route path='/contratos/link' element={<LinkContrato />} />
+                    <Route path='/contratos/:id' element={<ClausulasContrato gerado />} />
                     <Route path='/contrato/assinatura' element={<AssinaturaContrato />} />
                     <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>

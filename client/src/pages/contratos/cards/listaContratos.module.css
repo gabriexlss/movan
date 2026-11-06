@@ -197,6 +197,7 @@
     background: #fff;
     box-shadow: 0 3px 3px rgb(0 0 0 / 25%);
     font-family: inherit;
+    text-decoration: none;
 }
 
 /* A faixa fica separada do conteúdo para permitir um recorte com gradiente. */
@@ -338,6 +339,7 @@
 .paginacao button:focus-visible,
 .filtro:focus-visible,
 .novo:focus-visible,
+.contrato:focus-visible,
 .opcaoFiltro:focus-visible {
     outline: 2px solid #0d47a1;
     outline-offset: 2px;

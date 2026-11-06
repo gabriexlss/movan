@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FaChevronLeft, FaChevronRight, FaPlus, FaRegCalendarAlt, FaRegFileAlt, FaSearch, FaUser } from 'react-icons/fa'
 import { IoFilterSharp } from 'react-icons/io5'
 import { LuScrollText } from 'react-icons/lu'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import DefaultCard from '../../../components/cards/DefaultCard'
 import { contratos, formatarData, situacoesContrato } from '../contratos-data'
 import DialogContrato from '../dialogs/DialogContrato'
@@ -148,27 +148,33 @@ const ListaContratos = () => {
                 {contratosDaPagina.length > 0 ? (
                     <ul className={styles.registros}>
                         {contratosDaPagina.map((contrato) => (
-                            <li key={contrato.id} className={styles.contrato}>
-                                <span className={styles.iconeContrato} aria-hidden="true"><FaRegFileAlt /></span>
-                                <div className={styles.conteudo}>
-                                    <div className={styles.cabecalhoContrato}>
-                                        <strong className={styles.tituloContrato}>{contrato.titulo}</strong>
-                                        <span className={`${styles.status} ${styles[contrato.situacao]}`}>
-                                            {situacoesContrato[contrato.situacao]}
-                                        </span>
-                                    </div>
-                                    <div className={styles.informacoes}>
-                                        <div className={styles.linhaDetalhes}>
-                                            <span><LuScrollText aria-hidden="true" />{contrato.id}</span>
-                                            <span><FaUser aria-hidden="true" />Cliente: {contrato.cliente}</span>
+                            <li key={contrato.id}>
+                                <Link
+                                    to={`/contratos/${contrato.id}`}
+                                    className={styles.contrato}
+                                    aria-label={`Abrir contrato ${contrato.id} de ${contrato.cliente}`}
+                                >
+                                    <span className={styles.iconeContrato} aria-hidden="true"><FaRegFileAlt /></span>
+                                    <div className={styles.conteudo}>
+                                        <div className={styles.cabecalhoContrato}>
+                                            <strong className={styles.tituloContrato}>{contrato.titulo}</strong>
+                                            <span className={`${styles.status} ${styles[contrato.situacao]}`}>
+                                                {situacoesContrato[contrato.situacao]}
+                                            </span>
                                         </div>
-                                        <div className={styles.linhaDetalhes}>
-                                            <span><FaRegCalendarAlt aria-hidden="true" />Início: {formatarData(contrato.inicio)}</span>
-                                            <span>Término: {formatarData(contrato.termino)}</span>
+                                        <div className={styles.informacoes}>
+                                            <div className={styles.linhaDetalhes}>
+                                                <span><LuScrollText aria-hidden="true" />{contrato.id}</span>
+                                                <span><FaUser aria-hidden="true" />Cliente: {contrato.cliente}</span>
+                                            </div>
+                                            <div className={styles.linhaDetalhes}>
+                                                <span><FaRegCalendarAlt aria-hidden="true" />Início: {formatarData(contrato.inicio)}</span>
+                                                <span>Término: {formatarData(contrato.termino)}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <FaChevronRight className={styles.seta} aria-hidden="true" />
+                                    <FaChevronRight className={styles.seta} aria-hidden="true" />
+                                </Link>
                             </li>
                         ))}
                     </ul>
