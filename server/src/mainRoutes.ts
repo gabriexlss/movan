@@ -9,6 +9,7 @@ import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
 import { controllerRotas } from './controllers/rotas.controller.js';
 import rotasRota from './routes/rotas.route.js'
 import { database } from './db/postgre.js';
+import { otimizarRota } from './services/otimizarRota.js';
 
 const router = Router();
 
@@ -17,14 +18,14 @@ router.get('/health', (req, res) => {
     res.status(200).json({ 'msg-code': 'OK' });
 });
 router.post('/teste', middlewareAutenticar,async (req, res) => {
-    const cliente = await database.connect()
+    //const cliente = await database.connect()
     try{
-        await cliente.query('BEGIN')
-        await controllerRotas.adicionarAluno(42, cliente, req)
-        await cliente.query('COMMIT')
+        //await cliente.query('BEGIN')
+        await otimizarRota(62, req)
+        //await cliente.query('COMMIT')
         return res.status(200).json()
     }catch(erro){
-        await cliente.query('ROLLBACK')
+        //await cliente.query('ROLLBACK')
         console.error(erro)
         if(erro instanceof Error){
             switch(erro.message){
@@ -32,11 +33,15 @@ router.post('/teste', middlewareAutenticar,async (req, res) => {
                     return res.status(404).json({
                         msg: "Aluno não encontrado."
                     })
+                case 'ROTA_NOT_FOUND': 
+                return res.status(404).json({
+                    msg: "Rota não encontrada."
+                })
             }
         }
         return res.status(500).json()
     }finally{
-        cliente.release()
+        //cliente.release()
     }
 })
 
