@@ -33,6 +33,21 @@ const nomesSituacao = {
     atrasado: 'Contrato atrasado',
 }
 
+const normalizarCliente = (tipo, registro) => {
+    if (!registro) return null
+    if (tipo !== 'aluno') return registro
+
+    return {
+        ...registro,
+        dataNascimento: (registro.dataNascimento || registro.data_nasc || '').slice(0, 10),
+        anoEscolar: registro.anoEscolar || registro.ano_escolar || '',
+        informacoesGerais: registro.informacoesGerais || registro.observacao || '',
+        responsavelId: registro.responsavelId || registro.responsavel_id || '',
+        escolaId: registro.escolaId || registro.escola_id || '',
+        escolaTurnoId: registro.escolaTurnoId || registro.escola_turno_id || '',
+    }
+}
+
 const ClienteDetalhes = () => {
     const { tipo, id } = useParams()
     const { state } = useLocation()
@@ -81,7 +96,8 @@ const ClienteDetalhes = () => {
 
     const registroRecebido = state?.registro && String(state.registro.id) === id ? state.registro : null
     const registroEncontrado = registroApi || registroRecebido || buscarCliente(tipo, id)
-    const cliente = String(registroAlterado?.id) === id ? registroAlterado : registroEncontrado
+    const clienteBruto = String(registroAlterado?.id) === id ? registroAlterado : registroEncontrado
+    const cliente = normalizarCliente(tipo, clienteBruto)
     const ConteudoDetalhes = componentesPorTipo[tipo]
 
     if (!cliente || !ConteudoDetalhes) {

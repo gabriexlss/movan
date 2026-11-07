@@ -23,11 +23,20 @@ const nomesPlural = {
     escola: 'escolas',
 }
 
+const MESES = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+]
+
 const formatarData = (data) => {
     if (!data) return ''
 
-    const [ano, mes, dia] = data.split('-')
-    return ano && mes && dia ? `${dia}/${mes}/${ano}` : data
+    const [ano, mes, dia] = String(data).slice(0, 10).split('-')
+    const mesIndex = Number(mes) - 1
+    if (ano && mes && dia && mesIndex >= 0 && mesIndex < 12) {
+        return `${Number(dia)} de ${MESES[mesIndex]} de ${ano}`
+    }
+    return data
 }
 
 const montarDetalhes = (tipo, registro) => {

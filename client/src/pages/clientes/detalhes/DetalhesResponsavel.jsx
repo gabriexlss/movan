@@ -53,7 +53,7 @@ const DetalhesResponsavel = ({ cliente: responsavel }) => {
                                     to={`/clientes/aluno/${aluno.id}`}
                                     state={{ registro: {
                                         ...aluno,
-                                        dataNascimento: aluno.dataNascimento || aluno.data_nasc,
+                                        dataNascimento: (aluno.dataNascimento || aluno.data_nasc || '').slice(0, 10),
                                         anoEscolar: aluno.anoEscolar || aluno.ano_escolar,
                                         responsavelId: aluno.responsavelId || aluno.responsavel_id,
                                         escolaId: aluno.escolaId || aluno.escola_id,

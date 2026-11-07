@@ -7,10 +7,19 @@ import { obterEndereco } from '../../../services/googlePlaces'
 import SecaoDetalhes, { CampoDetalhe } from './SecaoDetalhes'
 import styles from './clienteDetalhes.module.css'
 
+const MESES = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+]
+
 const formatarData = (data) => {
     if (!data) return 'Não informada'
-    const [ano, mes, dia] = data.split('-')
-    return ano && mes && dia ? `${dia}/${mes}/${ano}` : data
+    const [ano, mes, dia] = String(data).slice(0, 10).split('-')
+    const mesIndex = Number(mes) - 1
+    if (ano && mes && dia && mesIndex >= 0 && mesIndex < 12) {
+        return `${Number(dia)} de ${MESES[mesIndex]} de ${ano}`
+    }
+    return data
 }
 
 const DetalhesAluno = ({ cliente: aluno, turnos = [] }) => {
@@ -66,9 +75,9 @@ const DetalhesAluno = ({ cliente: aluno, turnos = [] }) => {
     const possuiCoordenadas = aluno.latitude !== null && aluno.latitude !== ''
         && aluno.longitude !== null && aluno.longitude !== ''
         && Number.isFinite(Number(aluno.latitude)) && Number.isFinite(Number(aluno.longitude))
-    const enderecoExibido = possuiCoordenadas
+    const enderecoExibido = aluno.endereco || (possuiCoordenadas
         ? endereco || 'Carregando endereço...'
-        : 'Endereço não informado.'
+        : 'Endereço não informado.')
     const escolaTurnoId = aluno.escolaTurnoId || aluno.escola_turno_id
     const turno = turnos.find((item) => String(item.id) === String(escolaTurnoId))
 
@@ -76,12 +85,12 @@ const DetalhesAluno = ({ cliente: aluno, turnos = [] }) => {
         <>
             <SecaoDetalhes title="Informações de cadastro" Icone={FaInfoCircle}>
                 <div className={styles.gradeDados}>
-                    <CampoDetalhe label="Data de nascimento">{formatarData(aluno.dataNascimento)}</CampoDetalhe>
+                    <CampoDetalhe label="Data de nascimento">{formatarData(aluno.dataNascimento || aluno.data_nasc)}</CampoDetalhe>
                     <CampoDetalhe label="Turno">{turno?.turno || aluno.turno}</CampoDetalhe>
-                    <CampoDetalhe label="Ano escolar">{aluno.anoEscolar}</CampoDetalhe>
+                    <CampoDetalhe label="Ano escolar">{aluno.anoEscolar || aluno.ano_escolar}</CampoDetalhe>
                     <CampoDetalhe label="Endereço" destaque>{enderecoExibido}</CampoDetalhe>
                     <CampoDetalhe label="Informações gerais" destaque>
-                        {aluno.informacoesGerais || 'Nenhuma informação adicional.'}
+                        {aluno.informacoesGerais || aluno.observacao || 'Nenhuma informação adicional.'}
                     </CampoDetalhe>
                 </div>
             </SecaoDetalhes>
