@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { FaChevronLeft, FaChevronRight, FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import fotoPlaceholder from '../../../assets/media/img/placeholders/placeholder.jpg'
 import DefaultCard from '../../../components/cards/DefaultCard'
+import IconeCliente from '../IconeCliente'
 import DialogExcluirCliente from '../dialogs/DialogExcluirCliente'
 import DialogFormularioCliente from '../dialogs/DialogFormularioCliente'
 import styles from './cards-clientes.module.css'
@@ -137,7 +137,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [] }) => {
                         {registrosDaPagina.map((registro) => (
                             <li className={styles.registro} key={registro.id}>
                                 <span className={styles.avatar} aria-hidden="true">
-                                    <img src={fotoPlaceholder} alt="" />
+                                    <IconeCliente tipo={tipo} />
                                 </span>
                                 <div className={styles.informacoes}>
                                     <Link

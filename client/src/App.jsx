@@ -3,6 +3,7 @@ import './App.css'
 
 import Header from './components/layout/header'
 import Footer from './components/layout/footer'
+import ScrollToTop from './components/layout/ScrollToTop'
 
 import HomePage from './pages/homePage'
 import Login from './pages/login-cad/login/login'
@@ -23,6 +24,11 @@ import Cliente from './pages/clientes/cliente'
 import ClienteDetalhes from './pages/clientes/detalhes/ClienteDetalhes'
 import Perfil from './pages/perfil/perfil'
 import Notificacoes from './pages/notificacoes/notificacoes'
+import Contratos from './pages/contratos/contratos'
+import ClausulasContrato from './pages/contratos/ClausulasContrato'
+import LinkContrato from './pages/contratos/LinkContrato'
+import AssinaturaContrato from './pages/contratos/AssinaturaContrato'
+import Rotas from './pages/rotas/rota'
 
 function App() {
 
@@ -40,9 +46,11 @@ function App() {
     ]
 
     const logCad = rotasLogCad.includes(location.pathname)
+    const fluxoContrato = location.pathname.startsWith('/contratos/') || location.pathname === '/contrato/assinatura'
 
     return (
         <div className='app'>
+            <ScrollToTop />
             {!logCad && <Header />}
 
             <Routes>
@@ -51,9 +59,15 @@ function App() {
                 <Route element={<ProtectedRoute />}>
                     <Route path='/' element={<HomePage />} />
                     <Route path='/financeiro' element={<Financeiro />} />
+                    <Route path='/rota' element={<Rotas />} />
                     <Route path='/clientes' element={<Cliente />} />
                     <Route path='/clientes/:tipo/:id' element={<ClienteDetalhes />} />
                     <Route path='/perfil' element={<Perfil />} />
+                    <Route path='/contratos' element={<Contratos />} />
+                    <Route path='/contratos/clausulas' element={<ClausulasContrato />} />
+                    <Route path='/contratos/link' element={<LinkContrato />} />
+                    <Route path='/contratos/:id' element={<ClausulasContrato gerado />} />
+                    <Route path='/contrato/assinatura' element={<AssinaturaContrato />} />
                     <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
 
@@ -77,7 +91,7 @@ function App() {
                 </Route>
             </Routes>
 
-            {!logCad && <Footer />}
+            {!logCad && !fluxoContrato && <Footer />}
         </div>
 )
 }

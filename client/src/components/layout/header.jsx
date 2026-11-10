@@ -1,7 +1,7 @@
 import styles from './header.module.css'
 import { useLayoutEffect, useRef } from 'react'
 
-import useHeaderScroll from '../../hook/useHeaderScroll'
+import useHeaderScroll from '../../hooks/useHeaderScroll'
 
 const Header = () => {
     const showHeader = useHeaderScroll();

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { FaArrowLeft, FaPencilAlt, FaTrash } from 'react-icons/fa'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import fotoPlaceholder from '../../../assets/media/img/placeholders/placeholder.jpg'
 import TituloTela from '../../../components/layout/tituloTela'
+import IconeCliente from '../IconeCliente'
 import DialogExcluirCliente from '../dialogs/DialogExcluirCliente'
 import DialogFormularioCliente from '../dialogs/DialogFormularioCliente'
 import { buscarCliente, responsaveis } from '../clientes-data'
@@ -78,7 +78,7 @@ const ClienteDetalhes = () => {
 
             <section className={styles.identificacao}>
                 <span className={styles.avatar} aria-hidden="true">
-                    <img src={fotoPlaceholder} alt="" />
+                    <IconeCliente tipo={tipo} />
                 </span>
 
                 <div className={styles.identificacaoTexto}>

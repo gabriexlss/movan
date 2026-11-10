@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { PiBuildingsBold } from 'react-icons/pi'
-import { toast } from 'react-hot-toast'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
 import styles from './edicaoPerfil.module.css'
 import { useAuth } from '../../../context/useAuth'
 import api from '../../../services/api'
-import { mensagemErroApi } from '../../../utils/apiError'
+import { apiErrorToast, errorToast, successToast } from '../../../services/toastManager'
 
 const DialogCnpj = ({ onClose }) => {
     const [credencialNova, setCredencialNova] = useState('')
@@ -23,23 +22,23 @@ const DialogCnpj = ({ onClose }) => {
             const credencialNovaLimpo = credencialNova.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() //remove apenas simbolos
 
             if (credencialAtualLimpo !== credencialOriginal) { //se o cnpj atual for diferente do cnpj original
-                toast.error('CNPJ atual não confere.')
+                errorToast('CURRENT_CNPJ_MISMATCH')
                 return
             }else if  (credencialNovaLimpo.length !== 14) { //se o cnpj novo não tiver 14 caracteres
-                toast.error('CNPJ novo inválido. O CNPJ deve conter 14 caracteres.')
+                errorToast('NEW_CNPJ_INVALID_LENGTH')
                 return
             }else if (credencialAtualLimpo.length !== 14) { //se o cnpj atual não tiver 14 caracteres
-                toast.error('CNPJ atual inválido. O CNPJ deve conter 14 caracteres.')
+                errorToast('CURRENT_CNPJ_INVALID_LENGTH')
                 return
             }else {
             await api.patch('/motorista', { credencial: credencialNovaLimpo }, { skipGlobalErrorToast: true }) //manda o CNPJ para o backend
             await refreshSession()
-            toast.success('CNPJ alterado com sucesso.')
+            successToast('CNPJ_CHANGED')
             }
             onClose() //fecha o dialog
         }
         catch (error) {
-            toast.error(mensagemErroApi(error, 'Não foi possível alterar o CNPJ.'))
+            apiErrorToast(error, 'CNPJ_CHANGE_FAILED')
         }
     }
 

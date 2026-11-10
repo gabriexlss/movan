@@ -15,6 +15,7 @@ import DefaultCard from "../../../components/cards/DefaultCard"
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 ChartJS.defaults.font.family = 'Poppins, sans-serif'
 ChartJS.defaults.font.weight = 'bold'
+ChartJS.defaults.font.size = 13
 
 const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 const cinza = Array(3).fill('#c7c7c7')
