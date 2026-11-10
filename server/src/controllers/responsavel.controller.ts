@@ -231,7 +231,7 @@ export const controllerResponsavel = {
                 })
             }
 
-            const query = "SELECT id, nome FROM responsavel WHERE motorista_id = $1 ORDER BY id ASC"
+            const query = "SELECT id, nome, email, cpf, telefone, endereco  FROM responsavel WHERE motorista_id = $1 ORDER BY id ASC"
             const { rows } = await database.query(query, [motoristaId])
 
             return res.status(200).json({

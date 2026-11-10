@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { controllerEscola } from "../controllers/escola.controller.js";
-import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js";
+import { controllerEscola } from "../../controllers/escola/escola.controller.js";
+import { middlewareAutenticar } from "../../middlewares/autenticacao.middleware.js";
+import rotasTurno from "./turno.route.js";
 
 const router = Router()
+
+// Mantém as rotas de turno sob /escola/turno (antes das rotas com /:id).
+router.use('/turno', rotasTurno)
 
 // rota para realizar a criação da escola.
 router.post('/', middlewareAutenticar, controllerEscola.criarEscola)

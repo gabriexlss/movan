@@ -1,0 +1,130 @@
+.autocompleteField {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    padding-top: .35rem;
+}
+
+.autocompleteField > label {
+    position: absolute;
+    top: 0;
+    left: 1.75rem;
+    z-index: 1;
+    max-width: calc(100% - 3.5rem);
+    overflow: hidden;
+    padding: 0 .35rem;
+    background: #fff;
+    color: #0d47a1;
+    font-family: 'Poppins', sans-serif;
+    font-size: .72rem;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    border: 1px solid #b8b8b8;
+    border-radius: 999px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.inputWrapper:focus-within {
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 3px rgb(13 71 161 / 10%);
+}
+
+.fieldIcon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2rem;
+    padding-left: .4rem;
+    color: #0d47a1;
+}
+
+.inputWrapper input {
+    width: 100%;
+    min-width: 0;
+    padding: .55rem .7rem .55rem 0;
+    border: 0;
+    border-radius: 999px;
+    outline: 0;
+    background: transparent;
+    color: #454545;
+    font-family: 'Poppins', sans-serif;
+    font-size: .88rem;
+}
+
+.inputWrapper input::placeholder {
+    color: #888;
+    opacity: 1;
+}
+
+.sugestoesEndereco {
+    position: absolute;
+    top: calc(100% + .3rem);
+    inset-inline: 0;
+    max-height: 13rem;
+    overflow-y: auto;
+    padding: .25rem;
+    border: 1px solid #d7dce4;
+    border-radius: .65rem;
+    background: #fff;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+    list-style: none;
+}
+
+.sugestoesEndereco button {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: .6rem .75rem;
+    border: 0;
+    border-radius: .4rem;
+    background: transparent;
+    color: #454545;
+    font-family: 'Poppins', sans-serif;
+    font-size: .78rem;
+    line-height: 1.45;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.sugestoesEndereco button:hover,
+.sugestoesEndereco button:focus-visible,
+.sugestoesEndereco [aria-selected='true'] button {
+    background: #eef4fc;
+    color: #0d47a1;
+}
+
+.sugestoesEndereco button span {
+    color: #7a7a7a;
+    font-size: .72rem;
+}
+
+.autocompleteError,
+.coordenadasPendentes {
+    margin-top: .3rem;
+    color: #7a7a7a;
+    font-family: 'Poppins', sans-serif;
+    font-size: .72rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.autocompleteError {
+    color: #bf3737;
+}
+
+@media (max-width: 420px) {
+    .inputWrapper input {
+        font-size: 1rem;
+    }
+}

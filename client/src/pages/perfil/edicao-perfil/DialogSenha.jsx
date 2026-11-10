@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 import { PiLockKeyBold, PiShieldCheckBold } from 'react-icons/pi'
-import { toast } from 'react-hot-toast'
 
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import CampoEdicao from './CampoEdicao'
@@ -8,8 +7,8 @@ import styles from './edicaoPerfil.module.css'
 import api from '../../../services/api'
 import PasswordRequirements from '../../../components/auth/PasswordRequirements'
 import { senhaValida } from '../../../utils/password'
-import { mensagemErroApi } from '../../../utils/apiError'
 import { useAuth } from '../../../context/useAuth'
+import { apiErrorToast, errorToast, successToast } from '../../../services/toastManager'
 
 const DialogSenha = ({ onClose }) => {
     const [senhaAtual, setSenhaAtual] = useState('')
@@ -23,15 +22,15 @@ const DialogSenha = ({ onClose }) => {
     async function TrocarSenha() {
         if (envioEmCurso.current) return
         if (!senhaAtual || !novaSenha || !confirmarSenha) {
-            toast.error('Por favor, preencha todos os campos.')
+            errorToast('ALL_FIELDS_REQUIRED')
             return
         }
         if (novaSenha !== confirmarSenha) {
-            toast.error('As senhas não coincidem.')
+            errorToast('PASSWORDS_DO_NOT_MATCH')
             return
         }
         if (!senhaValida(novaSenha)) {
-            toast.error('A nova senha deve atender a todos os requisitos.')
+            errorToast('PASSWORD_REQUIREMENTS')
             return
         }
 
@@ -42,12 +41,12 @@ const DialogSenha = ({ onClose }) => {
                 skipGlobalErrorToast: true,
                 skipAuthExpired: true,
             })
-            toast.success('Senha alterada com sucesso.')
+            successToast('PASSWORD_CHANGED')
             onClose()
         } catch (error) {
             // Um 401 pode ser senha incorreta ou sessão inválida; a consulta distingue os casos.
             if (error.response?.status === 401) await refreshSession()
-            toast.error(mensagemErroApi(error, 'Não foi possível alterar a senha.'))
+            apiErrorToast(error, 'PASSWORD_CHANGE_FAILED')
         } finally {
             envioEmCurso.current = false
             setEnviando(false)
