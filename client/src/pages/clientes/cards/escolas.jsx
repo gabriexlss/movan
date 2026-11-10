@@ -29,7 +29,12 @@ const Escolas = () => {
             ...listaAtual,
         ])
 
-        const resultados = await Promise.allSettled((valores.turnos || []).map((turno) => (
+        const turnosParaCriar = valores.turnos || (
+            valores.turnoInicial?.horaEntrada && valores.turnoInicial?.horaSaida
+                ? [valores.turnoInicial]
+                : []
+        )
+        const resultados = await Promise.allSettled(turnosParaCriar.map((turno) => (
             criarTurnoEscola({ ...turno, escolaId: escolaCriada.id })
         )))
         setTurnos((listaAtual) => [

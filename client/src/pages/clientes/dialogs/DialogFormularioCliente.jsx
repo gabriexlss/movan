@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     PiAddressBookBold,
     PiBookOpenTextBold,
@@ -21,7 +21,6 @@ import { alterarTurnoEscola, criarTurnoEscola, excluirTurnoEscola, listarTurnosE
 import toast from 'react-hot-toast'
 import CampoCliente from './CampoCliente'
 import CampoEnderecoAutocomplete from '../components/CampoEnderecoAutocomplete'
-import TurnosEscola from '../components/TurnosEscola'
 import styles from './dialogsClientes.module.css'
 
 const valoresIniciais = {
@@ -91,28 +90,17 @@ const DialogFormularioCliente = ({
         ...valoresIniciais[tipo],
         ...registro,
     })
-    const [turnosCarregados, setTurnosCarregados] = useState(null)
-    const turnosDisponiveis = turnosCarregados ?? turnos
-    const [turnosNovos, setTurnosNovos] = useState([])
-    const [alteracoesTurnos, setAlteracoesTurnos] = useState({})
-    const [turnosRemovidos, setTurnosRemovidos] = useState([])
-    const [salvando, setSalvando] = useState(false)
-    const proximoTurno = useRef(0)
+    const [turnosDaEscola, setTurnosDaEscola] = useState(() => (
+        turnos.filter((turno) => String(turno.escola_id) === String(registro?.id))
+    ))
+    const [turnosDisponiveis, setTurnosDisponiveis] = useState(turnos)
+    const [novoTurno, setNovoTurno] = useState({ turno: 'MANHA', horaEntrada: '', horaSaida: '' })
     const editando = acao === 'editar'
     const verbo = editando ? 'Alterar' : 'Adicionar'
-    const turnosCadastrados = turnos.filter((turno) => String(turno.escola_id) === String(registro?.id))
-    const turnosDaEscola = [
-        ...turnosCadastrados
-            .filter((turno) => !turnosRemovidos.includes(turno.id))
-            .map((turno) => ({
-                chave: String(turno.id),
-                turno: turno.turno,
-                horaEntrada: turno.hora_entrada?.slice(0, 5) || '',
-                horaSaida: turno.hora_saida?.slice(0, 5) || '',
-                ...alteracoesTurnos[String(turno.id)],
-            })),
-        ...turnosNovos,
-    ]
+
+    useEffect(() => {
+        setTurnosDaEscola(turnos.filter((turno) => String(turno.escola_id) === String(registro?.id)))
+    }, [turnos, registro?.id])
 
     useEffect(() => {
         if (tipo !== 'aluno') return undefined
@@ -120,16 +108,20 @@ const DialogFormularioCliente = ({
         let ativo = true
         listarTurnosEscola()
             .then((dados) => {
-                if (ativo) setTurnosCarregados(dados)
+                if (ativo) setTurnosDisponiveis(dados)
             })
             .catch(() => {
-                if (ativo) setTurnosCarregados(null)
+                if (ativo) setTurnosDisponiveis(turnos)
             })
 
         return () => {
             ativo = false
         }
     }, [tipo])
+
+    useEffect(() => {
+        setTurnosDisponiveis(turnos)
+    }, [turnos])
 
     const alterarCampo = (campo, valor) => {
         setValores((estadoAtual) => ({ ...estadoAtual, [campo]: valor }))
@@ -140,71 +132,60 @@ const DialogFormularioCliente = ({
         onChange: (event) => alterarCampo(campo, event.target.value),
     })
 
-    const adicionarTurno = () => {
-        const chave = `novo-${++proximoTurno.current}`
-        setTurnosNovos((atuais) => [...atuais, {
-            chave,
-            turno: 'MANHA',
-            horaEntrada: '',
-            horaSaida: '',
-        }])
+    const atualizarTurnos = (proximosTurnos) => {
+        setTurnosDaEscola(proximosTurnos)
+        onTurnosChange?.((turnosAtuais) => [
+            ...turnosAtuais.filter((turno) => String(turno.escola_id) !== String(registro?.id)),
+            ...proximosTurnos,
+        ])
     }
 
-    const alterarTurno = (chave, campo, valor) => {
-        if (chave.startsWith('novo-')) {
-            setTurnosNovos((atuais) => atuais.map((turno) => (
-                turno.chave === chave ? { ...turno, [campo]: valor } : turno
-            )))
-        } else {
-            setAlteracoesTurnos((atuais) => ({
-                ...atuais,
-                [chave]: { ...atuais[chave], [campo]: valor },
-            }))
-        }
-    }
-
-    const removerTurno = (chave) => {
-        if (chave.startsWith('novo-')) {
-            setTurnosNovos((atuais) => atuais.filter((turno) => turno.chave !== chave))
-        } else {
-            const turno = turnosCadastrados.find((item) => String(item.id) === chave)
-            setTurnosRemovidos((atuais) => [...atuais, turno.id])
-        }
-    }
-
-    const salvarTurnos = async () => {
-        for (const id of turnosRemovidos) {
-            await excluirTurnoEscola(id)
-            onTurnosChange?.((atuais) => atuais.filter((turno) => turno.id !== id))
-            setTurnosRemovidos((atuais) => atuais.filter((item) => item !== id))
-        }
-
-        for (const turno of turnosDaEscola.filter((item) => alteracoesTurnos[item.chave])) {
-            const atualizado = await alterarTurnoEscola(turno.chave, turno)
-            onTurnosChange?.((atuais) => atuais.map((item) => String(item.id) === turno.chave ? {
-                ...item,
-                ...atualizado,
-                turno: turno.turno,
-                hora_entrada: turno.horaEntrada,
-                hora_saida: turno.horaSaida,
-            } : item))
-            setAlteracoesTurnos((atuais) => {
-                const proximas = { ...atuais }
-                delete proximas[turno.chave]
-                return proximas
+    const adicionarTurno = async () => {
+        try {
+            const turnoCriado = await criarTurnoEscola({
+                ...novoTurno,
+                escolaId: registro.id,
             })
-        }
+            setTurnosDaEscola((atuais) => [...atuais, turnoCriado])
+            onTurnosChange?.((turnosAtuais) => {
+                if (turnosAtuais.some((turno) => String(turno.id) === String(turnoCriado.id))) {
+                    return turnosAtuais
+                }
 
-        for (const turno of turnosNovos) {
-            const criado = await criarTurnoEscola({ ...turno, escolaId: registro.id })
-            onTurnosChange?.((atuais) => [...atuais, criado])
-            setTurnosNovos((atuais) => atuais.filter((item) => item.chave !== turno.chave))
+                return [...turnosAtuais, turnoCriado]
+            })
+            setNovoTurno({ turno: 'MANHA', horaEntrada: '', horaSaida: '' })
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível adicionar o turno.')
         }
     }
 
-    const salvar = async (event) => {
+    const editarTurno = async (turno) => {
+        try {
+            const turnoAtualizado = await alterarTurnoEscola(turno.id, {
+                turno: turno.turno,
+                horaEntrada: turno.hora_entrada,
+                horaSaida: turno.hora_saida,
+            })
+            atualizarTurnos(turnosDaEscola.map((item) => (
+                item.id === turno.id ? { ...item, ...turnoAtualizado, ...turno } : item
+            )))
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível alterar o turno.')
+        }
+    }
+
+    const removerTurno = async (id) => {
+        try {
+            await excluirTurnoEscola(id)
+            atualizarTurnos(turnosDaEscola.filter((turno) => turno.id !== id))
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível excluir o turno.')
+        }
+    }
+
+    const salvar = (event) => {
         event.preventDefault()
-        if (salvando) return
 
         if ((tipo === 'escola' || tipo === 'aluno') && !possuiCoordenadas(valores)) {
             return
@@ -214,15 +195,12 @@ const DialogFormularioCliente = ({
             return
         }
 
-        setSalvando(true)
-        try {
-            if (tipo === 'escola' && editando) await salvarTurnos()
-            await onSave(tipo === 'escola' ? { ...valores, turnos: turnosNovos } : valores)
-        } catch (error) {
-            toast.error(error.response?.data?.msg || 'Não foi possível salvar as alterações. Tente novamente.')
-        } finally {
-            setSalvando(false)
-        }
+        onSave(tipo === 'escola'
+            ? {
+                ...valores,
+                turnos: novoTurno.horaEntrada && novoTurno.horaSaida ? [novoTurno] : [],
+            }
+            : valores)
     }
 
     return (
@@ -257,9 +235,8 @@ const DialogFormularioCliente = ({
                             required
                         />
                         <CampoEnderecoAutocomplete
-                            icon={<PiMapPinBold />}
+                            icon={<PiMapPinBold /   >}
                             value={valores.endereco}
-                            coordenadasPendentes={!possuiCoordenadas(valores)}
                             onChange={(endereco) => setValores((estadoAtual) => ({
                                 ...estadoAtual,
                                 endereco,
@@ -271,13 +248,78 @@ const DialogFormularioCliente = ({
                                 ...enderecoSelecionado,
                             }))}
                         />
-                        <TurnosEscola
-                            turnos={turnosDaEscola}
-                            onAdicionar={adicionarTurno}
-                            onAlterar={alterarTurno}
-                            onRemover={removerTurno}
-                            disabled={salvando}
-                        />
+                        {!possuiCoordenadas(valores) && (
+                            <p className={styles.coordenadasPendentes}>Escolha uma sugestão para registrar as coordenadas.</p>
+                        )}
+                        {editando && registro?.id && (
+                            <div className={styles.turnosEscola}>
+                                <h3>Turnos da escola</h3>
+                                {turnosDaEscola.map((turno) => (
+                                    <div className={styles.turnoItem} key={turno.id}>
+                                        <CampoCliente
+                                            label="Tipo"
+                                            icon={<PiSunHorizonBold />}
+                                            as="select"
+                                            value={turno.turno}
+                                            onChange={(event) => setTurnosDaEscola((atuais) => atuais.map((item) => (
+                                                item.id === turno.id ? { ...item, turno: event.target.value } : item
+                                            )))}
+                                        >
+                                            <option value="INTEGRAL">Integral</option>
+                                            <option value="MANHA">Manhã</option>
+                                            <option value="TARDE">Tarde</option>
+                                            <option value="NOITE">Noite</option>
+                                            <option value="INTEGRAL-MANHA">Integral manhã</option>
+                                            <option value="INTEGRAL-TARDE">Integral tarde</option>
+                                        </CampoCliente>
+                                        <CampoCliente label="Entrada" icon={<PiSunHorizonBold />} type="time" value={turno.hora_entrada?.slice(0, 5) || ''} onChange={(event) => setTurnosDaEscola((atuais) => atuais.map((item) => item.id === turno.id ? { ...item, hora_entrada: event.target.value } : item))} />
+                                        <CampoCliente label="Saída" icon={<PiSunHorizonBold />} type="time" value={turno.hora_saida?.slice(0, 5) || ''} onChange={(event) => setTurnosDaEscola((atuais) => atuais.map((item) => item.id === turno.id ? { ...item, hora_saida: event.target.value } : item))} />
+                                        <button type="button" className={styles.primaryButton} onClick={() => editarTurno(turno)}>Salvar turno</button>
+                                        <button type="button" className={styles.primaryButton} onClick={() => removerTurno(turno.id)}>Excluir turno</button>
+                                    </div>
+                                ))}
+                                <div className={styles.turnoItem}>
+                                    <CampoCliente
+                                        label="Novo turno"
+                                        icon={<PiSunHorizonBold />}
+                                        as="select"
+                                        value={novoTurno.turno}
+                                        onChange={(event) => setNovoTurno((atual) => ({ ...atual, turno: event.target.value }))}
+                                    >
+                                        <option value="INTEGRAL">Integral</option>
+                                        <option value="MANHA">Manhã</option>
+                                        <option value="TARDE">Tarde</option>
+                                        <option value="NOITE">Noite</option>
+                                        <option value="INTEGRAL-MANHA">Integral manhã</option>
+                                        <option value="INTEGRAL-TARDE">Integral tarde</option>
+                                    </CampoCliente>
+                                    <CampoCliente label="Entrada" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaEntrada} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaEntrada: event.target.value }))} />
+                                    <CampoCliente label="Saída" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaSaida} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaSaida: event.target.value }))} />
+                                    <button type="button" className={styles.primaryButton} onClick={adicionarTurno}>Adicionar turno</button>
+                                </div>
+                            </div>
+                        )}
+                        {!editando && (
+                            <div className={styles.turnoItem}>
+                                <h3>Turno inicial (opcional)</h3>
+                                <CampoCliente
+                                    label="Tipo"
+                                    icon={<PiSunHorizonBold />}
+                                    as="select"
+                                    value={novoTurno.turno}
+                                    onChange={(event) => setNovoTurno((atual) => ({ ...atual, turno: event.target.value }))}
+                                >
+                                    <option value="INTEGRAL">Integral</option>
+                                    <option value="MANHA">Manhã</option>
+                                    <option value="TARDE">Tarde</option>
+                                    <option value="NOITE">Noite</option>
+                                    <option value="INTEGRAL-MANHA">Integral manhã</option>
+                                    <option value="INTEGRAL-TARDE">Integral tarde</option>
+                                </CampoCliente>
+                                <CampoCliente label="Entrada" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaEntrada} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaEntrada: event.target.value }))} />
+                                <CampoCliente label="Saída" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaSaida} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaSaida: event.target.value }))} />
+                            </div>
+                        )}
                     </>
                 )}
 
@@ -384,7 +426,6 @@ const DialogFormularioCliente = ({
                         <CampoEnderecoAutocomplete
                             icon={<PiMapPinBold />}
                             value={valores.endereco}
-                            coordenadasPendentes={!possuiCoordenadas(valores)}
                             onChange={(endereco) => setValores((estadoAtual) => ({
                                 ...estadoAtual,
                                 endereco,
@@ -396,6 +437,9 @@ const DialogFormularioCliente = ({
                                 ...enderecoSelecionado,
                             }))}
                         />
+                        {!possuiCoordenadas(valores) && (
+                            <p className={styles.coordenadasPendentes}>Escolha uma sugestão para registrar as coordenadas.</p>
+                        )}
                     </>
                 )}
 
@@ -437,27 +481,20 @@ const DialogFormularioCliente = ({
                             autoComplete="tel"
                             required
                         />
-                        <CampoEnderecoAutocomplete
+                        <CampoCliente
+                            label="Endereço"
                             icon={<PiMapPinBold />}
-                            value={valores.endereco}
-                            coordenadasPendentes={!possuiCoordenadas(valores)}
-                            onChange={(endereco) => setValores((estadoAtual) => ({
-                                ...estadoAtual,
-                                endereco,
-                                latitude: null,
-                                longitude: null,
-                            }))}
-                            onSelecionar={(enderecoSelecionado) => setValores((estadoAtual) => ({
-                                ...estadoAtual,
-                                ...enderecoSelecionado,
-                            }))}
+                            {...propsCampo('endereco')}
+                            placeholder="Rua, número, bairro e cidade"
+                            autoComplete="street-address"
+                            required
                         />
                     </>
                 )}
 
-                <button type="submit" className={styles.primaryButton} disabled={salvando}>
+                <button type="submit" className={styles.primaryButton}>
                     {editando ? <PiNotePencilBold aria-hidden="true" /> : <PiPlusBold aria-hidden="true" />}
-                    {salvando ? 'Salvando...' : `${verbo} ${nomesTipo[tipo]}`}
+                    {verbo} {nomesTipo[tipo]}
                 </button>
             </form>
         </DefaultDialog>
