@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import rotasMotorista from './routes/motorista.route.js';
+import rotasMotorista from './routes/motorista/motorista.route.js';
 import rotasSistema from './routes/system.route.js'
 import rotasResponsavel from "./routes/responsavel.route.js"
-import rotasEscola from "./routes/escola.route.js"
+import rotasEscola from "./routes/escola/escola.route.js"
 import rotasAluno from "./routes/aluno.route.js"
 
 const router = Router();

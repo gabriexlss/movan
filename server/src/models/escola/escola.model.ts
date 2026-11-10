@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "./utils.model.js";
+import { UtilSchema } from "../utils.model.js";
 
 const EscolaSchema = z.object({
     id: UtilSchema.shape.id,
