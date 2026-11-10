@@ -4,6 +4,8 @@ import rotasSistema from './routes/system.route.js'
 import rotasResponsavel from "./routes/responsavel.route.js"
 import rotasEscola from "./routes/escola.route.js"
 import rotasAluno from "./routes/aluno.route.js"
+import rotasContrato from "./routes/contrato/contrato.route.js"
+import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
 
 const router = Router();
 
@@ -19,12 +21,15 @@ router.use('/motorista', rotasMotorista);
 router.use('/system', rotasSistema)
 
 // Rota para os endpoints relacionados ao responsavel
-router.use('/responsavel', rotasResponsavel)
+router.use('/responsavel', middlewareAutenticar, rotasResponsavel)
 
 // Rota para os endpoints relacionado as escolas
-router.use('/escola', rotasEscola)
+router.use('/escola', middlewareAutenticar, rotasEscola)
 
 //Rota para os endpoints relacionado aos alunos
-router.use('/aluno', rotasAluno)
+router.use('/aluno', middlewareAutenticar, rotasAluno)
+
+// Rota para os endpoints relacionado aos contratos e suas clausulas.
+router.use('/contrato', rotasContrato)
 
 export default router;

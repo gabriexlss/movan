@@ -55,3 +55,8 @@ coverage/
 Thumbs.db
 # Obsidian
 **/.obsidian/
+
+# Scripts locais de teste
+/server/scripts/
+
+/server/pnpm-lock.yaml

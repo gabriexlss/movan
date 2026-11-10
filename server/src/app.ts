@@ -3,6 +3,7 @@ import cors from 'cors';
 import mainRoutes from './mainRoutes.js';
 import cookieParser from 'cookie-parser';
 import { limitarRequisicoes } from './middlewares/rateLimit.js';
+import multer from 'multer';
 
 const app: Application = express();
 
@@ -44,7 +45,13 @@ app.use((_req: Request, res: Response) => {
 });
 
 app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  const erroHttp = erro as { status?: unknown; type?: unknown };
+    // Erros do Multer
+    if (erro instanceof multer.MulterError) {
+        switch (erro.code) {
+            case "LIMIT_FILE_SIZE":
+                return res.status(413).json({
+                    msg: "Arquivo excede o tamanho máximo permitido."
+                });
 
   if (erroHttp.type === 'entity.parse.failed') {
     return res.status(400).json({

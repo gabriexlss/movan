@@ -22,3 +22,9 @@ export const ParamsSchema = z.object({
         .int("ID deve ser um número inteiro.")
         .positive("ID deve ser positivo.")
 })
+export const ContratoParamsSchema = z.object({
+    contrato_id: z.coerce
+        .number("ID deve ser um número.")
+        .int("ID deve ser um número inteiro.")
+        .positive("ID deve ser positivo.")
+})

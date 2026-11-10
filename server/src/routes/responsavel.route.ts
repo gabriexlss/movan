@@ -1,19 +1,18 @@
 import { Router } from "express"
-import { middlewareAutenticar } from "../middlewares/autenticacao.middleware.js";
 import { controllerResponsavel } from "../controllers/responsavel.controller.js";
 const router = Router();
 
 // Endpoint para criar responsável
-router.post('/', middlewareAutenticar, controllerResponsavel.criarResponsavel)
+router.post('/', controllerResponsavel.criarResponsavel)
 
 // endpoint para editar responsável.
-router.patch('/:id', middlewareAutenticar, controllerResponsavel.editarResponsavel)
+router.patch('/:id', controllerResponsavel.editarResponsavel)
 
 // endpoint para excluir responsável
-router.delete('/:id', middlewareAutenticar, controllerResponsavel.excluirResponsavel)
+router.delete('/:id', controllerResponsavel.excluirResponsavel)
 
 // rota para obter varios dados simples, ou um perfil complexo
-router.get('/:id', middlewareAutenticar, controllerResponsavel.obterDados)
-router.get('/', middlewareAutenticar, controllerResponsavel.obterDados)
+router.get('/:id', controllerResponsavel.obterDados)
+router.get('/', controllerResponsavel.obterDados)
 
 export default router
