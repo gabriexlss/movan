@@ -27,5 +27,6 @@ export const EditarEscolaSchema = EscolaSchema.omit({
     id: true
 }).partial()
 
+export type Escola = z.infer<typeof EscolaSchema>
 export type EditarEscola = z.infer<typeof EditarEscolaSchema>
 export type CriarEscola = z.infer<typeof CriarEscolaSchema>

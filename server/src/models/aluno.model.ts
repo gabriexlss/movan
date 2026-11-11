@@ -36,4 +36,5 @@ export const EditarAlunoSchema = AlunoSchema.omit({
     motorista_id: true
 }).partial()
 
+export type Aluno = z.infer<typeof AlunoSchema>
 export type CriarAluno = z.infer<typeof CriarAlunoSchema>
