@@ -267,8 +267,8 @@ export const controllerRotas = {
         }
     },
     otimizarRota: async (req: Request, res: Response) => {
-        // recebe o id
-        const dadosBrutos = OtimizarRotaSchema.safeParse(req.params)
+        // recebe o id via params e as coordenadas do motorista via body ou query
+        const dadosBrutos = OtimizarRotaSchema.safeParse({ ...req.params, ...req.query, ...req.body })
 
         // validação
         if (!dadosBrutos.success) {

@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken"
 import { cpf, cnpj } from "cpf-cnpj-validator"
 import { tipoCredencial, verificarEmailouCNPJouCPF } from "../../utils/motorista/credencial.js"
 import { queryAtualizarUsoCodigo, validarCodigo } from "../../utils/motorista/codigo.js"
+import { controllerRotas } from "../rotas.controller.js"
 
 export const controllerConta = {
     // Controller pra criar um novo motorista vulgo usuario
@@ -91,6 +92,9 @@ export const controllerConta = {
             // finalmente pega os dados e faz o insert no banco de dados
             const { rows } = await database.query(query, valores)
             const id = rows[0].id
+
+            // gera todas as rotas padrão para o motorista recém-criado
+            await controllerRotas.gerarRotas(id)
 
             const segredoJWT = process.env['SEGREDO_JWT']
             if (!segredoJWT) {
