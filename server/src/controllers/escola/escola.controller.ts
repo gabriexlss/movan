@@ -114,6 +114,7 @@ export const controllerEscola = {
             UPDATE escola
             SET ${campos.join(', ')}
             WHERE id = $${valores.length + 1} AND motorista_id = $${valores.length + 2} 
+            RETURNING *
             `
             valores.push(id)
             valores.push(motoristaId)
@@ -125,7 +126,8 @@ export const controllerEscola = {
                 })
             } else {
                 return res.status(200).json({
-                    msg: "Escola editada com sucesso."
+                    msg: "Escola editada com sucesso.",
+                    escola: escola.rows[0]
                 })
             }
 
@@ -213,7 +215,7 @@ export const controllerEscola = {
                 })
             }
 
-            const query = "SELECT id, nome FROM escola WHERE motorista_id = $1 ORDER BY id ASC"
+            const query = "SELECT * FROM escola WHERE motorista_id = $1 ORDER BY id ASC"
             const { rows } = await database.query(query, [motoristaId])
 
             return res.status(200).json({

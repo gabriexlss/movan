@@ -1,0 +1,254 @@
+.campo {
+    position: relative;
+    min-width: 0;
+    padding-top: .35rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.aberto {
+    z-index: 3;
+}
+
+.campo > label {
+    position: absolute;
+    top: 0;
+    left: 1.75rem;
+    z-index: 1;
+    padding: 0 .35rem;
+    background: #fff;
+    color: #0d47a1;
+    font-size: .72rem;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    border: 1px solid #b8b8b8;
+    border-radius: 999px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.inputWrapper:focus-within {
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 3px rgb(13 71 161 / 10%);
+}
+
+.botaoRelogio {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2rem;
+    height: 2.25rem;
+    padding: 0 0 0 .4rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #0d47a1;
+    cursor: pointer;
+}
+
+.botaoRelogio svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.inputWrapper input {
+    width: 100%;
+    min-width: 0;
+    padding: .55rem .7rem .55rem 0;
+    border: 0;
+    border-radius: 999px;
+    outline: 0;
+    background: transparent;
+    color: #454545;
+    font-family: inherit;
+    font-size: .88rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.inputWrapper input::placeholder {
+    color: #888;
+    opacity: 1;
+}
+
+.popup {
+    position: absolute;
+    top: calc(100% + .4rem);
+    left: 0;
+    width: min(16rem, calc(100vw - 5.5rem));
+    padding: .85rem;
+    border: 1px solid #d7dce4;
+    border-radius: .75rem;
+    background: #fff;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 16%);
+    color: #454545;
+}
+
+.alinharFim {
+    right: 0;
+    left: auto;
+}
+
+.titulo,
+.instrucao {
+    display: block;
+    font-size: .72rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.titulo {
+    color: #0d47a1;
+    font-weight: 600;
+}
+
+.horarioDigital {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    margin: .6rem 0 .4rem;
+    color: #0d47a1;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.horarioDigital button {
+    padding: .2rem .65rem;
+    border: 0;
+    border-radius: .4rem;
+    background: #f4f6f9;
+    color: #666;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+
+.horarioDigital .etapaAtiva {
+    background: #eef4fc;
+    color: #0d47a1;
+}
+
+.instrucao {
+    margin-bottom: .5rem;
+    color: #7a7a7a;
+}
+
+.relogio {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #f4f6f9;
+    touch-action: none;
+    user-select: none;
+    cursor: pointer;
+}
+
+.numero {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    color: #454545;
+    font-size: .8rem;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.numeroInterno {
+    width: 1.65rem;
+    height: 1.65rem;
+    color: #7a7a7a;
+    font-size: .68rem;
+}
+
+.numeroSelecionado {
+    background: #0d47a1;
+    color: #fff;
+}
+
+.ponteiro {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 2px;
+    transform-origin: center bottom;
+    background: #0d47a1;
+    pointer-events: none;
+}
+
+.ponteiro::before {
+    position: absolute;
+    top: -.2rem;
+    left: 50%;
+    width: .4rem;
+    height: .4rem;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: #0d47a1;
+    content: '';
+}
+
+.centro {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: .45rem;
+    height: .45rem;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #0d47a1;
+    pointer-events: none;
+}
+
+.acoes {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-top: .75rem;
+}
+
+.acoes button {
+    min-height: 2.5rem;
+    padding: .45rem .65rem;
+    border: 0;
+    border-radius: .3rem;
+    font-family: inherit;
+    font-size: .75rem;
+    cursor: pointer;
+}
+
+.cancelar {
+    background: transparent;
+    color: #0d47a1;
+}
+
+.confirmar {
+    background: #0d47a1;
+    color: #fff;
+    font-weight: 700;
+}
+
+.botaoRelogio:focus-visible,
+.horarioDigital button:focus-visible,
+.relogio:focus-visible,
+.acoes button:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+    .inputWrapper input {
+        font-size: 1rem;
+    }
+}

@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
-import { toast } from 'react-hot-toast'
 
 import { PiNotePencilBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
@@ -20,7 +19,7 @@ import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
 import api from '../../services/api'
-import { mensagemErroApi } from '../../utils/apiError'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../services/toastManager'
 
 import styles from './perfil.module.css'
 
@@ -140,12 +139,12 @@ const Perfil = () => {
         //ATUALIZAR CAMPO 
         //======================
         try {
-            await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
+            const response = await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
             )
             await refreshSession()
-            toast.success('Campo atualizado com sucesso.')
+            responseSuccessToast(response, 'FIELD_UPDATED')
         } catch (error) {
-            toast.error(mensagemErroApi(error, 'Não foi possível atualizar o campo.'))
+            apiErrorToast(error, 'FIELD_UPDATE_FAILED')
         }
     }
 
@@ -163,10 +162,10 @@ const Perfil = () => {
                 skipAuthExpired: true,
             })
             await refreshSession() //chamo a função de refreshSession para atualizar as informações do usuario apos vincular a conta do google
-            toast.success(response.data?.msg || 'Conta Google vinculada com sucesso.')
+            responseSuccessToast(response, 'GOOGLE_ACCOUNT_LINKED')
         } catch (error) {
             if (error.response?.status === 401) await refreshSession()
-            toast.error(mensagemErroApi(error, 'Não foi possível vincular a conta Google.'))
+            apiErrorToast(error, 'GOOGLE_LINK_FAILED')
         } finally {
             setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
         }
@@ -255,7 +254,7 @@ const Perfil = () => {
                                 <div className={styles['linkGoogle']}>
                                     <GoogleLogin
                                         onSuccess={vincularGoogle}
-                                        onError={() => toast.error('Não foi possível abrir o Google.')}
+                                        onError={() => errorToast('GOOGLE_OPEN_FAILED')}
                                         text="signup_with"
                                         size="small"
                                         shape="pill"
