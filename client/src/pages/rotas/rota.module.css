@@ -1,0 +1,395 @@
+.container {
+    width: min(100%, 52rem);
+    margin-inline: auto;
+    gap: 0;
+}
+
+.conteudo {
+    width: calc(100% - 3rem);
+    margin: .55rem auto 0;
+}
+
+.conteudo,
+.modal {
+    --azul: #0d47a1;
+    --amarelo: #ffc33a;
+
+    color: #555;
+    font-family: 'Poppins', sans-serif;
+}
+
+.conteudo h2 {
+    color: var(--azul);
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.conteudo button {
+    font: inherit;
+    color: inherit;
+    opacity: 1;
+}
+
+.secaoTurnos {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: .8rem;
+}
+
+.turnos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    flex: 1;
+    max-width: 24rem;
+    overflow: hidden;
+    border: 1px solid #d5d5d5;
+    border-radius: .5rem;
+}
+
+.turnos button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    min-height: 2.45rem;
+    padding: .25rem;
+    border: 0;
+    background: #fff;
+    color: var(--azul);
+    font-size: .7425rem;
+}
+
+.turnos button + button {
+    border-left: 1px solid #dedede;
+}
+
+.turnos button[aria-pressed='true'] {
+    background: #fff0c9;
+    font-weight: 600;
+}
+
+.iconeTurno {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: .3rem;
+    background: #eaeaea;
+    font-size: .9rem;
+}
+
+.painel {
+    display: grid;
+    gap: .5rem;
+}
+
+.mapa {
+    position: relative;
+    height: clamp(14rem, 75vw, 25rem);
+    overflow: hidden;
+    border: 2px solid var(--amarelo);
+    border-radius: .65rem;
+    background: #efeee9;
+}
+
+.mapaLeaflet {
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    background: #efeee9;
+    font-family: 'Poppins', sans-serif;
+}
+
+.mapaLeaflet :global(.leaflet-control-attribution) {
+    max-width: 100%;
+    font-size: .625rem;
+}
+
+.mapaLeaflet :global(.leaflet-marker-icon) {
+    filter: hue-rotate(145deg) saturate(1.5);
+}
+
+.controlesMapa {
+    position: absolute;
+    right: .65rem;
+    bottom: 1.8rem;
+    z-index: 1;
+    display: grid;
+    gap: .3rem;
+}
+
+.controlesMapa button {
+    display: grid;
+    place-items: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    border: 1px solid #e4e4e4;
+    border-radius: .35rem;
+    background: #fff;
+    color: var(--azul);
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+
+.controlesMapa button:focus-visible {
+    outline: 2px solid var(--azul);
+    outline-offset: 2px;
+}
+
+.listas {
+    display: grid;
+    gap: .45rem;
+    padding: .45rem .45rem .9rem;
+    border-radius: .65rem;
+    background: #f4f2f2;
+}
+
+.cabecalhoLista {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .35rem .5rem;
+    margin-bottom: .35rem;
+    padding-inline: .55rem;
+}
+
+.conteudo .adicionar {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    min-height: 1.65rem;
+    padding: .25rem .5rem;
+    border: 0;
+    border-radius: .3rem;
+    background: var(--azul);
+    color: #fff;
+    font-size: .6825rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.adicionar svg {
+    font-size: .85rem;
+}
+
+.escolas,
+.alunos {
+    list-style: none;
+}
+
+.escolas {
+    border: 1px solid #d0cdcd;
+    border-radius: .35rem;
+    background: #fff;
+}
+
+.escola {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: .35rem;
+    min-height: 3.25rem;
+    padding: .35rem .4rem;
+}
+
+.escola + .escola {
+    border-top: 1px solid #e0dddd;
+}
+
+.iconeEscola {
+    display: grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 50%;
+    background: var(--azul);
+    color: #fff;
+    font-size: 1.05rem;
+}
+
+.dadosEscola {
+    display: grid;
+    gap: .1rem;
+    min-width: 0;
+    font-size: .6425rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.dadosEscola strong {
+    color: #454545;
+    font-size: .7425rem;
+    font-weight: 600;
+}
+
+.infosPonto {
+    display: grid;
+    gap: .15rem;
+    color: #15720c;
+    font-size: .6425rem;
+    line-height: 1.25;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.infosPonto span {
+    padding: .12rem .28rem;
+    border-radius: .22rem;
+    background: #e8eef8;
+    color: var(--azul);
+    font-weight: 600;
+}
+
+.acoes {
+    display: flex;
+    align-items: center;
+    gap: .15rem;
+}
+
+.acoes button {
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.55rem;
+    padding: 0;
+    border: 0;
+    border-radius: .2rem;
+    background: #fff;
+    color: var(--azul);
+    font-size: .9rem;
+    cursor: pointer;
+}
+
+.acoes .excluir {
+    color: #bf3737;
+}
+
+.secaoAlunos {
+    min-height: 16rem;
+    padding: .55rem .65rem;
+    border-radius: .55rem;
+    background: #fff;
+}
+
+.tituloAlunos {
+    margin-bottom: .35rem;
+}
+
+.tituloAlunos span {
+    color: #946400;
+}
+
+.alunos {
+    padding: 0 .45rem;
+}
+
+.aluno {
+    display: grid;
+    grid-template-columns: 1.15rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .35rem;
+    min-height: 1.8rem;
+    font-size: .7425rem;
+    overflow-wrap: anywhere;
+}
+
+.aluno + .aluno {
+    border-top: 1px solid #e6e6e6;
+}
+
+.aluno > svg {
+    color: var(--azul);
+    font-size: 1rem;
+}
+
+.modal[role='dialog'] {
+    padding: 1.25rem;
+    border: 1px solid #eee;
+    border-radius: .75rem;
+    box-shadow: 0 3px 5px rgb(0 0 0 / 22%);
+}
+
+.modal > div[aria-hidden='true'] {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: .5rem;
+    border-width: 1px;
+}
+
+.modal > header h2 {
+    color: var(--azul);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.modal p {
+    margin: .3rem 0 0;
+    color: #666;
+    font-family: 'Poppins', sans-serif;
+    font-size: .8125rem;
+    font-weight: 400;
+}
+
+.camposPonto,
+.botoesModal {
+    display: grid;
+    gap: .6rem;
+}
+
+.camposPonto + .botoesModal {
+    margin-top: .9rem;
+}
+
+.modal > header + div {
+    margin-top: .9rem;
+}
+
+.botoesModal button {
+    min-height: 2.25rem;
+    padding: .4rem;
+    border: 0;
+    border-radius: .3rem;
+    background: var(--azul);
+    color: #fff;
+    font-family: inherit;
+    font-size: .8125rem;
+    font-weight: 600;
+}
+
+.botoesModal button:not(:disabled) {
+    cursor: pointer;
+}
+
+.adicionar:focus-visible,
+.acoes button:focus-visible,
+.modal button:focus-visible {
+    outline: 2px solid var(--azul);
+    outline-offset: 2px;
+}
+
+@media (max-width: 360px) {
+    .conteudo {
+        width: calc(100% - 2rem);
+    }
+
+    .secaoTurnos {
+        gap: .35rem;
+    }
+
+    .turnos button {
+        gap: .2rem;
+        font-size: .6825rem;
+    }
+
+    .iconeTurno {
+        width: 1.15rem;
+        height: 1.2rem;
+        font-size: .75rem;
+    }
+}
