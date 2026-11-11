@@ -6,7 +6,7 @@ O Movan é um Trabalho de Conclusão de Curso de Desenvolvimento de Sistemas da 
 
 A proposta é centralizar informações de alunos, responsáveis e escolas, facilitar a preparação de contratos e apoiar o acompanhamento financeiro e o planejamento de trajetos.
 
-> **Projeto em desenvolvimento.** As funcionalidades estão distribuídas entre a `main` e branches de trabalho. A existência de uma tela ou endpoint não significa que o fluxo completo já esteja integrado. O estado abaixo foi conferido em **22/10/2026**.
+> **Projeto em desenvolvimento.** As funcionalidades estão distribuídas entre a `main` e branches de trabalho. A existência de uma tela ou endpoint não significa que o fluxo completo já esteja integrado. O estado abaixo foi conferido em **29/10/2026**.
 
 ## O problema
 
@@ -18,10 +18,10 @@ O uso de anotações, mensagens e planilhas separadas dificulta a consulta dos d
 | --- | --- | --- |
 | Conta do motorista | Cadastro com CPF ou CNPJ, login, verificação de e-mail, recuperação de senha, edição de perfil, integração com Google e exclusão de conta com período de retenção de 30 dias. | `main` |
 | Alunos, responsáveis e escolas | API de cadastro, consulta, edição e exclusão. As telas estão em desenvolvimento; criação e listagem de responsáveis e escolas já possuem integração na branch específica. | `gestaoClientes` e `feat/integracaoClientes` |
-| Contratos e cláusulas | API para contratos em rascunho, cláusulas padrão e personalizadas e organização da ordem das cláusulas. | `contratos` e `feat/assinaturaContrato` |
-| Documentos e assinaturas | Implementação de geração de PDF, hash do documento, armazenamento no R2, assinatura do motorista e link para o responsável. A assinatura do responsável e a integração completa ainda estão em desenvolvimento. | `feat/assinaturaContrato` e `feat/telaContratos` |
+| Contratos e cláusulas | API de rascunhos, cláusulas padrão e personalizadas, ordenação, consulta com cláusulas e PDF e cancelamento de contratos ativos ou aguardando assinatura. | `contratos` |
+| Documentos e assinaturas | API de geração de PDF com assinatura do motorista, link válido por 15 dias, assinatura do responsável, PDF com ambas as imagens e recriação de link. A integração das telas segue em desenvolvimento. | API em `contratos`; telas em `feat/telaContratos` |
 | Financeiro | Telas e interações em desenvolvimento, ainda com dados de exemplo. | `main`, `fix/errosTelaFinanc` e `feat/telaContratos` |
-| Rotas | Funcionalidade planejada; a página existente ainda não implementa o planejamento de trajetos. | `feat/telaContratos` |
+| Rotas | Funcionalidade planejada; a página existente ainda não implementa o planejamento de trajetos. A branch local `rotas` aponta para o mesmo commit de `contratos` nesta revisão. | `feat/telaContratos` e branch local `rotas` |
 
 As branches de frontend e backend podem conter partes diferentes de um mesmo módulo. Consulte as alterações e os pull requests antes de escolher uma versão para executar.
 
@@ -36,7 +36,7 @@ As branches de frontend e backend podem conter partes diferentes de um mesmo mó
 | Autenticação | bcrypt, JSON Web Token em cookies, @react-oauth/google e google-auth-library. |
 | E-mail | Resend. |
 | Limitação de requisições | express-rate-limit. |
-| Documentos e arquivos | Multer, Cloudflare R2 com o SDK S3 e @react-pdf/renderer, na branch `feat/assinaturaContrato`. |
+| Documentos e arquivos | Multer, Sharp, Cloudflare R2 com o SDK S3, @react-pdf/renderer e pdf-lib, na branch `contratos`. |
 | Ferramentas e infraestrutura | ESLint, GitHub Actions com PR Agent e configurações de hospedagem na Vercel. |
 
 ## Estrutura do repositório
@@ -48,7 +48,9 @@ As branches de frontend e backend podem conter partes diferentes de um mesmo mó
 | [`docs/`](./docs/) | Materiais e documentação acadêmica do TCC. |
 | [`.github/workflows/`](./.github/workflows/) | Automações do GitHub Actions. |
 
-Algumas branches também incluem documentação dos endpoints em `server/documentação/` e o serviço de PDF em `server/src/services/`.
+A documentação da API está no repositório independente [movandocs](https://github.com/gabriexlss/movandocs), com páginas em `content/`, e é disponibilizada em [devdocs.movan.org](https://devdocs.movan.org). O serviço de PDF está em `server/src/services/` na branch `contratos`.
+
+Esta revisão conferiu `main@802e94c`, `gestaoClientes@2e6a555`, `feat/integracaoClientes@bf6db22`, `contratos@19c32ed`, `feat/telaContratos@1dc9cc5`, `gestaoFinanceira@d21b0b6` e `fix/errosTelaFinanc@483eb93`. A branch de assinatura foi incorporada em `contratos` pelo PR #120; use essa branch para executar a API completa de contratos.
 
 ## Executando localmente
 
@@ -157,7 +159,7 @@ Acesse a URL informada pelo Vite, normalmente `http://localhost:5173`. Se ele ut
 
 ### Configuração adicional do R2
 
-Na branch `feat/assinaturaContrato`, preencha também no backend:
+Na branch `contratos`, preencha também no backend:
 
 - `R2_ACCOUNT_ID`
 - `R2_ACCESS_KEY_ID`
@@ -165,7 +167,7 @@ Na branch `feat/assinaturaContrato`, preencha também no backend:
 - `R2_BUCKET_NAME`
 - `CDN_URL`
 
-`CDN_URL` deve corresponder à URL base utilizada para disponibilizar os arquivos do bucket.
+`CDN_URL` deve ser a URL HTTPS base usada para disponibilizar os arquivos do bucket. O backend normaliza a barra final ao montar URLs. O bucket armazena assinaturas WebP (até 1 MiB por envio) e PDFs; a limpeza definitiva de usuários também remove seus objetos sob `motoristas/<id>/`.
 
 Mantenha os segredos no backend. Variáveis com o prefixo `VITE_` são incorporadas ao frontend e devem conter apenas informações públicas.
 
@@ -194,8 +196,7 @@ O projeto ainda não possui uma suíte de testes automatizados versionada. O scr
 | [`main`](https://github.com/gabriexlss/movan/tree/main) | Base principal do projeto. |
 | [`gestaoClientes`](https://github.com/gabriexlss/movan/tree/gestaoClientes) | Gestão de alunos, responsáveis e escolas. |
 | [`feat/integracaoClientes`](https://github.com/gabriexlss/movan/tree/feat/integracaoClientes) | Integração das telas de clientes com a API. |
-| [`contratos`](https://github.com/gabriexlss/movan/tree/contratos) | Contratos e cláusulas. |
-| [`feat/assinaturaContrato`](https://github.com/gabriexlss/movan/tree/feat/assinaturaContrato) | PDF, armazenamento, assinaturas e links de contrato. |
+| [`contratos`](https://github.com/gabriexlss/movan/tree/contratos) | API de clientes, contratos, cláusulas, PDFs, assinaturas e cancelamento. |
 | [`feat/telaContratos`](https://github.com/gabriexlss/movan/tree/feat/telaContratos) | Interface do fluxo de contratos. |
 | [`fix/errosTelaFinanc`](https://github.com/gabriexlss/movan/tree/fix/errosTelaFinanc) | Ajustes nas telas financeiras e em componentes da interface. |
 | [`gestaoFinanceira`](https://github.com/gabriexlss/movan/tree/gestaoFinanceira) | Branch histórica de desenvolvimento, divergente da base atual. |
@@ -213,7 +214,7 @@ O arquivo [`server/vercel.json`](./server/vercel.json) agenda a limpeza de conta
 3. Execute o lint e o build das partes alteradas.
 4. Abra um pull request descrevendo a mudança e como ela foi validada.
 
-Ao implementar ou integrar um módulo, atualize a tabela de funcionalidades para que o README acompanhe o estado real do projeto.
+Ao implementar ou integrar um módulo, atualize a tabela de funcionalidades e as páginas correspondentes em `movandocs/content/`. Registre a branch e o commit em `Versões e Branches.md` e execute `npm run check` e `npm run build` no repositório de documentação.
 
 ---
 

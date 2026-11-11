@@ -20,16 +20,20 @@ const TOTAL_PAGINAS = Math.ceil(mensalidades.length / ITENS_POR_PAGINA)
 
 const MensalidadesAlunos = () => {
     const [pagina, setPagina] = useState(0)
+    const paginaAtual = Math.min(pagina, TOTAL_PAGINAS - 1)
     const mensalidadesDaPagina = mensalidades.slice(
-        pagina * ITENS_POR_PAGINA,
-        (pagina + 1) * ITENS_POR_PAGINA,
+        paginaAtual * ITENS_POR_PAGINA,
+        (paginaAtual + 1) * ITENS_POR_PAGINA,
     )
 
     return (
         <PainelLista
             title="Mensalidades dos alunos"
-            page={pagina}
+            page={paginaAtual}
             totalPages={TOTAL_PAGINAS}
+            totalItems={mensalidades.length}
+            itemsPerPage={ITENS_POR_PAGINA}
+            itemLabel="mensalidades"
             onPageChange={setPagina}
             showAction={false}
         >

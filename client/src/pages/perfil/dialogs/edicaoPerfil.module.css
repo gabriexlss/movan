@@ -26,7 +26,7 @@
     margin: .4rem auto 0;
     color: #7a7a7a;
     font-family: 'Poppins', sans-serif;
-    font-size: .75rem;
+    font-size: 0.8125rem;
     font-weight: 400;
     line-height: 1.5;
     text-align: center;
@@ -40,7 +40,7 @@
 .field {
     position: relative;
     min-width: 0;
-    padding-top: .35rem;
+    padding-top: .55rem;
 }
 
 .field > label {
@@ -52,8 +52,8 @@
     padding: 0 .35rem;
     background: #fff;
     color: #0d47a1;
-    font-size: .65rem;
-    line-height: 1.1;
+    font-size: 0.7125rem;
+    line-height: 1.4;
 }
 
 .inputWrapper {
@@ -90,7 +90,7 @@
     background: transparent;
     color: #454545;
     font-family: 'Poppins', sans-serif;
-    font-size: .85rem;
+    font-size: 0.9125rem;
 }
 
 .inputWrapper input::placeholder,
@@ -121,7 +121,7 @@
     gap: .25rem;
     padding-right: .65rem;
     color: #0d47a1;
-    font-size: .7rem;
+    font-size: 0.7625rem;
 }
 
 .requirements {
@@ -130,7 +130,7 @@
     padding: .2rem .35rem;
     list-style: none;
     color: #7a7a7a;
-    font-size: .65rem;
+    font-size: 0.7125rem;
 }
 
 .requirements li {
@@ -159,7 +159,7 @@
     background: #0d47a1;
     color: #fff;
     font-family: 'Poppins', sans-serif;
-    font-size: .8rem;
+    font-size: 0.8625rem;
     font-weight: 700;
     cursor: pointer;
 }
@@ -230,7 +230,7 @@
     align-items: flex-start;
     gap: .4rem;
     color: #7a7a7a;
-    font-size: .7rem;
+    font-size: 0.7625rem;
     line-height: 1.5;
 }
 
@@ -267,7 +267,7 @@
     border-radius: 50%;
     background: #0d47a1;
     color: #fff;
-    font-size: .8rem;
+    font-size: 0.8625rem;
 }
 
 .confirmationSteps .field {
@@ -281,7 +281,7 @@
     max-width: none;
     margin-bottom: .3rem;
     padding: 0;
-    font-size: .7rem;
+    font-size: 0.7625rem;
     line-height: 1.4;
 }
 
@@ -310,7 +310,7 @@
 .cancellationNotice p {
     color: inherit;
     font-family: 'Poppins', sans-serif;
-    font-size: .7rem;
+    font-size: 0.7625rem;
     font-weight: 400;
     line-height: 1.5;
     text-align: left;
@@ -329,7 +329,7 @@
     min-height: 2.5rem;
     border-radius: .35rem;
     font-family: 'Poppins', sans-serif;
-    font-size: .8rem;
+    font-size: 0.8625rem;
     font-weight: 600;
     cursor: pointer;
 }
@@ -348,7 +348,7 @@
     gap: .25rem;
     color: #c72c2c;
     font-family: 'Poppins', sans-serif;
-    font-size: .65rem;
+    font-size: 0.7125rem;
     font-weight: 400;
     line-height: 1.5;
 }
@@ -382,6 +382,6 @@
     }
 
     .inputWrapper input {
-        font-size: 1rem;
+        font-size: 1.0625rem;
     }
 }
