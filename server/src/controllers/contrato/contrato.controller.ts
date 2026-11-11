@@ -12,9 +12,8 @@ import type { AssinaturaMotorista } from "../../models/contrato/assinatura.model
 import { BUCKET_NAME, CDN_URL, r2 } from "../../db/r2.js";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { ClausulaMuitoLongaError, gerarContratoPdf } from "../../services/gerarPDF.js";
-import { Clausula } from "../../models/contrato/clausula.model.js";
-import { Motorista } from "../../models/motorista.model.js";
+import type { Clausula } from "../../models/contrato/clausula.model.js";
+import type { Motorista } from "../../models/motorista.model.js";
 import { obterArquivoR2 } from "../../utils/obterArquivoR2.js";
 import { deletarR2 } from "../../utils/deletarR2.js";
 import { travarContratoRascunho } from "../../utils/travarContratoRascunho.js";
@@ -484,6 +483,7 @@ export const controllerContrato = {
                 nome_motorista: DadosMotorista.nome,
                 assinatura_motorista: await obterArquivoR2(assinaturaMotorista.caminho_arquivo)
             }
+            const { gerarContratoPdf } = await import("../../services/gerarPDF.js")
             const PDFBuffer = await gerarContratoPdf(ContratoeClausulas)
 
             // agr vamos gerar um token sha256 que será usado pra identificar o documento. ou seja, se for o mesmo documento vai gerar o mesmo código, mas se alguem modificar o documento o codigo será diferente.
@@ -558,7 +558,7 @@ export const controllerContrato = {
                     console.error("erro ao excluir PDF de um contrato que não foi finalizado, erro: ", erro)
                 })
             }
-            if(erro instanceof ClausulaMuitoLongaError){
+            if(erro instanceof Error && erro.name === "ClausulaMuitoLongaError"){
                 return res.status(400).json({
                     msg: erro.message
                 })
