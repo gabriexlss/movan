@@ -58,5 +58,6 @@ Thumbs.db
 
 # Scripts locais de teste
 /server/scripts/
+/server/tests/
 
 /server/pnpm-lock.yaml
