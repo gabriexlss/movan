@@ -1,0 +1,293 @@
+import { useCallback, useMemo, useState, useEffect } from 'react'
+import { FaChevronLeft, FaChevronRight, FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
+import fotoPlaceholder from '../../../assets/media/img/placeholders/placeholder.jpg'
+import DefaultCard from '../../../components/cards/DefaultCard'
+import DialogExcluirCliente from '../dialogs/DialogExcluirCliente'
+import DialogFormularioCliente from '../dialogs/DialogFormularioCliente'
+import styles from './cards-clientes.module.css'
+import toast from 'react-hot-toast'
+import { apiErrorToast } from '../../../services/toastManager'
+
+const ITENS_POR_PAGINA = 4
+
+const textosAcao = {
+    responsavel: 'Novo responsável',
+    aluno: 'Novo aluno',
+    escola: 'Nova escola',
+}
+
+const nomesPlural = {
+    responsavel: 'responsáveis',
+    aluno: 'alunos',
+    escola: 'escolas',
+}
+
+const MESES = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+]
+
+const formatarData = (data) => {
+    if (!data) return ''
+
+    const [ano, mes, dia] = String(data).slice(0, 10).split('-')
+    const mesIndex = Number(mes) - 1
+    if (ano && mes && dia && mesIndex >= 0 && mesIndex < 12) {
+        return `${Number(dia)} de ${MESES[mesIndex]} de ${ano}`
+    }
+    return data
+}
+
+const montarDetalhes = (tipo, registro) => {
+    if (tipo === 'responsavel') {
+        return [registro.telefone, registro.email, registro.endereco].filter(Boolean)
+    }
+
+    if (tipo === 'aluno') {
+        return [
+            registro.responsavel && `Responsável: ${registro.responsavel}`,
+            [registro.anoEscolar, registro.turno, formatarData(registro.dataNascimento)]
+                .filter(Boolean)
+                .join(' · '),
+        ].filter(Boolean)
+    }
+
+    return [
+        registro.endereco,
+        registro.telefone,
+    ].filter(Boolean)
+}
+
+const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = [], turnos = [], onTurnosChange, onCriar, onEditar, onExcluir }) => {
+    const [itens, setItens] = useState(registros)
+    const [busca, setBusca] = useState('')
+    const [pagina, setPagina] = useState(0)
+    const [dialog, setDialog] = useState(null)
+
+    useEffect(() => { //quando os registros mudarem
+        setItens(registros) //atualiza os itens com os novos registros
+    }, [registros]) //depende dos registros, ou seja, quando eles mudarem, o efeito será executado
+
+    const resultados = useMemo(() => {
+        const termo = busca.trim().toLocaleLowerCase('pt-BR')
+        if (!termo) return itens
+
+        return itens.filter((registro) =>
+            [registro.nome, ...registro.detalhes, registro.badge]
+                .filter(Boolean)
+                .join(' ')
+                .toLocaleLowerCase('pt-BR')
+                .includes(termo),
+        )
+    }, [busca, itens])
+
+    const fecharDialog = useCallback(() => setDialog(null), [])
+
+    const abrirFormulario = (acao, registro = null) => {
+        setDialog({ acao, registro }) //abro o formulario com a acao e o registro selecionado
+    }
+
+    const salvarRegistro = async (valores) => { //função para salvar um registro, seja adicionando ou editando
+        if (dialog.acao === 'adicionar' && onCriar) { //se o dialog for de adicionar e onCriar existir, chama a função onCriar com os valores do formulário
+            try {
+                await onCriar(valores) //chama a função onCriar com os valores do formulário
+                setPagina(0) //falo que a pagina atual é a inicial
+                fecharDialog() //fecho o dialog
+                return
+            } catch (error) {
+                const mensagemDoServidor = error.response?.data?.msg
+
+                if (mensagemDoServidor) {
+                    toast.error(mensagemDoServidor) //mando a mensagem de erro do servidor caso tenha
+                } else {
+                    apiErrorToast(error, 'UNEXPECTED_ERROR')
+                }
+            }
+        return
+        }
+
+        const registroAtualizado = { //falo que os registros atualizados são os registros do dialog mais os valores do formulário, se o registro tiver id, usa ele, se não, cria um id com o tipo e a data atual
+        ...dialog.registro,
+        ...valores,
+        id: dialog.registro?.id || `${tipo}-${Date.now()}`,
+        detalhes: montarDetalhes(tipo, valores),
+    }
+
+    if (dialog.acao === 'editar' && onEditar) {
+        try {
+            const salvo = await onEditar(dialog.registro.id, valores) //mando os dados alterados para o backend
+            const atualizado = { ...registroAtualizado, ...salvo, detalhes: montarDetalhes(tipo, { ...registroAtualizado, ...salvo }) } //monto o registro atualizado para mostrar na lista
+            setItens((estadoAtual) => estadoAtual.map((item) => item.id === atualizado.id ? atualizado : item)) //atualizo o registro na lista
+            setPagina(0)
+            fecharDialog()
+            return
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível alterar este cadastro.')
+            return
+        }
+    }
+
+    setItens((estadoAtual) => ( //falo que os itens atualizados são os itens atuais mais o novo registro atualizado
+        dialog.acao === 'editar'
+            ? estadoAtual.map((item) => (
+                item.id === registroAtualizado.id
+                    ? registroAtualizado
+                    : item
+            ))
+            : [registroAtualizado, ...estadoAtual]
+    ))
+
+    setPagina(0)
+    fecharDialog()
+    }
+
+
+    const excluirRegistro = async () => {
+        try {
+            if (onExcluir) await onExcluir(dialog.registro.id) //mando o id do registro para o backend excluir
+            setItens((estadoAtual) => estadoAtual.filter((item) => item.id !== dialog.registro.id)) //removo o registro da lista
+            fecharDialog() //fecho o dialog de exclusao
+        } catch (error) {
+            toast.error(error.response?.data?.msg || 'Não foi possível excluir este cadastro.')
+        }
+    }
+
+    const totalPaginas = Math.max(1, Math.ceil(resultados.length / ITENS_POR_PAGINA))
+    const paginaAtual = Math.min(pagina, totalPaginas - 1)
+    const registrosDaPagina = resultados.slice(
+        paginaAtual * ITENS_POR_PAGINA,
+        (paginaAtual + 1) * ITENS_POR_PAGINA,
+    )
+    const primeiroItem = resultados.length ? paginaAtual * ITENS_POR_PAGINA + 1 : 0
+    const ultimoItem = Math.min((paginaAtual + 1) * ITENS_POR_PAGINA, resultados.length)
+
+    return (
+        <DefaultCard title={title} titleClassName={styles.tituloCard}>
+            <div className={styles.listaClientes}>
+                <div className={styles.toolbar}>
+                    <label className={styles.busca}>
+                        <FaSearch aria-hidden="true" />
+                        <span className={styles.somenteLeitor}>Buscar {nomesPlural[tipo]}</span>
+                        <input
+                            type="search"
+                            value={busca}
+                            onChange={(event) => {
+                                setBusca(event.target.value)
+                                setPagina(0)
+                            }}
+                            placeholder={`Buscar ${tipo === 'responsavel' ? 'por nome, telefone ou e-mail' : 'por nome'}`}
+                        />
+                    </label>
+                    <button
+                        type="button"
+                        className={styles.novo}
+                        onClick={() => abrirFormulario('adicionar')}
+                        aria-haspopup="dialog"
+                    >
+                        <FaPlus aria-hidden="true" />
+                        <span>{textosAcao[tipo]}</span>
+                    </button>
+                </div>
+
+                {registrosDaPagina.length > 0 ? (
+                    <ul className={styles.registros}>
+                        {registrosDaPagina.map((registro) => (
+                            <li className={styles.registro} key={registro.id}>
+                                <span className={styles.avatar} aria-hidden="true">
+                                    <img src={fotoPlaceholder} alt="" />
+                                </span>
+                                <div className={styles.informacoes}>
+                                    <Link
+                                        to={`/clientes/${tipo}/${registro.id}`}
+                                        state={{ registro }}
+                                        className={styles.nomeCliente}
+                                    >
+                                        {registro.nome}
+                                    </Link>
+                                    {registro.detalhes.map((detalhe) => <span key={detalhe}>{detalhe}</span>)}
+                                </div>
+                                <div className={styles.acoes}>
+                                    {registro.badge && <span className={styles.badge}>{registro.badge}</span>}
+                                    <button
+                                        type="button"
+                                        className={styles.editar}
+                                        aria-label={`Editar ${registro.nome}`}
+                                        title={`Editar ${registro.nome}`}
+                                        aria-haspopup="dialog"
+                                        onClick={() => abrirFormulario('editar', registro)}
+                                    >
+                                        <FaPencilAlt aria-hidden="true" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={styles.excluir}
+                                        aria-label={`Excluir ${registro.nome}`}
+                                        title={`Excluir ${registro.nome}`}
+                                        aria-haspopup="dialog"
+                                        onClick={() => setDialog({ acao: 'excluir', registro })}
+                                    >
+                                        <FaTrash aria-hidden="true" />
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className={styles.vazio}>Nenhum resultado encontrado.</p>
+                )}
+
+                <footer className={styles.rodapeLista}>
+                    <span aria-live="polite">
+                        {primeiroItem}-{ultimoItem} de {resultados.length} {nomesPlural[tipo]}
+                    </span>
+                    <nav className={styles.paginacao} aria-label={`Páginas de ${title}`}>
+                        <button
+                            type="button"
+                            aria-label="Página anterior"
+                            onClick={() => setPagina(paginaAtual - 1)}
+                            disabled={paginaAtual === 0}
+                        >
+                            <FaChevronLeft aria-hidden="true" />
+                        </button>
+                        <span>{paginaAtual + 1} / {totalPaginas}</span>
+                        <button
+                            type="button"
+                            aria-label="Próxima página"
+                            onClick={() => setPagina(paginaAtual + 1)}
+                            disabled={paginaAtual + 1 >= totalPaginas}
+                        >
+                            <FaChevronRight aria-hidden="true" />
+                        </button>
+                    </nav>
+                </footer>
+            </div>
+
+            {dialog && dialog.acao !== 'excluir' && (
+                <DialogFormularioCliente
+                    acao={dialog.acao}
+                    tipo={tipo}
+                    registro={dialog.registro}
+                    responsaveis={responsaveis}
+                    escolas={escolas}
+                    turnos={turnos}
+                    onTurnosChange={onTurnosChange}
+                    onClose={fecharDialog}
+                    onSave={salvarRegistro}
+                />
+            )}
+
+            {dialog?.acao === 'excluir' && (
+                <DialogExcluirCliente
+                    tipo={tipo}
+                    registro={dialog.registro}
+                    onClose={fecharDialog}
+                    onConfirm={excluirRegistro}
+                />
+            )}
+        </DefaultCard>
+    )
+
+}
+
+export default ListaClientes

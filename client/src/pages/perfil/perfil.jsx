@@ -1,10 +1,13 @@
 import { useCallback, useRef, useState } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
-import { toast } from 'react-hot-toast'
 
 import { PiNotePencilBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
+import { MdPersonOutline } from "react-icons/md";
+import { LuMails } from "react-icons/lu";
+import { BiSolidBuildings } from "react-icons/bi";
+import { HiOutlineKey } from "react-icons/hi";
 import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
 
 
@@ -16,7 +19,7 @@ import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
 import api from '../../services/api'
-import { mensagemErroApi } from '../../utils/apiError'
+import { apiErrorToast, errorToast, responseSuccessToast } from '../../services/toastManager'
 
 import styles from './perfil.module.css'
 
@@ -55,12 +58,14 @@ const Perfil = () => {
     const campos = [
         {
             id: 'nome',
+            Icone: MdPersonOutline,
             label: 'Nome',
             placeholder: user?.nome || 'Nome não informado',
             autoComplete: 'name',
         },
         {
             id: 'email',
+            Icone: LuMails,
             label: 'E-mail',
             placeholder: user?.email || 'E-mail não informado',
             type: 'email',
@@ -68,12 +73,14 @@ const Perfil = () => {
         },
         {
             id: 'credencial',
+            Icone: BiSolidBuildings,
             label: 'CNPJ',
             placeholder: formatarCredencial(user?.credencial) || 'CNPJ não informado',
             inputMode: 'text',
         },
         {
             id: 'senha',
+            Icone: HiOutlineKey,
             label: 'Senha',
             placeholder: '********',
             type: 'password',
@@ -132,12 +139,12 @@ const Perfil = () => {
         //ATUALIZAR CAMPO 
         //======================
         try {
-            await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
+            const response = await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
             )
             await refreshSession()
-            toast.success('Campo atualizado com sucesso.')
+            responseSuccessToast(response, 'FIELD_UPDATED')
         } catch (error) {
-            toast.error(mensagemErroApi(error, 'Não foi possível atualizar o campo.'))
+            apiErrorToast(error, 'FIELD_UPDATE_FAILED')
         }
     }
 
@@ -155,10 +162,10 @@ const Perfil = () => {
                 skipAuthExpired: true,
             })
             await refreshSession() //chamo a função de refreshSession para atualizar as informações do usuario apos vincular a conta do google
-            toast.success(response.data?.msg || 'Conta Google vinculada com sucesso.')
+            responseSuccessToast(response, 'GOOGLE_ACCOUNT_LINKED')
         } catch (error) {
             if (error.response?.status === 401) await refreshSession()
-            toast.error(mensagemErroApi(error, 'Não foi possível vincular a conta Google.'))
+            apiErrorToast(error, 'GOOGLE_LINK_FAILED')
         } finally {
             setVinculandoGoogle(false) //digo que terminei o processo de vincular a conta do google para permitir que o usuario clique no botão novamente
         }
@@ -192,10 +199,15 @@ const Perfil = () => {
             <section className={styles['campos-perfil']} aria-label="Dados do perfil">
                 {camposFiltrados.map((campo) => {
                     const editavel = Boolean(camposEditaveis[campo.id])
+                    const Icone = campo.Icone
 
                     return (
                         <div className={styles['campo-grupo']} key={campo.id}>
-                            <label htmlFor={`perfil-${campo.id}`}>{campo.label}</label>
+                            <label 
+                                className={`${styles['label']} ${editavel ? styles['label--editavel'] : ''}`} htmlFor={`perfil-${campo.id}`}><Icone className={`${styles['icon-label']} ${editavel ? styles['icon-label--editavel'] : ''}`}
+                            /> 
+                                {campo.label}
+                            </label>
 
                             <div
                                 className={`${styles['input-container']} ${
@@ -242,7 +254,7 @@ const Perfil = () => {
                                 <div className={styles['linkGoogle']}>
                                     <GoogleLogin
                                         onSuccess={vincularGoogle}
-                                        onError={() => toast.error('Não foi possível abrir o Google.')}
+                                        onError={() => errorToast('GOOGLE_OPEN_FAILED')}
                                         text="signup_with"
                                         size="small"
                                         shape="pill"

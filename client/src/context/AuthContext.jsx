@@ -62,13 +62,29 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             setUser(null)
 
-            if (error.response?.status !== 401) {
-                redirectToErrorPage(error.response?.status || 503)
+            const status = error.response?.status
+            const usuarioDaSessaoNaoExiste = status === 404
+                && error.response?.data?.['msg-code'] === 'USER_NOT_FOUND'
+
+            if (usuarioDaSessaoNaoExiste) {
+                // O cookie ainda pode apontar para um usuário removido do banco.
+                // Encerra essa sessão inválida para permitir um novo login.
+                try {
+                    await api.delete('/motorista/logout', { skipGlobalErrorToast: true })
+                } catch {
+                    // A ausência do backend será tratada na próxima tentativa de sessão.
+                }
+
+                if (pathname === '/error') {
+                    navigate('/login', { replace: true })
+                }
+            } else if (status !== 401) {
+                redirectToErrorPage(status || 503)
             }
         } finally {
             setIsLoading(false)
         }
-    }, [navigate, redirectToErrorPage])
+    }, [navigate, pathname, redirectToErrorPage])
 
 //=======================
 //LIDAR COM SESSÃO EXPIRADA
