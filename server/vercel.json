@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "src/**": {
+      "includeFiles": "assets/**"
+    }
+  },
   "crons": [
     {
       "path": "/system/limpeza-usuarios",
