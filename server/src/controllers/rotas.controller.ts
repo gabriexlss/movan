@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import { database } from "../db/postgre.js";
-import { CriarRota, FiltrosRotaSchema, Rota } from "../models/rotas/rota.js";
+import { CriarRota, FiltrosRotaSchema, OtimizarRotaSchema, Rota } from "../models/rotas/rota.js";
 import { PoolClient } from "pg";
 import { Aluno } from "../models/aluno.model.js";
 import { Escola } from "../models/escola/escola.model.js";
 import { PontoRota } from "../models/rotas/pontoRota.js";
 import { EscolaTurno } from "../models/escola/turno.model.js";
+import { otimizarRota } from "../services/otimizarRota.js";
+import { ParamsSchema } from "../models/utils.model.js";
 
 export const controllerRotas = {
     // gera todas as rotas assim que o motorista é criado
@@ -181,7 +183,7 @@ export const controllerRotas = {
         // os filtros que a busca vai ter vão ser id, turno e sentido
         const dadosBrutos = FiltrosRotaSchema.safeParse(req.query)
 
-        if(!dadosBrutos.success){
+        if (!dadosBrutos.success) {
             return res.status(400).json({
                 msg: "Querys Inválidas Para filtrar rotas.",
                 erro: dadosBrutos.error.format()
@@ -192,7 +194,7 @@ export const controllerRotas = {
         const motoristaID = req.userId
 
         // operação
-        try{
+        try {
             let query = `
             SELECT DISTINCT rota.*, CASE rds.dia_semana 
             WHEN 2 THEN 'SEGUNDA' WHEN 3 THEN 'TERÇA' WHEN 4 THEN 'QUARTA' WHEN 5 THEN 'QUINTA' WHEN 6 THEN 'SEXTA' END AS "diaSemana" 
@@ -201,21 +203,21 @@ export const controllerRotas = {
             ON rds.rota_id = rota.id 
             WHERE rota.motorista_id = $1
             `
-            const valores: (string|number)[] = [motoristaID]
+            const valores: (string | number)[] = [motoristaID]
 
-            if(id){
+            if (id) {
                 query += ` AND rota.id = $${valores.length + 1}`
                 valores.push(id)
             }
-            if(turno){
+            if (turno) {
                 query += ` AND rota.turno = $${valores.length + 1}`
                 valores.push(turno)
             }
-            if(sentido){
+            if (sentido) {
                 query += ` AND rota.sentido = $${valores.length + 1}`
                 valores.push(sentido)
             }
-            if(dia){
+            if (dia) {
                 const diasSemana = { SEGUNDA: 2, 'TERÇA': 3, QUARTA: 4, QUINTA: 5, SEXTA: 6 }
                 query += ` AND rds.dia_semana = $${valores.length + 1}`
                 valores.push(diasSemana[dia])
@@ -224,7 +226,7 @@ export const controllerRotas = {
             const { rows: rotas } = await database.query<Rota & { diaSemana: string }>(query, valores)
 
             // se não tiver achado nenhuma rota
-            if(!rotas){
+            if (!rotas) {
                 return res.status(404).json({
                     msg: "Nenhuma Rota encontrada com os filtros fornecidos"
                 })
@@ -234,7 +236,7 @@ export const controllerRotas = {
             return res.status(200).json({
                 rotas
             })
-        }catch{
+        } catch {
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })
@@ -245,11 +247,11 @@ export const controllerRotas = {
         const rotaID = Number(req.params['id'])
         const motoristaID = req.userId
 
-        if(!Number.isInteger(rotaID) || rotaID <= 0){
+        if (!Number.isInteger(rotaID) || rotaID <= 0) {
             return res.status(400).json({ msg: "ID da rota inválido." })
         }
 
-        try{
+        try {
             const { rows: pontos } = await database.query<PontoRota>(
                 `
                 SELECT * FROM ponto_rota
@@ -259,8 +261,100 @@ export const controllerRotas = {
                 [rotaID, motoristaID]
             )
             return res.status(200).json({ pontos })
-        }catch{
+        } catch {
             return res.status(500).json({ msg: "Erro Interno do Servidor." })
+        }
+    },
+    otimizarRota: async (req: Request, res: Response) => {
+        // recebe o id
+        const dadosBrutos = OtimizarRotaSchema.safeParse(req.params)
+
+        // validação
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "ID Inválido",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { id: rotaID, latitude: latitudeMotorista, longitude: longitudeMotorista } = dadosBrutos.data
+
+        // começa a operação
+        const cliente = await database.connect()
+        try {
+            // inicia a operação
+            await cliente.query('BEGIN')
+
+            // chama o service pra otimizar
+            await otimizarRota({ rotaID, req, coordenadasMotorista: { latitude: latitudeMotorista, longitude: longitudeMotorista }, cliente })
+
+            // se não teve nenhum erro, dá commit
+            await cliente.query('COMMIT')
+            return res.status(200).json({
+                msg: "Rota Otimizada!"
+            })
+        } catch (erro) {
+            // deu erro, ent damos rollback
+            await cliente.query('ROLLBACK')
+            // anota o erro no console
+            console.error(erro)
+            // se o erro for do tipo Error, entra no if
+            if (erro instanceof Error) {
+                // aq tem um switch com os possiveis tipos de erro
+                switch (erro.message) {
+                    case 'DRIVER_COORDINATES_INVALID':
+                        return res.status(400).json({
+                            msg: "Coordenadas do motorista inválidas."
+                        })
+                    case 'ALUNO_COORDINATES_INVALID':
+                        return res.status(400).json({
+                            msg: "Um ou mais alunos da rota possuem coordenadas inválidas."
+                        })
+                    case 'ESCOLA_COORDINATES_INVALID':
+                        return res.status(400).json({
+                            msg: "Uma ou mais escolas da rota possuem coordenadas inválidas."
+                        })
+                    case 'MOTORISTA_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Motorista não encontrado."
+                        })
+                    case 'ROTA_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Rota não encontrada."
+                        })
+                    case 'PONTOS_NOT_FOUND':
+                    case 'PONTOS_SENTIDO_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Nenhum ponto encontrado para otimizar nesta rota."
+                        })
+                    case 'ALUNO_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Aluno não encontrado."
+                        })
+                    case 'ESCOLA_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Escola não encontrada."
+                        })
+                    case 'TURNO_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Turno da escola não encontrado."
+                        })
+                    case 'ABSENT_ENV_CONFIG':
+                        return res.status(500).json({
+                            msg: "Configurações do Google Cloud ausentes no servidor."
+                        })
+                    case 'UNKOWN_ERROR':
+                        return res.status(500).json({
+                            msg: "Não foi possível otimizar a rota."
+                        })
+                }
+            }
+            // se não achou o erro, retorna com 500
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor"
+            })
+        } finally {
+            cliente.release()
         }
     }
 }

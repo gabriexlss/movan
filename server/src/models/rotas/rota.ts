@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "../utils.model.js";
+import { ParamsSchema, UtilSchema } from "../utils.model.js";
 
 const RotaSchema = z.object({
     id: UtilSchema.shape.id,
@@ -31,6 +31,13 @@ export const FiltrosRotaSchema = RotaSchema.pick({
 }).extend({
     dia: z.enum(['SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA'])
 }).partial()
+
+export const OtimizarRotaSchema = z.object({
+    id: ParamsSchema.shape.id,
+    latitude: UtilSchema.shape.latitude,
+    longitude: UtilSchema.shape.longitude
+})
+
 export type Rota = z.infer<typeof RotaSchema>
 export type RotaDiaSemana = z.infer<typeof RotaDiaSemanaSchema>
 export type CriarRota = z.infer<typeof CriarRotaSchema>

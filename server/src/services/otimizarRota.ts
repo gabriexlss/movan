@@ -1,5 +1,5 @@
 import { v1, protos } from '@googlemaps/routeoptimization'
-import { database } from '../db/postgre.js';
+import { GoogleAuth } from 'google-auth-library';
 import { Rota } from '../models/rotas/rota.js';
 import { PontoRota } from '../models/rotas/pontoRota.js';
 import { Aluno } from '../models/aluno.model.js';
@@ -8,26 +8,62 @@ import { EscolaTurno } from '../models/escola/turno.model.js';
 import { Request } from 'express';
 import { timeToTimestamp } from '../utils/converterTimestamp.js';
 import { Motorista } from '../models/motorista/motorista.model.js';
+import { validarCoordenadas } from '../models/utils.model.js';
+import { PoolClient } from 'pg';
 
 // importação dos tipos
 type IOptimizeToursRequest = protos.google.maps.routeoptimization.v1.IOptimizeToursRequest;
 type IShipment = protos.google.maps.routeoptimization.v1.IShipment;
 type IVehicle = protos.google.maps.routeoptimization.v1.IVehicle;
 
+interface coordenadasMotorista {
+    latitude: number,
+    longitude: number
+}
+
+interface otimizarRotaProps {
+    rotaID: number,
+    req: Request,
+    coordenadasMotorista: coordenadasMotorista,
+    cliente: PoolClient
+}
+
+const auth = new GoogleAuth({
+    projectId: process.env['GCP_PROJECT_ID'] ?? '',
+    credentials: {
+        client_email: process.env['GCP_CLIENT_EMAIL'] ?? '',
+        private_key: (process.env['GCP_PRIVATE_KEY'] ?? '').replace(/\\n/g, '\n'),
+    },
+    scopes: ['https://www.googleapis.com/auth/cloud-platform']
+});
+
+const routeClient = new v1.RouteOptimizationClient({
+    auth: auth as unknown as v1.RouteOptimizationClient['auth']
+});
+
 // função
-export const otimizarRota = async (rotaID: number, req: Request) => {
+export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente }: otimizarRotaProps): Promise<void> => {
+    // valida se as coordenadas são válidas
+    const coordenadasValidas = validarCoordenadas.safeParse(coordenadasMotorista)
+
+    if (!coordenadasValidas.success) {
+        throw new Error('DRIVER_COORDINATES_INVALID', { cause: coordenadasValidas.error })
+    }
 
     // primeiro pego os dados necessarios.
     const motoristaID = req.userId
-    const { rows: [motorista] } = await database.query<Motorista>(
+    const { rows: [motorista] } = await cliente.query<Motorista>(
         `
         SELECT * FROM motorista
         WHERE id = $1
         `,
         [motoristaID]
     )
+    if (!motorista) {
+        throw new Error('MOTORISTA_NOT_FOUND')
+    }
     // pegando as infos da rota
-    const { rows: [rota] } = await database.query<Rota>(
+    const { rows: [rota] } = await cliente.query<Rota>(
         `
         SELECT * FROM rota
         WHERE id = $1
@@ -38,7 +74,7 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
         throw new Error('ROTA_NOT_FOUND')
     }
     // pegando todos os pontos daquela rota.
-    const { rows: pontosRota } = await database.query<PontoRota>(
+    const { rows: pontosRota } = await cliente.query<PontoRota>(
         `
         SELECT * FROM ponto_rota
         WHERE rota_id = $1
@@ -50,7 +86,7 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
         throw new Error('PONTOS_NOT_FOUND')
     }
     // pega os dados do aluno daquele motorista.
-    const { rows: alunos } = await database.query<Aluno>(
+    const { rows: alunos } = await cliente.query<Aluno>(
         "SELECT * FROM aluno WHERE motorista_id = $1",
         [motoristaID]
     )
@@ -58,7 +94,7 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
         throw new Error('ALUNO_NOT_FOUND')
     }
     // agora pega os dados da escola.
-    const { rows: escolas } = await database.query<Escola>(
+    const { rows: escolas } = await cliente.query<Escola>(
         "SELECT * FROM escola WHERE motorista_id = $1",
         [motoristaID]
     )
@@ -67,7 +103,7 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
     }
     // agora pega os dados do turno daquela escola.
     const escolasIDs = escolas.map(e => e.id)
-    const { rows: turnosEscolas } = await database.query<EscolaTurno>(
+    const { rows: turnosEscolas } = await cliente.query<EscolaTurno>(
         "SELECT * FROM escola_turno WHERE escola_id = ANY($1::int[])",
         [escolasIDs]
     )
@@ -92,13 +128,41 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
         pontosRotaFiltrados = pontosRota.filter(p => p.tipo_ponto === 'DESEMBARQUE')
     }
 
-
+    if (pontosRotaFiltrados.length === 0) {
+        throw new Error('PONTOS_SENTIDO_NOT_FOUND')
+    }
 
     for (const pontoRota of pontosRotaFiltrados) {
         // filtrando pra obter somente os dados que preciso.
-        const aluno = alunos.find(a => a.id === pontoRota.aluno_id)!
-        const escola = escolas.find(e => e.id === aluno.escola_id)!
-        const turno = turnosEscolas.find(t => t.id === aluno.escola_turno_id)!
+        const aluno = alunos.find(a => a.id === pontoRota.aluno_id)
+        if (!aluno) {
+            throw new Error('ALUNO_NOT_FOUND')
+        }
+        const escola = escolas.find(e => e.id === aluno.escola_id)
+        if (!escola) {
+            throw new Error('ESCOLA_NOT_FOUND')
+        }
+        const turno = turnosEscolas.find(t => t.id === aluno.escola_turno_id)
+        if (!turno) {
+            throw new Error('TURNO_NOT_FOUND')
+        }
+
+        // validando coordenadas do aluno e da escola com zod
+        const coordenadasAluno = validarCoordenadas.safeParse({
+            latitude: aluno.latitude !== null ? Number(aluno.latitude) : null,
+            longitude: aluno.longitude !== null ? Number(aluno.longitude) : null
+        })
+        if (!coordenadasAluno.success) {
+            throw new Error('ALUNO_COORDINATES_INVALID', { cause: coordenadasAluno.error })
+        }
+
+        const coordenadasEscola = validarCoordenadas.safeParse({
+            latitude: escola.latitude !== null ? Number(escola.latitude) : null,
+            longitude: escola.longitude !== null ? Number(escola.longitude) : null
+        })
+        if (!coordenadasEscola.success) {
+            throw new Error('ESCOLA_COORDINATES_INVALID', { cause: coordenadasEscola.error })
+        }
 
         // convertendo o horario de saida e entrada de TIME pra timestamp unix q é oq o fresco do google aceita
         const horaSaida = timeToTimestamp(turno.hora_saida)
@@ -112,22 +176,23 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
         shipmentAlunos.push(
             {
                 label: `aluno_${aluno.id}`,
+                penaltyCost: 100000,
                 pickups: [
                     {
                         label: rota.sentido === 'IDA' ? `casa_aluno_${aluno.id}` : `escola_${escola.id}`,
                         arrivalLocation: {
-                            latitude: rota.sentido === 'IDA' ? Number(aluno.latitude) : Number(escola.latitude),
-                            longitude: rota.sentido === 'IDA' ? Number(aluno.longitude) : Number(escola.longitude)
+                            latitude: rota.sentido === 'IDA' ? coordenadasAluno.data.latitude : coordenadasEscola.data.latitude,
+                            longitude: rota.sentido === 'IDA' ? coordenadasAluno.data.longitude : coordenadasEscola.data.longitude
                         },
-                        duration: { seconds: 120 },
+                        duration: { seconds: rota.sentido === 'IDA' ? 60 : 15 },
                         ...(rota.sentido === 'VOLTA' ? {
                             timeWindows: [
                                 {
-                                    startTime: {
+                                    startTime: horaSaida,
+                                    endTime: {
                                         ...horaSaida,
-                                        seconds: horaSaida.seconds - (10 * 60) // traduzindo essa macacada, basicamente se a rota for saida, a janela pro motorista pegar o aluno na escola começa 10 minutos antes do horario e termina no horario de termino
-                                    },
-                                    endTime: horaSaida
+                                        seconds: horaSaida.seconds + (30 * 60) // na volta, a janela pro motorista pegar o aluno na escola começa no horario de saida e vai até 30 minutos depois
+                                    }
                                 }
                             ]
                         } : {}
@@ -138,16 +203,16 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
                     {
                         label: rota.sentido === 'IDA' ? `escola_${escola.id}` : `casa_aluno_${aluno.id}`,
                         arrivalLocation: {
-                            latitude: rota.sentido === 'IDA' ? Number(escola.latitude) : Number(aluno.latitude),
-                            longitude: rota.sentido === 'IDA' ? Number(escola.longitude) : Number(aluno.longitude)
+                            latitude: rota.sentido === 'IDA' ? coordenadasEscola.data.latitude : coordenadasAluno.data.latitude,
+                            longitude: rota.sentido === 'IDA' ? coordenadasEscola.data.longitude : coordenadasAluno.data.longitude
                         },
-                        duration: { seconds: 120 },
+                        duration: { seconds: rota.sentido === 'IDA' ? 15 : 60 },
                         ...(rota.sentido === 'IDA' ? {
                             timeWindows: [
                                 {
                                     startTime: {
                                         ...horaEntrada,
-                                        seconds: horaEntrada.seconds - (10 * 60) // traduzindo essa macacada, basicamente se a rota for saida, a janela pro motorista pegar o aluno na escola começa 10 minutos antes do horario e termina no horario de termino
+                                        seconds: horaEntrada.seconds - (30 * 60) // na ida, a janela pro motorista deixar o aluno na escola começa 30 minutos antes da entrada e termina no horario de entrada
                                     },
                                     endTime: horaEntrada
                                 }
@@ -165,22 +230,21 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
     const veiculoVan: IVehicle = {
         label: 'van-escolar', // nome do veiculo
         travelMode: 1, // modo de viajar, 1 significa carro
-        startLocation: { latitude: 2349374, longitude: 958320958 }, // localização inicial do veiculo
+        startLocation: { latitude: coordenadasValidas.data.latitude, longitude: coordenadasValidas.data.longitude }, // localização inicial do veiculo
         loadLimits: { // capacidade
-            assentos: { maxLoad: motorista!.capacidade_van }
+            assentos: { maxLoad: motorista.capacidade_van }
         },
         costPerKilometer: 2.5, // custo por kilometro, no caso aqui ta 2 reais e 50 centavos por kilometro
         costPerHour: 45.0 // custo por hora
     }
 
-    const globalIDA = turnosValidos.reduce((menor, atual) => atual.hora_entrada < menor.hora_entrada ? atual : menor)
-    const globalVOLTA = turnosValidos.reduce((menor, atual) => atual.hora_saida < menor.hora_saida ? atual : menor)
-
-    const horaIda = timeToTimestamp(globalIDA.hora_entrada)
-    const horaVolta = timeToTimestamp(globalVOLTA.hora_saida)
+    const globalIDAinicio = timeToTimestamp(turnosValidos.reduce((menor, atual) => atual.hora_entrada < menor.hora_entrada ? atual : menor).hora_entrada) // escola com menor tempo de inicio
+    const globalIDAfim = timeToTimestamp(turnosValidos.reduce((menor, atual) => atual.hora_entrada > menor.hora_entrada ? atual : menor).hora_entrada)  // escola com maior tempo de inicio
+    const globalVOLTAinicio = timeToTimestamp(turnosValidos.reduce((menor, atual) => atual.hora_saida < menor.hora_saida ? atual : menor).hora_saida) // escola com menor tempo de fim
+    const globalVOLTAfim = timeToTimestamp(turnosValidos.reduce((menor, atual) => atual.hora_saida > menor.hora_saida ? atual : menor).hora_saida) // escola com maior tempo de fim
 
     // antes de criar a requisição, válida pra ver se as coisas necessarias tão no .env
-    if(!process.env['GCP_PROJECT_ID'] || !process.env['GCP_CLIENT_EMAIL'] || !process.env['GCP_PRIVATE_KEY']) throw new Error('ABSENT_ENV_CONFIG')
+    if (!process.env['GCP_PROJECT_ID'] || !process.env['GCP_CLIENT_EMAIL'] || !process.env['GCP_PRIVATE_KEY']) throw new Error('ABSENT_ENV_CONFIG')
 
     const requisicao: IOptimizeToursRequest = {
         parent: `projects/${process.env['GCP_PROJECT_ID']}`,
@@ -190,22 +254,59 @@ export const otimizarRota = async (rotaID: number, req: Request) => {
         populateTransitionPolylines: false, // devolver as polylines de cada trajeto invidual. exemplo: casa do aluno 1 pra casa do aluno 2
         // modelo da otimização de rota, ou seja, oq vai processar de fato
         model: {
-            globalStartTime: rota.sentido === 'IDA' ? { seconds: horaIda.seconds - (2 * 60 * 60) } : { seconds: horaVolta.seconds - (10 * 60) }, // horario de inicio da rota, no caso começa 2h antes da escola com menor horario
-            globalEndTime: rota.sentido === 'IDA' ? horaIda : { seconds: horaVolta.seconds + (2 * 60 * 60) }, // horario de termino da rota
+            globalStartTime: rota.sentido === 'IDA' ? { seconds: globalIDAinicio.seconds - (2 * 60 * 60) } : { seconds: globalVOLTAinicio.seconds - (30 * 60) }, // horario de inicio da rota, no caso começa 2h antes da escola com maior horario e se for uma rota de volta, pega a escola com menor tempo de saida menos 30 minutos
+            globalEndTime: rota.sentido === 'IDA' ? globalIDAfim : { seconds: globalVOLTAfim.seconds + (2 * 60 * 60) }, // horario de termino da rota na ida é a escola com maior tempo de entrada e na volta é a escola com maior tempo de saida mais duas horas
             // lista das "mercadorias" ou seja, no nosso caso os alunos
             shipments: shipmentAlunos,
             // lista dos veiculos
             vehicles: [veiculoVan]
         }
     }
-    const routeClient = new v1.RouteOptimizationClient({
-        projectId: process.env['GCP_PROJECT_ID'],
-        credentials: {
-            client_email: process.env['GCP_CLIENT_EMAIL'],
-            private_key: process.env["GCP_PRIVATE_KEY"].replace(/\\n/g, '\n'),
-        },
-    });
     const [response] = await routeClient.optimizeTours(requisicao)
-    console.dir({ requisicao, turnosValidos }, { depth: null })
+
+    const rotaOtimizada = response.routes![0]
+
+    if (!rotaOtimizada || !rotaOtimizada.visits) {
+        throw new Error('UNKOWN_ERROR')
+    }
+
+    const polylines = rotaOtimizada.routePolyline
+    const ordemOtimizada = rotaOtimizada.visits
+    const pontosRotaOtimizados: PontoRota[] = []
+
+    // for pra transformar o que o google devolve de volta nos objetos originais de ponto_rota na ordem certa
+    for (const visita of ordemOtimizada) {
+        const label = visita.visitLabel
+        if (!label) continue
+
+        // verificando se a visita atual é na casa de um aluno ou em uma escola pelo label que definimos lá em cima
+        const ehAluno = label.startsWith('casa_aluno_')
+        const id = Number(ehAluno ? label.replace('casa_aluno_', '') : label.replace('escola_', ''))
+
+        // buscando o ponto rota original correspondente
+        const pontoOriginal = pontosRota.find(p => ehAluno ? p.aluno_id === id : p.escola_id === id)
+        if (!pontoOriginal) continue
+
+        // como vários alunos podem ser da mesma escola, o google devolve uma visita na escola pra cada aluno.
+        // esse if garante que a escola não seja adicionada repetida no array final
+        if (!pontosRotaOtimizados.some(p => p.id === pontoOriginal.id)) {
+            pontosRotaOtimizados.push({
+                ...pontoOriginal,
+                ordem: pontosRotaOtimizados.length + 1
+            })
+        }
+    }
+
+    console.dir({ pontosRotaFiltrados, pontosRotaOtimizados, polylines }, { depth: null })
+    for (const pontoRotaOtimizado of pontosRotaOtimizados) {
+        await cliente.query(
+            `
+            UPDATE ponto_rota
+            SET ordem = $1
+            WHERE id = $2
+            `,
+            [pontoRotaOtimizado.ordem, pontoRotaOtimizado.id]
+        )
+    }
     return
-}
+} 
