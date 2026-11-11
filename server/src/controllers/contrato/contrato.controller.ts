@@ -13,7 +13,7 @@ import { BUCKET_NAME, CDN_URL, r2 } from "../../db/r2.js";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import type { Clausula } from "../../models/contrato/clausula.model.js";
-import type { Motorista } from "../../models/motorista.model.js";
+import type { Motorista } from "../../models/motorista/motorista.model.js";
 import { obterArquivoR2 } from "../../utils/obterArquivoR2.js";
 import { deletarR2 } from "../../utils/deletarR2.js";
 import { travarContratoRascunho } from "../../utils/travarContratoRascunho.js";
