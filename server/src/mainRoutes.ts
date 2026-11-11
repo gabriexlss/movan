@@ -54,7 +54,7 @@ router.use('/system', rotasSistema)
 router.use('/responsavel', middlewareAutenticar, rotasResponsavel)
 
 // Rota para os endpoints relacionado as escolas
-router.use('/escola', middlewareAutenticar, rotasEscola)
+router.use('/escola', rotasEscola)
 
 //Rota para os endpoints relacionado aos alunos
 router.use('/aluno', middlewareAutenticar, rotasAluno)
