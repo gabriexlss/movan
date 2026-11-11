@@ -45,13 +45,27 @@ app.use((_req: Request, res: Response) => {
 });
 
 app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    // Erros do Multer
-    if (erro instanceof multer.MulterError) {
-        switch (erro.code) {
-            case "LIMIT_FILE_SIZE":
-                return res.status(413).json({
-                    msg: "Arquivo excede o tamanho máximo permitido."
-                });
+  // Erros do Multer
+  if (erro instanceof multer.MulterError) {
+    switch (erro.code) {
+      case 'LIMIT_FILE_SIZE':
+        return res.status(413).json({
+          msg: 'Arquivo excede o tamanho máximo permitido.'
+        });
+
+      case 'LIMIT_UNEXPECTED_FILE':
+        return res.status(400).json({
+          msg: 'Campo de arquivo inesperado ou arquivos demais.'
+        });
+
+      default:
+        return res.status(400).json({
+          msg: 'Erro ao processar o arquivo.'
+        });
+    }
+  }
+
+  const erroHttp = erro as { status?: unknown; type?: unknown };
 
   if (erroHttp.type === 'entity.parse.failed') {
     return res.status(400).json({
@@ -62,6 +76,13 @@ app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (erroHttp.status === 413 || erroHttp.type === 'entity.too.large') {
     return res.status(413).json({
       'msg-code': 'PAYLOAD_TOO_LARGE'
+    });
+  }
+
+  // Tipo de arquivo inválido
+  if (erroHttp.status === 415) {
+    return res.status(415).json({
+      msg: 'Tipo de arquivo não permitido.'
     });
   }
 
