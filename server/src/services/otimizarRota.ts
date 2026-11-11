@@ -270,7 +270,6 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
         throw new Error('UNKOWN_ERROR')
     }
 
-    const polylines = rotaOtimizada.routePolyline
     const ordemOtimizada = rotaOtimizada.visits
     const pontosRotaOtimizados: PontoRota[] = []
 
@@ -309,4 +308,4 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
         )
     }
     return
-} 
+}

@@ -8,6 +8,7 @@ import { MoverPontosRotaSchema, PontoRota } from "../models/rotas/pontoRota.js";
 import { EscolaTurno } from "../models/escola/turno.model.js";
 import { otimizarRota } from "../services/otimizarRota.js";
 import { ParamsSchema } from "../models/utils.model.js";
+import { gerarPolylineRota } from "../services/gerarPolyline.js";
 
 export const controllerRotas = {
     // gera todas as rotas assim que o motorista é criado
@@ -428,6 +429,90 @@ export const controllerRotas = {
         } catch (erro) {
             await cliente.query('ROLLBACK')
             console.error("Erro no endpoint de mover pontos da rota, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        } finally {
+            cliente.release()
+        }
+    },
+    obterPolylineRota: async (req: Request, res: Response) => {
+        // pega o id bruto pelo parametros
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        // validação de sempre
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "ID da rota inválido.",
+                erro: idBruto.error.format()
+            })
+        }
+
+        // desestruturação
+        const { id: rotaID } = idBruto.data
+        const motoristaID = req.userId
+
+        // coordenadas opcionais do motorista (via query ou body) caso queira incluir a saída inicial da van
+        const latBruta = req.query['latitude']
+        const lngBruta = req.query['longitude']
+        const coordenadasMotorista = (latBruta !== undefined && lngBruta !== undefined)
+            ? { latitude: Number(latBruta), longitude: Number(lngBruta) }
+            : undefined
+
+        const cliente = await database.connect()
+        try {
+            const polyline = await gerarPolylineRota({
+                rotaID,
+                motoristaID,
+                ...(coordenadasMotorista ? { coordenadasMotorista } : {}),
+                cliente
+            })
+
+            return res.status(200).json({
+                polyline
+            })
+        } catch (erro) {
+            console.error(erro)
+            if (erro instanceof Error) {
+                switch (erro.message) {
+                    case 'DRIVER_COORDINATES_INVALID':
+                        return res.status(400).json({
+                            msg: "Coordenadas do motorista inválidas."
+                        })
+                    case 'ALUNO_COORDINATES_INVALID':
+                        return res.status(400).json({
+                            msg: "Um ou mais alunos da rota possuem coordenadas inválidas."
+                        })
+                    case 'ESCOLA_COORDINATES_INVALID':
+                        return res.status(400).json({
+                            msg: "Uma ou mais escolas da rota possuem coordenadas inválidas."
+                        })
+                    case 'ROTA_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Rota não encontrada."
+                        })
+                    case 'PONTOS_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Nenhum ponto encontrado nesta rota."
+                        })
+                    case 'ALUNO_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Aluno não encontrado."
+                        })
+                    case 'ESCOLA_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Escola não encontrada."
+                        })
+                    case 'ABSENT_ENV_CONFIG':
+                        return res.status(500).json({
+                            msg: "Configurações do Google Cloud ausentes no servidor."
+                        })
+                    case 'UNKOWN_ERROR':
+                        return res.status(500).json({
+                            msg: "Não foi possível gerar a polyline da rota."
+                        })
+                }
+            }
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })
