@@ -297,7 +297,7 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
         }
     }
 
-    console.dir({ pontosRotaFiltrados, pontosRotaOtimizados, polylines }, { depth: null })
+    // agr coloco a nova ordem no banco de dados.
     for (const pontoRotaOtimizado of pontosRotaOtimizados) {
         await cliente.query(
             `

@@ -4,7 +4,7 @@ import { CriarRota, FiltrosRotaSchema, OtimizarRotaSchema, Rota } from "../model
 import { PoolClient } from "pg";
 import { Aluno } from "../models/aluno.model.js";
 import { Escola } from "../models/escola/escola.model.js";
-import { PontoRota } from "../models/rotas/pontoRota.js";
+import { MoverPontosRotaSchema, PontoRota } from "../models/rotas/pontoRota.js";
 import { EscolaTurno } from "../models/escola/turno.model.js";
 import { otimizarRota } from "../services/otimizarRota.js";
 import { ParamsSchema } from "../models/utils.model.js";
@@ -352,6 +352,84 @@ export const controllerRotas = {
             // se não achou o erro, retorna com 500
             return res.status(500).json({
                 msg: "Erro Interno do Servidor"
+            })
+        } finally {
+            cliente.release()
+        }
+    },
+    moverPontos: async (req: Request, res: Response) => {
+        // recebendo os dados por meio das querys (from e to) e o id da rota pelos params.
+        const dadosBrutos = MoverPontosRotaSchema.safeParse(req.query)
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        // validação
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para mover pontos da rota.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "ID da rota inválido.",
+                erro: idBruto.error.format()
+            })
+        }
+
+        // desestruturação
+        const { from, to } = dadosBrutos.data
+        const { id: rotaID } = idBruto.data
+        const motoristaID = req.userId
+
+        // conectando ao banco de dados
+        const cliente = await database.connect()
+        try {
+            // iniciando transação sql
+            await cliente.query('BEGIN')
+
+            // verifica se a rota existe e pertence ao motorista, travando a linha durante a troca
+            const { rowCount: rotaEncontrada } = await cliente.query(
+                `
+                SELECT id FROM rota
+                WHERE id = $1 AND motorista_id = $2
+                FOR UPDATE
+                `,
+                [rotaID, motoristaID]
+            )
+            if (!rotaEncontrada) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({
+                    msg: "Rota não encontrada."
+                })
+            }
+
+            // troca os dois pontos da rota de lugar em um único UPDATE.
+            const query = `
+            UPDATE ponto_rota
+            SET ordem = CASE WHEN ordem = $1 THEN $2 ELSE $1 END
+            WHERE rota_id = $3 AND motorista_id = $4 AND ordem IN ($1, $2)
+            `
+            const operacao = await cliente.query(query, [from, to, rotaID, motoristaID])
+
+            // precisa achar exatamente os dois pontos (se from === to, só acha um).
+            if (operacao.rowCount !== 2) {
+                await cliente.query('ROLLBACK')
+                return res.status(400).json({
+                    msg: "Um dos pontos que você quer mover não existe nesta rota."
+                })
+            }
+
+            // commitando alterações.
+            await cliente.query('COMMIT')
+
+            return res.status(200).json({
+                msg: "Pontos da rota movidos com sucesso."
+            })
+        } catch (erro) {
+            await cliente.query('ROLLBACK')
+            console.error("Erro no endpoint de mover pontos da rota, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         } finally {
             cliente.release()
