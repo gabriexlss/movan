@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Document, Font, Image, Page, Path, Svg, Text, TextInput, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import { PDFDocument } from "pdf-lib";
@@ -13,21 +14,32 @@ export interface DadosContrato extends ContratoView {
     nome_motorista: string;
 }
 
+// Referências explícitas para o bundler da Vercel (@vercel/nft) rastrear os arquivos de fonte.
+const poppinsRegularPath = fileURLToPath(new URL("../../assets/fonts/Poppins-Regular.ttf", import.meta.url));
+const poppinsSemiBoldPath = fileURLToPath(new URL("../../assets/fonts/Poppins-SemiBold.ttf", import.meta.url));
+const breeSerifRegularPath = fileURLToPath(new URL("../../assets/fonts/BreeSerif-Regular.ttf", import.meta.url));
+const tanNimbusPath = fileURLToPath(new URL("../../assets/fonts/TAN-NIMBUS.ttf", import.meta.url));
+
+void readFileSync(poppinsRegularPath);
+void readFileSync(poppinsSemiBoldPath);
+void readFileSync(breeSerifRegularPath);
+void readFileSync(tanNimbusPath);
+
 // Assets do próprio servidor: funcionam tanto em src/services quanto em dist/services.
 Font.register({
     family: "Poppins",
     fonts: [
-        { src: fileURLToPath(new URL("../../assets/fonts/Poppins-Regular.ttf", import.meta.url)) },
-        { src: fileURLToPath(new URL("../../assets/fonts/Poppins-SemiBold.ttf", import.meta.url)), fontWeight: 600 },
+        { src: poppinsRegularPath },
+        { src: poppinsSemiBoldPath, fontWeight: 600 },
     ],
 });
 Font.register({
     family: "Bree Serif",
-    src: fileURLToPath(new URL("../../assets/fonts/BreeSerif-Regular.ttf", import.meta.url)),
+    src: breeSerifRegularPath,
 });
 Font.register({
     family: "TAN Nimbus",
-    src: fileURLToPath(new URL("../../assets/fonts/TAN-NIMBUS.ttf", import.meta.url)),
+    src: tanNimbusPath,
 });
 
 const cores = {
