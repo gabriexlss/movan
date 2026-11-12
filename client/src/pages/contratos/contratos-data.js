@@ -20,7 +20,7 @@ export const contratos = [
 ]
 
 export const formatarData = (data) => {
-    const [ano, mes, dia] = data.split('-')
+    const [ano, mes, dia] = String(data || '').slice(0, 10).split('-')
     return ano && mes && dia ? `${dia}/${mes}/${ano}` : data
 }
 

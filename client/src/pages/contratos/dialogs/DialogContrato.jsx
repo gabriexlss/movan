@@ -1,10 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaRegFileAlt } from 'react-icons/fa'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
-import { alunos, escolas, responsaveis } from '../../clientes/clientes-data'
+import { listarAluno } from '../../../services/aluno'
+import { listarEscola } from '../../../services/escola'
+import { listarResponsaveis } from '../../../services/responsaveis'
 import styles from './dialogContrato.module.css'
 
 const DialogContrato = ({ onClose, onSave }) => {
+    const [responsaveis, setResponsaveis] = useState([])
+    const [alunos, setAlunos] = useState([])
+    const [escolas, setEscolas] = useState([])
+    const [carregandoOpcoes, setCarregandoOpcoes] = useState(true)
     const [valores, setValores] = useState({
         titulo: 'Contrato de prestação de serviços',
         cliente: '',
@@ -13,6 +19,28 @@ const DialogContrato = ({ onClose, onSave }) => {
         inicio: '',
         termino: '',
     })
+
+    useEffect(() => {
+        let ativo = true
+
+        Promise.all([listarResponsaveis(), listarAluno(), listarEscola()])
+            .then(([dadosResponsaveis, dadosAlunos, dadosEscolas]) => {
+                if (ativo) {
+                    setResponsaveis(dadosResponsaveis)
+                    setAlunos(dadosAlunos)
+                    setEscolas(dadosEscolas)
+                }
+            })
+            .finally(() => {
+                if (ativo) {
+                    setCarregandoOpcoes(false)
+                }
+            })
+
+        return () => {
+            ativo = false
+        }
+    }, [])
 
     const propsCampo = (campo) => ({
         value: valores[campo],
@@ -44,8 +72,10 @@ const DialogContrato = ({ onClose, onSave }) => {
                 <label className={styles.campo}>
                     Responsável
                     <select {...propsCampo('cliente')} required>
-                        <option value="">Selecione um responsável</option>
-                        {responsaveis.map((responsavel) => (
+                        <option value="">
+                            {carregandoOpcoes ? 'Carregando responsáveis...' : 'Selecione um responsável'}
+                        </option>
+                        {!carregandoOpcoes && responsaveis.map((responsavel) => (
                             <option key={responsavel.id} value={responsavel.nome}>{responsavel.nome}</option>
                         ))}
                     </select>
@@ -53,8 +83,10 @@ const DialogContrato = ({ onClose, onSave }) => {
                 <label className={styles.campo}>
                     Aluno
                     <select {...propsCampo('aluno')} required>
-                        <option value="">Selecione um aluno</option>
-                        {alunos.map((aluno) => (
+                        <option value="">
+                            {carregandoOpcoes ? 'Carregando alunos...' : 'Selecione um aluno'}
+                        </option>
+                        {!carregandoOpcoes && alunos.map((aluno) => (
                             <option key={aluno.id} value={aluno.nome}>{aluno.nome}</option>
                         ))}
                     </select>
@@ -62,8 +94,10 @@ const DialogContrato = ({ onClose, onSave }) => {
                 <label className={styles.campo}>
                     Escola
                     <select {...propsCampo('escola')} required>
-                        <option value="">Selecione uma escola</option>
-                        {escolas.map((escola) => (
+                        <option value="">
+                            {carregandoOpcoes ? 'Carregando escolas...' : 'Selecione uma escola'}
+                        </option>
+                        {!carregandoOpcoes && escolas.map((escola) => (
                             <option key={escola.id} value={escola.nome}>{escola.nome}</option>
                         ))}
                     </select>

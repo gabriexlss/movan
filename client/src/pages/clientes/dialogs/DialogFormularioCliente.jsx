@@ -50,6 +50,8 @@ const valoresIniciais = {
         cpf: '',
         telefone: '',
         endereco: '',
+        latitude: null,
+        longitude: null,
     },
 }
 
@@ -481,13 +483,19 @@ const DialogFormularioCliente = ({
                             autoComplete="tel"
                             required
                         />
-                        <CampoCliente
-                            label="Endereço"
+                        <CampoEnderecoAutocomplete
                             icon={<PiMapPinBold />}
-                            {...propsCampo('endereco')}
-                            placeholder="Rua, número, bairro e cidade"
-                            autoComplete="street-address"
-                            required
+                            value={valores.endereco}
+                            onChange={(endereco) => setValores((estadoAtual) => ({
+                                ...estadoAtual,
+                                endereco,
+                                latitude: null,
+                                longitude: null,
+                            }))}
+                            onSelecionar={(enderecoSelecionado) => setValores((estadoAtual) => ({
+                                ...estadoAtual,
+                                ...enderecoSelecionado,
+                            }))}
                         />
                     </>
                 )}

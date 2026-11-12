@@ -1,19 +1,50 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaChevronRight, FaFilePdf, FaPlus } from 'react-icons/fa'
 import { LuScrollText } from 'react-icons/lu'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import ContratoLayout, { AvisoContrato } from './ContratoLayout'
 import DialogNovaClausula from './dialogs/DialogNovaClausula'
-import { clausulasExtras, clausulasFixas, contratoExemplo, contratos, textoClausula } from './contratos-data'
+import { obterContrato } from '../../services/contrato'
+import { clausulasExtras, clausulasFixas, contratoExemplo, textoClausula } from './contratos-data'
 import styles from './fluxoContratos.module.css'
 
 const ClausulasContrato = ({ gerado = false }) => {
     const { state } = useLocation()
     const { id } = useParams()
-    const contrato = gerado
-        ? contratos.find((item) => item.id === id)
-        : state?.contrato || contratoExemplo
+    const [contrato, setContrato] = useState(state?.contrato || contratoExemplo)
+    const [carregando, setCarregando] = useState(gerado)
     const [dialogAberto, setDialogAberto] = useState(false)
+
+    useEffect(() => {
+        if (!gerado || !id) {
+            return undefined
+        }
+
+        let ativo = true
+        obterContrato(id)
+            .then((dados) => {
+                if (ativo) {
+                    setContrato(dados)
+                }
+            })
+            .finally(() => {
+                if (ativo) {
+                    setCarregando(false)
+                }
+            })
+
+        return () => {
+            ativo = false
+        }
+    }, [gerado, id])
+
+    if (carregando) {
+        return (
+            <ContratoLayout voltar>
+                <p className={styles.mensagem}>Carregando contrato...</p>
+            </ContratoLayout>
+        )
+    }
 
     if (!contrato) {
         return (

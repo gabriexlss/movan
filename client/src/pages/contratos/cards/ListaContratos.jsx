@@ -1,22 +1,65 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaChevronRight, FaPlus, FaRegCalendarAlt, FaRegFileAlt, FaSearch, FaUser } from 'react-icons/fa'
 import { IoFilterSharp } from 'react-icons/io5'
 import { LuScrollText } from 'react-icons/lu'
 import { Link, useNavigate } from 'react-router-dom'
 import DefaultCard from '../../../components/cards/DefaultCard'
-import { contratos, formatarData, situacoesContrato } from '../contratos-data'
+import { listarContratos } from '../../../services/contrato'
+import { formatarData, situacoesContrato } from '../contratos-data'
 import DialogContrato from '../dialogs/DialogContrato'
 import styles from './listaContratos.module.css'
 
 const ITENS_POR_PAGINA = 5
 
+const situacoesBanco = {
+    RASCUNHO: 'rascunho',
+    AGUARDANDO_ASSINATURA: 'pendente',
+    ATIVO: 'ativo',
+    FINALIZADO: 'finalizado',
+    CANCELADO: 'cancelado',
+    INATIVO: 'cancelado',
+    PENDENTE: 'pendente',
+}
+
+const adaptarContrato = (contrato) => ({
+    ...contrato,
+    id: contrato.contrato_id,
+    titulo: 'Contrato de prestação de serviços',
+    cliente: contrato.nome_responsavel,
+    inicio: contrato.data_inicio,
+    termino: contrato.data_fim,
+    situacao: situacoesBanco[contrato.status] || String(contrato.status || '').toLocaleLowerCase('pt-BR'),
+})
+
 const ListaContratos = () => {
     const navigate = useNavigate()
+    const [contratos, setContratos] = useState([])
+    const [carregando, setCarregando] = useState(true)
     const [busca, setBusca] = useState('')
     const [situacao, setSituacao] = useState('todos')
     const [pagina, setPagina] = useState(0)
     const [filtroAberto, setFiltroAberto] = useState(false)
     const [formularioAberto, setFormularioAberto] = useState(false)
+
+    useEffect(() => {
+        let ativo = true
+
+        listarContratos()
+            .then((dados) => {
+                if (ativo) {
+                    setContratos(dados.map(adaptarContrato))
+                }
+            })
+            .finally(() => {
+                if (ativo) {
+                    setCarregando(false)
+                }
+            })
+
+        return () => {
+            ativo = false
+        }
+    }, [])
 
     const termo = busca.trim().toLocaleLowerCase('pt-BR')
     const resultados = contratos.filter((contrato) => (
@@ -145,7 +188,9 @@ const ListaContratos = () => {
                     </button>
                 </div>
 
-                {contratosDaPagina.length > 0 ? (
+                {carregando ? (
+                    <p className={styles.vazio}>Carregando contratos...</p>
+                ) : contratosDaPagina.length > 0 ? (
                     <ul className={styles.registros}>
                         {contratosDaPagina.map((contrato) => (
                             <li key={contrato.id}>
