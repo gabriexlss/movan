@@ -2,33 +2,27 @@ import { useEffect, useState } from 'react'
 import { FaRegFileAlt } from 'react-icons/fa'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
 import { listarAluno } from '../../../services/aluno'
-import { listarEscola } from '../../../services/escola'
-import { listarResponsaveis } from '../../../services/responsaveis'
 import styles from './dialogContrato.module.css'
 
 const DialogContrato = ({ onClose, onSave }) => {
-    const [responsaveis, setResponsaveis] = useState([])
     const [alunos, setAlunos] = useState([])
-    const [escolas, setEscolas] = useState([])
     const [carregandoOpcoes, setCarregandoOpcoes] = useState(true)
+    const [salvando, setSalvando] = useState(false) //indica quando o contrato está sendo criado
     const [valores, setValores] = useState({
-        titulo: 'Contrato de prestação de serviços',
-        cliente: '',
-        aluno: '',
-        escola: '',
+        alunoId: '',
         inicio: '',
         termino: '',
+        diaVencimento: '',
+        valorMensal: '',
     })
 
     useEffect(() => {
         let ativo = true
 
-        Promise.all([listarResponsaveis(), listarAluno(), listarEscola()])
-            .then(([dadosResponsaveis, dadosAlunos, dadosEscolas]) => {
+        listarAluno()
+            .then((dadosAlunos) => {
                 if (ativo) {
-                    setResponsaveis(dadosResponsaveis)
                     setAlunos(dadosAlunos)
-                    setEscolas(dadosEscolas)
                 }
             })
             .finally(() => {
@@ -50,69 +44,62 @@ const DialogContrato = ({ onClose, onSave }) => {
         })),
     })
 
-    const salvar = (event) => {
+    const salvar = async (event) => {
         event.preventDefault()
-        onSave({ ...valores, titulo: valores.titulo.trim() })
+        if (salvando) return //evita que o botão envie mais de uma requisição
+
+        setSalvando(true) //bloqueia o formulário durante a criação
+        try {
+            await onSave(valores)
+        } finally {
+            setSalvando(false) //libera o formulário caso a requisição termine ou falhe
+        }
     }
 
     return (
         <DefaultDialog
             isOpen
-            onClose={onClose}
+            onClose={salvando ? () => {} : onClose}
             title="Novo contrato"
             description="Preencha os dados do contrato."
             icon={<FaRegFileAlt />}
             className={styles.dialog}
         >
-            <form className={styles.formulario} onSubmit={salvar}>
-                <label className={styles.campo}>
-                    Título
-                    <input {...propsCampo('titulo')} required pattern=".*\S.*" data-autofocus="true" />
-                </label>
-                <label className={styles.campo}>
-                    Responsável
-                    <select {...propsCampo('cliente')} required>
-                        <option value="">
-                            {carregandoOpcoes ? 'Carregando responsáveis...' : 'Selecione um responsável'}
-                        </option>
-                        {!carregandoOpcoes && responsaveis.map((responsavel) => (
-                            <option key={responsavel.id} value={responsavel.nome}>{responsavel.nome}</option>
-                        ))}
-                    </select>
-                </label>
+            <form className={styles.formulario} onSubmit={salvar} aria-busy={salvando}>
                 <label className={styles.campo}>
                     Aluno
-                    <select {...propsCampo('aluno')} required>
+                    <select {...propsCampo('alunoId')} required disabled={salvando} data-autofocus="true">
                         <option value="">
                             {carregandoOpcoes ? 'Carregando alunos...' : 'Selecione um aluno'}
                         </option>
                         {!carregandoOpcoes && alunos.map((aluno) => (
-                            <option key={aluno.id} value={aluno.nome}>{aluno.nome}</option>
-                        ))}
-                    </select>
-                </label>
-                <label className={styles.campo}>
-                    Escola
-                    <select {...propsCampo('escola')} required>
-                        <option value="">
-                            {carregandoOpcoes ? 'Carregando escolas...' : 'Selecione uma escola'}
-                        </option>
-                        {!carregandoOpcoes && escolas.map((escola) => (
-                            <option key={escola.id} value={escola.nome}>{escola.nome}</option>
+                            <option key={aluno.id} value={aluno.id}>{aluno.nome}</option>
                         ))}
                     </select>
                 </label>
                 <div className={styles.duasColunas}>
                     <label className={styles.campo}>
                         Início
-                        <input type="date" {...propsCampo('inicio')} max={valores.termino || undefined} required />
+                        <input type="date" {...propsCampo('inicio')} max={valores.termino || undefined} required disabled={salvando} />
                     </label>
                     <label className={styles.campo}>
                         Término
-                        <input type="date" {...propsCampo('termino')} min={valores.inicio || undefined} required />
+                        <input type="date" {...propsCampo('termino')} min={valores.inicio || undefined} required disabled={salvando} />
                     </label>
                 </div>
-                <button type="submit" className={styles.salvar}>Adicionar contrato</button>
+                <div className={styles.duasColunas}>
+                    <label className={styles.campo}>
+                        Dia de vencimento
+                        <input type="number" min="1" max="31" {...propsCampo('diaVencimento')} required disabled={salvando} />
+                    </label>
+                    <label className={styles.campo}>
+                        Valor mensal
+                        <input type="number" min="0" step="0.01" {...propsCampo('valorMensal')} required disabled={salvando} />
+                    </label>
+                </div>
+                <button type="submit" className={styles.salvar} disabled={salvando}>
+                    {salvando ? 'Criando contrato...' : 'Adicionar contrato'}
+                </button>
             </form>
         </DefaultDialog>
     )

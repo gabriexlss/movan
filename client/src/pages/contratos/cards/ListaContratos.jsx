@@ -4,7 +4,7 @@ import { IoFilterSharp } from 'react-icons/io5'
 import { LuScrollText } from 'react-icons/lu'
 import { Link, useNavigate } from 'react-router-dom'
 import DefaultCard from '../../../components/cards/DefaultCard'
-import { listarContratos } from '../../../services/contrato'
+import { criarContrato, listarContratos } from '../../../services/contrato'
 import { formatarData, situacoesContrato } from '../contratos-data'
 import DialogContrato from '../dialogs/DialogContrato'
 import styles from './listaContratos.module.css'
@@ -84,14 +84,23 @@ const ListaContratos = () => {
         setFiltroAberto(false)
     }
 
-    const salvarContrato = (valores) => {
-        const novoContrato = {
-            ...valores,
-            id: `C-${String(contratos.length + 1).padStart(3, '0')}`,
-            situacao: 'ativo',
-        }
+    const salvarContrato = async (valores) => {
+        await criarContrato(valores) //crio o contrato no backend
+        setFormularioAberto(false) //fecho o dialogo depois que o contrato foi criado
 
-        navigate('/contratos/clausulas', { state: { contrato: novoContrato } })
+        const contratosAtualizados = await listarContratos() //busco novamente os contratos para atualizar a lista
+        setContratos(contratosAtualizados.map(adaptarContrato)) //mostro os contratos atualizados na tela
+        const novoContrato = contratosAtualizados
+            .filter((contrato) => (
+                Number(contrato.aluno_id) === Number(valores.alunoId)
+                && contrato.data_inicio === valores.inicio
+                && contrato.data_fim === valores.termino
+                && contrato.status === 'RASCUNHO'
+            ))
+            .sort((a, b) => b.contrato_id - a.contrato_id)[0]
+
+    if (!novoContrato) return //encerro caso o contrato criado não seja encontrado na lista
+    navigate(`/contratos/${novoContrato.contrato_id}`) //abro as cláusulas do contrato criado
     }
 
     return (

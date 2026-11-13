@@ -20,7 +20,7 @@ export const responsaveis = [
         email: 'thiago@email.com',
         cpf: '234.567.890-12',
         telefone: '(11) 98888-0000',
-        endereco: 'Rua das Palmeiras, 84 · Jardim Ângela',
+        endereco: 'Rua das Palmeras, 84 · Jardim Ângela',
         informacoesGerais: 'Prefere receber avisos e cobranças por e-mail.',
         situacaoContrato: 'pendente',
         detalhes: ['(11) 98888-0000', 'thiago@email.com', 'Jardim Ângela'],

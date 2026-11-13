@@ -8,6 +8,7 @@ import styles from './fluxoContratos.module.css'
 const LinkContrato = () => {
     const { state } = useLocation()
     const contrato = { ...contratoExemplo, ...state?.contrato }
+    const link = state?.link || '' //guardo o link de assinatura retornado pelo backend
     const resumo = [
         ['Responsável', contrato.cliente],
         ['Aluno', contrato.aluno],
@@ -28,9 +29,9 @@ const LinkContrato = () => {
                 <div className={styles.card}>
                     <Link to="/contrato/assinatura" className={styles.linkAssinatura}>
                         <LuLink aria-hidden="true" />
-                        <span>https://movan.app/contrato/<wbr />linkdaparaocontrato</span>
+                        <span>{link || 'Link indisponível'}</span>
                     </Link>
-                    <button type="button" className={styles.copiarLink}>
+                    <button type="button" className={styles.copiarLink} onClick={() => navigator.clipboard?.writeText(link)} disabled={!link}> {/*copio o link para a área de transferência*/}
                         <FaRegCopy aria-hidden="true" />
                         Copiar link
                     </button>

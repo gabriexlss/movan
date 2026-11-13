@@ -74,7 +74,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
         if (!termo) return itens
 
         return itens.filter((registro) =>
-            [registro.nome, ...registro.detalhes, registro.badge]
+            [registro.nome, ...(registro.detalhes || montarDetalhes(tipo, registro)), registro.badge]
                 .filter(Boolean)
                 .join(' ')
                 .toLocaleLowerCase('pt-BR')
@@ -205,7 +205,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                                     >
                                         {registro.nome}
                                     </Link>
-                                    {registro.detalhes.map((detalhe) => <span key={detalhe}>{detalhe}</span>)}
+                                    {(registro.detalhes || montarDetalhes(tipo, registro)).map((detalhe) => <span key={detalhe}>{detalhe}</span>)}
                                 </div>
                                 <div className={styles.acoes}>
                                     {registro.badge && <span className={styles.badge}>{registro.badge}</span>}
