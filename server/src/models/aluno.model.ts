@@ -11,17 +11,20 @@ const AlunoSchema = z.object({
     ano_escolar: z
         .string("Ano escolar deve ser uma string.")
         .min(1, "Ano escolar não pode estar vazio.")
-        .max(5, "Ano escolar deve ter no máximo 5 caracteres."),
+        .max(10, "Ano escolar deve ter no máximo 10 caracteres."),
     observacao: z
         .string("Observação deve ser uma string.")
         .max(255, "Observação deve ter no máximo 255 caracteres.")
         .optional(),
-    endereco: z.string("Endereço deve ser uma string.").max(255, "endereço deve ter no maximo 255 caracteres."),
+    endereco: z
+        .string("Endereço deve ser uma string.")
+        .max(255, "Endereço deve ter no máximo 255 caracteres."),
     latitude: UtilSchema.shape.latitude,
     longitude: UtilSchema.shape.longitude,
     responsavel_id: UtilSchema.shape.id,
     escola_id: UtilSchema.shape.id,
-    motorista_id: UtilSchema.shape.id
+    motorista_id: UtilSchema.shape.id,
+    escola_turno_id: UtilSchema.shape.id
 })
 export const CriarAlunoSchema = AlunoSchema.omit({
     id: true,
@@ -33,4 +36,5 @@ export const EditarAlunoSchema = AlunoSchema.omit({
     motorista_id: true
 }).partial()
 
+export type Aluno = z.infer<typeof AlunoSchema>
 export type CriarAluno = z.infer<typeof CriarAlunoSchema>

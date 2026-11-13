@@ -4,7 +4,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    gap: 5rem;
+    gap: clamp(.5rem, 5vw, 3rem);
     width: 100%;
     margin-bottom: .5rem;
     
@@ -13,6 +13,8 @@
 
 .statusAluno{
     display: flex;
+    flex: 0 1 auto;
+    min-width: 0;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -35,7 +37,7 @@
 }
 
 .quantidadeAluno{
-    font-size: 2rem;
+    font-size: 2.0625rem;
     font-weight: 900;
     margin-left: auto;
     color: #7A7A7A;
@@ -50,6 +52,7 @@
 }
 
 .tituloAluno{
-    font-size: .7rem;
+    font-size: 0.7625rem;
     font-weight: 900;
+    line-height: 1.4;
 }

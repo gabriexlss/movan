@@ -20,7 +20,7 @@
     background: #0d47a1;
     color: #fff;
     font-family: 'Poppins', sans-serif;
-    font-size: .6rem;
+    font-size: 0.6625rem;
     white-space: nowrap;
     cursor: pointer;
 }
@@ -39,7 +39,7 @@
     padding-top: .2rem;
     border-top: 1px solid #dedede;
     color: #777;
-    font-size: .56rem;
+    font-size: 0.6225rem;
 }
 
 .paginacao {
@@ -78,6 +78,6 @@
 @media (max-width: 350px) {
     .novo {
         padding-inline: .3rem;
-        font-size: .56rem;
+        font-size: 0.6225rem;
     }
 }
