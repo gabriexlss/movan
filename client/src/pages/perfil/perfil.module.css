@@ -26,7 +26,7 @@
     border-radius: 1rem;
     padding: clamp(1rem, 4vw, 1.5rem);
 
-    background-color: #f8f5f5;
+    background-color: var(--theme-surface);
 }
 
 .foto-perfil {
@@ -49,7 +49,7 @@
 .perfil-container h1,
 .perfil-container p {
     font-family: 'Poppins', sans-serif;
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-weight: bold;
 }
 
@@ -74,11 +74,11 @@
 
 .campo-grupo .icon-label{
     font-size: 1.5rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
 }
 
 .campo-grupo .icon-label--editavel{
-    color: #0D5DFF;
+    color: var(--theme-link);
 }
 
 .campo-grupo .label {
@@ -86,7 +86,7 @@
     align-items: center;
     gap: .3rem;
     
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 0.9625rem;
     font-weight: 600;
@@ -94,7 +94,7 @@
 }
 
 .campo-grupo .label--editavel{
-    color: #0D5DFF;
+    color: var(--theme-link);
 }
 
 .input-container {
@@ -103,15 +103,15 @@
     align-items: center;
     min-height: 2.75rem;
     overflow: hidden;
-    border: 2px solid #0D47A1;
+    border: 2px solid var(--theme-focus);
     border-radius: 999px;
-    background-color: #ffffff;
+    background-color: var(--theme-panel);
     transition: border-color .2s ease;
     user-select: none; 
 }
 
 .input-container--editavel:focus-within {
-    border-color: #0d47a1;
+    border-color: var(--theme-focus);
     user-select: auto;
 }
 
@@ -122,7 +122,7 @@
     outline: 0;
     padding: .55rem 3.25rem .55rem 1rem;
     background-color: transparent;
-    color: #3f3f3f;
+    color: var(--theme-text);
     font-family: 'Poppins', sans-serif;
     font-size: 1.0625rem;
 }
@@ -133,7 +133,7 @@
 }
 
 .input-container input::placeholder {
-    color: #727272;
+    color: var(--theme-muted);
     opacity: 1;
 }
 
@@ -147,7 +147,7 @@
     border: 0;
     border-radius: 50%;
     background-color: transparent;
-    color: #0D47A1;
+    color: var(--theme-accent);
     cursor: pointer;
     transition: color .2s ease, transform .2s ease;
 }
@@ -158,7 +158,7 @@
 }
 
 .input-container--editavel:focus-within .botao-editar {
-    color: #0D5DFF;
+    color: var(--theme-link);
 }
 
 .botao-editar:active {
@@ -178,7 +178,7 @@
 
     font-size: 0.9625rem;
     font-family: 'Poppins', sans-serif;
-    color: #5A5A5A;
+    color: var(--theme-text-secondary);
     text-decoration: none;
     text-align: center;
     margin-bottom: -.9rem;
@@ -205,12 +205,12 @@
     justify-content: center;
     align-items: center;
 
-    background-color: #F5F5F5;
+    background-color: var(--theme-surface);
     box-shadow: 0 3px 5px rgba(1, 16, 43, 0.424);
     border-radius: 5px;
-    border: #C72C2C solid 2px;
+    border: var(--theme-danger) solid 2px;
 
-    color: #C72C2C;
+    color: var(--theme-danger);
     font-family: 'Poppins', sans-serif;
     font-size: 0.8625rem;
     text-align: center;
@@ -222,8 +222,8 @@
 .BtnSair-conta{
     margin-top: 0;
 
-    border-color: #0d47a1;
-    color: #0d47a1;
+    border-color: var(--theme-focus);
+    color: var(--theme-accent);
 }
 
 .BtnExclu-conta::after {

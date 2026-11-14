@@ -5,7 +5,7 @@
     line-height: 1.5;
     margin-top: 2vh;
 
-    color: #C0C0C0;
+    color: var(--theme-muted);
     font-size: 0.7625rem;
 
     text-align: center;

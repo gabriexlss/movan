@@ -255,7 +255,14 @@ const AppToaster = () => {
             position="top-right"
             toastOptions={{
                 duration: 6000,
-                style: { fontSize: '1.0625rem', lineHeight: 1.4, overflowWrap: 'anywhere' },
+                style: {
+                    fontSize: '1.0625rem',
+                    lineHeight: 1.4,
+                    overflowWrap: 'anywhere',
+                    background: 'var(--theme-panel)',
+                    color: 'var(--theme-text)',
+                    border: '1px solid var(--theme-border)',
+                },
             }}
         >
             {(currentToast) => (

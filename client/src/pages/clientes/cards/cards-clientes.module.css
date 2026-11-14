@@ -23,10 +23,10 @@
     min-width: 0;
     min-height: 1.8rem;
     padding: 0 .45rem;
-    border: 1px solid #d7dce4;
+    border: 1px solid var(--theme-border);
     border-radius: .25rem;
-    background: #fff;
-    color: #7a8798;
+    background: var(--theme-panel);
+    color: var(--theme-muted);
     font-size: 0.7125rem;
 }
 
@@ -41,12 +41,12 @@
     border: 0;
     outline: 0;
     background: transparent;
-    color: #333;
+    color: var(--theme-text);
     font: inherit;
 }
 
 .busca input::placeholder {
-    color: #9aa1aa;
+    color: var(--theme-placeholder);
     opacity: 1;
 }
 
@@ -60,8 +60,8 @@
     padding: .25rem .4rem;
     border: 0;
     border-radius: .25rem;
-    background: #0d47a1;
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-family: inherit;
     font-size: 0.6625rem;
     white-space: nowrap;
@@ -85,12 +85,12 @@
     gap: .35rem;
     min-height: 3.55rem;
     padding: .3rem .1rem;
-    border-top: 1px solid #dedede;
+    border-top: 1px solid var(--theme-border);
     transition: background-color .2s ease;
 }
 
 .registro:hover {
-    background: #eef4fc;
+    background: var(--theme-accent-soft);
 }
 
 .nomeCliente::after {
@@ -102,7 +102,7 @@
 }
 
 .registro:has(.nomeCliente:focus-visible) {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: -2px;
 }
 
@@ -113,10 +113,10 @@
     place-items: center;
     width: 1.35rem;
     height: 1.35rem;
-    border: 1px solid #aaa;
+    border: 1px solid var(--theme-control-border);
     border-radius: 50%;
-    background: #e8eef8;
-    color: #0d47a1;
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
     font-size: .7rem;
 }
 
@@ -129,14 +129,14 @@
     display: flex;
     min-width: 0;
     flex-direction: column;
-    color: #858585;
+    color: var(--theme-placeholder);
     font-size: 0.6425rem;
     line-height: 1.45;
 }
 
 .nomeCliente {
     overflow: hidden;
-    color: #555;
+    color: var(--theme-text-secondary);
     font-size: 0.7425rem;
     font-weight: 600;
     text-decoration: none;
@@ -164,8 +164,8 @@
     margin-right: .1rem;
     padding: .13rem .25rem;
     border-radius: .2rem;
-    background: #d7f2d9;
-    color: #278b36;
+    background: var(--theme-success-soft);
+    color: var(--theme-success);
     font-size: 0.5825rem;
     white-space: nowrap;
 }
@@ -186,13 +186,13 @@
 .editar {
     position: relative;
     z-index: 2;
-    color: #0d47a1;
+    color: var(--theme-accent);
 }
 
 .excluir {
     position: relative;
     z-index: 2;
-    color: #bf3737;
+    color: var(--theme-danger);
 }
 
 .editar svg,
@@ -206,13 +206,13 @@
 .nomeCliente:focus-visible,
 .paginacao button:focus-visible {
     border-radius: .2rem;
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 1px;
 }
 
 .vazio {
     padding: 1rem .4rem;
-    color: #777;
+    color: var(--theme-muted);
     font-size: 0.7625rem;
     text-align: center;
 }
@@ -224,8 +224,8 @@
     gap: .4rem;
     min-height: 1.75rem;
     padding-top: .2rem;
-    border-top: 1px solid #dedede;
-    color: #777;
+    border-top: 1px solid var(--theme-border);
+    color: var(--theme-muted);
     font-size: 0.6225rem;
 }
 
@@ -233,14 +233,14 @@
     display: flex;
     align-items: center;
     gap: .25rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
     white-space: nowrap;
 }
 
 .paginacao button {
     width: 1rem;
     height: 1.2rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: .62rem;
 }
 

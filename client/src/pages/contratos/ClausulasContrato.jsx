@@ -25,7 +25,7 @@ const ClausulasContrato = ({ gerado = false }) => {
 
     return (
         <ContratoLayout subtitle={gerado ? 'Contrato gerado' : 'Assinatura de contratos'} voltar>
-            <AvisoContrato title={gerado ? 'Cláusulas do contrato' : 'Atenção! Estas cláusulas serão utilizadas como base para todos os seus contratos.'}>
+            <AvisoContrato destaque={!gerado} title={gerado ? 'Cláusulas do contrato' : 'Atenção! Estas cláusulas serão utilizadas como base para todos os seus contratos.'}>
                 {gerado
                     ? 'Confira as cláusulas deste contrato antes de gerar o PDF.'
                     : 'Além das cláusulas fixas, é possível a criação de cláusulas adicionais caso seja necessário.'}

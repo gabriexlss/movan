@@ -16,7 +16,7 @@ export const notificacoes = [
         tempo: '2m',
         acao: 'Ver rota',
         Icone: PiTimerBold,
-        cor: '#f7b928',
+        cor: 'var(--theme-notification-warning)',
     },
     {
         id: 'rota-iniciad',
@@ -25,7 +25,7 @@ export const notificacoes = [
         tempo: '2m',
         acao: 'Ver rota',
         Icone: PiTimerBold,
-        cor: '#f7b928',
+        cor: 'var(--theme-notification-warning)',
     },
     {
         id: 'mensalidade-pendente',
@@ -34,7 +34,7 @@ export const notificacoes = [
         tempo: '1h',
         acao: 'Ver mensalidade',
         Icone: PiCurrencyDollarBold,
-        cor: '#21853a',
+        cor: 'var(--theme-notification-success)',
     },
     {
         id: 'atualizacao-sistema',
@@ -43,7 +43,7 @@ export const notificacoes = [
         tempo: '3h',
         acao: 'Ver',
         Icone: PiWarningBold,
-        cor: '#0d47a1',
+        cor: 'var(--theme-notification-info)',
     },
     {
         id: 'mudancas-rota',
@@ -52,7 +52,7 @@ export const notificacoes = [
         tempo: '1d',
         acao: 'Ver rota',
         Icone: PiArrowsClockwiseBold,
-        cor: '#9445e6',
+        cor: 'var(--theme-notification-event)',
     },
     {
         id: 'novo-cadastro',
@@ -61,7 +61,7 @@ export const notificacoes = [
         tempo: '2d',
         acao: 'Ver aluno',
         Icone: PiUserPlusBold,
-        cor: '#f7b928',
+        cor: 'var(--theme-notification-warning)',
     },
 ]
 

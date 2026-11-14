@@ -14,16 +14,20 @@
     height: clamp(5rem, 10vh, 7rem);
     overflow: hidden;
 
-    background-image: url('../../assets/media/img/header-imgs/header-stain.svg');
-    background-size: 120%;
-    background-position: center;
-    background-repeat: no-repeat;
-
     transition: transform .5s ease;
     will-change: transform;
 }
 
-.header.hidden{
+.header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('../../assets/media/img/header-imgs/header-stain.svg') center / 120% no-repeat;
+    pointer-events: none;
+}
+
+.header.hidden {
     transform: translateY(-100%);
 }
 
@@ -31,7 +35,7 @@
     position: static;
     transform: none;
     text-align: center;
-    color: #FFC33A;
+    color: var(--theme-brand-yellow);
     margin-left: 1rem;
 }
 
@@ -43,7 +47,7 @@
 }
 
 .movan-span {
-    color: #FFFFFF;
+    color: var(--theme-on-brand);
 }
 
 .subtitulo {
@@ -51,5 +55,5 @@
     font-family: 'Bree Serif', serif;
     font-size: 0.8125rem;
     font-weight: lighter;
-    color: #FFFFFF;
+    color: var(--theme-on-brand);
 }

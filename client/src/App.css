@@ -62,6 +62,7 @@
 
 html {
   scrollbar-width: none;
+  background-color: var(--theme-page);
 }
 
 html::-webkit-scrollbar{
@@ -69,7 +70,8 @@ html::-webkit-scrollbar{
 }
 
 body {
-  background-color: #FFFFFF;
+  background-color: var(--theme-page);
+  color: var(--theme-text);
   font-size: 1.0625rem;
 }
 
@@ -86,7 +88,7 @@ p {
   font-size: 0.8125rem;
   line-height: 1.5;
   font-weight: lighter;
-  color: #FFFFFF;
+  color: var(--theme-text);
 }
 
 main {

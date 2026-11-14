@@ -11,20 +11,20 @@
     gap: .35rem;
     min-height: 2.15rem;
     padding: .22rem .1rem;
-    border-top: 1px solid #d9d9d9;
+    border-top: 1px solid var(--theme-border);
     border-left: 2px solid transparent;
 }
 
 .pago {
-    border-left-color: #279742;
+    border-left-color: var(--theme-success);
 }
 
 .pendente {
-    border-left-color: #e9ad22;
+    border-left-color: var(--theme-warning);
 }
 
 .atrasado {
-    border-left-color: #b52a2a;
+    border-left-color: var(--theme-danger);
 }
 
 .avatar {
@@ -33,8 +33,8 @@
     width: 1.3rem;
     height: 1.3rem;
     border-radius: 50%;
-    background: #dedede;
-    color: #8b8b8b;
+    background: var(--theme-surface-muted);
+    color: var(--theme-placeholder);
     font-size: .7rem;
 }
 
@@ -48,7 +48,7 @@
 
 .descricao strong {
     overflow: hidden;
-    color: #646464;
+    color: var(--theme-text-secondary);
     font-size: 0.6825rem;
     font-weight: 600;
     text-overflow: ellipsis;
@@ -56,19 +56,19 @@
 }
 
 .pago .descricao strong {
-    color: #15720c;
+    color: var(--theme-success);
 }
 
 .pendente .descricao strong {
-    color: #cf8e00;
+    color: var(--theme-warning);
 }
 
 .atrasado .descricao strong {
-    color: #a32020;
+    color: var(--theme-danger);
 }
 
 .descricao span {
-    color: #999;
+    color: var(--theme-placeholder);
     font-size: 0.5425rem;
 }
 
@@ -82,16 +82,16 @@
 }
 
 .status-pago {
-    background: #d8eddd;
-    color: #15720c;
+    background: var(--theme-success-soft);
+    color: var(--theme-success);
 }
 
 .status-pendente {
-    background: #faedc8;
-    color: #b67a00;
+    background: var(--theme-warning-soft);
+    color: var(--theme-warning);
 }
 
 .status-atrasado {
-    background: #f0dada;
-    color: #9f2424;
+    background: var(--theme-danger-soft);
+    color: var(--theme-danger);
 }

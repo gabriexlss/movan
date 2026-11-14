@@ -1,7 +1,7 @@
 .dialog {
     max-width: 29rem;
     padding: 3.25rem 1.4rem 1.4rem;
-    border: 1px solid #eee;
+    border: 1px solid var(--theme-border);
     border-radius: .75rem;
     box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
 }
@@ -15,7 +15,7 @@
 
 .dialog > header p {
     margin-top: .4rem;
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-family: 'Poppins', sans-serif;
     font-size: 0.8825rem;
 }
@@ -30,7 +30,7 @@
     flex-direction: column;
     gap: .25rem;
     min-width: 0;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 0.7825rem;
 }
 
@@ -40,10 +40,10 @@
     min-width: 0;
     min-height: 2.5rem;
     padding: .55rem .7rem;
-    border: 1px solid #b8b8b8;
+    border: 1px solid var(--theme-control-border);
     border-radius: 999px;
-    background: #fff;
-    color: #454545;
+    background: var(--theme-panel);
+    color: var(--theme-text);
     font-family: inherit;
     font-size: 0.9425rem;
 }
@@ -60,8 +60,8 @@
     padding: .6rem 1rem;
     border: 0;
     border-radius: .3rem;
-    background: #0d47a1;
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-family: inherit;
     font-size: 0.9425rem;
     font-weight: 600;
@@ -78,8 +78,8 @@
     top: 0;
     left: 1rem;
     padding: 0 .3rem;
-    background: #fff;
-    color: #56769e;
+    background: var(--theme-panel);
+    color: var(--theme-muted);
     font-size: .75rem;
 }
 
@@ -88,10 +88,10 @@
     width: 100%;
     min-width: 0;
     padding: .7rem .9rem;
-    border: 1px solid #b8b8b8;
+    border: 1px solid var(--theme-control-border);
     border-radius: .85rem;
-    background: #fff;
-    color: #454545;
+    background: var(--theme-panel);
+    color: var(--theme-text);
     font-family: inherit;
     font-size: .85rem;
     line-height: 1.5;
@@ -108,14 +108,14 @@
 
 .campoClausula input:focus-visible,
 .campoClausula textarea:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 
 .campo input:focus-visible,
 .campo select:focus-visible,
 .salvar:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 

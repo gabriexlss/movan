@@ -16,13 +16,13 @@
 }
 
 .lucro {
-    color: #15720C;
-    background-color: #d8eddd;
+    color: var(--theme-success);
+    background-color: var(--theme-success-soft);
 }
 
 .despesa {
-    color: #720C0C;
-    background-color: #f0dada;
+    color: var(--theme-danger);
+    background-color: var(--theme-danger-soft);
 }
 
 .icone {
@@ -40,7 +40,7 @@
 
 .label {
     overflow: hidden;
-    color: #686868;
+    color: var(--theme-text-secondary);
     font-size: 0.6825rem;
     text-overflow: ellipsis;
     white-space: nowrap;

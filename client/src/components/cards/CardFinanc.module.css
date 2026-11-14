@@ -29,6 +29,6 @@
     font-family: 'Poppins', sans-serif;
     font-size: 0.7625rem;
     font-weight: 400;
-    color:#7A7A7A;
+    color:var(--theme-muted);
     text-align: start;
 }

@@ -19,7 +19,7 @@
     display: inline-flex;
     align-items: center;
     gap: .35rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7625rem;
     font-weight: 600;
@@ -34,7 +34,7 @@
 .secao,
 .naoEncontrado {
     border-radius: .65rem;
-    background: #f8f5f5;
+    background: var(--theme-surface);
     box-shadow: 0 5px 6px rgb(0 0 0 / 22%);
 }
 
@@ -54,10 +54,10 @@
     place-items: center;
     width: 2.45rem;
     height: 2.45rem;
-    border: 1px solid #aaa;
+    border: 1px solid var(--theme-control-border);
     border-radius: 50%;
-    background: #e8eef8;
-    color: #0d47a1;
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
     font-size: 1rem;
 }
 
@@ -76,7 +76,7 @@
 }
 
 .tipoCliente {
-    color: #8a8a8a;
+    color: var(--theme-placeholder);
     font-size: 0.6425rem;
     text-transform: uppercase;
     letter-spacing: .04em;
@@ -85,7 +85,7 @@
 .nomeCliente {
     overflow: hidden;
     max-width: 100%;
-    color: #555;
+    color: var(--theme-text-secondary);
     font-family: 'Poppins', sans-serif;
     font-size: 0.9425rem;
     font-weight: 600;
@@ -94,15 +94,15 @@
 }
 
 .nome-ativo {
-    color: #15720c;
+    color: var(--theme-success);
 }
 
 .nome-pendente {
-    color: #b67a00;
+    color: var(--theme-warning);
 }
 
 .nome-atrasado {
-    color: #a32020;
+    color: var(--theme-danger);
 }
 
 .acoes {
@@ -120,28 +120,28 @@
     padding: 0;
     border: 0;
     border-radius: .2rem;
-    background: #fff;
+    background: var(--theme-panel);
     cursor: pointer;
 }
 
 .editar {
-    color: #0d47a1;
+    color: var(--theme-accent);
 }
 
 .excluir {
-    color: #bf3737;
+    color: var(--theme-danger);
 }
 
 .editar:hover,
 .excluir:hover {
-    background: #ececec;
+    background: var(--theme-surface-muted);
 }
 
 .editar:focus-visible,
 .excluir:focus-visible,
 .voltar:focus-visible,
 .itemRelacionado:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 
@@ -163,15 +163,15 @@
     gap: .3rem;
     min-height: 2rem;
     padding: .45rem .75rem;
-    border-bottom: 1px solid #d8d8d8;
-    color: #0d47a1;
+    border-bottom: 1px solid var(--theme-border);
+    color: var(--theme-accent);
     font-size: .78rem;
     font-weight: 600;
 }
 
 .tituloSecao svg {
     flex: 0 0 auto;
-    color: #f3ae18;
+    color: var(--theme-warning);
 }
 
 .corpoSecao {
@@ -197,7 +197,7 @@
 }
 
 .rotulo {
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 0.6825rem;
     font-weight: 600;
 }
@@ -205,7 +205,7 @@
 .valor,
 .endereco,
 .estadoVazio {
-    color: #666;
+    color: var(--theme-text-secondary);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7425rem;
     font-style: normal;
@@ -240,7 +240,7 @@
     gap: .3rem;
     min-height: 1.55rem;
     border-radius: .2rem;
-    color: #555;
+    color: var(--theme-text-secondary);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7425rem;
     text-decoration: none;
@@ -248,25 +248,25 @@
 }
 
 .itemRelacionado:hover {
-    background: #eee;
-    color: #0d47a1;
+    background: var(--theme-surface-muted);
+    color: var(--theme-accent);
 }
 
 .itemRelacionado > svg:first-child {
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: .66rem;
 }
 
 .setaItem {
-    color: #777;
+    color: var(--theme-muted);
     font-size: .58rem;
 }
 
 .contagem {
     margin-top: .35rem;
     padding-top: .35rem;
-    border-top: 1px solid #dedede;
-    color: #777;
+    border-top: 1px solid var(--theme-border);
+    color: var(--theme-muted);
     font-family: 'Poppins', sans-serif;
     font-size: 0.6425rem;
     text-align: center;
@@ -283,10 +283,10 @@
     flex-direction: column;
     gap: .15rem;
     padding: .5rem;
-    border: 1px solid #dedede;
+    border: 1px solid var(--theme-border);
     border-radius: .4rem;
-    background: #fff;
-    color: #777;
+    background: var(--theme-panel);
+    color: var(--theme-muted);
     font-size: 0.6625rem;
 }
 
@@ -300,7 +300,7 @@
 
 .contratoCabecalho strong {
     overflow: hidden;
-    color: #555;
+    color: var(--theme-text-secondary);
     font-size: 0.7425rem;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -316,18 +316,18 @@
 }
 
 .status-ativo {
-    background: #d8eddd;
-    color: #15720c;
+    background: var(--theme-success-soft);
+    color: var(--theme-success);
 }
 
 .status-pendente {
-    background: #faedc8;
-    color: #b67a00;
+    background: var(--theme-warning-soft);
+    color: var(--theme-warning);
 }
 
 .status-atrasado {
-    background: #f0dada;
-    color: #a32020;
+    background: var(--theme-danger-soft);
+    color: var(--theme-danger);
 }
 
 .naoEncontrado {
@@ -337,7 +337,7 @@
 }
 
 .naoEncontrado h1 {
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 1rem;
     font-weight: 600;
@@ -345,13 +345,13 @@
 
 .naoEncontrado p {
     margin: .5rem 0 .8rem;
-    color: #666;
+    color: var(--theme-text-secondary);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7625rem;
 }
 
 .naoEncontrado a {
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 0.7625rem;
 }
 

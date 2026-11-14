@@ -19,14 +19,14 @@
 }
 
 .TituloTela-container .titulo{
-    color: #07368A;
+    color: var(--theme-title);
     font-family: 'Merriweather Sans', sans-serif;
     font-weight: 900;
     font-size: 1.1rem;
 }
 
 .TituloTela-container .subtitulo{
-    color: #7A7A7A;
+    color: var(--theme-muted);
     font-family: 'Poppins', sans-serif;
     font-weight: 400;
     font-size: 0.8125rem;
@@ -58,11 +58,11 @@
 
 .TituloTela-container .iconeNotificacao:not(:disabled):hover,
 .TituloTela-container .iconeNotificacao:focus-visible {
-    background: #fff4d6;
+    background: var(--theme-warning-soft);
 }
 
 .TituloTela-container .iconeNotificacao:focus-visible {
-    outline: 2px solid #07368a;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 
@@ -73,7 +73,7 @@
     width: .45rem;
     height: .45rem;
     border-radius: 50%;
-    background: #d32f2f;
+    background: var(--theme-action-danger);
     pointer-events: none;
 }
 
@@ -84,8 +84,8 @@
     gap: .35rem;
     margin-top: .25rem;
     padding-top: .45rem;
-    border-top: 1px solid #e6e6e6;
-    color: #0d47a1;
+    border-top: 1px solid var(--theme-border);
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7125rem;
     font-weight: 700;
@@ -93,6 +93,6 @@
 }
 
 .verTodas:focus-visible {
-    outline: 2px solid #07368a;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }

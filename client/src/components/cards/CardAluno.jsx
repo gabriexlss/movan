@@ -6,8 +6,8 @@ import { BiSolidUserX } from "react-icons/bi";
 
 const CardAluno = () => {
     const alunos = [
-        {titulo: "Alunos cadastrados", qntd: "36", icon: <PiStudentBold />, cor: "#FFC33A"},
-        {titulo: "Alunos ausentes", qntd: "5", icon: <BiSolidUserX />, cor: "#E55723"}
+        {titulo: "Alunos cadastrados", qntd: "36", icon: <PiStudentBold />, cor: 'var(--theme-warning)'},
+        {titulo: "Alunos ausentes", qntd: "5", icon: <BiSolidUserX />, cor: 'var(--theme-orange)'}
     ];
 
     return(

@@ -19,6 +19,7 @@ ass: mk gabriel incrivel
 }
 .loadingSpinIcon{
     animation: loadingSpinAnimation infinite 1s;
+    color: var(--theme-accent);
     width: 30px;
     height: 30px;
 }

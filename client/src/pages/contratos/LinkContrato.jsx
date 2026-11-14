@@ -19,7 +19,7 @@ const LinkContrato = () => {
 
     return (
         <ContratoLayout>
-            <AvisoContrato title="Contrato gerado com sucesso!" icon={<FaRegCheckCircle aria-hidden="true" />}>
+            <AvisoContrato destaque title="Contrato gerado com sucesso!" icon={<FaRegCheckCircle aria-hidden="true" />}>
                 Seu contrato foi gerado, copie o link abaixo e envie ao responsável para que o mesmo possa assinar.
             </AvisoContrato>
 

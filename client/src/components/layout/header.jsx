@@ -45,7 +45,6 @@ return (
             <h1 className={styles.movan}>MO<span className={styles['movan-span']}>VAN</span></h1>
             <p className={styles.subtitulo}>Seu caminho seguro na <br/> palma da mão</p>
         </div>
-
     </header>
 )
 

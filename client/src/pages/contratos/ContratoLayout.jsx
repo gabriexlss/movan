@@ -19,8 +19,8 @@ const ContratoLayout = ({ subtitle = 'Contrato gerado', voltar = false, children
     </main>
 )
 
-export const AvisoContrato = ({ title, icon, children }) => (
-    <aside className={styles.aviso}>
+export const AvisoContrato = ({ title, icon, destaque = false, children }) => (
+    <aside className={destaque ? `${styles.aviso} ${styles.avisoDestaque}` : styles.aviso}>
         <h2>{icon}{title}</h2>
         <p>{children}</p>
     </aside>

@@ -7,7 +7,7 @@
     place-items: center;
     padding: 1rem;
 
-    background-color: rgb(0 20 55 / 55%);
+    background-color: var(--theme-overlay);
     backdrop-filter: blur(3px);
 }
 
@@ -20,7 +20,7 @@
     padding: 3.5rem 1.5rem 1.5rem;
 
     border-radius: 1.25rem;
-    background-color: #fff;
+    background-color: var(--theme-panel);
     box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 25%);
 
     font-family: 'Poppins', sans-serif;
@@ -51,7 +51,7 @@
     border: 0;
     background: transparent;
 
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 1.5rem;
     cursor: pointer;
 }
@@ -64,10 +64,10 @@
     height: 3.5rem;
     margin: 0 auto 0.75rem;
 
-    border: 2px solid #0d47a1;
+    border: 2px solid var(--theme-focus);
     border-radius: 50%;
 
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 1.5rem;
 }
 
@@ -76,7 +76,7 @@
 }
 
 .header h2 {
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 1.5rem;
 }
 

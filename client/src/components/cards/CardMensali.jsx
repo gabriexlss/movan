@@ -3,18 +3,21 @@ import styles from './CardMensali.module.css';
 
 const CardMensali = () => {
     const mensalidade = [
-        {nome: "Pagas", qntd: "38", corf: "rgba(0, 255, 98, 0.25)", cor:"#15720C"},
-        {nome: "Pendentes", qntd: "8", corf: "rgba(234, 227, 24, 0.25)", cor: "#d4a30e"},
-        {nome: "Vencidas", qntd: "5", corf: "rgba(199, 44, 44, 0.25)", cor: "#720C0C"}
+        {nome: "Pagas", qntd: "38", status: 'success'},
+        {nome: "Pendentes", qntd: "8", status: 'warning'},
+        {nome: "Vencidas", qntd: "5", status: 'danger'}
     ];
 
     return (
         <DefaultCard title="Mensalidades" link="/financeiro">
             <div className={styles.containerMensalidade}>
                 {mensalidade.map((mensalidade) => (
-                    <div className={styles.mensalidadeItem} key={mensalidade.nome} style={{backgroundColor: mensalidade.corf, color: mensalidade.cor}}>
+                    <div className={styles.mensalidadeItem} key={mensalidade.nome} style={{
+                        backgroundColor: `var(--theme-${mensalidade.status}-soft)`,
+                        color: `var(--theme-${mensalidade.status})`,
+                    }}>
                         <h2 className={styles.quantidadeMensalidade}>{mensalidade.qntd}</h2>
-                        <p className={styles.tituloMensalidade} style={{color: mensalidade.cor}}>{mensalidade.nome}</p>
+                        <p className={styles.tituloMensalidade}>{mensalidade.nome}</p>
                     </div>
                 ))}
             </div>

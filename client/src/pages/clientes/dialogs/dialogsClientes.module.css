@@ -1,7 +1,7 @@
 .dialog {
     max-width: 29rem;
     padding: 3.25rem 1.4rem 1.4rem;
-    border: 1px solid #eeeeee;
+    border: 1px solid var(--theme-border);
     border-radius: .75rem;
     box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
 }
@@ -24,7 +24,7 @@
 .dialog > header p {
     max-width: 22rem;
     margin: .4rem auto 0;
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-family: 'Poppins', sans-serif;
     font-size: 0.8825rem;
     font-weight: 400;
@@ -49,7 +49,7 @@
     min-width: 0;
     margin-top: .35rem;
     padding-top: .85rem;
-    border-top: 1px solid #e6e6e6;
+    border-top: 1px solid var(--theme-border);
     font-family: 'Poppins', sans-serif;
     font-size: .88rem;
     font-weight: 400;
@@ -67,7 +67,7 @@
     display: flex;
     align-items: center;
     gap: .4rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: .88rem;
     font-weight: 700;
     line-height: 1.3;
@@ -84,7 +84,7 @@
     border: 0;
     border-radius: .3rem;
     background: transparent;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: .8rem;
     font-weight: 700;
@@ -102,16 +102,16 @@
 }
 
 .adicionarTurno {
-    background: #0d47a1;
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
 }
 
 .adicionarTurno:hover {
-    background: #07368a;
+    background: var(--theme-action-hover);
 }
 
 .turnosAviso {
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-family: 'Poppins', sans-serif;
     font-size: .72rem;
     font-weight: 400;
@@ -124,13 +124,13 @@
     gap: .75rem;
     min-width: 0;
     padding: .65rem .75rem .75rem;
-    border: 1px solid #b8b8b8;
+    border: 1px solid var(--theme-control-border);
     border-radius: .75rem;
 }
 
 .turnoItem legend {
     padding-inline: .35rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: .72rem;
     font-weight: 400;
     line-height: 1.1;
@@ -144,22 +144,22 @@
 
 .removerTurno {
     justify-self: end;
-    color: #bf3737;
+    color: var(--theme-danger);
     font-weight: 400;
 }
 
 .removerTurno:hover {
-    background: #fff7f7;
+    background: var(--theme-danger-subtle);
 }
 
 .adicionarTurno:focus-visible,
 .removerTurno:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 
 .removerTurno:focus-visible {
-    outline-color: #bf3737;
+    outline-color: var(--theme-danger);
 }
 
 .primaryButton:disabled,
@@ -176,8 +176,8 @@
     max-width: calc(100% - 3.5rem);
     overflow: hidden;
     padding: 0 .35rem;
-    background: #fff;
-    color: #0d47a1;
+    background: var(--theme-panel);
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7825rem;
     line-height: 1.4;
@@ -189,15 +189,15 @@
     display: flex;
     align-items: center;
     min-height: 2.5rem;
-    border: 1px solid #b8b8b8;
+    border: 1px solid var(--theme-control-border);
     border-radius: 999px;
-    background: #fff;
+    background: var(--theme-panel);
     transition: border-color .2s ease, box-shadow .2s ease;
 }
 
 .inputWrapper:focus-within {
-    border-color: #0d47a1;
-    box-shadow: 0 0 0 3px rgb(13 71 161 / 10%);
+    border-color: var(--theme-focus);
+    box-shadow: 0 0 0 3px var(--theme-focus-ring);
 }
 
 .fieldIcon {
@@ -206,7 +206,7 @@
     place-items: center;
     width: 2rem;
     padding-left: .4rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
 }
 
 .inputWrapper input,
@@ -219,7 +219,7 @@
     border-radius: 999px;
     outline: 0;
     background: transparent;
-    color: #454545;
+    color: var(--theme-text);
     font-family: 'Poppins', sans-serif;
     font-size: 0.9425rem;
 }
@@ -230,7 +230,7 @@
 
 .inputWrapper input::placeholder,
 .inputWrapper textarea::placeholder {
-    color: #888;
+    color: var(--theme-placeholder);
     opacity: 1;
 }
 
@@ -266,8 +266,8 @@
     padding: .6rem 1rem;
     border: 0;
     border-radius: .3rem;
-    background: #0d47a1;
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-family: 'Poppins', sans-serif;
     font-size: 0.9425rem;
     font-weight: 700;
@@ -280,7 +280,7 @@
 }
 
 .primaryButton:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 3px;
 }
 
@@ -290,12 +290,12 @@
 }
 
 .deleteDialog > div[aria-hidden='true'] {
-    border-color: #c72c2c;
-    color: #c72c2c;
+    border-color: var(--theme-danger);
+    color: var(--theme-danger);
 }
 
 .deleteDialog > header h2 {
-    color: #c72c2c;
+    color: var(--theme-danger);
 }
 
 .deleteContent {
@@ -308,10 +308,10 @@
     align-items: flex-start;
     gap: .6rem;
     padding: .85rem;
-    border: 1px solid rgb(199 44 44 / 35%);
+    border: 1px solid var(--theme-danger-border);
     border-radius: .7rem;
-    background: #fff7f7;
-    color: #7a7a7a;
+    background: var(--theme-danger-subtle);
+    color: var(--theme-muted);
     font-family: 'Poppins', sans-serif;
     font-size: 0.8625rem;
     font-weight: 400;
@@ -322,21 +322,21 @@
 .deleteNotice svg {
     flex-shrink: 0;
     margin-top: .1rem;
-    color: #c72c2c;
+    color: var(--theme-danger);
     font-size: 1.1rem;
 }
 
 .deleteNotice strong {
-    color: #555;
+    color: var(--theme-text-secondary);
 }
 
 .primaryButton.deleteButton {
     margin-top: 0;
-    background: #c72c2c;
+    background: var(--theme-action-danger);
 }
 
 .deleteButton:focus-visible {
-    outline-color: #c72c2c;
+    outline-color: var(--theme-danger);
 }
 
 @media (max-width: 420px) {

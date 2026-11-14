@@ -18,6 +18,8 @@ import DialogEmail from './edicao-perfil/DialogEmail'
 import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
+import ThemeToggle from '../../theme/ThemeToggle'
+import { useTheme } from '../../theme/theme-context'
 import api from '../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../services/toastManager'
 
@@ -40,6 +42,7 @@ const formatarCredencial = (credencial = '') => {
 }
 
 const Perfil = () => {
+    const { theme } = useTheme()
     const { user, refreshSession, logout } = useAuth()
     const [camposEditaveis, setCamposEditaveis] = useState({})
     const [campoSelect, setCampoSelect] = useState(null)
@@ -177,7 +180,7 @@ const Perfil = () => {
 
     return (
         <main className={styles['perfil-container']}>
-            <TituloTela title="Este é o seu perfil" className={styles['titulo-tela']} />
+            <TituloTela title="Este é o seu perfil" className={styles['titulo-tela']} acao={<ThemeToggle />} />
 
             <div className={styles['conteudos-perfil']}>
                 <img
@@ -253,6 +256,7 @@ const Perfil = () => {
                             {campo.id === 'email' && user?.email_verificado === true && user?.google_verificado === false && (
                                 <div className={styles['linkGoogle']}>
                                     <GoogleLogin
+                                        theme={theme === 'dark' ? 'filled_black' : 'outline'}
                                         onSuccess={vincularGoogle}
                                         onError={() => errorToast('GOOGLE_OPEN_FAILED')}
                                         text="signup_with"

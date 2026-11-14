@@ -11,15 +11,12 @@
 
 .conteudo,
 .modal {
-    --azul: #0d47a1;
-    --amarelo: #ffc33a;
-
-    color: #555;
+    color: var(--theme-text-secondary);
     font-family: 'Poppins', sans-serif;
 }
 
 .conteudo h2 {
-    color: var(--azul);
+    color: var(--theme-accent);
     font-size: .8125rem;
     font-weight: 600;
     line-height: 1.35;
@@ -44,7 +41,7 @@
     flex: 1;
     max-width: 24rem;
     overflow: hidden;
-    border: 1px solid #d5d5d5;
+    border: 1px solid var(--theme-border);
     border-radius: .5rem;
 }
 
@@ -56,17 +53,17 @@
     min-height: 2.45rem;
     padding: .25rem;
     border: 0;
-    background: #fff;
-    color: var(--azul);
+    background: var(--theme-panel);
+    color: var(--theme-accent);
     font-size: .7425rem;
 }
 
 .turnos button + button {
-    border-left: 1px solid #dedede;
+    border-left: 1px solid var(--theme-border);
 }
 
 .turnos button[aria-pressed='true'] {
-    background: #fff0c9;
+    background: var(--theme-warning-soft);
     font-weight: 600;
 }
 
@@ -77,7 +74,7 @@
     width: 1.45rem;
     height: 1.45rem;
     border-radius: .3rem;
-    background: #eaeaea;
+    background: var(--theme-surface-muted);
     font-size: .9rem;
 }
 
@@ -90,22 +87,28 @@
     position: relative;
     height: clamp(14rem, 75vw, 25rem);
     overflow: hidden;
-    border: 2px solid var(--amarelo);
+    border: 2px solid var(--theme-brand-yellow);
     border-radius: .65rem;
-    background: #efeee9;
+    background: var(--theme-map);
 }
 
 .mapaLeaflet {
     z-index: 0;
     width: 100%;
     height: 100%;
-    background: #efeee9;
+    background: var(--theme-map);
     font-family: 'Poppins', sans-serif;
 }
 
 .mapaLeaflet :global(.leaflet-control-attribution) {
     max-width: 100%;
     font-size: .625rem;
+    background: var(--theme-panel);
+    color: var(--theme-text-secondary);
+}
+
+.mapaLeaflet :global(.leaflet-control-attribution a) {
+    color: var(--theme-link);
 }
 
 .mapaLeaflet :global(.leaflet-marker-icon) {
@@ -126,16 +129,16 @@
     place-items: center;
     width: 2.15rem;
     height: 2.15rem;
-    border: 1px solid #e4e4e4;
+    border: 1px solid var(--theme-border);
     border-radius: .35rem;
-    background: #fff;
-    color: var(--azul);
+    background: var(--theme-panel);
+    color: var(--theme-accent);
     font-size: 1.05rem;
     cursor: pointer;
 }
 
 .controlesMapa button:focus-visible {
-    outline: 2px solid var(--azul);
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 
@@ -144,7 +147,7 @@
     gap: .45rem;
     padding: .45rem .45rem .9rem;
     border-radius: .65rem;
-    background: #f4f2f2;
+    background: var(--theme-surface);
 }
 
 .cabecalhoLista {
@@ -165,8 +168,8 @@
     padding: .25rem .5rem;
     border: 0;
     border-radius: .3rem;
-    background: var(--azul);
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-size: .6825rem;
     font-weight: 600;
     cursor: pointer;
@@ -182,9 +185,9 @@
 }
 
 .escolas {
-    border: 1px solid #d0cdcd;
+    border: 1px solid var(--theme-border);
     border-radius: .35rem;
-    background: #fff;
+    background: var(--theme-panel);
 }
 
 .escola {
@@ -197,7 +200,7 @@
 }
 
 .escola + .escola {
-    border-top: 1px solid #e0dddd;
+    border-top: 1px solid var(--theme-border);
 }
 
 .iconeEscola {
@@ -206,8 +209,8 @@
     width: 1.55rem;
     height: 1.55rem;
     border-radius: 50%;
-    background: var(--azul);
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-size: 1.05rem;
 }
 
@@ -221,7 +224,7 @@
 }
 
 .dadosEscola strong {
-    color: #454545;
+    color: var(--theme-text);
     font-size: .7425rem;
     font-weight: 600;
 }
@@ -229,7 +232,7 @@
 .infosPonto {
     display: grid;
     gap: .15rem;
-    color: #15720c;
+    color: var(--theme-success);
     font-size: .6425rem;
     line-height: 1.25;
     text-align: center;
@@ -239,8 +242,8 @@
 .infosPonto span {
     padding: .12rem .28rem;
     border-radius: .22rem;
-    background: #e8eef8;
-    color: var(--azul);
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
     font-weight: 600;
 }
 
@@ -258,21 +261,21 @@
     padding: 0;
     border: 0;
     border-radius: .2rem;
-    background: #fff;
-    color: var(--azul);
+    background: var(--theme-panel);
+    color: var(--theme-accent);
     font-size: .9rem;
     cursor: pointer;
 }
 
 .acoes .excluir {
-    color: #bf3737;
+    color: var(--theme-danger);
 }
 
 .secaoAlunos {
     min-height: 16rem;
     padding: .55rem .65rem;
     border-radius: .55rem;
-    background: #fff;
+    background: var(--theme-panel);
 }
 
 .tituloAlunos {
@@ -280,7 +283,7 @@
 }
 
 .tituloAlunos span {
-    color: #946400;
+    color: var(--theme-warning);
 }
 
 .alunos {
@@ -298,17 +301,17 @@
 }
 
 .aluno + .aluno {
-    border-top: 1px solid #e6e6e6;
+    border-top: 1px solid var(--theme-border);
 }
 
 .aluno > svg {
-    color: var(--azul);
+    color: var(--theme-accent);
     font-size: 1rem;
 }
 
 .modal[role='dialog'] {
     padding: 1.25rem;
-    border: 1px solid #eee;
+    border: 1px solid var(--theme-border);
     border-radius: .75rem;
     box-shadow: 0 3px 5px rgb(0 0 0 / 22%);
 }
@@ -321,7 +324,7 @@
 }
 
 .modal > header h2 {
-    color: var(--azul);
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 1.05rem;
     font-weight: 600;
@@ -330,7 +333,7 @@
 
 .modal p {
     margin: .3rem 0 0;
-    color: #666;
+    color: var(--theme-text-secondary);
     font-family: 'Poppins', sans-serif;
     font-size: .8125rem;
     font-weight: 400;
@@ -355,8 +358,8 @@
     padding: .4rem;
     border: 0;
     border-radius: .3rem;
-    background: var(--azul);
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-family: inherit;
     font-size: .8125rem;
     font-weight: 600;
@@ -369,7 +372,7 @@
 .adicionar:focus-visible,
 .acoes button:focus-visible,
 .modal button:focus-visible {
-    outline: 2px solid var(--azul);
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 

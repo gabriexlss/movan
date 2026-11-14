@@ -14,7 +14,7 @@
     justify-content: center;
     gap: .65rem;
     margin-top: -.35rem;
-    color: #07368A;
+    color: var(--theme-title);
     font-family: 'Poppins', sans-serif;
     font-size: 0.9125rem;
     font-weight: 600;
@@ -28,7 +28,7 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: #0D47A1;
+    color: var(--theme-accent);
     cursor: pointer;
 }
 
@@ -39,7 +39,7 @@
 
 .setaPeriodo:focus-visible {
     border-radius: .2rem;
-    outline: 2px solid #0D47A1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 
@@ -57,12 +57,12 @@
     border: 0;
     border-radius: .2rem;
     background: transparent;
-    color: #0d47a1;
+    color: var(--theme-accent);
     cursor: pointer;
 }
 
 .botaoCalendario:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
 
@@ -74,11 +74,11 @@
     transform: translateX(-50%);
     width: min(14.5rem, calc(100vw - 2rem));
     padding: .55rem;
-    border: 1px solid #d9e1ed;
+    border: 1px solid var(--theme-border);
     border-radius: .35rem;
-    background: #fff;
+    background: var(--theme-panel);
     box-shadow: 0 4px 14px rgb(0 0 0 / 15%);
-    color: #333;
+    color: var(--theme-text);
 }
 
 .cabecalhoAno {
@@ -87,7 +87,7 @@
     align-items: center;
     justify-items: center;
     min-height: 2rem;
-    color: #173d75;
+    color: var(--theme-title);
     font-family: 'Poppins', sans-serif;
 }
 
@@ -105,17 +105,17 @@
     border: 0;
     border-radius: .2rem;
     background: transparent;
-    color: #0d47a1;
+    color: var(--theme-accent);
     cursor: pointer;
 }
 
 .navegarAno:hover {
-    background: #edf3fb;
+    background: var(--theme-accent-soft);
 }
 
 .navegarAno:focus-visible,
 .mesOpcao:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 1px;
 }
 
@@ -131,21 +131,21 @@
     padding: .25rem;
     border: 1px solid transparent;
     border-radius: .25rem;
-    background: #f3f6fa;
-    color: #34445b;
+    background: var(--theme-accent-soft);
+    color: var(--theme-text);
     font-family: 'Poppins', sans-serif;
     font-size: 0.6025rem;
     cursor: pointer;
 }
 
 .mesOpcao:hover {
-    border-color: #c4d5eb;
-    background: #e8eff8;
+    border-color: var(--theme-accent-border);
+    background: var(--theme-accent-soft);
 }
 
 .mesSelecionado,
 .mesSelecionado:hover {
-    border-color: #0d47a1;
-    background: #0d47a1;
-    color: #fff;
+    border-color: var(--theme-focus);
+    background: var(--theme-action);
+    color: var(--theme-on-action);
 }

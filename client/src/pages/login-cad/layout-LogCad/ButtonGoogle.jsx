@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import { useAuth } from '../../../context/useAuth'
+import { useTheme } from '../../../theme/theme-context'
 
 const ButtonGoogle = () => {
+    const { theme } = useTheme()
     const navigate = useNavigate() //me deixa mandar o usuario para outra pagina
     const { refreshSession } = useAuth() //serve para atualizar a sessão do usuario, basicamente eu uso isso para informar o app que o usuario logou com o google
 
@@ -39,6 +41,7 @@ const ButtonGoogle = () => {
 
     return (
         <GoogleLogin
+            theme={theme === 'dark' ? 'filled_black' : 'outline'}
             onSuccess={handleSuccess} //a bilioteca do google chama a função caso ela considerar que o login pode ocorrer
             onError={() => errorToast('GOOGLE_AUTH_FAILED')} //a bilioteca do google chama a função caso ela considerar que o login não pode ocorrer
         />
