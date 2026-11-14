@@ -37,4 +37,6 @@ export const AdicionarFinanceiroSchema = FinanceiroSchema.pick({
     data_lancamento: true
 })
 
+export const EditarFinanceiroSchema = AdicionarFinanceiroSchema.partial()
+
 export type Financeiro = z.infer<typeof FinanceiroSchema>

@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
-import { AdicionarFinanceiroSchema, Financeiro } from "../models/financeiro/financeiro.model.js";
+import { AdicionarFinanceiroSchema, EditarFinanceiroSchema, Financeiro } from "../models/financeiro/financeiro.model.js";
+import { ParamsSchema } from "../models/utils.model.js";
 import { database } from "../db/postgre.js";
+import { possuiCodigoPostgres } from "../utils/erroBanco.js";
 
 // controller referente ao financeiro
 export const controllerFinanceiro = {
@@ -50,6 +52,127 @@ export const controllerFinanceiro = {
             console.error("erro no endpoint de adicionar registro financeiro, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // controller para editar um registro financeiro
+    editarRegistro: async (req: Request, res: Response) => {
+        const motoristaId = req.userId
+        const dadosBrutos = EditarFinanceiroSchema.safeParse(req.body)
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "ID inválido ou ausente para editar o registro financeiro.",
+                erro: idBruto.error.format()
+            })
+        }
+
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para editar o registro financeiro.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        const { id } = idBruto.data
+        const { titulo, valor, descricao, tipo, data_lancamento } = dadosBrutos.data
+
+        const campos: string[] = []
+        const valores: (string | number)[] = []
+
+        if (titulo) {
+            campos.push(`titulo = $${valores.length + 1}`)
+            valores.push(titulo)
+        }
+        if (valor !== undefined) {
+            campos.push(`valor = $${valores.length + 1}`)
+            valores.push(valor)
+        }
+        if (descricao !== undefined) {
+            campos.push(`descricao = $${valores.length + 1}`)
+            valores.push(descricao)
+        }
+        if (tipo) {
+            campos.push(`tipo = $${valores.length + 1}`)
+            valores.push(tipo)
+        }
+        if (data_lancamento) {
+            campos.push(`data_lancamento = $${valores.length + 1}`)
+            valores.push(data_lancamento)
+        }
+
+        if (campos.length < 1) {
+            return res.status(400).json({
+                msg: "É necessário informar pelo menos um campo para edição."
+            })
+        }
+
+        try {
+            const query = `
+            UPDATE financeiro
+            SET ${campos.join(', ')}
+            WHERE id = $${valores.length + 1} AND motorista_id = $${valores.length + 2}
+            RETURNING *
+            `
+            valores.push(id)
+            valores.push(motoristaId)
+
+            const resultado = await database.query<Financeiro>(query, valores)
+
+            if (!resultado.rowCount) {
+                return res.status(404).json({
+                    msg: "Registro financeiro não encontrado."
+                })
+            }
+
+            return res.status(200).json({
+                msg: "Registro financeiro editado com sucesso.",
+                financeiro: resultado.rows[0]
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de editar registro financeiro, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro interno do servidor."
+            })
+        }
+    },
+    // controller para excluir um registro financeiro
+    excluirRegistro: async (req: Request, res: Response) => {
+        const motoristaId = req.userId
+        const dadosBrutos = ParamsSchema.safeParse(req.params)
+
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "ID inválido ou ausente para excluir o registro financeiro.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        const { id } = dadosBrutos.data
+
+        try {
+            const query = "DELETE FROM financeiro WHERE id = $1 AND motorista_id = $2"
+            const resultado = await database.query(query, [id, motoristaId])
+
+            if (!resultado.rowCount) {
+                return res.status(404).json({
+                    msg: "Registro financeiro não encontrado."
+                })
+            }
+
+            return res.status(200).json({
+                msg: "Registro financeiro excluído com sucesso."
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de excluir registro financeiro, erro: ", erro)
+            if (possuiCodigoPostgres(erro, "23503")) {
+                return res.status(409).json({
+                    msg: "Não é possível excluir o registro financeiro enquanto houver outros registros vinculados a ele."
+                })
+            }
+            return res.status(500).json({
+                msg: "Erro interno do servidor."
             })
         }
     }
