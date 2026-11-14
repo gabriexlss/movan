@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react'
 import { FaChevronRight, FaFileContract, FaInfoCircle, FaMapMarkerAlt, FaUserGraduate } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import { alunos } from '../clientes-data'
+import { listarAluno } from '../../../services/aluno'
 import SecaoDetalhes, { CampoDetalhe } from './SecaoDetalhes'
 import styles from './clienteDetalhes.module.css'
 
@@ -9,10 +10,24 @@ const nomesSituacao = {
     pendente: 'Pendente',
     atrasado: 'Atrasado',
 }
-
 const DetalhesResponsavel = ({ cliente: responsavel }) => {
+    const [alunos, setAlunos] = useState([])
+
+    useEffect(() => {
+        let ativo = true
+
+        listarAluno().then((dados) => {
+            if (ativo) setAlunos(dados)
+        })
+
+        return () => {
+            ativo = false
+        }
+    }, [])
+
     const alunosVinculados = alunos.filter((aluno) => (
-        aluno.responsavelId === responsavel.id || aluno.responsavel === responsavel.nome
+        String(aluno.responsavel_id ?? aluno.responsavelId) === String(responsavel.id)
+        || aluno.responsavel === responsavel.nome
     ))
     const contratos = responsavel.contratos || []
 
@@ -36,7 +51,13 @@ const DetalhesResponsavel = ({ cliente: responsavel }) => {
                             <li key={aluno.id}>
                                 <Link
                                     to={`/clientes/aluno/${aluno.id}`}
-                                    state={{ registro: aluno }}
+                                    state={{ registro: {
+                                        ...aluno,
+                                        dataNascimento: (aluno.dataNascimento || aluno.data_nasc || '').slice(0, 10),
+                                        anoEscolar: aluno.anoEscolar || aluno.ano_escolar,
+                                        responsavelId: aluno.responsavelId || aluno.responsavel_id,
+                                        escolaId: aluno.escolaId || aluno.escola_id,
+                                    } }}
                                     className={styles.itemRelacionado}
                                 >
                                     <FaUserGraduate aria-hidden="true" />

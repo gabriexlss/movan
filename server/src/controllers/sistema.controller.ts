@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { database } from "../db/postgre.js"
-import { Motorista } from "../models/motorista.model.js";
+import { Motorista } from "../models/motorista/motorista.model.js";
 import { deletarPastaR2 } from "../utils/deletarPastaR2.js";
 
 export const controllerSistema = {

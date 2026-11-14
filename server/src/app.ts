@@ -45,16 +45,19 @@ app.use((_req: Request, res: Response) => {
 });
 
 app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  // Erros do Multer
   if (erro instanceof multer.MulterError) {
     switch (erro.code) {
       case 'LIMIT_FILE_SIZE':
         return res.status(413).json({
           msg: 'Arquivo excede o tamanho máximo permitido.'
         });
+
       case 'LIMIT_UNEXPECTED_FILE':
         return res.status(400).json({
           msg: 'Campo de arquivo inesperado ou arquivos demais.'
         });
+
       default:
         return res.status(400).json({
           msg: 'Erro ao processar o arquivo.'
@@ -76,6 +79,7 @@ app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
     });
   }
 
+  // Tipo de arquivo inválido
   if (erroHttp.status === 415) {
     return res.status(415).json({
       msg: 'Tipo de arquivo não permitido.'

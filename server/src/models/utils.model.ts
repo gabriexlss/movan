@@ -28,3 +28,8 @@ export const ContratoParamsSchema = z.object({
         .int("ID deve ser um número inteiro.")
         .positive("ID deve ser positivo.")
 })
+
+export const validarCoordenadas = z.object({
+    latitude: UtilSchema.shape.latitude,
+    longitude: UtilSchema.shape.longitude
+})
