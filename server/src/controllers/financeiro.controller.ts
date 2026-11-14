@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AdicionarFinanceiroSchema, EditarFinanceiroSchema, Financeiro } from "../models/financeiro/financeiro.model.js";
+import { AdicionarFinanceiroSchema, EditarFinanceiroSchema, Financeiro, QuerysObterFinanceiroSchema } from "../models/financeiro/financeiro.model.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { database } from "../db/postgre.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
@@ -173,6 +173,61 @@ export const controllerFinanceiro = {
             }
             return res.status(500).json({
                 msg: "Erro interno do servidor."
+            })
+        }
+    },
+    obterRegistros: async (req: Request, res: Response) => {
+        // pega as querys
+        const dadosBrutos = QuerysObterFinanceiroSchema.safeParse(req.query)
+
+        // validação
+        if(!dadosBrutos.success){
+            return res.status(400).json({
+                msg: "Querys Inválidas",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { mes: data, id } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // se vier a data na query, filtramos ela
+        let dataISO: Date | undefined = undefined
+        if(data){
+            const [ mes, ano ] = data.split("/").map(Number)
+            dataISO = new Date(`${ano}-${String(mes).padStart(2, "0")}-01T00:00:00.000Z`)
+        }
+
+        // operação
+        try{
+            const { rows: financeiro } = await database.query<Financeiro>(
+                `
+                SELECT * FROM financeiro
+                WHERE motorista_id = $1 
+                ${dataISO ? "AND data_lancamento >= $2 AND data_lancamento < $2 + INTERVAL '1 month' " : ''}
+                ${id ? 'AND id = $3' : ''}
+                `,
+                [
+                    motoristaID,
+                    ...dataISO ? [dataISO] : [],
+                    ...id ? [id] : []
+                ]
+            )
+
+            // devolvendo o usuario
+            if(financeiro.length === 0){
+                return res.status(404).json({
+                    msg: "Nenhum Registro Encontrado."
+                })
+            }
+            return res.status(200).json({
+                msg: "Dados Obtidos com Sucesso.",
+                financeiro
+            })
+        }catch(erro){
+            console.error("Erro no endpoint de consultar dados do financeiro, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         }
     }

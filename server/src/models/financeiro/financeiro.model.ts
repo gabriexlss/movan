@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "../utils.model.js";
+import { ParamsSchema, UtilSchema } from "../utils.model.js";
 
 // Schema do lançamento financeiro
 export const FinanceiroSchema = z.object({
@@ -38,5 +38,11 @@ export const AdicionarFinanceiroSchema = FinanceiroSchema.pick({
 })
 
 export const EditarFinanceiroSchema = AdicionarFinanceiroSchema.partial()
+
+export const QuerysObterFinanceiroSchema = z.object({
+    mes: z.stringFormat("mm-yyyy", /^(0[1-9]|1[0-2])\/\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY." }),
+    id: ParamsSchema.shape.id
+}).partial()
+
 
 export type Financeiro = z.infer<typeof FinanceiroSchema>
