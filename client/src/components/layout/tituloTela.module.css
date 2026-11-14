@@ -52,7 +52,11 @@
     cursor: pointer;
 }
 
-.TituloTela-container .iconeNotificacao:hover,
+.TituloTela-container .iconeNotificacao:disabled {
+    cursor: default;
+}
+
+.TituloTela-container .iconeNotificacao:not(:disabled):hover,
 .TituloTela-container .iconeNotificacao:focus-visible {
     background: #fff4d6;
 }
