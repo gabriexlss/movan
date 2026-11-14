@@ -19,7 +19,7 @@ export const FinanceiroSchema = z.object({
         .min(1, "Descrição não pode estar vazia.")
         .optional(),
     tipo: z.enum(['ENTRADA', 'SAIDA'], "Tipo de lançamento inválido."),
-    data_lancamento: z.iso.date("Data de lançamento deve estar no formato YYYY-MM-DD."),
+    data_lancamento: z.iso.date("Data de lançamento deve estar no formato YYYY-MM-DD.").optional(),
     data_referencia: z.iso.date("Data de referência deve estar no formato YYYY-MM-DD.").optional(),
     origem: z.enum(['MANUAL', 'MENSALIDADE', 'RECORRENTE', 'ESTORNO', 'AJUSTE'], "Origem financeira inválida."),
     criado_em: z.iso.datetime("Data de criação deve estar no formato ISO 8601."),
@@ -27,6 +27,14 @@ export const FinanceiroSchema = z.object({
     mensalidade_id: UtilSchema.shape.id.optional(),
     regra_financeira_id: UtilSchema.shape.id.optional(),
     lancamento_origem_id: UtilSchema.shape.id.optional()
+})
+
+export const AdicionarFinanceiroSchema = FinanceiroSchema.pick({
+    titulo: true,
+    valor: true,
+    descricao: true,
+    tipo: true,
+    data_lancamento: true
 })
 
 export type Financeiro = z.infer<typeof FinanceiroSchema>
