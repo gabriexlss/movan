@@ -32,3 +32,37 @@
     color:var(--theme-muted);
     text-align: start;
 }
+
+@media (min-width: 64rem) {
+    .financeiro-container {
+        margin: 0 0 1rem;
+    }
+
+    .texto-financ {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: .65rem;
+        width: 100%;
+    }
+
+    .texto-financ > div {
+        min-width: 0;
+        padding: .7rem .55rem;
+        border-radius: .55rem;
+        background: var(--theme-panel);
+        overflow-wrap: anywhere;
+    }
+
+    .texto-financ h1 {
+        margin-bottom: .25rem;
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .texto-financ p {
+        color: var(--theme-text);
+        font-size: clamp(.875rem, 1.15vw, 1.1875rem);
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+}

@@ -3,3 +3,9 @@
     margin-inline: auto;
     padding-top: calc(var(--header-height, 5rem) + 1.5rem);
 }
+
+@media (min-width: 64rem) {
+    .container {
+        --largura-conteudo-desktop: 64rem;
+    }
+}

@@ -1,7 +1,7 @@
 import DefaultCard from './DefaultCard';
 import styles from './CardMensali.module.css';
 
-const CardMensali = () => {
+const CardMensali = ({ className }) => {
     const mensalidade = [
         {nome: "Pagas", qntd: "38", status: 'success'},
         {nome: "Pendentes", qntd: "8", status: 'warning'},
@@ -9,7 +9,7 @@ const CardMensali = () => {
     ];
 
     return (
-        <DefaultCard title="Mensalidades" link="/financeiro">
+        <DefaultCard title="Mensalidades" link="/financeiro" className={className}>
             <div className={styles.containerMensalidade}>
                 {mensalidade.map((mensalidade) => (
                     <div className={styles.mensalidadeItem} key={mensalidade.nome} style={{

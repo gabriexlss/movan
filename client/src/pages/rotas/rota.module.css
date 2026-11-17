@@ -376,6 +376,134 @@
     outline-offset: 2px;
 }
 
+@media (min-width: 64rem) {
+    .conteudo {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto 1fr auto;
+        align-items: start;
+        gap: var(--espaco-paineis-desktop);
+        width: 100%;
+        margin: 1rem 0 0;
+    }
+
+    .painel,
+    .listas {
+        display: contents;
+    }
+
+    .secaoTurnos {
+        grid-area: 1 / 2;
+        margin: 0;
+    }
+
+    .conteudo h2 {
+        font-size: 1rem;
+    }
+
+    .turnos button {
+        min-height: var(--altura-controle-desktop);
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .mapa {
+        grid-area: 1 / 1 / span 2;
+        align-self: stretch;
+        height: auto;
+        min-height: clamp(19rem, 48vh, 31rem);
+    }
+
+    .mapaLeaflet {
+        position: absolute;
+        inset: 0;
+    }
+
+    .secaoEscolas,
+    .secaoAlunos {
+        padding: 1rem;
+        border-radius: .65rem;
+        background: var(--theme-surface);
+    }
+
+    .secaoEscolas {
+        grid-area: 2 / 2;
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cabecalhoLista {
+        margin-bottom: .65rem;
+        padding-inline: 0;
+    }
+
+    .conteudo .adicionar {
+        gap: .35rem;
+        min-height: var(--altura-controle-desktop);
+        padding-inline: .65rem;
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .escolas {
+        display: grid;
+        flex: 1;
+        grid-auto-rows: minmax(min-content, 1fr);
+    }
+
+    .escola {
+        gap: .45rem;
+        min-height: 4.35rem;
+        padding: .55rem;
+    }
+
+    .iconeEscola {
+        width: 1.875rem;
+        height: 1.875rem;
+        font-size: 1.125rem;
+    }
+
+    .dadosEscola,
+    .infosPonto {
+        font-size: .8125rem;
+    }
+
+    .dadosEscola strong {
+        font-size: .9375rem;
+    }
+
+    .acoes button {
+        width: 1.875rem;
+        height: 1.875rem;
+        font-size: .95rem;
+    }
+
+    .secaoAlunos {
+        grid-column: 1 / -1;
+        min-height: 0;
+    }
+
+    .alunos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .55rem;
+        padding: 0;
+    }
+
+    .aluno + .aluno {
+        border-top: 0;
+    }
+
+    .aluno {
+        flex: 1 1 14.5rem;
+        min-width: 0;
+        min-height: 2.75rem;
+        padding: .35rem .6rem;
+        border-radius: .4rem;
+        background: var(--theme-panel);
+        font-size: var(--texto-apoio-desktop);
+    }
+}
+
 @media (max-width: 360px) {
     .conteudo {
         width: calc(100% - 2rem);

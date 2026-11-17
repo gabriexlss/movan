@@ -180,7 +180,11 @@ const Perfil = () => {
 
     return (
         <main className={styles['perfil-container']}>
-            <TituloTela title="Este é o seu perfil" className={styles['titulo-tela']} acao={<ThemeToggle />} />
+            <TituloTela
+                title="Este é o seu perfil"
+                className={styles['titulo-tela']}
+                acao={<ThemeToggle className={styles['acao-movel']} />}
+            />
 
             <div className={styles['conteudos-perfil']}>
                 <img

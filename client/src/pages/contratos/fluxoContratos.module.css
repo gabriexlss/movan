@@ -377,6 +377,40 @@
     }
 }
 
+@media (min-width: 64rem) {
+    .container {
+        --largura-conteudo-desktop: 52rem;
+    }
+
+    .cabecalho h1 {
+        font-size: 1.35rem;
+    }
+
+    .aviso h2,
+    .tituloSecao,
+    .clausula summary {
+        font-size: 1rem;
+    }
+
+    .cabecalho p,
+    .aviso p,
+    .textoClausula p,
+    .botaoPrincipal,
+    .copiarLink,
+    .linkAssinatura {
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .clausula summary,
+    .botaoPrincipal {
+        min-height: var(--altura-controle-desktop);
+    }
+
+    .cardAssinatura {
+        max-width: 39rem;
+    }
+}
+
 @media (max-width: 360px) {
     .cabecalhoExtras {
         padding-inline: .4rem;

@@ -140,7 +140,7 @@ const Rotas = () => {
                     </figure>
 
                     <div className={styles.listas}>
-                        <section aria-labelledby="titulo-escolas">
+                        <section className={styles.secaoEscolas} aria-labelledby="titulo-escolas">
                             <div className={styles.cabecalhoLista}>
                                 <h2 id="titulo-escolas">Escolas da rota atual ({escolas.length})</h2>
                                 <button

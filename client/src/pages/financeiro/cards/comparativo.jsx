@@ -73,7 +73,7 @@ const opcoes = {
     },
 }
 
-const Comparativo = () => {
+const Comparativo = ({ className }) => {
     const { theme } = useTheme()
     const graficoRef = useRef(null)
 
@@ -87,7 +87,7 @@ const Comparativo = () => {
     }, [theme])
 
     return (
-        <DefaultCard title="Comparativo de lucros e despesas">
+        <DefaultCard title="Comparativo de lucros e despesas" className={className}>
             <div className={styles['grafico']}>
                 <Bar ref={graficoRef} data={dados} options={opcoes} />
             </div>

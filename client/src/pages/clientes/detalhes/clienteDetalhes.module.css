@@ -355,6 +355,68 @@
     font-size: 0.7625rem;
 }
 
+@media (min-width: 64rem) {
+    .container {
+        --largura-conteudo-desktop: 68rem;
+    }
+
+    .tituloDetalhes {
+        margin-inline: 0;
+    }
+
+    .barraNavegacao,
+    .identificacao,
+    .secoes,
+    .naoEncontrado {
+        width: 100%;
+    }
+
+    .secoes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--espaco-paineis-desktop);
+    }
+
+    .secoes > :first-child:nth-last-child(3) {
+        grid-column: 1 / -1;
+    }
+
+    .identificacao,
+    .tituloSecao,
+    .corpoSecao {
+        padding: .875rem 1rem;
+    }
+
+    .nomeCliente,
+    .tituloSecao {
+        font-size: 1rem;
+    }
+
+    .gradeDados {
+        gap: .8rem 1rem;
+    }
+
+    .rotulo,
+    .valor,
+    .endereco,
+    .estadoVazio,
+    .itemRelacionado,
+    .voltar {
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .itemRelacionado {
+        min-height: 2.25rem;
+    }
+
+    .editar,
+    .excluir {
+        width: 2rem;
+        height: 2rem;
+        font-size: .9375rem;
+    }
+}
+
 @media (max-width: 360px) {
     .identificacao {
         grid-template-columns: 2.35rem minmax(0, 1fr) auto;

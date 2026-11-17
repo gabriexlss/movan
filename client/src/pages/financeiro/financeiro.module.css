@@ -149,3 +149,51 @@
     background: var(--theme-action);
     color: var(--theme-on-action);
 }
+
+.paineis {
+    display: contents;
+}
+
+@media (min-width: 64rem) {
+    .paineis {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        gap: var(--espaco-paineis-desktop);
+        width: 100%;
+    }
+
+    .resumo,
+    .comparativo {
+        grid-column: 1 / -1;
+    }
+
+    .comparativo {
+        order: 1;
+    }
+
+    .periodo {
+        margin-top: 0;
+        font-size: 1rem;
+    }
+
+    .setaPeriodo,
+    .botaoCalendario {
+        width: var(--altura-controle-desktop);
+        height: var(--altura-controle-desktop);
+        border-radius: .4rem;
+        background: var(--theme-accent-soft);
+    }
+
+    .setaPeriodo svg,
+    .botaoCalendario svg {
+        font-size: 1rem;
+    }
+
+    .seletorMes {
+        width: 19rem;
+    }
+
+    .mesOpcao {
+        font-size: var(--texto-apoio-desktop);
+    }
+}

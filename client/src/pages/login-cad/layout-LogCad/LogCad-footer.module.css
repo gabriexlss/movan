@@ -14,3 +14,10 @@
 .logcad-footer-container a{
     text-align: center;
 }
+
+@media (min-width: 64rem) {
+    .logcad-footer-container {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+}

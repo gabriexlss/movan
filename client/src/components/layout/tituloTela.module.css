@@ -96,3 +96,17 @@
     outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
 }
+
+@media (min-width: 64rem) {
+    .TituloTela-container {
+        align-self: auto;
+        width: 100%;
+        margin: 0 0 .5rem;
+        padding-top: 0;
+    }
+
+    .TituloTela-container .titulo {
+        font-size: 1.35rem;
+        overflow-wrap: anywhere;
+    }
+}

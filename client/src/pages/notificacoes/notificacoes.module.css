@@ -48,3 +48,9 @@
     font-size: 0.7625rem;
     text-align: left;
 }
+
+@media (min-width: 64rem) {
+    .pagina {
+        --largura-conteudo-desktop: 52rem;
+    }
+}

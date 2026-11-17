@@ -44,3 +44,27 @@
     font-size: 0.8625rem;
     color: var(--theme-accent);
 }
+
+@media (min-width: 64rem) {
+    .errorPage-container {
+        justify-content: center;
+        gap: .65rem;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .iconeErro {
+        width: min(28vw, 20rem);
+        margin-top: 0;
+    }
+
+    .errorPage-container p {
+        max-width: 34rem;
+        margin: 0;
+        font-size: .875rem;
+    }
+
+    .errorPage-container a {
+        margin-top: .65rem;
+    }
+}

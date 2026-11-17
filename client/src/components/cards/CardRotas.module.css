@@ -79,6 +79,44 @@
     outline-offset: 1px;
 }
 
+@media (min-width: 64rem) {
+    .containerEscolas {
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr);
+        grid-auto-rows: minmax(min-content, 1fr);
+        gap: .45rem;
+        margin: 0 0 .875rem;
+    }
+
+    .escola {
+        justify-content: flex-start;
+        gap: .7rem;
+        padding: .55rem .75rem;
+        border-radius: .5rem;
+        background: var(--theme-panel);
+    }
+
+    .iconEscola {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .textoEscola p {
+        font-size: .9375rem;
+    }
+
+    .textoEscola span,
+    .paginacao {
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .paginacao button {
+        width: 1.875rem;
+        height: 1.875rem;
+        font-size: .875rem;
+    }
+}
+
 @media (max-width: 350px) {
     .containerEscolas {
         gap: .35rem;

@@ -9,9 +9,11 @@ const Cliente = () => {
         <main className={styles.container}>
             <TituloTela title="Veja seus clientes." />
 
-            <Pais />
-            <Alunos />
-            <Escolas />
+            <div className={styles.listas}>
+                <Pais />
+                <Alunos />
+                <Escolas />
+            </div>
         </main>
     )
 }

@@ -4,7 +4,7 @@
 }
 
 .tituloCard.tituloCard {
-    font-size: .82rem;
+    font-size: var(--tamanho-titulo-card, .82rem);
 }
 
 .toolbar {
@@ -259,6 +259,91 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     clip-path: inset(50%);
+}
+
+@media (min-width: 64rem) {
+    .listaClientes {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+    }
+
+    .toolbar {
+        gap: .55rem;
+        margin-bottom: .65rem;
+    }
+
+    .busca,
+    .novo {
+        min-height: var(--altura-controle-desktop);
+        padding-inline: .55rem;
+        font-size: .8125rem;
+    }
+
+    .novo svg {
+        font-size: .75rem;
+    }
+
+    .registro {
+        grid-template-columns: 1.875rem minmax(0, 1fr) auto;
+        gap: .5rem;
+        min-height: 4.1rem;
+        padding: .6rem .15rem;
+    }
+
+    .avatar {
+        width: 1.875rem;
+        height: 1.875rem;
+    }
+
+    .informacoes {
+        font-size: .8125rem;
+    }
+
+    .nomeCliente {
+        font-size: .9375rem;
+    }
+
+    .nomeCliente,
+    .informacoes span {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .acoes {
+        display: grid;
+        grid-template-columns: repeat(2, 1.75rem);
+        justify-items: center;
+    }
+
+    .badge {
+        grid-column: 1 / -1;
+        margin-right: 0;
+        font-size: .6875rem;
+    }
+
+    .editar,
+    .excluir,
+    .paginacao button {
+        width: 1.75rem;
+        height: 1.875rem;
+        font-size: .85rem;
+    }
+
+    .editar svg,
+    .excluir svg {
+        font-size: .875rem;
+    }
+
+    .vazio,
+    .rodapeLista {
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .rodapeLista {
+        margin-top: auto;
+        padding-top: .45rem;
+    }
 }
 
 @media (max-width: 360px) {

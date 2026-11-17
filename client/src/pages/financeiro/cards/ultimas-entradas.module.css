@@ -132,6 +132,58 @@
     outline-offset: 1px;
 }
 
+@media (min-width: 64rem) {
+    .lista {
+        flex: 1;
+    }
+
+    .item {
+        flex: 1;
+        grid-template-columns: 1.75rem minmax(0, 1fr) auto auto;
+        gap: .55rem;
+        min-height: 4.25rem;
+        padding: .55rem .2rem;
+    }
+
+    .icone {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: .9rem;
+    }
+
+    .descricao strong,
+    .valorReceita,
+    .valorDespesa {
+        font-size: .9375rem;
+    }
+
+    .descricao strong {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .descricao span,
+    .valores > span:not(.tag),
+    .tag {
+        font-size: .75rem;
+    }
+
+    .descricao span {
+        overflow-wrap: anywhere;
+    }
+
+    .editar,
+    .excluir {
+        width: 1.75rem;
+        height: 1.875rem;
+    }
+
+    .editar svg,
+    .excluir svg {
+        font-size: .875rem;
+    }
+}
+
 @media (max-width: 360px) {
     .item {
         grid-template-columns: 1.3rem minmax(0, 1fr) auto 2.4rem;

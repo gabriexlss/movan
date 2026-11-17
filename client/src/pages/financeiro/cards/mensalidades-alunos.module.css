@@ -95,3 +95,39 @@
     background: var(--theme-danger-soft);
     color: var(--theme-danger);
 }
+
+@media (min-width: 64rem) {
+    .lista {
+        flex: 1;
+    }
+
+    .item {
+        flex: 1;
+        grid-template-columns: 1.875rem minmax(0, 1fr) auto;
+        gap: .55rem;
+        min-height: 3rem;
+        padding: .4rem .45rem;
+    }
+
+    .avatar {
+        width: 1.875rem;
+        height: 1.875rem;
+        font-size: .875rem;
+    }
+
+    .descricao strong {
+        font-size: .9375rem;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .descricao span {
+        font-size: .75rem;
+    }
+
+    .status {
+        min-width: 4.25rem;
+        padding: .2rem .35rem;
+        font-size: .75rem;
+    }
+}

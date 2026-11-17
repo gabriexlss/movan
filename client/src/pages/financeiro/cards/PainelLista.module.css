@@ -5,7 +5,7 @@
 }
 
 .tituloCard.tituloCard {
-    font-size: .82rem;
+    font-size: var(--tamanho-titulo-card, .82rem);
 }
 
 .novo {
@@ -73,6 +73,43 @@
     border-radius: .2rem;
     outline: 2px solid var(--theme-focus);
     outline-offset: 1px;
+}
+
+@media (min-width: 64rem) {
+    .painelLista,
+    .conteudo {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+    }
+
+    .tituloCard.tituloCard {
+        display: flex;
+        align-items: center;
+        min-height: var(--altura-controle-desktop);
+    }
+
+    .novo {
+        gap: .4rem;
+        min-height: var(--altura-controle-desktop);
+        padding-inline: .75rem;
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .novo svg {
+        font-size: .85rem;
+    }
+
+    .rodapeLista {
+        padding-top: .45rem;
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .paginacao button {
+        width: 1.875rem;
+        height: 1.875rem;
+        font-size: .85rem;
+    }
 }
 
 @media (max-width: 350px) {

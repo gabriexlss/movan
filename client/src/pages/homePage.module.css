@@ -1,0 +1,51 @@
+.rotina,
+.indicadores {
+    display: contents;
+}
+
+@media (min-width: 64rem) {
+    .pagina {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+        grid-template-areas:
+            "titulo titulo"
+            "indicadores rotina";
+        align-content: start;
+        align-items: stretch;
+        gap: var(--espaco-paineis-desktop);
+    }
+
+    .titulo {
+        grid-area: titulo;
+    }
+
+    .rotina,
+    .indicadores {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--espaco-paineis-desktop);
+        min-width: 0;
+    }
+
+    .rotina {
+        grid-area: rotina;
+        grid-template-rows: repeat(2, minmax(min-content, 1fr));
+    }
+
+    .indicadores {
+        grid-area: indicadores;
+        grid-template-areas: "alunos" "mensalidades" "financeiro";
+    }
+
+    .mensalidades {
+        grid-area: mensalidades;
+    }
+
+    .financeiro {
+        grid-area: financeiro;
+    }
+
+    .alunos {
+        grid-area: alunos;
+    }
+}

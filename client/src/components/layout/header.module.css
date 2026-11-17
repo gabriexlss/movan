@@ -57,3 +57,30 @@
     font-weight: lighter;
     color: var(--theme-on-brand);
 }
+
+@media (min-width: 64rem) {
+    .header,
+    .header.hidden {
+        position: relative;
+        flex: 0 0 auto;
+        justify-content: center;
+        height: clamp(6rem, 16vh, 8rem);
+        transform: none;
+        transition: none;
+        will-change: auto;
+    }
+
+    .header::before {
+        border-bottom: .35rem solid var(--theme-brand-yellow);
+        border-end-end-radius: 2.5rem;
+        background: var(--theme-auth-logo-accent);
+    }
+
+    .texto-titulo {
+        margin-left: 0;
+    }
+
+    .movan {
+        font-size: clamp(1.65rem, 2.3vw, 2.25rem);
+    }
+}

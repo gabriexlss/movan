@@ -64,3 +64,9 @@
 .logcad-toggle.cadastro a:last-of-type {
     color: var(--theme-on-action);
 }
+
+@media (min-width: 64rem) {
+    .logcad-toggle {
+        justify-self: center;
+    }
+}

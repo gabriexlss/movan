@@ -49,9 +49,14 @@ function App() {
     const fluxoContrato = location.pathname.startsWith('/contratos/') || location.pathname === '/contrato/assinatura'
 
     return (
-        <div className='app'>
+        <div className={logCad ? 'app' : 'app app-com-navegacao'}>
             <ScrollToTop />
-            {!logCad && <Header />}
+            {!logCad && (
+                <div className="app-navegacao">
+                    <Header />
+                    <Footer ocultoNoCelular={fluxoContrato} />
+                </div>
+            )}
 
             <Routes>
                 <Route path='/error' element={<ErrorPage />} />
@@ -90,8 +95,6 @@ function App() {
                     </Route>
                 </Route>
             </Routes>
-
-            {!logCad && !fluxoContrato && <Footer />}
         </div>
 )
 }

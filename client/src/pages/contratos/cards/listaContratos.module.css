@@ -4,7 +4,7 @@
 }
 
 .tituloCard.tituloCard {
-    font-size: .82rem;
+    font-size: var(--tamanho-titulo-card, .82rem);
 }
 
 .acoesCabecalho.acoesCabecalho {
@@ -343,6 +343,101 @@
 .opcaoFiltro:focus-visible {
     outline: 2px solid var(--theme-focus);
     outline-offset: 2px;
+}
+
+@media (min-width: 64rem) {
+    .paginacao,
+    .filtro,
+    .busca,
+    .novo,
+    .tituloFiltro,
+    .opcaoFiltro {
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .paginacao button,
+    .filtro,
+    .busca,
+    .novo {
+        min-height: var(--altura-controle-desktop);
+    }
+
+    .paginacao button {
+        width: 1.875rem;
+        font-size: .875rem;
+    }
+
+    .toolbar {
+        gap: .65rem;
+        margin-bottom: 1rem;
+    }
+
+    .busca,
+    .novo {
+        gap: .45rem;
+        padding-inline: .75rem;
+    }
+
+    .miniFiltro {
+        width: 17rem;
+    }
+
+    .registros {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .85rem;
+    }
+
+    .registros > :last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    .contrato {
+        align-items: center;
+        gap: .65rem;
+        height: 100%;
+        min-height: 6.75rem;
+        padding: .875rem .8rem .875rem 1rem;
+    }
+
+    .iconeContrato {
+        width: 2.25rem;
+        height: 2.25rem;
+        font-size: 1.25rem;
+    }
+
+    .cabecalhoContrato {
+        align-items: baseline;
+        gap: .6rem;
+    }
+
+    .tituloContrato {
+        font-size: 1rem;
+    }
+
+    .informacoes,
+    .contagem,
+    .vazio {
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .status {
+        padding: .2rem .45rem;
+        font-size: .75rem;
+    }
+
+    .linhaDetalhes {
+        column-gap: .75rem;
+    }
+
+    .linhaDetalhes span + span {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .linhaDetalhes svg,
+    .seta {
+        font-size: .875rem;
+    }
 }
 
 @media (max-width: 360px) {

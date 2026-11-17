@@ -2,3 +2,20 @@
     width: min(100%, 52rem);
     margin-inline: auto;
 }
+
+.listas {
+    display: contents;
+}
+
+@media (min-width: 64rem) {
+    .listas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--espaco-paineis-desktop);
+        width: 100%;
+    }
+
+    .listas > section {
+        flex: 1 1 20rem;
+    }
+}
