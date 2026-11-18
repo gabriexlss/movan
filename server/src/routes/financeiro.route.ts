@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { controllerFinanceiro } from '../controllers/financeiro.controller.js';
+import { controllerFinanceiro } from '../controllers/financeiro/financeiro.controller.js';
 const router = Router()
 
 // ROTAS CRUD pro financeiro

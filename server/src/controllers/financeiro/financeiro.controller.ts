@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { AdicionarFinanceiroSchema, EditarFinanceiroSchema, Financeiro, QuerysObterFinanceiroSchema } from "../models/financeiro/financeiro.model.js";
-import { ParamsSchema } from "../models/utils.model.js";
-import { database } from "../db/postgre.js";
-import { possuiCodigoPostgres } from "../utils/erroBanco.js";
+import { AdicionarFinanceiroSchema, EditarFinanceiroSchema, Financeiro, QuerysObterFinanceiroSchema } from "../../models/financeiro/financeiro.model.js";
+import { ParamsSchema } from "../../models/utils.model.js";
+import { database } from "../../db/postgre.js";
+import { possuiCodigoPostgres } from "../../utils/erroBanco.js";
 
 // controller referente ao financeiro
 export const controllerFinanceiro = {

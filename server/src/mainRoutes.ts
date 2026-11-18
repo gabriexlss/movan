@@ -10,6 +10,7 @@ import rotasRota from './routes/rotas.route.js'
 import { otimizarRota } from './services/otimizarRota.js';
 import { database } from './db/postgre.js';
 import rotasFinanceiro from './routes/financeiro.route.js'
+import { controllerMensalide } from './controllers/financeiro/mensalidade.controller.js';
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.post('/teste', middlewareAutenticar,async (req, res) => {
     const cliente = await database.connect()
     try{
         await cliente.query('BEGIN')
-        await otimizarRota({ rotaID: 61, req, coordenadasMotorista: { latitude: -23.7019403 ,longitude: -46.7671673 }, cliente})
+        await controllerMensalide.criarMensalidade({contratoID: 85, motoristaID: req.userId, cliente})
         await cliente.query('COMMIT')
         return res.status(200).json()
     }catch(erro){
@@ -29,7 +30,7 @@ router.post('/teste', middlewareAutenticar,async (req, res) => {
         console.error(erro)
         if(erro instanceof Error){
             switch(erro.message){
-                case 'ALUNO_NOT_FOUND':
+                case 'CONTRATO_NOT_FOUND':
                     return res.status(404).json({
                         msg: "Aluno não encontrado."
                     })
