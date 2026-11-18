@@ -1,6 +1,10 @@
 import { Router } from 'express'
 import { controllerFinanceiro } from '../controllers/financeiro/financeiro.controller.js';
+import rotasMensalidade from './financeiro/mensalidade.route.js';
 const router = Router()
+
+// rotas das mensalidades ficam em /financeiro/mensalidade (antes do /:id pra não dar conflito)
+router.use('/mensalidade', rotasMensalidade)
 
 // ROTAS CRUD pro financeiro
 router.post('/', controllerFinanceiro.adicionarRegistro)

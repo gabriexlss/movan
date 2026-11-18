@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UtilSchema } from "../utils.model.js";
+import { ParamsSchema, UtilSchema } from "../utils.model.js";
 
 // Schema da mensalidade
 export const MensalidadeSchema = z.object({
@@ -20,5 +20,29 @@ export const MensalidadeSchema = z.object({
     contrato_id: UtilSchema.shape.id,
     motorista_id: UtilSchema.shape.id
 })
+
+// se mandarem pago, cancelado ou em minúsculo na query, já converte pro padrão do banco
+const normalizarStatusMensalidade = (valor: unknown) => {
+    if (typeof valor !== "string") return valor
+
+    const limpo = valor.trim().toUpperCase()
+    const mapa: Record<string, string> = {
+        PAGO: "PAGA",
+        CANCELADO: "CANCELADA",
+        ATRASADO: "ATRASADA",
+    }
+
+    return mapa[limpo] ?? limpo
+}
+
+// querys opcionais pra filtrar as mensalidades no get
+export const QuerysObterMensalidadeSchema = z.object({
+    aluno_id: ParamsSchema.shape.id,
+    mes: z.stringFormat("mm-yyyy", /^(0[1-9]|1[0-2])\/\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY." }),
+    status: z.preprocess(
+        normalizarStatusMensalidade,
+        z.enum(['PENDENTE', 'PAGA', 'CANCELADA', 'ATRASADA'], "Status da mensalidade inválido.")
+    )
+}).partial()
 
 export type Mensalidade = z.infer<typeof MensalidadeSchema>

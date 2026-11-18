@@ -1,6 +1,9 @@
-import { Request } from "express";
 import { PoolClient } from "pg";
 import { Contrato } from "../../models/contrato/contrato.model.js";
+import { Request, Response } from "express";
+import { database } from "../../db/postgre.js";
+import { ParamsSchema } from "../../models/utils.model.js";
+import { Mensalidade, QuerysObterMensalidadeSchema } from "../../models/financeiro/mensalidade.model.js";
 
 interface criarMensalidadeProps{
     contratoID: number,
@@ -68,5 +71,145 @@ export const controllerMensalide = {
             mensalidadeValores
         )
         return
+    },
+    // endpoint pra pagar uma mensalidade usando o id dos params
+    pagarMensalidade: async (req: Request, res: Response) => {
+        // pega o id dos params
+        const idBruto = ParamsSchema.safeParse(req.params)
+
+        // validação de sempre
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "ID inválido ou ausente para pagar a mensalidade.",
+                erro: idBruto.error.format()
+            })
+        }
+
+        // desestruturação
+        const { id } = idBruto.data
+        const motoristaID = req.userId
+
+        // operação
+        try {
+            // já tenta atualizar direto só se estiver pendente e for desse motorista
+            const { rows: [mensalidade] } = await database.query<Mensalidade>(
+                `
+                UPDATE mensalidade
+                SET status = 'PAGA'
+                WHERE id = $1 AND motorista_id = $2 AND status = 'PENDENTE'
+                RETURNING *
+                `,
+                [id, motoristaID]
+            )
+
+            // se não atualizou nada, vê o que rolou (não existe, já foi paga ou foi cancelada)
+            if (!mensalidade) {
+                const { rows: [existente] } = await database.query<Pick<Mensalidade, "status">>(
+                    `
+                    SELECT status FROM mensalidade
+                    WHERE id = $1 AND motorista_id = $2
+                    `,
+                    [id, motoristaID]
+                )
+
+                if (!existente) {
+                    return res.status(404).json({
+                        msg: "Mensalidade não encontrada."
+                    })
+                }
+                if (existente.status === "PAGA") {
+                    return res.status(409).json({
+                        msg: "Essa mensalidade já foi paga."
+                    })
+                }
+                return res.status(409).json({
+                    msg: "Não é possível pagar uma mensalidade cancelada."
+                })
+            }
+
+            // retorna a mensalidade atualizada
+            return res.status(200).json({
+                msg: "Mensalidade paga com sucesso.",
+                mensalidade
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de pagar mensalidade, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // endpoint pra listar as mensalidades com filtros opcionais de aluno_id, mes e status
+    obterMensalidades: async (req: Request, res: Response) => {
+        // pega as querys
+        const dadosBrutos = QuerysObterMensalidadeSchema.safeParse(req.query)
+
+        // validação
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Querys Inválidas.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        // desestruturação
+        const { aluno_id, mes, status } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // monto a query base só com os dados da mensalidade
+        let query = `
+        SELECT * FROM mensalidade
+        WHERE motorista_id = $1
+        `
+        const valores: (string | number)[] = [motoristaID]
+
+        // se vier aluno_id na query, filtra pelo contrato dele
+        if (aluno_id) {
+            query += ` AND EXISTS (
+                SELECT 1 FROM contrato
+                WHERE contrato.id = mensalidade.contrato_id
+                AND contrato.aluno_id = $${valores.length + 1}
+            )`
+            valores.push(aluno_id)
+        }
+
+        // se vier o mes na query (MM/YYYY), filtra as mensalidades que vencem dentro daquele mês
+        if (mes) {
+            const [mesNumero, ano] = mes.split("/").map(Number)
+            const dataInicioMes = `${ano}-${String(mesNumero).padStart(2, "0")}-01`
+            query += ` AND data_vencimento >= $${valores.length + 1}::date AND data_vencimento < ($${valores.length + 1}::date + INTERVAL '1 month')`
+            valores.push(dataInicioMes)
+        }
+
+        // se vier o status, filtra por ele (atrasada é pendente com vencimento antes de hoje)
+        if (status) {
+            if (status === "ATRASADA") {
+                query += ` AND status = 'PENDENTE' AND data_vencimento < (now() AT TIME ZONE 'America/Sao_Paulo')::date`
+            } else {
+                query += ` AND status = $${valores.length + 1}`
+                valores.push(status)
+            }
+        }
+
+        query += ` ORDER BY data_vencimento ASC, id ASC`
+
+        // operação
+        try {
+            const { rows: mensalidades } = await database.query<Mensalidade>(
+                query,
+                valores
+            )
+
+            // devolvendo pro usuario
+            return res.status(200).json({
+                msg: "Mensalidades obtidas com sucesso.",
+                mensalidades
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de obter mensalidades, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
     }
 }
