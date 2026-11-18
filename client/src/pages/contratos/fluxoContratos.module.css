@@ -321,19 +321,6 @@
     margin-top: .5rem;
 }
 
-.areaAssinatura {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1.6;
-    margin-top: .35rem;
-    border: 1px solid #c4c4c4;
-    border-radius: .2rem;
-    background: #fff;
-    touch-action: none;
-    cursor: crosshair;
-}
-
 .acoesAssinatura {
     display: flex;
     justify-content: center;
