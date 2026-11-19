@@ -365,7 +365,7 @@ export const controllerAssinatura = {
                 CacheControl: 'no-store, max-age=0'
             }))
             // crio as mensalidades
-            await controllerMensalide.criarMensalidade({contratoID: contratoDados.id, motoristaID: req.userId, cliente})
+            await controllerMensalide.criarMensalidade({contratoID: contratoDados.id, motoristaID: contratoDados.motorista_id, cliente})
 
             // commito coisas no banco
             await cliente.query('COMMIT')
