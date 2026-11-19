@@ -1,18 +1,19 @@
 import { Request, Response } from "express";
-import { AdicionarFinanceiroSchema, EditarFinanceiroSchema, Financeiro, QuerysObterFinanceiroSchema } from "../../models/financeiro/financeiro.model.js";
+import { AdicionarFinanceiroSchema, EditarFinanceiroSchema, Financeiro, QuerysObterFinanceiroSchema, QuerysSumarioFinaceiroSchema } from "../../models/financeiro/financeiro.model.js";
 import { ParamsSchema } from "../../models/utils.model.js";
 import { database } from "../../db/postgre.js";
 import { possuiCodigoPostgres } from "../../utils/erroBanco.js";
+import { Mensalidade } from "../../models/financeiro/mensalidade.model.js";
 
 // controller referente ao financeiro
 export const controllerFinanceiro = {
     // adicionar um reigstro MANUAL ao financeiro
-    adicionarRegistro: async(req: Request, res: Response) => {
+    adicionarRegistro: async (req: Request, res: Response) => {
         // recebendo os dados do body
         const dadosBrutos = AdicionarFinanceiroSchema.safeParse(req.body)
 
         // validação de sempre
-        if(!dadosBrutos.success){
+        if (!dadosBrutos.success) {
             return res.status(400).json({
                 msg: "Dados Inválidos para adicionar um registro ao financeiro.",
                 erro: dadosBrutos.error.format()
@@ -23,7 +24,7 @@ export const controllerFinanceiro = {
         const motoristaID = req.userId
 
         // operação
-        try{
+        try {
             // inserindo no banco de dados, sem tempo irmão kkkkkkk
             const { rows: [financeiro] } = await database.query<Financeiro>(
                 `
@@ -34,13 +35,13 @@ export const controllerFinanceiro = {
                 `,
                 [
                     titulo,
-                    valor, 
-                    tipo, 
+                    valor,
+                    tipo,
                     data_lancamento ? data_lancamento : new Date().toLocaleDateString('en-CA'), // se vier a data de lançamento usa ela, se não, pega a data atual.
-                    "MANUAL", 
+                    "MANUAL",
                     motoristaID,
                     ...descricao ? [descricao] : []
-                ] 
+                ]
             )
 
             // retorna
@@ -48,7 +49,7 @@ export const controllerFinanceiro = {
                 msg: "Registro Financeiro Criado!",
                 financeiro
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("erro no endpoint de adicionar registro financeiro, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
@@ -181,7 +182,7 @@ export const controllerFinanceiro = {
         const dadosBrutos = QuerysObterFinanceiroSchema.safeParse(req.query)
 
         // validação
-        if(!dadosBrutos.success){
+        if (!dadosBrutos.success) {
             return res.status(400).json({
                 msg: "Querys Inválidas",
                 erro: dadosBrutos.error.format()
@@ -193,20 +194,30 @@ export const controllerFinanceiro = {
 
         // se vier a data na query, filtramos ela
         let dataISO: Date | undefined = undefined
-        if(data){
-            const [ mes, ano ] = data.split("/").map(Number)
+        if (data) {
+            const [mes, ano] = data.split("/").map(Number)
             dataISO = new Date(`${ano}-${String(mes).padStart(2, "0")}-01T00:00:00.000Z`)
         }
 
         // operação
-        try{
-            const { rows: financeiro } = await database.query<Financeiro>(
-                `
+        try {
+            // montando a query
+            let query = `
                 SELECT * FROM financeiro
                 WHERE motorista_id = $1 
-                ${dataISO ? "AND data_lancamento >= $2 AND data_lancamento < $2 + INTERVAL '1 month' " : ''}
-                ${id ? 'AND id = $3' : ''}
-                `,
+                `
+            let parametros = 2
+            if (dataISO) {
+                query += `AND data_lancamento >= $${parametros} AND data_lancamento < $${parametros} + INTERVAL '1 month' `
+                parametros++
+            }
+            if (id) {
+                query += `AND id = $${parametros}`
+                parametros++
+            }
+
+            const { rows: financeiro } = await database.query<Financeiro>(
+                query,
                 [
                     motoristaID,
                     ...dataISO ? [dataISO] : [],
@@ -215,7 +226,7 @@ export const controllerFinanceiro = {
             )
 
             // devolvendo o usuario
-            if(financeiro.length === 0){
+            if (financeiro.length === 0) {
                 return res.status(404).json({
                     msg: "Nenhum Registro Encontrado."
                 })
@@ -224,8 +235,104 @@ export const controllerFinanceiro = {
                 msg: "Dados Obtidos com Sucesso.",
                 financeiro
             })
-        }catch(erro){
+        } catch (erro) {
             console.error("Erro no endpoint de consultar dados do financeiro, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    obterValor: async (req: Request, res: Response) => {
+        // pega as querys
+        const dadosBrutos = QuerysSumarioFinaceiroSchema.safeParse(req.query)
+
+        // validação
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Querys Inválidas",
+                erro: dadosBrutos.error.format()
+            })
+        }
+        // desestruturação
+        const { mes: data, tipo } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // se vier a data na query, filtramos ela
+        let dataISO: Date | undefined = undefined
+        if (data) {
+            const [mes, ano] = data.split("/").map(Number)
+            dataISO = new Date(`${ano}-${String(mes).padStart(2, "0")}-01T00:00:00.000Z`)
+        }
+
+        // operação
+        try {
+            //montando as querys
+            let queryFinanceiro = `
+                    SELECT valor, tipo 
+                    FROM financeiro 
+                    WHERE motorista_id = $1 
+                    `
+            let queryMensalidade = `
+                    SELECT valor_cobrado 
+                    FROM mensalidade 
+                    WHERE motorista_id = $1 
+                    AND status = $2 
+                    `
+            let parametros = 2
+            if (dataISO) {
+                queryFinanceiro += `AND data_lancamento >= $${parametros} AND data_lancamento < $${parametros} + INTERVAL '1 month' `
+                queryMensalidade += `AND competencia >= $${parametros + 1} AND competencia < $${parametros + 1} + INTERVAL '1 month' `
+                parametros++
+            }
+            if (tipo) {
+                queryFinanceiro += `AND tipo = $${parametros}`
+                parametros++
+            }
+
+            // pegando os dados
+            const [{ rows: financeiros }, { rows: mensalidades }] = await Promise.all([
+                database.query(
+                    queryFinanceiro,
+                    [
+                        motoristaID,
+                        ...dataISO ? [dataISO] : [],
+                        ...tipo ? [tipo] : []
+                ]),
+                tipo === 'ENTRADA' || tipo === undefined ? database.query<Pick<Mensalidade, 'valor_cobrado'>>(
+                    queryMensalidade, 
+                    [
+                    motoristaID,
+                    'PAGA',
+                    ...dataISO ? [dataISO] : []
+                ]) : { rows: [] }
+            ]);
+
+            if (financeiros.length === 0 && mensalidades.length === 0) {
+                return res.status(200).json({
+                    valor: 0.00
+                })
+            }
+
+            let valor: number = 0.00
+
+            for (const financeiro of financeiros) {
+                if (financeiro.tipo === 'SAIDA') {
+                    valor -= Number(financeiro.valor)
+                } else {
+                    valor += Number(financeiro.valor)
+                }
+            }
+            for (const mensalidade of mensalidades) {
+                valor += Number(mensalidade.valor_cobrado)
+            }
+            console.log(financeiros, mensalidades)
+            const valorFinal = Number(valor.toFixed(2))
+
+            return res.status(200).json({
+                valorFinal
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de obter sumario do financeiro, erro: ", erro)
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })

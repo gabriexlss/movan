@@ -44,5 +44,10 @@ export const QuerysObterFinanceiroSchema = z.object({
     id: ParamsSchema.shape.id
 }).partial()
 
+export const QuerysSumarioFinaceiroSchema = z.object({
+    mes: z.stringFormat("mm-yyyy", /^(0[1-9]|1[0-2])\/\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY." }),
+    tipo: z.enum(['ENTRADA', 'SAIDA'])
+}).partial()
+
 
 export type Financeiro = z.infer<typeof FinanceiroSchema>

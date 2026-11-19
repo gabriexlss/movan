@@ -7,9 +7,8 @@ import rotasAluno from "./routes/aluno.route.js"
 import rotasContrato from "./routes/contrato/contrato.route.js"
 import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
 import rotasRota from './routes/rotas.route.js'
-import { otimizarRota } from './services/otimizarRota.js';
 import { database } from './db/postgre.js';
-import rotasFinanceiro from './routes/financeiro.route.js'
+import rotasFinanceiro from './routes/financeiro/financeiro.route.js'
 import { controllerMensalide } from './controllers/financeiro/mensalidade.controller.js';
 
 const router = Router();
