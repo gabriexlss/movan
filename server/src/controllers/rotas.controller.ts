@@ -121,14 +121,62 @@ export const controllerRotas = {
         if (!turnoEscola) throw new Error('TURNO_NOT_FOUND');
 
         // busca todas as rotas daquele motorista.
-        const { rows: rotas } = await cliente.query<Rota>(
+        let { rows: rotas } = await cliente.query<Rota>(
             `
                 SELECT * FROM rota
                 WHERE motorista_id = $1 AND turno = $2
                 `,
             [motoristaID, turnoEscola.turno]
         )
-        if (rotas.length < 1) throw new Error('ROTAS_NOT_FOUND'); // penso em trocar isso aqui pra gerar as rotas se ainda não estiverem sido geradas, mas to pensando ainda.
+
+        // se o motorista ainda não possui rotas geradas, gera sob demanda usando a transação atual
+        if (rotas.length < 1) {
+            const RotasParaCriar: CriarRota[] = []
+            for (let i = 1; i <= 6; i++) {
+                const resto = i % 2
+                RotasParaCriar.push({
+                    nome: undefined,
+                    sentido: resto === 0 ? "VOLTA" : "IDA",
+                    ativa: true,
+                    motorista_id: motoristaID,
+                    turno: i <= 2 ? "MANHA" : i <= 4 ? "TARDE" : "NOITE"
+                })
+            }
+
+            const RotasCriadas: Rota[] = []
+            for (let i = 1; i <= 5; i++) {
+                for (const Rota of RotasParaCriar) {
+                    const RotaCriada = await cliente.query<Rota>(
+                        `
+                        INSERT INTO rota
+                        (nome, sentido, ativa, motorista_id, turno)
+                        VALUES ($1, $2, $3, $4, $5)
+                        RETURNING *
+                        `,
+                        [Rota.nome, Rota.sentido, Rota.ativa, Rota.motorista_id, Rota.turno]
+                    )
+                    RotasCriadas.push(RotaCriada.rows[0]!)
+                }
+            }
+
+            let i = 1
+            for (const Rota of RotasCriadas) {
+                const diaSemana = i > 0 && i <= 6 ? 2 : i > 6 && i <= 12 ? 3 : i > 12 && i <= 18 ? 4 : i > 18 && i <= 24 ? 5 : 6
+                await cliente.query(
+                    `
+                    INSERT INTO rota_dia_semana
+                    (rota_id, dia_semana)
+                    VALUES ($1, $2)
+                    `,
+                    [Rota.id, diaSemana]
+                )
+                i++
+            }
+
+            rotas = RotasCriadas.filter(r => r.turno === turnoEscola.turno)
+        }
+
+        if (rotas.length < 1) throw new Error('ROTAS_NOT_FOUND');
 
         // for para conseguir checar e inserir em todas as rotas do motorista.
         for (const rota of rotas) {
