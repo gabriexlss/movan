@@ -12,6 +12,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { deletarR2 } from "../../utils/deletarR2.js";
 import { obterArquivoR2, obterChaveR2 } from "../../utils/obterArquivoR2.js";
 import { assinarContratoPdf } from "../../services/assinaturaPDF.js";
+import { controllerMensalide } from "../financeiro/mensalidade.controller.js";
 
 export const controllerAssinatura = {
     // adicionar assinatura do motorista.
@@ -363,6 +364,8 @@ export const controllerAssinatura = {
                 ContentType: 'application/pdf',
                 CacheControl: 'no-store, max-age=0'
             }))
+            // crio as mensalidades
+            await controllerMensalide.criarMensalidade({contratoID: contratoDados.id, motoristaID: contratoDados.motorista_id, cliente})
 
             // commito coisas no banco
             await cliente.query('COMMIT')
