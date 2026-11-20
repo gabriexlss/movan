@@ -1,20 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { PiWarningBold } from 'react-icons/pi'
+import { useCallback } from 'react'
+import { PiPenNibBold } from 'react-icons/pi'
 import DefaultDialog from '../../components/dialog/dialogDefault'
 import styles from './assinaturaPerfil.module.css'
 
-const DialogConfirmarAssinatura = ({ imagem, salvando, onClose, onConfirm }) => {
-    const prazoRef = useRef(null)
-    const [segundos, setSegundos] = useState(5)
-
-    useEffect(() => {
-        prazoRef.current = Date.now() + 5000
-        const intervalo = window.setInterval(() => {
-            setSegundos(Math.max(0, Math.ceil((prazoRef.current - Date.now()) / 1000)))
-        }, 100)
-        return () => window.clearInterval(intervalo)
-    }, [])
-
+const DialogConfirmarAssinatura = ({ imagem, atualizando = false, salvando, onClose, onConfirm }) => {
     const fechar = useCallback(() => {
         if (!salvando) onClose()
     }, [salvando, onClose])
@@ -23,13 +12,15 @@ const DialogConfirmarAssinatura = ({ imagem, salvando, onClose, onConfirm }) => 
         <DefaultDialog
             isOpen
             onClose={fechar}
-            title="Confirme sua assinatura"
-            description="Após salvar, sua assinatura não poderá ser alterada ou refeita. Confira se ela está correta antes de confirmar."
-            icon={<PiWarningBold />}
+            title={atualizando ? 'Confirmar nova assinatura' : 'Confirme sua assinatura'}
+            description={atualizando
+                ? 'A nova assinatura será usada nos próximos contratos finalizados. Contratos já enviados ou assinados mantêm a assinatura anterior.'
+                : 'Confira se sua assinatura está correta antes de salvar. Ela será usada nos contratos que você finalizar.'}
+            icon={<PiPenNibBold />}
             className={styles.confirmacao}
         >
-            <img src={imagem} alt="Confira a assinatura que será salva definitivamente" className={styles.previa} />
-            <p className={styles.texto}>Esta assinatura ficará reservada para seus contratos.</p>
+            <img src={imagem} alt="Confira a assinatura que será salva" className={styles.previa} />
+            <p className={styles.texto}>Você poderá atualizar sua assinatura novamente quando precisar.</p>
             <div className={styles.acoes}>
                 <button type="button" className={styles.secundario} onClick={fechar} disabled={salvando} data-autofocus="true">
                     Voltar e revisar
@@ -37,12 +28,12 @@ const DialogConfirmarAssinatura = ({ imagem, salvando, onClose, onConfirm }) => 
                 <button
                     type="button"
                     className={styles.primario}
-                    disabled={segundos > 0 || salvando}
+                    disabled={salvando}
                     onClick={() => {
-                        if (prazoRef.current && Date.now() >= prazoRef.current && !salvando) onConfirm()
+                        if (!salvando) onConfirm()
                     }}
                 >
-                    {salvando ? 'Salvando…' : segundos > 0 ? `Confirmar em ${segundos}s` : 'Salvar definitivamente'}
+                    {salvando ? 'Salvando…' : atualizando ? 'Atualizar assinatura' : 'Salvar assinatura'}
                 </button>
             </div>
         </DefaultDialog>

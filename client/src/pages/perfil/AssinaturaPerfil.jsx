@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LuUndo2 } from 'react-icons/lu'
-import { PiCheckBold, PiLockKeyBold, PiPenNibBold } from 'react-icons/pi'
+import { PiCheckBold, PiCheckCircleBold, PiPenNibBold } from 'react-icons/pi'
 import CampoAssinatura from '../../components/assinatura/CampoAssinatura'
 import { obterAssinaturaMotorista, salvarAssinaturaMotorista } from '../../services/assinatura'
 import { apiErrorToast, successToast } from '../../services/toastManager'
@@ -13,6 +13,7 @@ const AssinaturaPerfil = () => {
     const campoRef = useRef(null)
     const envioRef = useRef(false)
     const [assinatura, setAssinatura] = useState(null)
+    const [editando, setEditando] = useState(false)
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState('')
     const [falhaCarregamento, setFalhaCarregamento] = useState(false)
@@ -27,7 +28,10 @@ const AssinaturaPerfil = () => {
         setFalhaCarregamento(false)
         try {
             const salva = await obterAssinaturaMotorista(signal)
-            if (!signal?.aborted) setAssinatura(salva)
+            if (!signal?.aborted) {
+                setAssinatura(salva)
+                setEditando(false)
+            }
         } catch (error) {
             if (!signal?.aborted) {
                 setErro('Não foi possível carregar sua assinatura. Tente novamente.')
@@ -54,6 +58,18 @@ const AssinaturaPerfil = () => {
 
     const fecharConfirmacao = useCallback(() => setRascunho(null), [])
 
+    const iniciarAlteracao = () => {
+        setErro('')
+        setTemAssinatura(false)
+        setEditando(true)
+    }
+
+    const cancelarAlteracao = () => {
+        setErro('')
+        setTemAssinatura(false)
+        setEditando(false)
+    }
+
     const concluir = async () => {
         if (!temAssinatura || rascunho || envioRef.current) return
         try {
@@ -66,32 +82,28 @@ const AssinaturaPerfil = () => {
 
     const salvar = async () => {
         if (!rascunho || envioRef.current) return
+        const jaPossuia = Boolean(assinatura)
         envioRef.current = true
         setSalvando(true)
         setErro('')
         try {
             const salva = await salvarAssinaturaMotorista(rascunho.imagem)
             setAssinatura(salva)
+            setEditando(false)
+            setTemAssinatura(false)
             setRascunho(null)
-            successToast('SIGNATURE_SAVED')
+            successToast(jaPossuia ? 'SIGNATURE_UPDATED' : 'SIGNATURE_SAVED')
         } catch (error) {
             apiErrorToast(error, 'SIGNATURE_SAVE_FAILED')
             setRascunho(null)
-            // Consulta novamente caso o envio tenha sido salvo antes de uma falha de conexão.
-            try {
-                const salva = await obterAssinaturaMotorista()
-                setAssinatura(salva)
-                if (!salva) setErro('Não foi possível salvar sua assinatura. Seu desenho foi mantido; tente novamente.')
-            } catch {
-                setFalhaCarregamento(true)
-                setTemAssinatura(false)
-                setErro('Não foi possível verificar se sua assinatura foi salva. Tente carregar novamente antes de continuar.')
-            }
+            setErro('Não foi possível salvar sua assinatura. Seu desenho foi mantido; tente novamente.')
         } finally {
             envioRef.current = false
             setSalvando(false)
         }
     }
+
+    const exibirFormulario = !assinatura || editando
 
     return (
         <main className={fluxo.container}>
@@ -105,22 +117,29 @@ const AssinaturaPerfil = () => {
 
             <aside className={fluxo.aviso}>
                 <h2><PiPenNibBold aria-hidden="true" /> Sua assinatura nos contratos</h2>
-                <p>{assinatura
-                    ? 'Sua assinatura está salva e reservada para seus contratos. Ela não pode ser alterada.'
-                    : 'Desenhe sua assinatura no campo abaixo. Você pode desfazer os traços antes de concluir. Após a confirmação, ela será salva uma única vez.'}</p>
+                <p>{assinatura && !editando
+                    ? 'Sua assinatura está salva e será usada automaticamente nos próximos contratos finalizados. Alterá-la não modifica contratos já finalizados ou assinados.'
+                    : 'Desenhe sua assinatura no campo abaixo. Você pode desfazer os traços antes de concluir. Ela será aplicada automaticamente quando você finalizar um contrato.'}</p>
             </aside>
 
             <section className={`${fluxo.card} ${fluxo.cardAssinatura}`} aria-labelledby="titulo-minha-assinatura" aria-busy={carregando || salvando}>
                 <h2 id="titulo-minha-assinatura" className={fluxo.tituloSecao}>Assinatura</h2>
-                {carregando ? <p className={styles.texto} role="status">Carregando assinatura…</p> : assinatura ? (
-                    <>
-                        <img src={assinatura.caminho_arquivo} alt="Sua assinatura cadastrada" className={styles.previa} />
-                        <p className={styles.status} role="status"><PiLockKeyBold aria-hidden="true" /> Assinatura salva definitivamente</p>
-                    </>
+                {carregando ? (
+                    <p className={styles.texto} role="status">Carregando assinatura…</p>
                 ) : falhaCarregamento ? (
                     <>
                         <p className={styles.erro} role="alert">{erro}</p>
                         <button type="button" className={fluxo.botaoPrincipal} onClick={() => carregar()}>Tentar novamente</button>
+                    </>
+                ) : !exibirFormulario ? (
+                    <>
+                        <img src={assinatura.caminho_arquivo} alt="Sua assinatura cadastrada" className={styles.previa} />
+                        <p className={styles.status} role="status"><PiCheckCircleBold aria-hidden="true" /> Assinatura cadastrada</p>
+                        <div className={fluxo.acoesAssinatura}>
+                            <button type="button" className={styles.secundario} onClick={iniciarAlteracao}>
+                                <PiPenNibBold aria-hidden="true" /> Alterar assinatura
+                            </button>
+                        </div>
                     </>
                 ) : (
                     <>
@@ -128,6 +147,11 @@ const AssinaturaPerfil = () => {
                         <CampoAssinatura ref={campoRef} bloqueado={Boolean(rascunho) || salvando} onChange={setTemAssinatura} label="Desenhe sua assinatura de motorista" />
                         {erro && <p className={styles.erro} role="alert">{erro}</p>}
                         <div className={fluxo.acoesAssinatura}>
+                            {assinatura && (
+                                <button type="button" className={styles.secundario} disabled={Boolean(rascunho) || salvando} onClick={cancelarAlteracao}>
+                                    Cancelar
+                                </button>
+                            )}
                             <button type="button" className={styles.secundario} disabled={!temAssinatura || Boolean(rascunho) || salvando} onClick={() => campoRef.current.desfazer()}>
                                 <LuUndo2 aria-hidden="true" /> Desfazer
                             </button>
@@ -141,6 +165,7 @@ const AssinaturaPerfil = () => {
             {rascunho && (
                 <DialogConfirmarAssinatura
                     imagem={rascunho.url}
+                    atualizando={Boolean(assinatura)}
                     salvando={salvando}
                     onClose={fecharConfirmacao}
                     onConfirm={salvar}

@@ -115,14 +115,15 @@
 }
 
 .toolbar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: .35rem;
     margin-bottom: .65rem;
 }
 
 .busca {
+    flex: 1 1 10rem;
     display: flex;
     align-items: center;
     gap: .3rem;
@@ -134,6 +135,47 @@
     background: #fff;
     color: #7a8798;
     font-size: 0.7125rem;
+}
+
+.acoesToolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .35rem;
+}
+
+.clausulasPadrao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    min-height: 1.8rem;
+    padding: .25rem .5rem;
+    border: 1px solid #0d47a1;
+    border-radius: .25rem;
+    background: #fff;
+    color: #0d47a1;
+    font-family: inherit;
+    font-size: 0.6625rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.clausulasPadrao:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
+}
+
+.erroEstado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    padding: 1.25rem .5rem;
+    color: #b42318;
+    font-size: 0.7625rem;
+    text-align: center;
 }
 
 .busca svg {

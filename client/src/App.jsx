@@ -47,7 +47,9 @@ function App() {
     ]
 
     const logCad = rotasLogCad.includes(location.pathname)
-    const fluxoContrato = location.pathname.startsWith('/contratos/') || location.pathname === '/contrato/assinatura' || location.pathname === '/perfil/assinatura'
+    const fluxoContrato = location.pathname.startsWith('/contratos/')
+        || location.pathname.startsWith('/assinar/')
+        || location.pathname === '/perfil/assinatura'
 
     return (
         <div className='app'>
@@ -56,6 +58,7 @@ function App() {
 
             <Routes>
                 <Route path='/error' element={<ErrorPage />} />
+                <Route path='/assinar/:token' element={<AssinaturaContrato />} />
 
                 <Route element={<ProtectedRoute />}>
                     <Route path='/' element={<HomePage />} />
@@ -69,7 +72,6 @@ function App() {
                     <Route path='/contratos/clausulas' element={<ClausulasContrato />} />
                     <Route path='/contratos/link' element={<LinkContrato />} />
                     <Route path='/contratos/:id' element={<ClausulasContrato gerado />} />
-                    <Route path='/contrato/assinatura' element={<AssinaturaContrato />} />
                     <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
 
