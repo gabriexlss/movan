@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import { FaChevronLeft, FaChevronRight, FaPlus, FaRegCalendarAlt, FaRegFileAlt, FaSearch, FaUser } from 'react-icons/fa'
+import { useCallback, useEffect, useState } from 'react'
+import { FaChevronLeft, FaChevronRight, FaPlus, FaRegCalendarAlt, FaRegFileAlt, FaSearch, FaSlidersH, FaUser } from 'react-icons/fa'
 import { IoFilterSharp } from 'react-icons/io5'
 import { LuScrollText } from 'react-icons/lu'
 import { Link, useNavigate } from 'react-router-dom'
 import DefaultCard from '../../../components/cards/DefaultCard'
-import { contratos, formatarData, situacoesContrato } from '../contratos-data'
+import { criarContrato, listarContratos } from '../../../services/contrato'
+import { apiErrorToast, successToast } from '../../../services/toastManager'
+import { adaptarContrato, formatarData, situacoesContrato } from '../contratos-data'
 import DialogContrato from '../dialogs/DialogContrato'
 import styles from './listaContratos.module.css'
 
@@ -12,16 +14,38 @@ const ITENS_POR_PAGINA = 5
 
 const ListaContratos = () => {
     const navigate = useNavigate()
+    const [contratos, setContratos] = useState([])
+    const [carregando, setCarregando] = useState(true)
+    const [erroCarregamento, setErroCarregamento] = useState(false)
     const [busca, setBusca] = useState('')
     const [situacao, setSituacao] = useState('todos')
     const [pagina, setPagina] = useState(0)
     const [filtroAberto, setFiltroAberto] = useState(false)
     const [formularioAberto, setFormularioAberto] = useState(false)
 
+    const carregarContratos = useCallback(async () => {
+        setCarregando(true)
+        setErroCarregamento(false)
+        try {
+            const dados = await listarContratos()
+            setContratos(dados.map(adaptarContrato))
+        } catch (error) {
+            setErroCarregamento(true)
+            apiErrorToast(error, 'UNEXPECTED_ERROR')
+        } finally {
+            setCarregando(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => carregarContratos(), 0)
+        return () => window.clearTimeout(timer)
+    }, [carregarContratos])
+
     const termo = busca.trim().toLocaleLowerCase('pt-BR')
     const resultados = contratos.filter((contrato) => (
         (situacao === 'todos' || contrato.situacao === situacao)
-        && `${contrato.id} ${contrato.titulo} ${contrato.cliente}`
+        && `${contrato.id} ${contrato.titulo} ${contrato.cliente} ${contrato.aluno}`
             .toLocaleLowerCase('pt-BR')
             .includes(termo)
     ))
@@ -41,14 +65,34 @@ const ListaContratos = () => {
         setFiltroAberto(false)
     }
 
-    const salvarContrato = (valores) => {
-        const novoContrato = {
-            ...valores,
-            id: `C-${String(contratos.length + 1).padStart(3, '0')}`,
-            situacao: 'ativo',
-        }
+    const salvarContrato = async (valores) => {
+        try {
+            const resposta = await criarContrato(valores)
+            setFormularioAberto(false)
+            successToast('CONTRACT_CREATED')
 
-        navigate('/contratos/clausulas', { state: { contrato: novoContrato } })
+            if (resposta?.id) {
+                navigate(`/contratos/${resposta.id}`)
+                return
+            }
+
+            const contratosAtualizados = await listarContratos()
+            setContratos(contratosAtualizados.map(adaptarContrato))
+            const novoContrato = contratosAtualizados
+                .filter((contrato) => (
+                    Number(contrato.aluno_id) === Number(valores.alunoId)
+                    && String(contrato.data_inicio || '').slice(0, 10) === valores.inicio
+                    && String(contrato.data_fim || '').slice(0, 10) === valores.termino
+                    && contrato.status === 'RASCUNHO'
+                ))
+                .sort((a, b) => b.contrato_id - a.contrato_id)[0]
+
+            if (novoContrato) {
+                navigate(`/contratos/${novoContrato.contrato_id}`)
+            }
+        } catch (error) {
+            apiErrorToast(error, 'CONTRACT_CREATE_FAILED')
+        }
     }
 
     return (
@@ -134,18 +178,33 @@ const ListaContratos = () => {
                             }}
                         />
                     </label>
-                    <button
-                        type="button"
-                        className={styles.novo}
-                        aria-haspopup="dialog"
-                        onClick={() => setFormularioAberto(true)}
-                    >
-                        <FaPlus aria-hidden="true" />
-                        <span>Novo contrato</span>
-                    </button>
+                    <div className={styles.acoesToolbar}>
+                        <Link to="/contratos/clausulas" className={styles.clausulasPadrao}>
+                            <FaSlidersH aria-hidden="true" />
+                            <span>Cláusulas padrão</span>
+                        </Link>
+                        <button
+                            type="button"
+                            className={styles.novo}
+                            aria-haspopup="dialog"
+                            onClick={() => setFormularioAberto(true)}
+                        >
+                            <FaPlus aria-hidden="true" />
+                            <span>Novo contrato</span>
+                        </button>
+                    </div>
                 </div>
 
-                {contratosDaPagina.length > 0 ? (
+                {carregando ? (
+                    <p className={styles.vazio}>Carregando contratos...</p>
+                ) : erroCarregamento ? (
+                    <div className={styles.erroEstado} role="alert">
+                        <p>Não foi possível carregar os contratos.</p>
+                        <button type="button" className={styles.novo} onClick={carregarContratos}>
+                            Tentar novamente
+                        </button>
+                    </div>
+                ) : contratosDaPagina.length > 0 ? (
                     <ul className={styles.registros}>
                         {contratosDaPagina.map((contrato) => (
                             <li key={contrato.id}>
@@ -159,12 +218,12 @@ const ListaContratos = () => {
                                         <div className={styles.cabecalhoContrato}>
                                             <strong className={styles.tituloContrato}>{contrato.titulo}</strong>
                                             <span className={`${styles.status} ${styles[contrato.situacao]}`}>
-                                                {situacoesContrato[contrato.situacao]}
+                                                {situacoesContrato[contrato.situacao] || contrato.situacao}
                                             </span>
                                         </div>
                                         <div className={styles.informacoes}>
                                             <div className={styles.linhaDetalhes}>
-                                                <span><LuScrollText aria-hidden="true" />{contrato.id}</span>
+                                                <span><LuScrollText aria-hidden="true" />#{contrato.id}</span>
                                                 <span><FaUser aria-hidden="true" />Cliente: {contrato.cliente}</span>
                                             </div>
                                             <div className={styles.linhaDetalhes}>

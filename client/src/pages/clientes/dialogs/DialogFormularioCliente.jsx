@@ -50,6 +50,8 @@ const valoresIniciais = {
         cpf: '',
         telefone: '',
         endereco: '',
+        latitude: null,
+        longitude: null,
     },
 }
 
@@ -367,6 +369,7 @@ const DialogFormularioCliente = ({
                                     responsavel: responsavelSelecionado?.nome || event.target.value,
                                 }))
                             }}
+                            disabled={editando}
                             required
                         >
                             <option value="" disabled>Selecione um responsável</option>
@@ -470,6 +473,7 @@ const DialogFormularioCliente = ({
                             placeholder="000.000.000-00"
                             inputMode="numeric"
                             maxLength={14}
+                            disabled={editando}
                             required
                         />
                         <CampoCliente
@@ -481,13 +485,19 @@ const DialogFormularioCliente = ({
                             autoComplete="tel"
                             required
                         />
-                        <CampoCliente
-                            label="Endereço"
+                        <CampoEnderecoAutocomplete
                             icon={<PiMapPinBold />}
-                            {...propsCampo('endereco')}
-                            placeholder="Rua, número, bairro e cidade"
-                            autoComplete="street-address"
-                            required
+                            value={valores.endereco}
+                            onChange={(endereco) => setValores((estadoAtual) => ({
+                                ...estadoAtual,
+                                endereco,
+                                latitude: null,
+                                longitude: null,
+                            }))}
+                            onSelecionar={(enderecoSelecionado) => setValores((estadoAtual) => ({
+                                ...estadoAtual,
+                                ...enderecoSelecionado,
+                            }))}
                         />
                     </>
                 )}
