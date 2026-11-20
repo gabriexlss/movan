@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react"
-import { alterarEscola, criarEscola, excluirEscola, listarEscola } from "../../../services/escola"
-import { criarTurnoEscola, listarTurnosEscola } from "../../../services/turnosEscola"
+import { alterarEscola, criarEscola, excluirEscola } from "../../../services/escola"
+import { criarTurnoEscola } from "../../../services/turnosEscola"
 import ListaClientes from "./ListaClientes"
 import toast from 'react-hot-toast'
 
@@ -9,22 +8,11 @@ const adaptarParaLista = (escola) => ({
     detalhes: [escola.telefone, escola.endereco].filter(Boolean)
 })
 
-const Escolas = () => {
-    const [escola, setEscola] = useState([])
-    const [turnos, setTurnos] = useState([])
-
-    useEffect(() => { 
-        const carregarEscola = async () => {
-            const [dados, dadosTurnos] = await Promise.all([listarEscola(), listarTurnosEscola()])
-            setEscola(dados.map(adaptarParaLista))
-            setTurnos(dadosTurnos)
-        }
-        carregarEscola()
-    }, [])
+const Escolas = ({ escolas, onEscolasChange, turnos, onTurnosChange }) => {
 
     const salvarNovaEscola = async (valores) => {
         const escolaCriada = await criarEscola(valores)
-        setEscola((listaAtual) => [
+        onEscolasChange((listaAtual) => [
             adaptarParaLista(escolaCriada),
             ...listaAtual,
         ])
@@ -37,7 +25,7 @@ const Escolas = () => {
         const resultados = await Promise.allSettled(turnosParaCriar.map((turno) => (
             criarTurnoEscola({ ...turno, escolaId: escolaCriada.id })
         )))
-        setTurnos((listaAtual) => [
+        onTurnosChange((listaAtual) => [
             ...listaAtual,
             ...resultados.filter((resultado) => resultado.status === 'fulfilled').map((resultado) => resultado.value),
         ])
@@ -50,24 +38,32 @@ const Escolas = () => {
     //====================
     //ALTERAR ESCOLA
     //====================
-    const salvarEscolaAlterada = (id, valores) => alterarEscola(id, valores) //mando os dados alterados para o backend
+    const salvarEscolaAlterada = async (id, valores) => {
+        const salvo = await alterarEscola(id, valores)
+        onEscolasChange((listaAtual) => listaAtual.map((escola) => (
+            escola.id === id
+                ? adaptarParaLista({ ...escola, ...valores, ...(salvo || {}) })
+                : escola
+        )))
+        return salvo
+    }
 
     //====================
     //EXCLUIR ESCOLA
     //====================
     const excluirEscolaDoBanco = async (id) => {
         await excluirEscola(id)
-        setEscola((listaAtual) => listaAtual.filter((item) => item.id !== id))
-        setTurnos((listaAtual) => listaAtual.filter((turno) => String(turno.escola_id) !== String(id)))
+        onEscolasChange((listaAtual) => listaAtual.filter((item) => item.id !== id))
+        onTurnosChange((listaAtual) => listaAtual.filter((turno) => String(turno.escola_id) !== String(id)))
     }
 
     return (
         <ListaClientes
             title="Lista de escolas"
             tipo="escola"
-            registros={escola}
+            registros={escolas}
             turnos={turnos}
-            onTurnosChange={setTurnos}
+            onTurnosChange={onTurnosChange}
             onCriar={salvarNovaEscola}
             onEditar={salvarEscolaAlterada}
             onExcluir={excluirEscolaDoBanco}

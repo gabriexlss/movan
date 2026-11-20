@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 
-import { PiNotePencilBold } from 'react-icons/pi'
+import { PiNotePencilBold, PiPenNibBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
 import { MdPersonOutline } from "react-icons/md";
@@ -279,6 +280,12 @@ const Perfil = () => {
 
             {dialogExluContaAberto && <DialogExluConta onClose={fecharDialogExluConta} />}
 
+            <button type="button" className={`${styles['BtnExclu-conta']} ${styles['BtnSair-conta']}`} onClick={logout}>
+                <IoMdExit aria-hidden="true" style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair
+            </button>
+            <Link to="/perfil/assinatura" className={`${styles['BtnExclu-conta']} ${styles['BtnAssinatura']}`}>
+                <PiPenNibBold aria-hidden="true" style={{ fontSize: '1.7rem' }} /> Minha assinatura
+            </Link>
             <button
                 type="button"
                 className={styles['BtnExclu-conta']}
@@ -288,7 +295,6 @@ const Perfil = () => {
                 <CgTrash aria-hidden="true" style={{ strokeWidth: '.6', fontSize: '1.7rem' }} />
                 Excluir conta
             </button>
-            <button className={`${styles['BtnExclu-conta']}  ${styles['BtnSair-conta']}` } onClick={logout}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
         </main>
     )
 }

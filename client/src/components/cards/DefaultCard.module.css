@@ -25,8 +25,7 @@
 }
 
 .card-header-container {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    display: flex;
     align-items: center;
     gap: .25rem;
     width: 100%;
@@ -35,6 +34,7 @@
 }
 
 .card-header-container .card-header {
+    flex: 1 1 auto;
     align-self: center;
     min-width: 0;
     margin: 0 0 0 .7rem;
@@ -43,22 +43,30 @@
     white-space: nowrap;
 }
 
+.card-header-content {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 .card-header.compact {
     margin-bottom: 0;
 }
 
 .BtnVerMensalidade {
     width: 90%;
-    height: 1.5rem;
+    min-height: 1.75rem;
+    padding: .25rem .5rem;
     background-color: #0D47A1;
     color: #F8F5F5;
 
     font-family: 'Poppins', sans-serif;
-    font-size: .6rem;
+    font-size: 0.6625rem;
     font-weight: 100;
     text-decoration: none;
     text-align: center;
-    line-height: 1.5rem;
+    line-height: 1.4;
 
     border-radius: 10px;
     border: none;

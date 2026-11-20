@@ -13,19 +13,15 @@ const nomesTipo = {
 
 const DialogExcluirCliente = ({ tipo, registro, onClose, onConfirm }) => {
     const [segundos, setSegundos] = useState(10);
-    const [desativaBotao, setDesativaBotao] = useState(true);
 
     useEffect(() => {
-        if (segundos <= 0) {
-            setDesativaBotao(false);
-            return;
-        }
+        if (segundos <= 0) return undefined;
 
-        const timer = setInterval(() => {
+        const timer = window.setTimeout(() => {
             setSegundos((prev) => prev - 1);
         }, 1000);
 
-        return() => clearInterval(timer);
+        return() => window.clearTimeout(timer);
     }, [segundos]);
 
     return (
@@ -49,7 +45,7 @@ const DialogExcluirCliente = ({ tipo, registro, onClose, onConfirm }) => {
                 <button
                     type="button"
                     className={`${styles.primaryButton} ${styles.deleteButton}`}
-                    disabled={segundos}
+                    disabled={segundos > 0}
                     onClick={onConfirm}
                     data-autofocus="true"
                 >
