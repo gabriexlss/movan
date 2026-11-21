@@ -321,21 +321,9 @@
     margin-top: .5rem;
 }
 
-.areaAssinatura {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1.6;
-    margin-top: .35rem;
-    border: 1px solid #c4c4c4;
-    border-radius: .2rem;
-    background: #fff;
-    touch-action: none;
-    cursor: crosshair;
-}
-
 .acoesAssinatura {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: .8rem;
     margin: 2rem 0 1rem;
@@ -345,12 +333,207 @@
     min-width: 6.5rem;
 }
 
+.cabecalhoResumo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .35rem;
+}
+
+.cabecalhoResumo .tituloSecao {
+    margin-bottom: 0;
+}
+
+.status {
+    flex-shrink: 0;
+    padding: .18rem .5rem;
+    border-radius: .25rem;
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.ativo {
+    background: #c1ddbf;
+    color: #15720c;
+}
+
+.finalizado {
+    background: #dce7f7;
+    color: #0d47a1;
+}
+
+.cancelado {
+    background: #f8d7da;
+    color: #a12631;
+}
+
+.rascunho {
+    background: #e6e8ec;
+    color: #555;
+}
+
+.pendente {
+    background: #fff0c7;
+    color: #866000;
+}
+
+.acoesContrato {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    justify-content: center;
+    width: 100%;
+}
+
+.botaoSecundario,
+.botaoPerigo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    min-height: 2.5rem;
+    padding: .55rem 1rem;
+    border-radius: .25rem;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.botaoSecundario {
+    border: 1px solid #0d47a1;
+    background: #fff;
+    color: #0d47a1;
+}
+
+.botaoPerigo {
+    border: 1px solid #b42318;
+    background: #fff;
+    color: #b42318;
+}
+
+.botaoSecundario:disabled,
+.botaoPerigo:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+.acoesClausula {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .35rem;
+    padding-top: .45rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.botaoIcone,
+.botaoIconePerigo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    min-height: 1.9rem;
+    padding: .25rem .55rem;
+    border-radius: .25rem;
+    font-family: inherit;
+    font-size: .72rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botaoIcone {
+    border: 1px solid #b8c8df;
+    background: #eef4fc;
+    color: #0d47a1;
+}
+
+.botaoIconePerigo {
+    border: 1px solid #e6b8bc;
+    background: #fdf2f3;
+    color: #a12631;
+}
+
+.botaoIcone:disabled,
+.botaoIconePerigo:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+.alertaErro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .65rem;
+    width: 100%;
+    padding: .85rem 1rem;
+    border: 1px solid #e6b8bc;
+    border-radius: .55rem;
+    background: #fdf2f3;
+    color: #a12631;
+    font-size: .8rem;
+    text-align: center;
+}
+
+.vazioSecao {
+    padding: .75rem .85rem;
+    border: 1px dashed #b8c8df;
+    border-radius: .55rem;
+    background: #f8fafd;
+    color: #55677f;
+    font-size: .76rem;
+    text-align: center;
+}
+
+.previaPdf {
+    width: 100%;
+    height: min(65vh, 34rem);
+    border: 1px solid #c4c4c4;
+    border-radius: .4rem;
+    background: #f3f5f8;
+}
+
+.acoesPdf {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: .75rem;
+    justify-content: center;
+}
+
+.sucessoBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .85rem;
+    padding: 1.25rem .85rem;
+    text-align: center;
+    color: #15720c;
+}
+
+.sucessoBox svg {
+    font-size: 2.2rem;
+}
+
+.sucessoBox p {
+    color: #454545;
+    font-size: .82rem;
+    line-height: 1.5;
+}
+
 .voltar:focus-visible,
 .botaoPrincipal:focus-visible,
+.botaoSecundario:focus-visible,
+.botaoPerigo:focus-visible,
+.botaoIcone:focus-visible,
+.botaoIconePerigo:focus-visible,
 .copiarLink:focus-visible,
 .linkAssinatura:focus-visible,
 .clausula summary:focus-visible,
-.clausulaExtra input:focus-visible,
 .cabecalhoExtras button:focus-visible {
     outline: 2px solid #0d47a1;
     outline-offset: 3px;

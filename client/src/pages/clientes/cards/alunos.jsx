@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
 import { alterarAluno, criarAluno, excluirAluno, listarAluno } from '../../../services/aluno'
-import { listarResponsaveis } from '../../../services/responsaveis'
-import { listarEscola } from '../../../services/escola'
-import { listarTurnosEscola } from '../../../services/turnosEscola'
 import ListaClientes from './ListaClientes'
 
 const MESES = [
@@ -51,29 +48,14 @@ const adaptarParaLista = (aluno, turnos) => {
     }
 }
 
-const Alunos = () => {
+const Alunos = ({ responsaveis, escolas, turnos }) => {
     const [alunos, setAlunos] = useState([])
-    const [responsaveis, setResponsaveis] = useState([])
-    const [escolas, setEscolas] = useState([])
-    const [turnos, setTurnos] = useState([])
 
     useEffect(() => {
-        const carregarAlunos = async () => {
-            const [dadosAlunos, dadosResponsaveis, dadosEscolas, dadosTurnos] = await Promise.all([
-                listarAluno(),
-                listarResponsaveis(),
-                listarEscola(),
-                listarTurnosEscola(),
-            ])
-
-            setAlunos(dadosAlunos.map((aluno) => adaptarParaLista(aluno, dadosTurnos)))
-            setResponsaveis(dadosResponsaveis)
-            setEscolas(dadosEscolas)
-            setTurnos(dadosTurnos)
-        }
-
-        carregarAlunos()
-    }, [])
+        listarAluno().then((dadosAlunos) => {
+            setAlunos(dadosAlunos.map((aluno) => adaptarParaLista(aluno, turnos)))
+        })
+    }, [turnos])
 
     const salvarNovoAluno = async (valores) => {
         const alunoCriado = await criarAluno(valores)
