@@ -9,7 +9,7 @@
     background-color: #eeeeeeb4;
 
     font-family: 'Bree Serif', serif;
-    font-size: 1.2rem;
+    font-size: 1.2625rem;
 }
 
 .logcad-toggle a {
@@ -20,7 +20,7 @@
     place-items: center;
 
     padding: 0.7rem 1rem;
-    line-height: 1.2rem;
+    line-height: 1.3;
 
     text-align: center;
     text-decoration: none;

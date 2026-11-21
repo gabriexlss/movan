@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState, useEffect } from 'react'
 import { FaChevronLeft, FaChevronRight, FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import fotoPlaceholder from '../../../assets/media/img/placeholders/placeholder.jpg'
 import DefaultCard from '../../../components/cards/DefaultCard'
+import IconeCliente from '../IconeCliente'
 import DialogExcluirCliente from '../dialogs/DialogExcluirCliente'
 import DialogFormularioCliente from '../dialogs/DialogFormularioCliente'
 import styles from './cards-clientes.module.css'
@@ -74,7 +74,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
         if (!termo) return itens
 
         return itens.filter((registro) =>
-            [registro.nome, ...registro.detalhes, registro.badge]
+            [registro.nome, ...(registro.detalhes || montarDetalhes(tipo, registro)), registro.badge]
                 .filter(Boolean)
                 .join(' ')
                 .toLocaleLowerCase('pt-BR')
@@ -195,7 +195,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                         {registrosDaPagina.map((registro) => (
                             <li className={styles.registro} key={registro.id}>
                                 <span className={styles.avatar} aria-hidden="true">
-                                    <img src={fotoPlaceholder} alt="" />
+                                    <IconeCliente tipo={tipo} />
                                 </span>
                                 <div className={styles.informacoes}>
                                     <Link
@@ -205,7 +205,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                                     >
                                         {registro.nome}
                                     </Link>
-                                    {registro.detalhes.map((detalhe) => <span key={detalhe}>{detalhe}</span>)}
+                                    {(registro.detalhes || montarDetalhes(tipo, registro)).map((detalhe) => <span key={detalhe}>{detalhe}</span>)}
                                 </div>
                                 <div className={styles.acoes}>
                                     {registro.badge && <span className={styles.badge}>{registro.badge}</span>}

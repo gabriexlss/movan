@@ -61,6 +61,36 @@ const MESSAGES = {
     ACCOUNT_VERIFICATION_REQUIRED: 'Sua Conta precisa estar verificada para realizar essa ação.',
     FIELD_UPDATED: 'Campo atualizado com sucesso.',
     FIELD_UPDATE_FAILED: 'Não foi possível atualizar o campo.',
+    SIGNATURE_SAVED: 'Assinatura salva com sucesso.',
+    SIGNATURE_UPDATED: 'Assinatura atualizada com sucesso.',
+    SIGNATURE_LOAD_FAILED: 'Não foi possível carregar sua assinatura.',
+    SIGNATURE_SAVE_FAILED: 'Não foi possível salvar sua assinatura. Tente novamente.',
+    SIGNATURE_ALREADY_EXISTS: 'Sua assinatura já está cadastrada e não pode ser alterada.',
+    SIGNATURE_REQUIRED: 'Desenhe sua assinatura antes de concluir.',
+    CONTRACT_CREATED: 'Contrato criado com sucesso.',
+    CONTRACT_CREATE_FAILED: 'Não foi possível criar o contrato.',
+    CONTRACT_UPDATED: 'Contrato atualizado com sucesso.',
+    CONTRACT_UPDATE_FAILED: 'Não foi possível atualizar o contrato.',
+    CONTRACT_DELETED: 'Contrato excluído com sucesso.',
+    CONTRACT_DELETE_FAILED: 'Não foi possível excluir o contrato.',
+    CONTRACT_FINALIZED: 'Contrato finalizado com sucesso.',
+    CONTRACT_FINALIZE_FAILED: 'Não foi possível finalizar o contrato.',
+    CONTRACT_CANCELLED: 'Contrato cancelado com sucesso.',
+    CONTRACT_CANCEL_FAILED: 'Não foi possível cancelar o contrato.',
+    CONTRACT_LINK_RECREATED: 'Novo link de assinatura gerado com sucesso.',
+    CONTRACT_LINK_RECREATE_FAILED: 'Não foi possível recriar o link de assinatura.',
+    CONTRACT_LINK_COPIED: 'Link copiado para a área de transferência.',
+    CONTRACT_LINK_COPY_FAILED: 'Não foi possível copiar o link.',
+    CONTRACT_SIGNED: 'Contrato assinado com sucesso.',
+    CONTRACT_SIGN_FAILED: 'Não foi possível assinar o contrato.',
+    CLAUSE_CREATED: 'Cláusula adicionada com sucesso.',
+    CLAUSE_CREATE_FAILED: 'Não foi possível adicionar a cláusula.',
+    CLAUSE_UPDATED: 'Cláusula atualizada com sucesso.',
+    CLAUSE_UPDATE_FAILED: 'Não foi possível atualizar a cláusula.',
+    CLAUSE_DELETED: 'Cláusula excluída com sucesso.',
+    CLAUSE_DELETE_FAILED: 'Não foi possível excluir a cláusula.',
+    CLAUSE_MOVED: 'Ordem das cláusulas atualizada.',
+    CLAUSE_MOVE_FAILED: 'Não foi possível mover a cláusula.',
     CURRENT_CNPJ_MISMATCH: 'CNPJ atual não confere.',
     NEW_CNPJ_INVALID_LENGTH: 'CNPJ novo inválido. O CNPJ deve conter 14 caracteres.',
     CURRENT_CNPJ_INVALID_LENGTH: 'CNPJ atual inválido. O CNPJ deve conter 14 caracteres.',
@@ -153,6 +183,47 @@ const getFieldErrorCodes = (error) => {
         .flatMap((field) => field?._errors || [])
 }
 
+const getResponseMessageText = (response) => {
+    const msg = response?.data?.msg
+    return typeof msg === 'string' && msg.trim() ? msg.trim() : null
+}
+
+const resolveErrorText = (entry, fallbackCode) => {
+    if (MESSAGES[entry]) return MESSAGES[entry]
+    if (typeof entry === 'string' && entry.trim() && !/^[A-Z0-9_]+$/.test(entry.trim())) {
+        return entry.trim()
+    }
+    return getMessage(entry, fallbackCode)
+}
+
+const getApiErrorMessage = (error, fallbackCode = 'UNEXPECTED_ERROR') => {
+    if (error?.code === 'ECONNABORTED') {
+        return getMessage('TIMEOUT')
+    }
+    if (!error?.response) {
+        return getMessage('NO_CONNECTION')
+    }
+
+    const fieldErrorCodes = getFieldErrorCodes(error)
+    if (fieldErrorCodes.length > 0) {
+        return fieldErrorCodes
+            .map((entry) => resolveErrorText(entry, fallbackCode))
+            .join(' ')
+    }
+
+    const responseCode = getResponseMessageCode(error.response)
+    if (MESSAGES[responseCode]) {
+        return MESSAGES[responseCode]
+    }
+
+    const responseMessage = getResponseMessageText(error.response)
+    if (responseMessage) {
+        return responseMessage
+    }
+
+    return getMessage(fallbackCode)
+}
+
 const successToast = (messageCode) => {
     return toast.success(getMessage(messageCode), {
         id: `success:${messageCode}`,
@@ -185,7 +256,7 @@ const apiErrorToast = (error, fallbackCode) => {
 
     if (fieldErrorCodes.length > 0) {
         const message = fieldErrorCodes
-            .map((messageCode) => getMessage(messageCode, fallbackCode))
+            .map((messageCode) => resolveErrorText(messageCode, fallbackCode))
             .join(' ')
 
         return toast.error(message, {
@@ -194,16 +265,24 @@ const apiErrorToast = (error, fallbackCode) => {
     }
 
     const responseCode = getResponseMessageCode(error.response)
+    const responseMessage = getResponseMessageText(error.response)
     const messageCode = MESSAGES[responseCode] ? responseCode : fallbackCode
 
     if (error.response.status === 429) {
         const seconds = segundosRetryAfter(error.response.headers)
+        const baseMessage = MESSAGES[responseCode] || responseMessage || getMessage(messageCode)
         const message = seconds === null
-            ? getMessage(messageCode)
-            : `${getMessage(messageCode)} Aguarde ${seconds} segundos antes de tentar novamente.`
+            ? baseMessage
+            : `${baseMessage} Aguarde ${seconds} segundos antes de tentar novamente.`
 
         return toast.error(message, {
             id: `error:${messageCode}:rate-limit`,
+        })
+    }
+
+    if (!MESSAGES[responseCode] && responseMessage) {
+        return toast.error(responseMessage, {
+            id: `error:msg:${responseMessage}`,
         })
     }
 
@@ -229,20 +308,37 @@ const globalApiErrorToast = (error) => {
     }
     if (status === 404) return apiErrorToast(error, 'RESOURCE_NOT_FOUND')
     if (status === 403) return apiErrorToast(error, 'ACCESS_DENIED')
+    if (status === 409) return apiErrorToast(error, 'UNEXPECTED_ERROR')
+    if (status === 413) return apiErrorToast(error, 'PAYLOAD_TOO_LARGE')
+    if (status === 415) return apiErrorToast(error, 'INVALID_REQUEST_DATA')
     if (status === 429) return apiErrorToast(error, 'TOO_MANY_REQUESTS')
 
     if (status === 400) {
         const fieldErrorCodes = getFieldErrorCodes(error)
         const responseCode = getResponseMessageCode(error.response)
-        const messageCodes = fieldErrorCodes.length > 0
-            ? fieldErrorCodes
-            : [MESSAGES[responseCode] ? responseCode : 'INVALID_REQUEST_DATA']
-        const message = `${MESSAGES.INVALID_REQUEST} ${messageCodes
-            .map((messageCode) => getMessage(messageCode, 'INVALID_REQUEST_DATA'))
-            .join(' ')}`
+        const responseMessage = getResponseMessageText(error.response)
+
+        if (fieldErrorCodes.length > 0) {
+            const message = `${MESSAGES.INVALID_REQUEST} ${fieldErrorCodes
+                .map((messageCode) => resolveErrorText(messageCode, 'INVALID_REQUEST_DATA'))
+                .join(' ')}`
+
+            return toast.error(message, {
+                id: `error:invalid-request:${fieldErrorCodes.join(':')}`,
+            })
+        }
+
+        if (!MESSAGES[responseCode] && responseMessage) {
+            return toast.error(responseMessage, {
+                id: `error:invalid-request:${responseMessage}`,
+            })
+        }
+
+        const messageCode = MESSAGES[responseCode] ? responseCode : 'INVALID_REQUEST_DATA'
+        const message = `${MESSAGES.INVALID_REQUEST} ${getMessage(messageCode, 'INVALID_REQUEST_DATA')}`
 
         return toast.error(message, {
-            id: `error:invalid-request:${messageCodes.join(':')}`,
+            id: `error:invalid-request:${messageCode}`,
         })
     }
 
@@ -251,7 +347,13 @@ const globalApiErrorToast = (error) => {
 
 const AppToaster = () => {
     return (
-        <Toaster position="top-right" toastOptions={{ duration: 6000 }}>
+        <Toaster
+            position="top-right"
+            toastOptions={{
+                duration: 6000,
+                style: { fontSize: '1.0625rem', lineHeight: 1.4, overflowWrap: 'anywhere' },
+            }}
+        >
             {(currentToast) => (
                 <div
                     onTouchEnd={() => toast.dismiss(currentToast.id)}
@@ -268,6 +370,7 @@ export {
     AppToaster,
     apiErrorToast,
     errorToast,
+    getApiErrorMessage,
     globalApiErrorToast,
     responseSuccessToast,
     successToast,

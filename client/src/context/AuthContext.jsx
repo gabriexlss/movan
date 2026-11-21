@@ -14,6 +14,10 @@ const rotasPublicas = [
     '/error',
 ]
 
+const ehRotaPublica = (pathname) => (
+    rotasPublicas.includes(pathname) || pathname.startsWith('/assinar/')
+)
+
 const ERROR_CODE_STORAGE_KEY = 'movan:errorcode'
 
 export const AuthProvider = ({ children }) => {
@@ -35,6 +39,11 @@ export const AuthProvider = ({ children }) => {
 //CARREGAR SESSÃO
 //=======================
     const loadSession = useCallback(async () => {
+        if (pathname.startsWith('/assinar/')) {
+            setIsLoading(false)
+            return
+        }
+
         try {
             const health = await api.get('/health', { skipGlobalErrorToast: true }) //verifica se o backend esta online
             if (health.status !== 200) { //se dar algum erro
@@ -94,7 +103,7 @@ export const AuthProvider = ({ children }) => {
             setUser(null)//deixa tudo nulo ou falso 
             setIsLoading(false)
 
-            if (!rotasPublicas.includes(pathname)) { //caso a rota atual do usuario não for uma rota publica
+            if (!ehRotaPublica(pathname)) { //caso a rota atual do usuario não for uma rota publica
                 navigate('/login', { replace: true }) //manda pro login
             }
         }

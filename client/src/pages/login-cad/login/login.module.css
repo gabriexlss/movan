@@ -43,7 +43,7 @@
 
     color: #263238;
     font-family: 'Bree Serif', sans-serif;
-    font-size: 1rem;
+    font-size: 1.0625rem;
     outline: none;
 
     box-sizing: border-box;
@@ -62,7 +62,7 @@
     
     color: #6B7280;
     font-family: 'Bree Serif', sans-serif;
-    font-size: 0.95rem;
+    font-size: 1.0125rem;
 
     transform: translateY(-50%);
     pointer-events: none;
@@ -83,12 +83,15 @@
 .inputSenha input:-webkit-autofill + label {
     top: 0;
     color: #0D47A1;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
 }
 
 .entrar{
     width: 50%;
-    height: 2.5rem;
+    min-width: min(100%, 10rem);
+    min-height: 2.75rem;
+    padding: .4rem .75rem;
+    line-height: 1.25;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -101,12 +104,12 @@
     
     font-family: 'Bree Serif', serif;
     color: #FFFFFF;
-    font-size: 1.5rem;
+    font-size: 1.5625rem;
     cursor: pointer;
 }
 
 .formulario-login .ou{
-    font-size: 1.4rem;
+    font-size: 1.4625rem;
     color: #C0C0C0;
     margin: 2%;
 }
