@@ -11,7 +11,7 @@ export const listarRotas = async (filtros = {}) => {
         if (filtros.dia) params.dia = filtros.dia
         if (filtros.id) params.id = filtros.id
 
-        const response = await api.get('/rota', { params, skipGlobalErrorToast: true })
+        const response = await api.get('/rota', { params, skipGlobalErrorToast: true, timeout: 30000 })
         return response.data.rotas || []
     } catch (erro) {
         if (erro.response?.status === 404) {
@@ -26,7 +26,7 @@ export const listarRotas = async (filtros = {}) => {
 //==========================
 export const obterPontosRota = async (rotaId) => {
     try {
-        const response = await api.get(`/rota/${rotaId}/pontos`, { skipGlobalErrorToast: true })
+        const response = await api.get(`/rota/${rotaId}/pontos`, { skipGlobalErrorToast: true, timeout: 30000 })
         return response.data.pontos || []
     } catch (erro) {
         if (erro.response?.status === 404) {
@@ -37,12 +37,36 @@ export const obterPontosRota = async (rotaId) => {
 }
 
 //==========================
+//ADICIONAR PONTO (ALUNO) A ROTA
+//==========================
+export const adicionarPontoRota = async (rotaId, alunoId) => {
+    const response = await api.post(
+        `/rota/${rotaId}/pontos`,
+        { aluno_id: Number(alunoId) },
+        { skipGlobalErrorToast: true, timeout: 30000 },
+    )
+    return response.data
+}
+
+//==========================
+//EXCLUIR PONTO DA ROTA
+//==========================
+export const excluirPontoRota = async (rotaId, pontoId) => {
+    const response = await api.delete(`/rota/${rotaId}/pontos/${pontoId}`, {
+        skipGlobalErrorToast: true,
+        timeout: 30000,
+    })
+    return response.data
+}
+
+//==========================
 //MOVER PONTOS DE UMA ROTA
 //==========================
 export const moverPontosRota = async (rotaId, from, to) => {
-    const response = await api.post(`/rota/${rotaId}/pontos/mover`, null, {
+    const response = await api.post(`/rota/${rotaId}/pontos/mover`, {}, {
         params: { from, to },
         skipGlobalErrorToast: true,
+        timeout: 30000,
     })
     return response.data
 }
@@ -51,16 +75,18 @@ export const moverPontosRota = async (rotaId, from, to) => {
 //OTIMIZAR ROTA
 //==========================
 export const otimizarRota = async (rotaId, { latitude, longitude }) => {
-    const response = await api.post(`/rota/${rotaId}/otimizar`, { latitude, longitude }, {
-        skipGlobalErrorToast: true,
-    })
+    const response = await api.post(
+        `/rota/${rotaId}/otimizar`,
+        { latitude: Number(latitude), longitude: Number(longitude) },
+        { skipGlobalErrorToast: true, timeout: 60000 },
+    )
     return response.data
 }
 
 //==========================
 //OBTER POLYLINE DE UMA ROTA
 //==========================
-export const obterPolylineRota = async (rotaId, coordenadas) => {
+export const obterPolylineRota = async (rotaId, coordenadas, signal) => {
     try {
         const params = {}
         if (coordenadas?.latitude != null && coordenadas?.longitude != null) {
@@ -68,7 +94,12 @@ export const obterPolylineRota = async (rotaId, coordenadas) => {
             params.longitude = coordenadas.longitude
         }
 
-        const response = await api.get(`/rota/${rotaId}/polyline`, { params, skipGlobalErrorToast: true })
+        const response = await api.get(`/rota/${rotaId}/polyline`, {
+            params,
+            signal,
+            skipGlobalErrorToast: true,
+            timeout: 30000,
+        })
         return response.data.polyline || null
     } catch {
         return null

@@ -34,14 +34,18 @@ const CardHorarios = () => {
                 const pontosPromises = rotasDoDia.map((r) => obterPontosRota(r.id))
                 const resultadosPontos = await Promise.all(pontosPromises)
 
-                // Agrupa as escolas atendidas por turno
+                // Agrupa escolas e turnos atendidos por turno da rota
                 const escolasPorTurno = { MANHA: new Set(), TARDE: new Set(), NOITE: new Set() }
+                const turnoIdsPorTurno = { MANHA: new Set(), TARDE: new Set(), NOITE: new Set() }
 
                 rotasDoDia.forEach((rota, idx) => {
                     const pontos = resultadosPontos[idx] || []
                     pontos.forEach((p) => {
                         if (p.escola_id && escolasPorTurno[rota.turno]) {
                             escolasPorTurno[rota.turno].add(String(p.escola_id))
+                            if (p.escola_turno_id) {
+                                turnoIdsPorTurno[rota.turno].add(String(p.escola_turno_id))
+                            }
                         }
                     })
                 })
@@ -50,11 +54,12 @@ const CardHorarios = () => {
 
                 ;['MANHA', 'TARDE', 'NOITE'].forEach((t) => {
                     const idsEscolas = escolasPorTurno[t]
+                    const idsTurnos = turnoIdsPorTurno[t]
                     if (idsEscolas && idsEscolas.size > 0) {
-                        const turnosRelevantes = todosTurnos.filter(
-                            (turno) => idsEscolas.has(String(turno.escola_id)) &&
-                                       String(turno.turno).toUpperCase() === t
-                        )
+                        const turnosRelevantes = todosTurnos.filter((turno) => (
+                            idsTurnos.has(String(turno.id))
+                            || (idsEscolas.has(String(turno.escola_id)) && String(turno.turno).toUpperCase() === t)
+                        ))
 
                         if (turnosRelevantes.length > 0) {
                             const entradas = turnosRelevantes.map((tr) => String(tr.hora_entrada).slice(0, 5)).sort()

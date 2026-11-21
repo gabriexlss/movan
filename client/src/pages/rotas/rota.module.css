@@ -7,9 +7,11 @@
 .conteudo {
     width: calc(100% - 3rem);
     margin: .55rem auto 0;
+    padding-bottom: 1.5rem;
 }
 
-.conteudo {
+.conteudo,
+.modal {
     --azul: #0d47a1;
     --amarelo: #ffc33a;
 
@@ -30,25 +32,53 @@
     opacity: 1;
 }
 
-.secaoTurnos {
-    display: flex;
-    align-items: center;
+.filtrosRota {
+    display: grid;
     gap: .55rem;
     margin-bottom: .8rem;
 }
 
-.secaoFiltros {
+.diasSemana {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid #d5d5d5;
+    border-radius: .5rem;
+    background: #fff;
+}
+
+.diasSemana button {
+    min-height: 2.1rem;
+    padding: .25rem;
+    border: 0;
+    background: #fff;
+    color: var(--azul);
+    font-size: .72rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.diasSemana button + button {
+    border-left: 1px solid #dedede;
+}
+
+.diasSemana button[aria-pressed='true'] {
+    background: var(--azul);
+    color: #fff;
+    font-weight: 600;
+}
+
+.secaoTurnos {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: .55rem;
-    margin-bottom: .8rem;
+    gap: .5rem;
 }
 
 .turnos {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    flex: 1;
-    max-width: 24rem;
+    flex: 1 1 14rem;
     overflow: hidden;
     border: 1px solid #d5d5d5;
     border-radius: .5rem;
@@ -88,66 +118,55 @@
     font-size: .9rem;
 }
 
-.dias {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    flex: 1;
-    max-width: 24rem;
-    overflow: hidden;
-    border: 1px solid #d5d5d5;
-    border-radius: .5rem;
-}
-
-.dias button {
+.acoesTopo {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    min-height: 2.15rem;
-    padding: .2rem;
-    border: 0;
-    background: #fff;
-    color: var(--azul);
-    font-size: .7rem;
-    cursor: pointer;
+    gap: .45rem;
 }
 
-.dias button + button {
-    border-left: 1px solid #dedede;
-}
-
-.dias button[aria-pressed='true'] {
-    background: #e8eef8;
-    font-weight: 600;
-}
-
-.sentido {
+.conteudo .sentido,
+.conteudo .otimizar {
     display: inline-flex;
     align-items: center;
-    gap: .25rem;
-    min-height: 2.15rem;
-    padding: .25rem .55rem;
-    border: 1px solid #d5d5d5;
+    justify-content: center;
+    gap: .35rem;
+    min-height: 2.45rem;
+    padding: .35rem .75rem;
     border-radius: .5rem;
-    background: #fff;
-    color: var(--azul);
-    font-size: .7rem;
+    font-size: .7425rem;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
 }
 
-.sentido svg {
-    font-size: 1rem;
+.conteudo .sentido {
+    border: 1px solid #d5d5d5;
+    background: #fff;
+    color: var(--azul);
+}
+
+.conteudo .otimizar {
+    border: 0;
+    background: var(--azul);
+    color: #fff;
+}
+
+.conteudo .otimizar:disabled,
+.conteudo .adicionar:disabled,
+.acoes button:disabled {
+    opacity: .5;
+    cursor: default;
 }
 
 .painel {
     display: grid;
-    gap: .5rem;
+    gap: .55rem;
 }
 
 .mapa {
     position: relative;
-    height: clamp(14rem, 75vw, 25rem);
+    height: clamp(15rem, 70vw, 25rem);
     overflow: hidden;
     border: 2px solid var(--amarelo);
     border-radius: .65rem;
@@ -167,15 +186,11 @@
     font-size: .625rem;
 }
 
-.mapaLeaflet :global(.leaflet-marker-icon) {
-    filter: hue-rotate(145deg) saturate(1.5);
-}
-
 .controlesMapa {
     position: absolute;
     right: .65rem;
     bottom: 1.8rem;
-    z-index: 1;
+    z-index: 400;
     display: grid;
     gap: .3rem;
 }
@@ -200,8 +215,8 @@
 
 .listas {
     display: grid;
-    gap: .45rem;
-    padding: .45rem .45rem .9rem;
+    gap: .65rem;
+    padding: .55rem .5rem .9rem;
     border-radius: .65rem;
     background: #f4f2f2;
 }
@@ -213,23 +228,122 @@
     justify-content: space-between;
     gap: .35rem .5rem;
     margin-bottom: .35rem;
-    padding-inline: .55rem;
+    padding-inline: .35rem;
 }
 
+.conteudo .adicionar {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    min-height: 1.8rem;
+    padding: .25rem .55rem;
+    border: 0;
+    border-radius: .3rem;
+    background: var(--azul);
+    color: #fff;
+    font-size: .6825rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.adicionar svg {
+    font-size: .85rem;
+}
+
+.paradas,
 .escolas,
 .alunos {
     list-style: none;
 }
 
+.paradas,
 .escolas {
     border: 1px solid #d0cdcd;
     border-radius: .35rem;
     background: #fff;
 }
 
+.parada {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .4rem;
+    min-height: 3rem;
+    padding: .4rem .45rem;
+}
+
+.parada + .parada {
+    border-top: 1px solid #e0dddd;
+}
+
+.ordemBadge {
+    display: grid;
+    place-items: center;
+    min-width: 1.45rem;
+    height: 1.45rem;
+    padding: 0 .25rem;
+    border-radius: 999px;
+    background: #e8eef8;
+    color: var(--azul);
+    font-size: .66rem;
+    font-weight: 700;
+}
+
+.iconeParadaAluno {
+    display: grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 50%;
+    background: #fff0c9;
+    color: #946400;
+    font-size: .95rem;
+}
+
+.dadosParada {
+    display: grid;
+    gap: .1rem;
+    min-width: 0;
+    font-size: .66rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.dadosParada strong {
+    color: #454545;
+    font-size: .7425rem;
+    font-weight: 600;
+}
+
+.subinfoParada {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .3rem;
+}
+
+.tagEmbarque,
+.tagDesembarque {
+    display: inline-block;
+    padding: .08rem .32rem;
+    border-radius: .2rem;
+    font-size: .6rem;
+    font-weight: 600;
+}
+
+.tagEmbarque {
+    background: #d8eddd;
+    color: #15720c;
+}
+
+.tagDesembarque {
+    background: #e8eef8;
+    color: var(--azul);
+}
+
 .escola {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: .35rem;
     min-height: 3.25rem;
@@ -242,7 +356,7 @@
 }
 
 .escolaAtiva {
-    background: #edf2fb;
+    background: #eef4fc;
 }
 
 .iconeEscola {
@@ -289,8 +403,33 @@
     font-weight: 600;
 }
 
+.acoes {
+    display: flex;
+    align-items: center;
+    gap: .2rem;
+}
+
+.acoes button {
+    display: grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.65rem;
+    padding: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: .25rem;
+    background: #fff;
+    color: var(--azul);
+    font-size: .82rem;
+    cursor: pointer;
+}
+
+.acoes .excluir {
+    border-color: #f0d0d0;
+    color: #bf3737;
+}
+
 .secaoAlunos {
-    min-height: 16rem;
+    min-height: 10rem;
     padding: .55rem .65rem;
     border-radius: .55rem;
     background: #fff;
@@ -305,15 +444,16 @@
 }
 
 .alunos {
-    padding: 0 .45rem;
+    padding: 0 .25rem;
 }
 
 .aluno {
     display: grid;
-    grid-template-columns: 1.15rem minmax(0, 1fr);
+    grid-template-columns: 1.15rem minmax(0, 1fr) auto;
     align-items: center;
     gap: .35rem;
-    min-height: 1.8rem;
+    min-height: 2.1rem;
+    padding-block: .2rem;
     font-size: .7425rem;
     overflow-wrap: anywhere;
 }
@@ -328,10 +468,129 @@
 }
 
 .mensagemVazia {
-    padding: .65rem;
-    color: #888;
-    font-size: .75rem;
+    padding: .9rem .6rem;
+    color: #777;
+    font-size: .74rem;
     text-align: center;
+}
+
+.erroEstado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .55rem;
+    padding: .9rem .65rem;
+    border: 1px solid #f0c4c7;
+    border-radius: .45rem;
+    background: #fdf2f3;
+    color: #a12631;
+    font-size: .76rem;
+    text-align: center;
+}
+
+.modal[role='dialog'] {
+    padding: 1.25rem;
+    border: 1px solid #eee;
+    border-radius: .75rem;
+    box-shadow: 0 3px 5px rgb(0 0 0 / 22%);
+}
+
+.modal > div[aria-hidden='true'] {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: .5rem;
+    border-width: 1px;
+}
+
+.modal > header h2 {
+    color: var(--azul);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.modal p {
+    margin: .3rem 0 0;
+    color: #666;
+    font-family: 'Poppins', sans-serif;
+    font-size: .8125rem;
+    font-weight: 400;
+}
+
+.camposPonto,
+.botoesModal {
+    display: grid;
+    gap: .6rem;
+}
+
+.camposPonto + .botoesModal {
+    margin-top: .9rem;
+}
+
+.modal > header + div {
+    margin-top: .9rem;
+}
+
+.campoSelect {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    color: var(--azul);
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+.campoSelect select {
+    width: 100%;
+    min-height: 2.45rem;
+    padding: .45rem .65rem;
+    border: 1px solid #b8b8b8;
+    border-radius: .45rem;
+    background: #fff;
+    color: #454545;
+    font-family: inherit;
+    font-size: .84rem;
+}
+
+.botoesModal button {
+    min-height: 2.25rem;
+    padding: .45rem .75rem;
+    border: 0;
+    border-radius: .3rem;
+    background: var(--azul);
+    color: #fff;
+    font-family: inherit;
+    font-size: .8125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botoesModal .botaoDestrutivo {
+    background: #b42318;
+}
+
+.botoesModal .botaoCancelar {
+    border: 1px solid var(--azul);
+    background: #fff;
+    color: var(--azul);
+}
+
+.botoesModal button:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+.diasSemana button:focus-visible,
+.turnos button:focus-visible,
+.sentido:focus-visible,
+.otimizar:focus-visible,
+.adicionar:focus-visible,
+.acoes button:focus-visible,
+.modal button:focus-visible,
+.campoSelect select:focus-visible {
+    outline: 2px solid var(--azul);
+    outline-offset: 2px;
 }
 
 @media (max-width: 360px) {
@@ -339,8 +598,7 @@
         width: calc(100% - 2rem);
     }
 
-    .secaoTurnos,
-    .secaoFiltros {
+    .secaoTurnos {
         gap: .35rem;
     }
 

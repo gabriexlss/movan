@@ -8,7 +8,7 @@ import { FaBell } from "react-icons/fa";
 import { PiCaretRightBold } from 'react-icons/pi'
 import { Link } from 'react-router-dom'
 
-const TituloTela = ({ title, className='', subtitle }) => {
+const TituloTela = ({ title, className='', subtitle, notificacoesAtivas = true }) => {
     const dataAtual = new Intl.DateTimeFormat("pt-BR", {
         weekday: "long",
         day: "numeric",
@@ -32,6 +32,7 @@ const TituloTela = ({ title, className='', subtitle }) => {
                     ref={botaoNotificacaoRef}
                     type="button"
                     className={styles.iconeNotificacao}
+                    disabled={!notificacoesAtivas}
                     aria-label={quantidadeNotificacoesNaoLidas > 0
                         ? `Abrir notificações. ${quantidadeNotificacoesNaoLidas} não lidas.`
                         : 'Abrir notificações'}
@@ -52,7 +53,7 @@ const TituloTela = ({ title, className='', subtitle }) => {
 
                 <DialogNotif
                     id={notificacoesId}
-                    isOpen={notifAberta}
+                    isOpen={notificacoesAtivas && notifAberta}
                     onClose={() => setNotifAberta(false)}
                     anchorRef={botaoNotificacaoRef}
                     notificationCount={notificacoes.length}

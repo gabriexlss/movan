@@ -30,6 +30,24 @@ export const MoverPontosRotaSchema = z.object({
     to: z.coerce.number().int().positive()
 })
 
+export const AdicionarPontoRotaSchema = z.object({
+    aluno_id: z.coerce
+        .number("ID do aluno deve ser um número.")
+        .int("ID do aluno deve ser um número inteiro.")
+        .positive("ID do aluno deve ser positivo.")
+})
+
+export const PontoRotaParamsSchema = z.object({
+    id: z.coerce
+        .number("ID da rota deve ser um número.")
+        .int("ID da rota deve ser um número inteiro.")
+        .positive("ID da rota deve ser positivo."),
+    ponto_id: z.coerce
+        .number("ID do ponto deve ser um número.")
+        .int("ID do ponto deve ser um número inteiro.")
+        .positive("ID do ponto deve ser positivo.")
+})
+
 export type PontoRota = z.infer<typeof PontoRotaSchema>
 export type CriarPontoRota = z.infer<typeof CriarPontoRotaSchema>
 export type EditarPontoRota = z.infer<typeof EditarPontoRotaSchema>

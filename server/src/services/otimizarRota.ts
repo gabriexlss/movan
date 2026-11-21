@@ -62,13 +62,14 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
     if (!motorista) {
         throw new Error('MOTORISTA_NOT_FOUND')
     }
-    // pegando as infos da rota
+    // pegando as infos da rota e garantindo que pertence ao motorista autenticado
     const { rows: [rota] } = await cliente.query<Rota>(
         `
         SELECT * FROM rota
-        WHERE id = $1
+        WHERE id = $1 AND motorista_id = $2
+        FOR UPDATE
         `,
-        [rotaID]
+        [rotaID, motoristaID]
     )
     if (!rota) {
         throw new Error('ROTA_NOT_FOUND')
@@ -77,10 +78,10 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
     const { rows: pontosRota } = await cliente.query<PontoRota>(
         `
         SELECT * FROM ponto_rota
-        WHERE rota_id = $1
+        WHERE rota_id = $1 AND motorista_id = $2
         ORDER BY ordem ASC
         `,
-        [rotaID]
+        [rotaID, motoristaID]
     )
     if (pontosRota.length < 1) {
         throw new Error('PONTOS_NOT_FOUND')
@@ -227,12 +228,17 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
             }
         )
     }
+    const capacidadeConfigurada = Number(motorista.capacidade_van)
+    const capacidadeEfetiva = Number.isFinite(capacidadeConfigurada) && capacidadeConfigurada > 0
+        ? capacidadeConfigurada
+        : Math.max(15, shipmentAlunos.length)
+
     const veiculoVan: IVehicle = {
         label: 'van-escolar', // nome do veiculo
         travelMode: 1, // modo de viajar, 1 significa carro
         startLocation: { latitude: coordenadasValidas.data.latitude, longitude: coordenadasValidas.data.longitude }, // localização inicial do veiculo
         loadLimits: { // capacidade
-            assentos: { maxLoad: motorista.capacidade_van }
+            assentos: { maxLoad: capacidadeEfetiva }
         },
         costPerKilometer: 2.5, // custo por kilometro, no caso aqui ta 2 reais e 50 centavos por kilometro
         costPerHour: 45.0 // custo por hora
@@ -296,15 +302,39 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
         }
     }
 
-    // agr coloco a nova ordem no banco de dados.
-    for (const pontoRotaOtimizado of pontosRotaOtimizados) {
+    // garante que nenhum ponto existente fique de fora da nova sequência
+    for (const pontoRestante of pontosRota) {
+        if (!pontosRotaOtimizados.some(p => p.id === pontoRestante.id)) {
+            pontosRotaOtimizados.push({
+                ...pontoRestante,
+                ordem: pontosRotaOtimizados.length + 1
+            })
+        }
+    }
+
+    // atualiza em duas fases para evitar colisão de UNIQUE(rota_id, ordem) durante a reordenação
+    const maiorOrdem = pontosRota.reduce((maior, ponto) => Math.max(maior, ponto.ordem), 0)
+    for (let i = 0; i < pontosRotaOtimizados.length; i++) {
+        const ponto = pontosRotaOtimizados[i]!
         await cliente.query(
             `
             UPDATE ponto_rota
             SET ordem = $1
-            WHERE id = $2
+            WHERE id = $2 AND rota_id = $3 AND motorista_id = $4
             `,
-            [pontoRotaOtimizado.ordem, pontoRotaOtimizado.id]
+            [maiorOrdem + i + 1, ponto.id, rotaID, motoristaID]
+        )
+    }
+
+    for (let i = 0; i < pontosRotaOtimizados.length; i++) {
+        const ponto = pontosRotaOtimizados[i]!
+        await cliente.query(
+            `
+            UPDATE ponto_rota
+            SET ordem = $1
+            WHERE id = $2 AND rota_id = $3 AND motorista_id = $4
+            `,
+            [i + 1, ponto.id, rotaID, motoristaID]
         )
     }
     return

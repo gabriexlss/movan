@@ -1,51 +1,63 @@
-import { useEffect, useRef, useMemo, useState, useCallback } from 'react'
-import { LuLocateFixed, LuMinus } from 'react-icons/lu'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { LuLocateFixed, LuMinus, LuPlus } from 'react-icons/lu'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import marcadorUrl from 'leaflet/dist/images/marker-icon.png'
-import marcadorRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
-import sombraMarcadorUrl from 'leaflet/dist/images/marker-shadow.png'
 
 import { obterPolylineRota } from '../../services/rotas'
-import { carregarGooglePlaces } from '../../services/googlePlaces'
 import styles from './rota.module.css'
 
-const centroInicial = [-23.6905, -46.7735]
+const CENTRO_INICIAL = [-23.6905, -46.7735]
 
-const iconePadrao = L.icon({
-    iconUrl: marcadorUrl,
-    iconRetinaUrl: marcadorRetinaUrl,
-    shadowUrl: sombraMarcadorUrl,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    shadowSize: [41, 41],
-})
-
-// Ícone especial para a van / posição atual do motorista
-const iconeMotorista = L.divIcon({
-    className: 'marcador-van-motorista',
+const criarIconeParada = (ordem, ehEscola) => L.divIcon({
+    className: 'marcador-parada-movan',
     html: `
         <div style="
-            width: 34px;
-            height: 34px;
-            background: #0d47a1;
+            width: 30px;
+            height: 30px;
+            background: ${ehEscola ? '#0d47a1' : '#ffc33a'};
             border: 2.5px solid #ffffff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-            color: #ffffff;
-            font-size: 17px;
+            color: ${ehEscola ? '#ffffff' : '#1c2b45'};
+            font-family: Poppins, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
         ">
-            🚐
+            ${ordem ?? '•'}
+        </div>
+    `,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+})
+
+const iconeMotorista = L.divIcon({
+    className: 'marcador-van-motorista',
+    html: `
+        <div style="
+            width: 34px;
+            height: 34px;
+            background: #15720c;
+            border: 2.5px solid #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            color: #ffffff;
+            font-family: Poppins, sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+        ">
+            VAN
         </div>
     `,
     iconSize: [34, 34],
     iconAnchor: [17, 17],
 })
 
-// Decodifica a polyline codificada do Google Routes
 const decodePolyline = (encoded) => {
     if (!encoded) return []
     let index = 0
@@ -82,7 +94,6 @@ const decodePolyline = (encoded) => {
     return coords
 }
 
-// Calcula a distância euclidiana aproximada em metros entre dois pontos
 const calcularDistanciaMetros = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3
     const rad = Math.PI / 180
@@ -96,19 +107,24 @@ const calcularDistanciaMetros = (lat1, lon1, lat2, lon2) => {
     return R * c
 }
 
-const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
+const escaparHtml = (texto) => String(texto || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+
+const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [], versaoMapa = 0 }) => {
     const elementoMapa = useRef(null)
     const instanciaMapa = useRef(null)
     const marcadoresRef = useRef([])
     const marcadorMotoristaRef = useRef(null)
     const polylineRef = useRef(null)
     const polylineOriginalRef = useRef([])
+    const posicaoMotoristaRef = useRef(null)
 
     const [posicaoMotorista, setPosicaoMotorista] = useState(null)
 
-    // construir coordenadas a partir dos pontos na ordem em que estão cadastrados
-    const coordenadas = useMemo(() => {
-        return pontos
+    const coordenadas = useMemo(() => (
+        pontos
             .map((ponto) => {
                 if (ponto.aluno_id) {
                     const aluno = alunos.find((a) => String(a.id) === String(ponto.aluno_id))
@@ -118,6 +134,7 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
                             lng: Number(aluno.longitude),
                             nome: aluno.nome,
                             tipo: 'Aluno',
+                            ehEscola: false,
                             tipoPonto: ponto.tipo_ponto,
                             ordem: ponto.ordem,
                         }
@@ -131,6 +148,7 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
                             lng: Number(escola.longitude),
                             nome: escola.nome,
                             tipo: 'Escola',
+                            ehEscola: true,
                             tipoPonto: ponto.tipo_ponto,
                             ordem: ponto.ordem,
                         }
@@ -138,13 +156,13 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
                 }
                 return null
             })
-            .filter(Boolean)
-    }, [pontos, alunos, escolas])
+            .filter((item) => item && Number.isFinite(item.lat) && Number.isFinite(item.lng))
+    ), [pontos, alunos, escolas])
 
-    // 1. Inicializar mapa Leaflet
+    // 1. Inicializar mapa Leaflet uma única vez
     useEffect(() => {
         const mapa = L.map(elementoMapa.current, {
-            center: centroInicial,
+            center: CENTRO_INICIAL,
             zoom: 13,
             zoomControl: false,
         })
@@ -165,34 +183,34 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
         }
     }, [])
 
-    // 2. Acompanhar localização em tempo real do motorista via Geolocation API
+    // 2. Acompanhar localização do motorista sem recalcular a API de polyline a cada tick
     useEffect(() => {
-        if (!navigator.geolocation) return
+        if (!navigator.geolocation) return undefined
 
         const watchId = navigator.geolocation.watchPosition(
             (pos) => {
-                setPosicaoMotorista({
+                const novaPos = {
                     lat: pos.coords.latitude,
                     lng: pos.coords.longitude,
-                })
+                }
+                posicaoMotoristaRef.current = novaPos
+                setPosicaoMotorista(novaPos)
             },
             () => {
-                // Se o motorista não conceder permissão, não quebra
+                // Permissão negada ou GPS indisponível: segue normalmente sem o marcador da van
             },
             {
                 enableHighAccuracy: true,
-                maximumAge: 5000,
+                maximumAge: 10000,
                 timeout: 10000,
-            }
+            },
         )
 
-        return () => {
-            navigator.geolocation.clearWatch(watchId)
-        }
+        return () => navigator.geolocation.clearWatch(watchId)
     }, [])
 
-    // 3. Atualizar traçado e consumir/apagar trecho por onde o motorista já passou
-    const atualizarLinhaRestante = useCallback((posAtual) => {
+    // 3. Atualiza visualmente o trecho restante da polyline já carregada
+    const desenharPolyline = useCallback((posAtual) => {
         const mapa = instanciaMapa.current
         const coordsOriginais = polylineOriginalRef.current
         if (!mapa || coordsOriginais.length < 2) return
@@ -200,7 +218,6 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
         let coordsRestantes = coordsOriginais
 
         if (posAtual) {
-            // Encontra o ponto da polyline mais próximo da localização atual
             let indiceMaisProximo = 0
             let menorDistancia = Infinity
 
@@ -213,7 +230,6 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
                 }
             }
 
-            // Se o motorista está a menos de 75m da rota, "apaga" os pontos anteriores
             if (menorDistancia <= 75 && indiceMaisProximo > 0) {
                 coordsRestantes = [
                     [posAtual.lat, posAtual.lng],
@@ -225,45 +241,40 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
         if (polylineRef.current) {
             polylineRef.current.setLatLngs(coordsRestantes)
         } else {
-            const linha = L.polyline(coordsRestantes, {
+            polylineRef.current = L.polyline(coordsRestantes, {
                 color: '#0d47a1',
                 weight: 4.5,
                 opacity: 0.85,
                 lineCap: 'round',
                 lineJoin: 'round',
             }).addTo(mapa)
-            polylineRef.current = linha
         }
     }, [])
 
-    // 4. Atualizar o marcador da van do motorista no mapa
+    // 4. Atualiza somente o marcador da van e o trecho percorrido quando o GPS muda
     useEffect(() => {
         const mapa = instanciaMapa.current
-        if (!mapa) return
+        if (!mapa || !posicaoMotorista) return
 
-        if (posicaoMotorista) {
-            if (marcadorMotoristaRef.current) {
-                marcadorMotoristaRef.current.setLatLng([posicaoMotorista.lat, posicaoMotorista.lng])
-            } else {
-                const marcador = L.marker([posicaoMotorista.lat, posicaoMotorista.lng], {
-                    icon: iconeMotorista,
-                    zIndexOffset: 1000,
-                }).addTo(mapa)
-                marcador.bindTooltip('<strong>Sua van (Localização atual)</strong>', { direction: 'top' })
-                marcadorMotoristaRef.current = marcador
-            }
-
-            // Atualiza o traçado da rota apagando por onde já passou
-            atualizarLinhaRestante(posicaoMotorista)
+        if (marcadorMotoristaRef.current) {
+            marcadorMotoristaRef.current.setLatLng([posicaoMotorista.lat, posicaoMotorista.lng])
+        } else {
+            const marcador = L.marker([posicaoMotorista.lat, posicaoMotorista.lng], {
+                icon: iconeMotorista,
+                zIndexOffset: 1000,
+            }).addTo(mapa)
+            marcador.bindTooltip('<strong>Sua van (posição atual)</strong>', { direction: 'top' })
+            marcadorMotoristaRef.current = marcador
         }
-    }, [posicaoMotorista, atualizarLinhaRestante])
 
-    // 5. Carregar trajeto pelas ruas iniciando no local atual do motorista
+        desenharPolyline(posicaoMotorista)
+    }, [posicaoMotorista, desenharPolyline])
+
+    // 5. Atualiza marcadores e busca a polyline no backend somente quando rota/pontos mudam
     useEffect(() => {
         const mapa = instanciaMapa.current
-        if (!mapa) return
+        if (!mapa) return undefined
 
-        // Limpar marcadores anteriores
         marcadoresRef.current.forEach((m) => mapa.removeLayer(m))
         marcadoresRef.current = []
 
@@ -274,127 +285,97 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
         polylineOriginalRef.current = []
 
         if (coordenadas.length === 0) {
-            if (posicaoMotorista) {
-                mapa.setView([posicaoMotorista.lat, posicaoMotorista.lng], 14)
+            if (posicaoMotoristaRef.current) {
+                mapa.setView([posicaoMotoristaRef.current.lat, posicaoMotoristaRef.current.lng], 14)
             } else {
-                mapa.setView(centroInicial, 13)
+                mapa.setView(CENTRO_INICIAL, 13)
             }
-            return
+            return undefined
         }
 
-        // Adicionar marcadores dos alunos e escolas
-        coordenadas.forEach(({ lat, lng, nome, tipo, tipoPonto, ordem }) => {
+        coordenadas.forEach(({ lat, lng, nome, tipo, ehEscola, tipoPonto, ordem }) => {
             const marcador = L.marker([lat, lng], {
-                icon: iconePadrao,
+                icon: criarIconeParada(ordem, ehEscola),
                 alt: nome || 'Ponto da rota',
             }).addTo(mapa)
 
             const rotuloTipoPonto = tipoPonto === 'EMBARQUE' ? 'Embarque' : 'Desembarque'
             marcador.bindTooltip(
-                `<strong>${ordem ? `${ordem}º - ` : ''}${nome}</strong><br/>${tipo} (${rotuloTipoPonto})`,
-                { direction: 'top' }
+                `<strong>${ordem ? `${ordem}º - ` : ''}${escaparHtml(nome)}</strong><br/>${tipo} (${rotuloTipoPonto})`,
+                { direction: 'top' },
             )
             marcadoresRef.current.push(marcador)
         })
 
-        let ativo = true
+        const controller = new AbortController()
 
-        const tracarRota = async () => {
-            // Se temos a posição do motorista, a rota começa nela!
-            // Ex: [Motorista] -> [Ponto 1] -> [Ponto 2] -> ... -> [Destino final]
-            const pontosComOrigem = posicaoMotorista
-                ? [{ lat: posicaoMotorista.lat, lng: posicaoMotorista.lng }, ...coordenadas]
-                : coordenadas
+        const carregarTrajeto = async () => {
+            const posAtual = posicaoMotoristaRef.current
+            const podePedirPolyline = rotaId && (coordenadas.length >= 2 || (coordenadas.length >= 1 && posAtual))
 
-            // Tenta usar a Google Directions API pelo cliente com a chave VITE_GOOGLE_MAPS_API_KEY
-            if (pontosComOrigem.length >= 2) {
-                try {
-                    const googleMaps = await carregarGooglePlaces()
-                    const directionsService = new googleMaps.DirectionsService()
-
-                    const origem = { lat: pontosComOrigem[0].lat, lng: pontosComOrigem[0].lng }
-                    const destino = {
-                        lat: pontosComOrigem[pontosComOrigem.length - 1].lat,
-                        lng: pontosComOrigem[pontosComOrigem.length - 1].lng,
-                    }
-                    const waypoints = pontosComOrigem.slice(1, -1).map((p) => ({
-                        location: { lat: p.lat, lng: p.lng },
-                        stopover: true,
-                    }))
-
-                    const resultado = await new Promise((resolve, reject) => {
-                        directionsService.route(
-                            {
-                                origin: origem,
-                                destination: destino,
-                                waypoints,
-                                travelMode: googleMaps.TravelMode.DRIVING,
-                            },
-                            (res, status) => {
-                                if (status === 'OK' && res) resolve(res)
-                                else reject(new Error(status))
-                            }
-                        )
-                    })
-
-                    if (ativo && resultado?.routes?.[0]?.overview_path) {
-                        const coordsGoogle = resultado.routes[0].overview_path.map((pt) => [pt.lat(), pt.lng()])
-                        polylineOriginalRef.current = coordsGoogle
-                        atualizarLinhaRestante(posicaoMotorista)
-
-                        if (instanciaMapa.current) {
-                            const bounds = L.latLngBounds(coordsGoogle)
-                            instanciaMapa.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
-                        }
-                        return
-                    }
-                } catch {
-                    // Google Directions no front falhou ou indisponível, segue para backend
-                }
-            }
-
-            // Fallback 1: polyline codificada do backend (passando coordenadas do motorista se disponíveis)
-            if (rotaId) {
-                const coordenadasParam = posicaoMotorista
-                    ? { latitude: posicaoMotorista.lat, longitude: posicaoMotorista.lng }
+            if (podePedirPolyline) {
+                const coordsParam = posAtual
+                    ? { latitude: posAtual.lat, longitude: posAtual.lng }
                     : undefined
 
-                const polylineCodificada = await obterPolylineRota(rotaId, coordenadasParam)
-                if (ativo && polylineCodificada) {
-                    const coordsDecodificadas = decodePolyline(polylineCodificada)
-                    if (coordsDecodificadas.length > 0) {
-                        polylineOriginalRef.current = coordsDecodificadas
-                        atualizarLinhaRestante(posicaoMotorista)
+                const polylineCodificada = await obterPolylineRota(rotaId, coordsParam, controller.signal)
+                if (controller.signal.aborted) return
 
+                if (polylineCodificada) {
+                    const coordsDecodificadas = decodePolyline(polylineCodificada)
+                    if (coordsDecodificadas.length >= 2) {
+                        polylineOriginalRef.current = coordsDecodificadas
+                        desenharPolyline(posicaoMotoristaRef.current)
                         if (instanciaMapa.current) {
-                            const bounds = L.latLngBounds(coordsDecodificadas)
-                            instanciaMapa.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
+                            instanciaMapa.current.fitBounds(L.latLngBounds(coordsDecodificadas), {
+                                padding: [36, 36],
+                                maxZoom: 15,
+                            })
                         }
                         return
                     }
                 }
             }
 
-            // Fallback 2: traçado simples ligando a van e os pontos
-            if (pontosComOrigem.length > 1) {
-                const coordsSimples = pontosComOrigem.map(({ lat, lng }) => [lat, lng])
-                polylineOriginalRef.current = coordsSimples
-                atualizarLinhaRestante(posicaoMotorista)
+            if (controller.signal.aborted) return
+
+            // Fallback simples caso o backend não retorne polyline
+            const pontosSimples = coordenadas.map(({ lat, lng }) => [lat, lng])
+            if (pontosSimples.length >= 2) {
+                polylineOriginalRef.current = pontosSimples
+                desenharPolyline(posicaoMotoristaRef.current)
             }
 
-            if (instanciaMapa.current) {
-                const todosPontos = pontosComOrigem.map(({ lat, lng }) => [lat, lng])
-                const bounds = L.latLngBounds(todosPontos)
-                instanciaMapa.current.fitBounds(bounds, { padding: [35, 35], maxZoom: 15 })
+            if (instanciaMapa.current && pontosSimples.length > 0) {
+                instanciaMapa.current.fitBounds(L.latLngBounds(pontosSimples), {
+                    padding: [36, 36],
+                    maxZoom: 15,
+                })
             }
         }
 
-        tracarRota()
+        carregarTrajeto()
 
-        return () => {
-            ativo = false
+        return () => controller.abort()
+    }, [rotaId, coordenadas, versaoMapa, desenharPolyline])
+
+    const centralizarMapa = () => {
+        const mapa = instanciaMapa.current
+        if (!mapa) return
+
+        if (polylineRef.current) {
+            mapa.fitBounds(polylineRef.current.getBounds(), { padding: [36, 36], maxZoom: 15 })
+        } else if (coordenadas.length > 0) {
+            mapa.fitBounds(L.latLngBounds(coordenadas.map(({ lat, lng }) => [lat, lng])), {
+                padding: [36, 36],
+                maxZoom: 15,
+            })
+        } else if (posicaoMotoristaRef.current) {
+            mapa.setView([posicaoMotoristaRef.current.lat, posicaoMotoristaRef.current.lng], 15)
+        } else {
+            mapa.setView(CENTRO_INICIAL, 13)
         }
-    }, [rotaId, coordenadas, posicaoMotorista, atualizarLinhaRestante])
+    }
 
     return (
         <>
@@ -402,29 +383,15 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
                 ref={elementoMapa}
                 className={styles.mapaLeaflet}
                 role="region"
-                aria-label="Mapa da rota com acompanhamento em tempo real"
+                aria-label="Mapa da rota com paradas ordenadas"
             />
             <div className={styles.controlesMapa}>
                 <button
                     type="button"
-                    aria-label="Centralizar na sua van ou rota"
-                    onClick={() => {
-                        const mapa = instanciaMapa.current
-                        if (!mapa) return
-
-                        if (posicaoMotorista) {
-                            mapa.setView([posicaoMotorista.lat, posicaoMotorista.lng], 15)
-                        } else if (polylineRef.current) {
-                            mapa.fitBounds(polylineRef.current.getBounds(), { padding: [35, 35], maxZoom: 15 })
-                        } else if (coordenadas.length > 0) {
-                            const bounds = L.latLngBounds(coordenadas.map(({ lat, lng }) => [lat, lng]))
-                            mapa.fitBounds(bounds, { padding: [35, 35], maxZoom: 15 })
-                        } else {
-                            mapa.setView(centroInicial, 13)
-                        }
-                    }}
+                    aria-label="Aproximar mapa"
+                    onClick={() => instanciaMapa.current?.zoomIn()}
                 >
-                    <LuLocateFixed aria-hidden="true" />
+                    <LuPlus aria-hidden="true" />
                 </button>
                 <button
                     type="button"
@@ -432,6 +399,13 @@ const MapaRota = ({ rotaId, pontos = [], alunos = [], escolas = [] }) => {
                     onClick={() => instanciaMapa.current?.zoomOut()}
                 >
                     <LuMinus aria-hidden="true" />
+                </button>
+                <button
+                    type="button"
+                    aria-label="Centralizar rota no mapa"
+                    onClick={centralizarMapa}
+                >
+                    <LuLocateFixed aria-hidden="true" />
                 </button>
             </div>
         </>

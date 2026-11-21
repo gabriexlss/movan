@@ -4,11 +4,40 @@ import { CriarRota, FiltrosRotaSchema, OtimizarRotaSchema, Rota } from "../model
 import { PoolClient } from "pg";
 import { Aluno } from "../models/aluno.model.js";
 import { Escola } from "../models/escola/escola.model.js";
-import { MoverPontosRotaSchema, PontoRota } from "../models/rotas/pontoRota.js";
+import { AdicionarPontoRotaSchema, MoverPontosRotaSchema, PontoRota, PontoRotaParamsSchema } from "../models/rotas/pontoRota.js";
 import { EscolaTurno } from "../models/escola/turno.model.js";
 import { otimizarRota } from "../services/otimizarRota.js";
 import { ParamsSchema } from "../models/utils.model.js";
 import { gerarPolylineRota } from "../services/gerarPolyline.js";
+
+const recompactarOrdemPontos = async (cliente: PoolClient, rotaID: number, motoristaID: number): Promise<void> => {
+    const { rows: pontosRestantes } = await cliente.query<PontoRota>(
+        `
+        SELECT id, ordem FROM ponto_rota
+        WHERE rota_id = $1 AND motorista_id = $2
+        ORDER BY ordem ASC, id ASC
+        `,
+        [rotaID, motoristaID]
+    )
+
+    if (pontosRestantes.length === 0) return
+
+    const maiorOrdem = pontosRestantes.reduce((maior, ponto) => Math.max(maior, ponto.ordem), 0)
+
+    for (let i = 0; i < pontosRestantes.length; i++) {
+        await cliente.query(
+            `UPDATE ponto_rota SET ordem = $1 WHERE id = $2 AND rota_id = $3 AND motorista_id = $4`,
+            [maiorOrdem + i + 1, pontosRestantes[i]!.id, rotaID, motoristaID]
+        )
+    }
+
+    for (let i = 0; i < pontosRestantes.length; i++) {
+        await cliente.query(
+            `UPDATE ponto_rota SET ordem = $1 WHERE id = $2 AND rota_id = $3 AND motorista_id = $4`,
+            [i + 1, pontosRestantes[i]!.id, rotaID, motoristaID]
+        )
+    }
+}
 
 export const controllerRotas = {
     // gera todas as rotas assim que o motorista é criado
@@ -121,16 +150,16 @@ export const controllerRotas = {
         if (!turnoEscola) throw new Error('TURNO_NOT_FOUND');
 
         // busca todas as rotas daquele motorista.
-        let { rows: rotas } = await cliente.query<Rota>(
+        let { rows: todasRotas } = await cliente.query<Rota>(
             `
                 SELECT * FROM rota
-                WHERE motorista_id = $1 AND turno = $2
+                WHERE motorista_id = $1
                 `,
-            [motoristaID, turnoEscola.turno]
+            [motoristaID]
         )
 
         // se o motorista ainda não possui rotas geradas, gera sob demanda usando a transação atual
-        if (rotas.length < 1) {
+        if (todasRotas.length < 1) {
             const RotasParaCriar: CriarRota[] = []
             for (let i = 1; i <= 6; i++) {
                 const resto = i % 2
@@ -173,9 +202,10 @@ export const controllerRotas = {
                 i++
             }
 
-            rotas = RotasCriadas.filter(r => r.turno === turnoEscola.turno)
+            todasRotas = RotasCriadas
         }
 
+        const rotas = todasRotas.filter(r => r.turno === turnoEscola.turno)
         if (rotas.length < 1) throw new Error('ROTAS_NOT_FOUND');
 
         // for para conseguir checar e inserir em todas as rotas do motorista.
@@ -185,9 +215,12 @@ export const controllerRotas = {
                 `
                     SELECT * FROM ponto_rota
                     WHERE rota_id = $1
+                    ORDER BY ordem ASC
                     `,
                 [rota.id]
             )
+            let proximaOrdem = pontosRota.reduce((maior, ponto) => Math.max(maior, ponto.ordem), 0) + 1
+
             // verifico se algum deles tem a escola do aluno que vai ser adicionado.
             if (!pontosRota.some(ponto => ponto.escola_id === escola.id)) {
                 // se entrou no if, não achou essa escola em nenhum ponto rota. então vamos adiciona-la. 
@@ -199,7 +232,7 @@ export const controllerRotas = {
                     RETURNING *
                     `,
                     [
-                        pontosRota.length + 1,
+                        proximaOrdem,
                         rota.sentido === 'IDA' ? 'DESEMBARQUE' : 'EMBARQUE',
                         rota.id,
                         motoristaID,
@@ -208,22 +241,26 @@ export const controllerRotas = {
                     ]
                 )
                 pontosRota.push(escolaAdicionada!)
+                proximaOrdem++
             }
-            // independente de ter entrado no if ou não, pq se nao tinha a escola agora tem, vamos adicionar o aluno a rota.
-            await cliente.query(
-                `
+
+            // evita duplicar o aluno caso ele já exista nessa rota
+            if (!pontosRota.some(ponto => ponto.aluno_id === alunoID)) {
+                await cliente.query(
+                    `
                     INSERT INTO ponto_rota
                     (ordem, tipo_ponto, rota_id, motorista_id, aluno_id)
                     VALUES ($1, $2, $3, $4, $5)
                     `,
-                [
-                    pontosRota.length + 1,
-                    rota.sentido === 'IDA' ? 'EMBARQUE' : 'DESEMBARQUE',
-                    rota.id,
-                    motoristaID,
-                    alunoID
-                ]
-            )
+                    [
+                        proximaOrdem,
+                        rota.sentido === 'IDA' ? 'EMBARQUE' : 'DESEMBARQUE',
+                        rota.id,
+                        motoristaID,
+                        alunoID
+                    ]
+                )
+            }
         }
         return
     },
@@ -452,21 +489,44 @@ export const controllerRotas = {
                 })
             }
 
-            // troca os dois pontos da rota de lugar em um único UPDATE.
-            const query = `
-            UPDATE ponto_rota
-            SET ordem = CASE WHEN ordem = $1 THEN $2 ELSE $1 END
-            WHERE rota_id = $3 AND motorista_id = $4 AND ordem IN ($1, $2)
-            `
-            const operacao = await cliente.query(query, [from, to, rotaID, motoristaID])
+            if (from === to) {
+                await cliente.query('ROLLBACK')
+                return res.status(400).json({
+                    msg: "Informe posições distintas para mover os pontos."
+                })
+            }
 
-            // precisa achar exatamente os dois pontos (se from === to, só acha um).
-            if (operacao.rowCount !== 2) {
+            // busca os dois pontos e a maior ordem para fazer a troca sem risco de colisão de chave única
+            const { rows: pontosRota } = await cliente.query<Pick<PontoRota, 'id' | 'ordem'>>(
+                `
+                SELECT id, ordem FROM ponto_rota
+                WHERE rota_id = $1 AND motorista_id = $2
+                `,
+                [rotaID, motoristaID]
+            )
+            const pontoOrigem = pontosRota.find(p => p.ordem === from)
+            const pontoDestino = pontosRota.find(p => p.ordem === to)
+
+            if (!pontoOrigem || !pontoDestino) {
                 await cliente.query('ROLLBACK')
                 return res.status(400).json({
                     msg: "Um dos pontos que você quer mover não existe nesta rota."
                 })
             }
+
+            const ordemTemporaria = pontosRota.reduce((maior, p) => Math.max(maior, p.ordem), 0) + 1
+            await cliente.query(
+                `UPDATE ponto_rota SET ordem = $1 WHERE id = $2 AND rota_id = $3 AND motorista_id = $4`,
+                [ordemTemporaria, pontoOrigem.id, rotaID, motoristaID]
+            )
+            await cliente.query(
+                `UPDATE ponto_rota SET ordem = $1 WHERE id = $2 AND rota_id = $3 AND motorista_id = $4`,
+                [from, pontoDestino.id, rotaID, motoristaID]
+            )
+            await cliente.query(
+                `UPDATE ponto_rota SET ordem = $1 WHERE id = $2 AND rota_id = $3 AND motorista_id = $4`,
+                [to, pontoOrigem.id, rotaID, motoristaID]
+            )
 
             // commitando alterações.
             await cliente.query('COMMIT')
@@ -564,6 +624,213 @@ export const controllerRotas = {
             return res.status(500).json({
                 msg: "Erro Interno do Servidor."
             })
+        } finally {
+            cliente.release()
+        }
+    },
+    // adiciona manualmente um aluno (e sua escola, se ainda não estiver) a uma rota específica
+    adicionarPontoRota: async (req: Request, res: Response) => {
+        const idBruto = ParamsSchema.safeParse(req.params)
+        const dadosBrutos = AdicionarPontoRotaSchema.safeParse(req.body)
+
+        if (!idBruto.success) {
+            return res.status(400).json({
+                msg: "ID da rota inválido.",
+                erro: idBruto.error.format()
+            })
+        }
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para adicionar ponto à rota.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        const { id: rotaID } = idBruto.data
+        const { aluno_id: alunoID } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        const cliente = await database.connect()
+        try {
+            await cliente.query('BEGIN')
+
+            const { rows: [rota] } = await cliente.query<Rota>(
+                `SELECT * FROM rota WHERE id = $1 AND motorista_id = $2 FOR UPDATE`,
+                [rotaID, motoristaID]
+            )
+            if (!rota) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({ msg: "Rota não encontrada." })
+            }
+
+            const { rows: [aluno] } = await cliente.query<Aluno>(
+                `SELECT * FROM aluno WHERE id = $1 AND motorista_id = $2`,
+                [alunoID, motoristaID]
+            )
+            if (!aluno) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({ msg: "Aluno não encontrado." })
+            }
+
+            const { rows: pontosRota } = await cliente.query<PontoRota>(
+                `SELECT * FROM ponto_rota WHERE rota_id = $1 AND motorista_id = $2 ORDER BY ordem ASC`,
+                [rotaID, motoristaID]
+            )
+
+            if (pontosRota.some(p => p.aluno_id === alunoID)) {
+                await cliente.query('ROLLBACK')
+                return res.status(409).json({ msg: "Este aluno já está nesta rota." })
+            }
+
+            let proximaOrdem = pontosRota.reduce((maior, ponto) => Math.max(maior, ponto.ordem), 0) + 1
+
+            if (aluno.escola_id && !pontosRota.some(p => p.escola_id === aluno.escola_id)) {
+                await cliente.query(
+                    `
+                    INSERT INTO ponto_rota
+                    (ordem, tipo_ponto, rota_id, motorista_id, escola_id, escola_turno_id)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    `,
+                    [
+                        proximaOrdem,
+                        rota.sentido === 'IDA' ? 'DESEMBARQUE' : 'EMBARQUE',
+                        rotaID,
+                        motoristaID,
+                        aluno.escola_id,
+                        aluno.escola_turno_id
+                    ]
+                )
+                proximaOrdem++
+            }
+
+            await cliente.query(
+                `
+                INSERT INTO ponto_rota
+                (ordem, tipo_ponto, rota_id, motorista_id, aluno_id)
+                VALUES ($1, $2, $3, $4, $5)
+                `,
+                [
+                    proximaOrdem,
+                    rota.sentido === 'IDA' ? 'EMBARQUE' : 'DESEMBARQUE',
+                    rotaID,
+                    motoristaID,
+                    alunoID
+                ]
+            )
+
+            const { rows: pontosAtualizados } = await cliente.query<PontoRota>(
+                `SELECT * FROM ponto_rota WHERE rota_id = $1 AND motorista_id = $2 ORDER BY ordem ASC`,
+                [rotaID, motoristaID]
+            )
+
+            await cliente.query('COMMIT')
+            return res.status(201).json({
+                msg: "Ponto adicionado à rota com sucesso.",
+                pontos: pontosAtualizados
+            })
+        } catch (erro) {
+            await cliente.query('ROLLBACK')
+            console.error("Erro no endpoint de adicionar ponto à rota, erro: ", erro)
+            return res.status(500).json({ msg: "Erro Interno do Servidor." })
+        } finally {
+            cliente.release()
+        }
+    },
+    // remove um ponto específico (aluno ou escola e seus alunos) de uma rota
+    excluirPontoRota: async (req: Request, res: Response) => {
+        const paramsBrutos = PontoRotaParamsSchema.safeParse(req.params)
+
+        if (!paramsBrutos.success) {
+            return res.status(400).json({
+                msg: "Parâmetros inválidos para remover ponto da rota.",
+                erro: paramsBrutos.error.format()
+            })
+        }
+
+        const { id: rotaID, ponto_id: pontoID } = paramsBrutos.data
+        const motoristaID = req.userId
+
+        const cliente = await database.connect()
+        try {
+            await cliente.query('BEGIN')
+
+            const { rowCount: rotaEncontrada } = await cliente.query(
+                `SELECT id FROM rota WHERE id = $1 AND motorista_id = $2 FOR UPDATE`,
+                [rotaID, motoristaID]
+            )
+            if (!rotaEncontrada) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({ msg: "Rota não encontrada." })
+            }
+
+            const { rows: [ponto] } = await cliente.query<PontoRota>(
+                `SELECT * FROM ponto_rota WHERE id = $1 AND rota_id = $2 AND motorista_id = $3`,
+                [pontoID, rotaID, motoristaID]
+            )
+            if (!ponto) {
+                await cliente.query('ROLLBACK')
+                return res.status(404).json({ msg: "Ponto não encontrado nesta rota." })
+            }
+
+            if (ponto.escola_id) {
+                // remove a escola e todos os alunos vinculados a ela nesta rota
+                await cliente.query(
+                    `
+                    DELETE FROM ponto_rota
+                    WHERE rota_id = $1 AND motorista_id = $2 AND (
+                        id = $3 OR aluno_id IN (
+                            SELECT id FROM aluno WHERE escola_id = $4 AND motorista_id = $2
+                        )
+                    )
+                    `,
+                    [rotaID, motoristaID, pontoID, ponto.escola_id]
+                )
+            } else if (ponto.aluno_id) {
+                const { rows: [aluno] } = await cliente.query<Pick<Aluno, 'escola_id'>>(
+                    `SELECT escola_id FROM aluno WHERE id = $1 AND motorista_id = $2`,
+                    [ponto.aluno_id, motoristaID]
+                )
+
+                await cliente.query(
+                    `DELETE FROM ponto_rota WHERE id = $1 AND rota_id = $2 AND motorista_id = $3`,
+                    [pontoID, rotaID, motoristaID]
+                )
+
+                // se não restar nenhum aluno dessa escola nesta rota, remove também o ponto da escola
+                if (aluno?.escola_id) {
+                    const { rowCount: alunosRestantes } = await cliente.query(
+                        `
+                        SELECT pr.id FROM ponto_rota pr
+                        JOIN aluno a ON a.id = pr.aluno_id
+                        WHERE pr.rota_id = $1 AND pr.motorista_id = $2 AND a.escola_id = $3
+                        LIMIT 1
+                        `,
+                        [rotaID, motoristaID, aluno.escola_id]
+                    )
+                    if (!alunosRestantes) {
+                        await cliente.query(
+                            `DELETE FROM ponto_rota WHERE rota_id = $1 AND motorista_id = $2 AND escola_id = $3`,
+                            [rotaID, motoristaID, aluno.escola_id]
+                        )
+                    }
+                }
+            } else {
+                await cliente.query(
+                    `DELETE FROM ponto_rota WHERE id = $1 AND rota_id = $2 AND motorista_id = $3`,
+                    [pontoID, rotaID, motoristaID]
+                )
+            }
+
+            await recompactarOrdemPontos(cliente, rotaID, motoristaID)
+
+            await cliente.query('COMMIT')
+            return res.status(200).json({
+                msg: "Ponto removido da rota com sucesso."
+            })
+        } catch (erro) {
+            await cliente.query('ROLLBACK')
+            console.error("Erro no endpoint de excluir ponto da rota, erro: ", erro)
+            return res.status(500).json({ msg: "Erro Interno do Servidor." })
         } finally {
             cliente.release()
         }

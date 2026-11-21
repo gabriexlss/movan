@@ -55,14 +55,19 @@ const CardRotas = () => {
                             chavesVistas.add(chave)
                             const escola = todasEscolas.find((e) => String(e.id) === String(p.escola_id))
                             if (escola) {
-                                // Tenta obter o horário de entrada/saída do turno daquela escola
-                                const turnoInfo = todosTurnos.find(
-                                    (t) => String(t.escola_id) === String(escola.id) &&
-                                           String(t.turno).toUpperCase() === String(rota.turno).toUpperCase()
-                                )
+                                // Tenta obter o horário pelo escola_turno_id do ponto ou pelo turno da escola
+                                const turnoInfo = (p.escola_turno_id
+                                    && todosTurnos.find((t) => String(t.id) === String(p.escola_turno_id)))
+                                    || todosTurnos.find(
+                                        (t) => String(t.escola_id) === String(escola.id)
+                                            && String(t.turno).toUpperCase() === String(rota.turno).toUpperCase(),
+                                    )
 
-                                const horarioTexto = turnoInfo?.hora_entrada
-                                    ? String(turnoInfo.hora_entrada).slice(0, 5)
+                                const horarioBruto = rota.sentido === 'VOLTA'
+                                    ? (turnoInfo?.hora_saida || turnoInfo?.hora_entrada)
+                                    : turnoInfo?.hora_entrada
+                                const horarioTexto = horarioBruto
+                                    ? String(horarioBruto).slice(0, 5)
                                     : nomesTurnoAmigaveis[rota.turno] || rota.turno.toLowerCase()
 
                                 itensEncontrados.push({
