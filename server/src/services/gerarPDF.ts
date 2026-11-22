@@ -1,8 +1,7 @@
 import { createElement } from "react";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Document, Font, Image, Page, Path, Svg, Text, TextInput, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import { PDFDocument } from "pdf-lib";
@@ -16,51 +15,61 @@ export interface DadosContrato extends ContratoView {
     nome_motorista: string;
 }
 
-// Referências explícitas para o bundler da Vercel (@vercel/nft) rastrear as fontes do servidor e do pdfkit.
-try {
-    const requireCjs = createRequire(import.meta.url);
-    requireCjs("pdfkit/standard-fonts/Courier");
-    requireCjs("pdfkit/standard-fonts/CourierBold");
-    requireCjs("pdfkit/standard-fonts/CourierBoldOblique");
-    requireCjs("pdfkit/standard-fonts/CourierOblique");
-    requireCjs("pdfkit/standard-fonts/Helvetica");
-    requireCjs("pdfkit/standard-fonts/HelveticaBold");
-    requireCjs("pdfkit/standard-fonts/HelveticaBoldOblique");
-    requireCjs("pdfkit/standard-fonts/HelveticaOblique");
-    requireCjs("pdfkit/standard-fonts/Symbol");
-    requireCjs("pdfkit/standard-fonts/TimesBold");
-    requireCjs("pdfkit/standard-fonts/TimesBoldItalic");
-    requireCjs("pdfkit/standard-fonts/TimesItalic");
-    requireCjs("pdfkit/standard-fonts/TimesRoman");
-    requireCjs("pdfkit/standard-fonts/ZapfDingbats");
-} catch {
-    const requireFromReactPdf = createRequire(import.meta.resolve("@react-pdf/renderer"));
-    const pdfkitJsDir = dirname(requireFromReactPdf.resolve("pdfkit"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/Courier.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/CourierBold.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/CourierBoldOblique.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/CourierOblique.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/Helvetica.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/HelveticaBold.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/HelveticaBoldOblique.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/HelveticaOblique.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/Symbol.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/TimesBold.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/TimesBoldItalic.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/TimesItalic.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/TimesRoman.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/ZapfDingbats.cjs"));
-    void readFileSync(join(pdfkitJsDir, "standard-fonts/chunks/standardGlyphNames-DNHAb7rp.cjs"));
-}
-const poppinsRegularPath = fileURLToPath(new URL("../../assets/fonts/Poppins-Regular.ttf", import.meta.url));
-const poppinsSemiBoldPath = fileURLToPath(new URL("../../assets/fonts/Poppins-SemiBold.ttf", import.meta.url));
-const breeSerifRegularPath = fileURLToPath(new URL("../../assets/fonts/BreeSerif-Regular.ttf", import.meta.url));
-const tanNimbusPath = fileURLToPath(new URL("../../assets/fonts/TAN-NIMBUS.ttf", import.meta.url));
+// Referências estáticas de filesystem para que o @vercel/nft inclua as fontes padrão (.cjs) do pdfkit
+// mesmo quando createRequire em módulos ESM não rastreia a condição "require" dos exports.
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/Courier.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/CourierBold.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/CourierBoldOblique.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/CourierOblique.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/Helvetica.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/HelveticaBold.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/HelveticaBoldOblique.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/HelveticaOblique.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/Symbol.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/TimesBold.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/TimesBoldItalic.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/TimesItalic.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/TimesRoman.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/ZapfDingbats.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/chunks/standardGlyphNames-DNHAb7rp.cjs", import.meta.url)));
+void existsSync(fileURLToPath(new URL("../../node_modules/pdfkit/js/standard-fonts/chunks", import.meta.url)));
 
-void readFileSync(poppinsRegularPath);
-void readFileSync(poppinsSemiBoldPath);
-void readFileSync(breeSerifRegularPath);
-void readFileSync(tanNimbusPath);
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/Courier.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/CourierBold.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/CourierBoldOblique.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/CourierOblique.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/Helvetica.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/HelveticaBold.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/HelveticaBoldOblique.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/HelveticaOblique.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/Symbol.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/TimesBold.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/TimesBoldItalic.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/TimesItalic.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/TimesRoman.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/ZapfDingbats.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/chunks/standardGlyphNames-DNHAb7rp.cjs"));
+void existsSync(join(process.cwd(), "node_modules/pdfkit/js/standard-fonts/chunks"));
+
+const poppinsRegularUrl = fileURLToPath(new URL("../../assets/fonts/Poppins-Regular.ttf", import.meta.url));
+const poppinsRegularCwd = join(process.cwd(), "assets/fonts/Poppins-Regular.ttf");
+const poppinsRegularPath = existsSync(poppinsRegularUrl) ? poppinsRegularUrl : poppinsRegularCwd;
+void existsSync(poppinsRegularCwd);
+
+const poppinsSemiBoldUrl = fileURLToPath(new URL("../../assets/fonts/Poppins-SemiBold.ttf", import.meta.url));
+const poppinsSemiBoldCwd = join(process.cwd(), "assets/fonts/Poppins-SemiBold.ttf");
+const poppinsSemiBoldPath = existsSync(poppinsSemiBoldUrl) ? poppinsSemiBoldUrl : poppinsSemiBoldCwd;
+void existsSync(poppinsSemiBoldCwd);
+
+const breeSerifRegularUrl = fileURLToPath(new URL("../../assets/fonts/BreeSerif-Regular.ttf", import.meta.url));
+const breeSerifRegularCwd = join(process.cwd(), "assets/fonts/BreeSerif-Regular.ttf");
+const breeSerifRegularPath = existsSync(breeSerifRegularUrl) ? breeSerifRegularUrl : breeSerifRegularCwd;
+void existsSync(breeSerifRegularCwd);
+
+const tanNimbusUrl = fileURLToPath(new URL("../../assets/fonts/TAN-NIMBUS.ttf", import.meta.url));
+const tanNimbusCwd = join(process.cwd(), "assets/fonts/TAN-NIMBUS.ttf");
+const tanNimbusPath = existsSync(tanNimbusUrl) ? tanNimbusUrl : tanNimbusCwd;
+void existsSync(tanNimbusCwd);
 
 // Assets do próprio servidor: funcionam tanto em src/services quanto em dist/services.
 Font.register({
