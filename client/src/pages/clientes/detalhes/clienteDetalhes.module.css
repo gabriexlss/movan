@@ -288,6 +288,16 @@
     background: #fff;
     color: #777;
     font-size: 0.6625rem;
+    text-decoration: none;
+}
+
+.contrato:hover {
+    border-color: #0d47a1;
+}
+
+.contrato:focus-visible {
+    outline: 2px solid #0d47a1;
+    outline-offset: 2px;
 }
 
 .contratoCabecalho {
@@ -325,9 +335,20 @@
     color: #b67a00;
 }
 
-.status-atrasado {
+.status-atrasado,
+.status-cancelado {
     background: #f0dada;
     color: #a32020;
+}
+
+.status-rascunho {
+    background: #e6e8ec;
+    color: #555;
+}
+
+.status-finalizado {
+    background: #dce7f7;
+    color: #0d47a1;
 }
 
 .naoEncontrado {

@@ -6,7 +6,8 @@ import { middlewareAssinatura } from "../../middlewares/assinatura.middleware.js
 
 const router = Router()
 
-// Cria ou atualiza a assinatura do motorista.
+// Obtém, cria ou atualiza a assinatura do motorista.
+router.get('/assinatura-motorista', middlewareAutenticar, controllerAssinatura.obterAssinaturaMotorista)
 router.post('/assinatura-motorista', middlewareAutenticar, receberImagem.single('assinatura'), validarImagemAssinatura, controllerAssinatura.assinarMotorista)
 
 // O responsável acessa e assina o contrato pelo token do link.

@@ -12,20 +12,12 @@ import type { AssinaturaMotorista } from "../../models/contrato/assinatura.model
 import { BUCKET_NAME, CDN_URL, r2 } from "../../db/r2.js";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { ClausulaMuitoLongaError, gerarContratoPdf } from "../../services/gerarPDF.js";
 import type { Clausula } from "../../models/contrato/clausula.model.js";
 import type { Motorista } from "../../models/motorista/motorista.model.js";
 import { obterArquivoR2 } from "../../utils/obterArquivoR2.js";
 import { deletarR2 } from "../../utils/deletarR2.js";
 import { travarContratoRascunho } from "../../utils/travarContratoRascunho.js";
-
-const substituirDadosClausula = (texto: string, substituicoes: Record<string, string>) => {
-    // Percorre o objeto trocando tudo no texto
-    for (const [busca, troca] of Object.entries(substituicoes)) {
-        texto = texto.replaceAll(busca, troca);
-    }
-    return texto
-}
+import { aplicarSubstituicoesClausulas, montarSubstituicoesContrato } from "../../utils/substituirDadosClausula.js";
 
 export const controllerContrato = {
     // controller para criar um contrato 
@@ -132,7 +124,8 @@ export const controllerContrato = {
 
             // retorno
             return res.status(201).json({
-                msg: "Contrato criado com sucesso."
+                msg: "Contrato criado com sucesso.",
+                id: contrato_id
             })
         } catch (erro) {
             try {
@@ -324,7 +317,20 @@ export const controllerContrato = {
         }
 
         try {
-            const { rows: resultado } = await database.query(query, valores)
+            const [{ rows: resultado }, { rows: [dadosMotorista] }, detalhesPorContrato] = await Promise.all([
+                database.query(query, valores),
+                database.query<Pick<Motorista, "nome" | "credencial">>(
+                    "SELECT nome, COALESCE(cpf, cnpj) AS credencial FROM motorista WHERE id = $1",
+                    [motoristaID]
+                ),
+                contratoID
+                    ? Promise.resolve(new Map<number, ContratoView>())
+                    : database.query<ContratoView>(
+                        "SELECT * FROM vw_detalhes_contrato WHERE motorista_id = $1",
+                        [motoristaID]
+                    ).then(({ rows }) => new Map(rows.map((item) => [item.contrato_id, item])))
+            ])
+
             if (contratoID && resultado.length === 0) {
                 return res.status(404).json({
                     msg: "Nenhum contrato encontrado."
@@ -350,7 +356,12 @@ export const controllerContrato = {
                 const { rows: clausulas } = await database.query(queryClausulas, [dados.contrato_id])
                 const { rows: [documento] } = await database.query<ContratoDocumento>(queryDocumento, [dados.contrato_id])
 
-                dados.clausula = clausulas
+                const dadosParaSubstituicao = contratoID
+                    ? (dados as ContratoView)
+                    : (detalhesPorContrato.get(dados.contrato_id) ?? dados)
+                const substituicoes = montarSubstituicoesContrato(dadosParaSubstituicao, dadosMotorista)
+
+                dados.clausula = aplicarSubstituicoesClausulas(clausulas, substituicoes)
                 dados.pdf = null
                 if (documento?.caminho_arquivo) {
                     const endereco = new URL(documento.caminho_arquivo)
@@ -451,32 +462,10 @@ export const controllerContrato = {
             const Clausulas = await controllerClausula.obterClausulas(contratoID)
 
             // as substituições que vão ser feitas no texto das clausulas originais pelo seu valor definitivo
-            const substituicoes: Record<string, string> = {
-                // Cláusula 1 - Valor e pagamento
-                "{{contrato_valor_mensal}}": `${DadosContrato.valor_mensal}`,
-                "{{contrato_dia_vencimento}}": `${DadosContrato.dia_vencimento}`,
-
-                // Cláusula 2 - Objeto e prestação do serviço
-                "{{motorista_nome}}": `${DadosMotorista.nome}`,
-                "{{motorista_documento}}": `${DadosMotorista.credencial}`,
-                "{{aluno_nome}}": `${DadosContrato.nome_aluno}`,
-                "{{responsavel_nome}}": `${DadosContrato.nome_responsavel}`,
-                "{{responsavel_cpf}}": `${DadosContrato.cpf_responsavel}`,
-                "{{escola_nome}}": `${DadosContrato.nome_escola}`,
-                "{{escola_endereco}}": `${DadosContrato.endereco_escola}`,
-                "{{aluno_endereco}}": `${DadosContrato.endereco_aluno}`,
-                "{{contrato_periodo}}": `${DadosContrato.data_inicio.toLocaleDateString("pt-BR")} a ${DadosContrato.data_fim.toLocaleDateString("pt-BR")}`,
-            };
+            const substituicoes = montarSubstituicoesContrato(DadosContrato, DadosMotorista)
 
             // chamando a função que vai efetivamente realizar essa troca
-            const clausulasFinais: Clausula[] = Clausulas.map(c => {
-                const conteudoSubstituido = substituirDadosClausula(c.conteudo, substituicoes)
-                const ClausulaSubstituida: Clausula = {
-                    ...c,
-                    conteudo: conteudoSubstituido
-                }
-                return ClausulaSubstituida
-            })
+            const clausulasFinais: Clausula[] = aplicarSubstituicoesClausulas(Clausulas, substituicoes)
             // criando objeto final
             const ContratoeClausulas = {
                 ...DadosContrato,
