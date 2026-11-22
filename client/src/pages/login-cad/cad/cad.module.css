@@ -118,3 +118,31 @@
     color: var(--theme-muted);
     font-size: 1.4625rem;
 }
+
+@media (min-width: 64rem) {
+    .formulario-cad {
+        padding: 1.5rem 0;
+    }
+
+    .formulario-cad form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 1rem;
+        margin-top: 0;
+    }
+
+    .campo-cadastro {
+        min-width: 0;
+    }
+
+    .campo-cadastro:first-child,
+    .formulario-cad form > :not(.campo-cadastro) {
+        grid-column: 1 / -1;
+    }
+
+    .cadastrar {
+        justify-self: center;
+        width: min(100%, 16rem);
+    }
+}

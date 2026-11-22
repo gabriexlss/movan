@@ -1,29 +1,47 @@
 .logcad-layout {
     width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
 
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+.logcad-painel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 36rem);
+    min-width: 0;
+}
+
 .logcad-conteudo {
     width: 100%;
+    min-width: 0;
     flex: 1;
 }
 
 @media (min-width: 64rem) {
     .logcad-layout {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: auto 1fr auto;
-        min-height: 100dvh;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 36rem);
+        gap: clamp(2rem, 5vw, 5rem);
+        width: min(100%, 80rem);
+        margin-inline: auto;
+        padding: clamp(1.5rem, 3vw, 3rem);
+    }
+
+    .logcad-painel {
+        width: 100%;
+        padding: 2rem;
+        border: 1px solid var(--theme-border);
+        border-radius: 1.5rem;
+        background-color: var(--theme-panel);
     }
 
     .logcad-conteudo {
-        grid-area: 2 / 1 / 3 / -1;
-        justify-self: center;
-        width: min(100%, 42rem);
-        padding-block: 1rem;
+        flex: none;
     }
 }

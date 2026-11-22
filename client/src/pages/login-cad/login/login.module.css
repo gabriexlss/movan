@@ -113,3 +113,17 @@
     color: var(--theme-muted);
     margin: 2%;
 }
+
+@media (min-width: 64rem) {
+    .formulario-login {
+        padding: 1.5rem 0;
+    }
+
+    .formulario-login form {
+        margin-top: 0;
+    }
+
+    .entrar {
+        width: min(100%, 16rem);
+    }
+}

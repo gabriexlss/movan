@@ -297,7 +297,6 @@ const Rotas = () => {
             <TituloTela
                 title="Suas rotas"
                 subtitle={dataSubtitulo}
-                notificacoesAtivas={false}
             />
 
             <div className={styles.conteudo}>

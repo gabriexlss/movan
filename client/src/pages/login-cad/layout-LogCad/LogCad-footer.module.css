@@ -17,7 +17,7 @@
 
 @media (min-width: 64rem) {
     .logcad-footer-container {
-        grid-column: 1 / -1;
         margin-top: 0;
+        padding: 0.5rem 0 0;
     }
 }

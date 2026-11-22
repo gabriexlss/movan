@@ -51,11 +51,6 @@
     --theme-contract-notice-title: var(--theme-title);
     --theme-contract-notice-text: var(--theme-accent);
 
-    --theme-notification-warning: #8f6200;
-    --theme-notification-success: #21853a;
-    --theme-notification-info: #0d47a1;
-    --theme-notification-event: #783ac5;
-    --theme-on-notification: #ffffff;
     --theme-map: #efeee9;
     --theme-paper: #ffffff;
 }
@@ -105,10 +100,4 @@
     --theme-contract-notice-detail: #302719;
     --theme-contract-notice-title: var(--theme-warning);
     --theme-contract-notice-text: var(--theme-text);
-
-    --theme-notification-warning: #ffc95a;
-    --theme-notification-success: #77d995;
-    --theme-notification-info: #93beff;
-    --theme-notification-event: #c9a2ff;
-    --theme-on-notification: var(--theme-page);
 }

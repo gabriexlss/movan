@@ -34,8 +34,7 @@
     color: var(--theme-on-brand);
 }
 
-.LogCad-header-container.login p,
-.LogCad-header-container.login .titulo-header {
+.LogCad-header-container.login p {
     color: var(--theme-auth-login-text);
 }
 
@@ -53,19 +52,41 @@
     color: var(--theme-brand-yellow)
 }
 
-@media (min-width: 64rem) {
+@media (min-width: 40rem) {
     .LogCad-header-container {
-        min-height: clamp(8rem, 20vh, 11rem);
+        max-width: 36rem;
+    }
+}
+
+@media (min-width: 64rem) {
+    .LogCad-header-container.login::before {
+        background-image: url('../../../assets/media/img/header-imgs/LogCad-stain-desktop.svg');
+    }
+
+    .LogCad-header-container.cadastro::before {
+        background-image: url('../../../assets/media/img/header-imgs/LogCad-stain-cadastro-desktop.svg');
+    }
+
+    .LogCad-header-container {
+        min-height: 0;
+        aspect-ratio: 600 / 560;
         width: min(100%, 33rem);
+        justify-self: center;
+        gap: 0.75rem;
         margin: 0;
-        padding-bottom: 1.5rem;
+        padding: 0 2rem 2rem;
     }
 
     .LogCad-header-container::before {
-        background-position: center 66%;
+        background-position: center;
+        background-size: contain;
+    }
+
+    .LogCad-header-container p {
+        font-size: clamp(0.9375rem, 1.25vw, 1.125rem);
     }
 
     .titulo-header {
-        font-size: 2.25rem;
+        font-size: clamp(2.5rem, 4vw, 4rem);
     }
 }

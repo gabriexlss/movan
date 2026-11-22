@@ -42,6 +42,8 @@ const ButtonGoogle = () => {
     return (
         <GoogleLogin
             theme={theme === 'dark' ? 'filled_black' : 'outline'}
+            // Evita o fundo branco do iframe quando a página usa color-scheme: dark.
+            containerProps={{ style: { colorScheme: 'light' } }}
             onSuccess={handleSuccess} //a bilioteca do google chama a função caso ela considerar que o login pode ocorrer
             onError={() => errorToast('GOOGLE_AUTH_FAILED')} //a bilioteca do google chama a função caso ela considerar que o login não pode ocorrer
         />
