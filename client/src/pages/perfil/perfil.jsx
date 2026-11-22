@@ -262,6 +262,8 @@ const Perfil = () => {
                                 <div className={styles['linkGoogle']}>
                                     <GoogleLogin
                                         theme={theme === 'dark' ? 'filled_black' : 'outline'}
+                                        // Evita o fundo branco do iframe quando a página usa color-scheme: dark.
+                                        containerProps={{ style: { colorScheme: 'light' } }}
                                         onSuccess={vincularGoogle}
                                         onError={() => errorToast('GOOGLE_OPEN_FAILED')}
                                         text="signup_with"

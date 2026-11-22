@@ -14,6 +14,7 @@
 
 .TituloTela-container .texto{
     display: flex;
+    flex: 1;
     min-width: 0;
     flex-direction: column;
 }
@@ -33,68 +34,6 @@
     margin-top: 0.1rem;
     line-height: 1.5;
     overflow-wrap: anywhere;
-}
-
-.TituloTela-container .notificacoes {
-    flex-shrink: 0;
-    margin-left: auto;
-    align-self: center;
-    position: relative;
-}
-
-.TituloTela-container .iconeNotificacao {
-    display: grid;
-    place-items: center;
-    padding: .35rem;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    cursor: pointer;
-}
-
-.TituloTela-container .iconeNotificacao:disabled {
-    cursor: default;
-}
-
-.TituloTela-container .iconeNotificacao:not(:disabled):hover,
-.TituloTela-container .iconeNotificacao:focus-visible {
-    background: var(--theme-warning-soft);
-}
-
-.TituloTela-container .iconeNotificacao:focus-visible {
-    outline: 2px solid var(--theme-focus);
-    outline-offset: 2px;
-}
-
-.notificacaoNaoLida {
-    position: absolute;
-    top: .25rem;
-    right: .25rem;
-    width: .45rem;
-    height: .45rem;
-    border-radius: 50%;
-    background: var(--theme-action-danger);
-    pointer-events: none;
-}
-
-.verTodas {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .35rem;
-    margin-top: .25rem;
-    padding-top: .45rem;
-    border-top: 1px solid var(--theme-border);
-    color: var(--theme-accent);
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.7125rem;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.verTodas:focus-visible {
-    outline: 2px solid var(--theme-focus);
-    outline-offset: 2px;
 }
 
 @media (min-width: 64rem) {

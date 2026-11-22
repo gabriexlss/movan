@@ -21,6 +21,7 @@ import { alterarTurnoEscola, criarTurnoEscola, excluirTurnoEscola, listarTurnosE
 import toast from 'react-hot-toast'
 import CampoCliente from './CampoCliente'
 import CampoEnderecoAutocomplete from '../components/CampoEnderecoAutocomplete'
+import { nomesTurnos } from '../turnos-escola'
 import styles from './dialogsClientes.module.css'
 
 const valoresIniciais = {
@@ -267,12 +268,9 @@ const DialogFormularioCliente = ({
                                                 item.id === turno.id ? { ...item, turno: event.target.value } : item
                                             )))}
                                         >
-                                            <option value="INTEGRAL">Integral</option>
-                                            <option value="MANHA">Manhã</option>
-                                            <option value="TARDE">Tarde</option>
-                                            <option value="NOITE">Noite</option>
-                                            <option value="INTEGRAL-MANHA">Integral manhã</option>
-                                            <option value="INTEGRAL-TARDE">Integral tarde</option>
+                                            {Object.entries(nomesTurnos).map(([valor, nome]) => (
+                                                <option key={valor} value={valor}>{nome}</option>
+                                            ))}
                                         </CampoCliente>
                                         <CampoCliente label="Entrada" icon={<PiSunHorizonBold />} type="time" value={turno.hora_entrada?.slice(0, 5) || ''} onChange={(event) => setTurnosDaEscola((atuais) => atuais.map((item) => item.id === turno.id ? { ...item, hora_entrada: event.target.value } : item))} />
                                         <CampoCliente label="Saída" icon={<PiSunHorizonBold />} type="time" value={turno.hora_saida?.slice(0, 5) || ''} onChange={(event) => setTurnosDaEscola((atuais) => atuais.map((item) => item.id === turno.id ? { ...item, hora_saida: event.target.value } : item))} />
@@ -288,12 +286,9 @@ const DialogFormularioCliente = ({
                                         value={novoTurno.turno}
                                         onChange={(event) => setNovoTurno((atual) => ({ ...atual, turno: event.target.value }))}
                                     >
-                                        <option value="INTEGRAL">Integral</option>
-                                        <option value="MANHA">Manhã</option>
-                                        <option value="TARDE">Tarde</option>
-                                        <option value="NOITE">Noite</option>
-                                        <option value="INTEGRAL-MANHA">Integral manhã</option>
-                                        <option value="INTEGRAL-TARDE">Integral tarde</option>
+                                        {Object.entries(nomesTurnos).map(([valor, nome]) => (
+                                            <option key={valor} value={valor}>{nome}</option>
+                                        ))}
                                     </CampoCliente>
                                     <CampoCliente label="Entrada" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaEntrada} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaEntrada: event.target.value }))} />
                                     <CampoCliente label="Saída" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaSaida} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaSaida: event.target.value }))} />
@@ -311,12 +306,9 @@ const DialogFormularioCliente = ({
                                     value={novoTurno.turno}
                                     onChange={(event) => setNovoTurno((atual) => ({ ...atual, turno: event.target.value }))}
                                 >
-                                    <option value="INTEGRAL">Integral</option>
-                                    <option value="MANHA">Manhã</option>
-                                    <option value="TARDE">Tarde</option>
-                                    <option value="NOITE">Noite</option>
-                                    <option value="INTEGRAL-MANHA">Integral manhã</option>
-                                    <option value="INTEGRAL-TARDE">Integral tarde</option>
+                                    {Object.entries(nomesTurnos).map(([valor, nome]) => (
+                                        <option key={valor} value={valor}>{nome}</option>
+                                    ))}
                                 </CampoCliente>
                                 <CampoCliente label="Entrada" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaEntrada} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaEntrada: event.target.value }))} />
                                 <CampoCliente label="Saída" icon={<PiSunHorizonBold />} type="time" value={novoTurno.horaSaida} onChange={(event) => setNovoTurno((atual) => ({ ...atual, horaSaida: event.target.value }))} />

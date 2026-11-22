@@ -24,7 +24,6 @@ import Cliente from './pages/clientes/cliente'
 import ClienteDetalhes from './pages/clientes/detalhes/ClienteDetalhes'
 import Perfil from './pages/perfil/perfil'
 import AssinaturaPerfil from './pages/perfil/AssinaturaPerfil'
-import Notificacoes from './pages/notificacoes/notificacoes'
 import Contratos from './pages/contratos/contratos'
 import ClausulasContrato from './pages/contratos/ClausulasContrato'
 import LinkContrato from './pages/contratos/LinkContrato'
@@ -78,7 +77,6 @@ function App() {
                     <Route path='/contratos/clausulas' element={<ClausulasContrato />} />
                     <Route path='/contratos/link' element={<LinkContrato />} />
                     <Route path='/contratos/:id' element={<ClausulasContrato gerado />} />
-                    <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
 
                 <Route element={<PublicRoute />}>

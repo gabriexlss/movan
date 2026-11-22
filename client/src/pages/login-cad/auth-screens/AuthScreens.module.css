@@ -144,3 +144,9 @@
 .auth-screens__tempo {
     color: var(--theme-muted);
 }
+
+@media (min-width: 64rem) {
+    .auth-screens {
+        padding: 1.5rem 0;
+    }
+}
