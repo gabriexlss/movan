@@ -23,6 +23,7 @@ import Financeiro from './pages/financeiro/financeiro'
 import Cliente from './pages/clientes/cliente'
 import ClienteDetalhes from './pages/clientes/detalhes/ClienteDetalhes'
 import Perfil from './pages/perfil/perfil'
+import AssinaturaPerfil from './pages/perfil/AssinaturaPerfil'
 import Notificacoes from './pages/notificacoes/notificacoes'
 import Contratos from './pages/contratos/contratos'
 import ClausulasContrato from './pages/contratos/ClausulasContrato'
@@ -46,20 +47,24 @@ function App() {
     ]
 
     const logCad = rotasLogCad.includes(location.pathname)
-    const fluxoContrato = location.pathname.startsWith('/contratos/') || location.pathname === '/contrato/assinatura'
+    const ehAssinaturaPublica = location.pathname.startsWith('/assinar/')
+    const fluxoContrato = location.pathname.startsWith('/contratos/')
+        || ehAssinaturaPublica
+        || location.pathname === '/perfil/assinatura'
 
     return (
-        <div className={logCad ? 'app' : 'app app-com-navegacao'}>
+        <div className={logCad || ehAssinaturaPublica ? 'app' : 'app app-com-navegacao'}>
             <ScrollToTop />
             {!logCad && (
                 <div className="app-navegacao">
                     <Header />
-                    <Footer ocultoNoCelular={fluxoContrato} />
+                    {!ehAssinaturaPublica && <Footer ocultoNoCelular={fluxoContrato} />}
                 </div>
             )}
 
             <Routes>
                 <Route path='/error' element={<ErrorPage />} />
+                <Route path='/assinar/:token' element={<AssinaturaContrato />} />
 
                 <Route element={<ProtectedRoute />}>
                     <Route path='/' element={<HomePage />} />
@@ -68,11 +73,11 @@ function App() {
                     <Route path='/clientes' element={<Cliente />} />
                     <Route path='/clientes/:tipo/:id' element={<ClienteDetalhes />} />
                     <Route path='/perfil' element={<Perfil />} />
+                    <Route path='/perfil/assinatura' element={<AssinaturaPerfil />} />
                     <Route path='/contratos' element={<Contratos />} />
                     <Route path='/contratos/clausulas' element={<ClausulasContrato />} />
                     <Route path='/contratos/link' element={<LinkContrato />} />
                     <Route path='/contratos/:id' element={<ClausulasContrato gerado />} />
-                    <Route path='/contrato/assinatura' element={<AssinaturaContrato />} />
                     <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
 

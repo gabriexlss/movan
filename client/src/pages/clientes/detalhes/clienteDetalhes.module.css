@@ -288,6 +288,16 @@
     background: var(--theme-panel);
     color: var(--theme-muted);
     font-size: 0.6625rem;
+    text-decoration: none;
+}
+
+.contrato:hover {
+    border-color: var(--theme-accent);
+}
+
+.contrato:focus-visible {
+    outline: 2px solid var(--theme-focus);
+    outline-offset: 2px;
 }
 
 .contratoCabecalho {
@@ -325,9 +335,20 @@
     color: var(--theme-warning);
 }
 
-.status-atrasado {
+.status-atrasado,
+.status-cancelado {
     background: var(--theme-danger-soft);
     color: var(--theme-danger);
+}
+
+.status-rascunho {
+    background: var(--theme-surface-muted);
+    color: var(--theme-text-secondary);
+}
+
+.status-finalizado {
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
 }
 
 .naoEncontrado {

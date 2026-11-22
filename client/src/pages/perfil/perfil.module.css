@@ -226,6 +226,14 @@
     color: var(--theme-accent);
 }
 
+.BtnAssinatura {
+    margin-top: 0;
+    border-color: var(--theme-action);
+    background-color: var(--theme-action);
+    color: var(--theme-on-action);
+    text-decoration: none;
+}
+
 .BtnExclu-conta::after {
     content: "";
     position: absolute;

@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
-import { ClausulaMotorista, CriarClausulaSchema, EditarClausulaSchema, MoverClausulasSchema } from "../../models/contrato/clausula.model.js";
+import { ClausulaMotorista, ClausulaPadrao, CriarClausulaSchema, EditarClausulaSchema, MoverClausulasSchema } from "../../models/contrato/clausula.model.js";
 import { database } from "../../db/postgre.js";
 import { PoolClient } from "pg";
 import { Contrato } from "../../models/contrato/contrato.model.js";
 import { atualizarClausulasContrato } from "../../utils/atualizarClausulasContrato.js";
 import { ParamsSchema } from "../../models/utils.model.js";
+import type { Motorista } from "../../models/motorista/motorista.model.js";
+import { aplicarSubstituicoesClausulas, montarSubstituicoesContrato } from "../../utils/substituirDadosClausula.js";
 
 interface atualizarTodosContratosProps {
     cliente: PoolClient,
@@ -252,19 +254,29 @@ export const controllerClausulaPadrao = {
             cliente.release()
         }
     },
-    // controller para obter todas as clausulas do motorista
+    // controller para obter todas as clausulas do motorista e as clausulas fixas do sistema
     obterClausulaPadrao: async (req: Request, res: Response) => {
         // pegando id do motorista
         const motoristaID = req.userId
 
         try {
-            const query = "SELECT id, titulo, conteudo, ordem FROM clausula_motorista WHERE motorista_id = $1 AND excluido = false ORDER BY ordem ASC"
+            const queryMotorista = "SELECT id, titulo, conteudo, ordem FROM clausula_motorista WHERE motorista_id = $1 AND excluido = false ORDER BY ordem ASC"
+            const querySistema = "SELECT id, titulo, conteudo, ordem FROM clausula_padrao WHERE excluido = false ORDER BY ordem ASC"
+            const queryDadosMotorista = "SELECT nome, COALESCE(cpf, cnpj) AS credencial FROM motorista WHERE id = $1"
 
-            const { rows: ClausulasMotorista } = await database.query<ClausulaMotorista>(query, [motoristaID])
+            const [{ rows: ClausulasMotorista }, { rows: clausulasSistemaBrutas }, { rows: [dadosMotorista] }] = await Promise.all([
+                database.query<ClausulaMotorista>(queryMotorista, [motoristaID]),
+                database.query<ClausulaPadrao>(querySistema),
+                database.query<Pick<Motorista, "nome" | "credencial">>(queryDadosMotorista, [motoristaID])
+            ])
+
+            const substituicoesMotorista = montarSubstituicoesContrato(undefined, dadosMotorista)
+            const ClausulasSistema = aplicarSubstituicoesClausulas(clausulasSistemaBrutas, substituicoesMotorista)
 
             return res.status(200).json({
                 msg: "Dados obtidos com sucesso.",
-                ClausulasMotorista
+                ClausulasMotorista,
+                ClausulasSistema
             })
         } catch (erro) {
             console.error("Erro no endpoint de obter cláusulas padrão, erro: ", erro)

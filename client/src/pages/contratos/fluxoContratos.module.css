@@ -336,21 +336,9 @@
     margin-top: .5rem;
 }
 
-.areaAssinatura {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1.6;
-    margin-top: .35rem;
-    border: 1px solid var(--theme-control-border);
-    border-radius: .2rem;
-    background: var(--theme-paper);
-    touch-action: none;
-    cursor: crosshair;
-}
-
 .acoesAssinatura {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: .8rem;
     margin: 2rem 0 1rem;
@@ -360,12 +348,207 @@
     min-width: 6.5rem;
 }
 
+.cabecalhoResumo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .35rem;
+}
+
+.cabecalhoResumo .tituloSecao {
+    margin-bottom: 0;
+}
+
+.status {
+    flex-shrink: 0;
+    padding: .18rem .5rem;
+    border-radius: .25rem;
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.ativo {
+    background: var(--theme-success-soft);
+    color: var(--theme-success);
+}
+
+.finalizado {
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
+}
+
+.cancelado {
+    background: var(--theme-danger-soft);
+    color: var(--theme-danger);
+}
+
+.rascunho {
+    background: var(--theme-surface-muted);
+    color: var(--theme-text-secondary);
+}
+
+.pendente {
+    background: var(--theme-warning-soft);
+    color: var(--theme-warning);
+}
+
+.acoesContrato {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    justify-content: center;
+    width: 100%;
+}
+
+.botaoSecundario,
+.botaoPerigo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    min-height: 2.5rem;
+    padding: .55rem 1rem;
+    border-radius: .25rem;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.botaoSecundario {
+    border: 1px solid var(--theme-accent-border);
+    background: var(--theme-panel);
+    color: var(--theme-accent);
+}
+
+.botaoPerigo {
+    border: 1px solid var(--theme-danger-border);
+    background: var(--theme-panel);
+    color: var(--theme-danger);
+}
+
+.botaoSecundario:disabled,
+.botaoPerigo:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+.acoesClausula {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .35rem;
+    padding-top: .45rem;
+    border-top: 1px solid var(--theme-border);
+}
+
+.botaoIcone,
+.botaoIconePerigo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    min-height: 1.9rem;
+    padding: .25rem .55rem;
+    border-radius: .25rem;
+    font-family: inherit;
+    font-size: .72rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botaoIcone {
+    border: 1px solid var(--theme-accent-border);
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
+}
+
+.botaoIconePerigo {
+    border: 1px solid var(--theme-danger-border);
+    background: var(--theme-danger-subtle);
+    color: var(--theme-danger);
+}
+
+.botaoIcone:disabled,
+.botaoIconePerigo:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+.alertaErro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .65rem;
+    width: 100%;
+    padding: .85rem 1rem;
+    border: 1px solid var(--theme-danger-border);
+    border-radius: .55rem;
+    background: var(--theme-danger-subtle);
+    color: var(--theme-danger);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.vazioSecao {
+    padding: .75rem .85rem;
+    border: 1px dashed var(--theme-accent-border);
+    border-radius: .55rem;
+    background: var(--theme-surface);
+    color: var(--theme-muted);
+    font-size: .76rem;
+    text-align: center;
+}
+
+.previaPdf {
+    width: 100%;
+    height: min(65vh, 34rem);
+    border: 1px solid var(--theme-control-border);
+    border-radius: .4rem;
+    background: var(--theme-surface);
+}
+
+.acoesPdf {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: .75rem;
+    justify-content: center;
+}
+
+.sucessoBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .85rem;
+    padding: 1.25rem .85rem;
+    text-align: center;
+    color: var(--theme-success);
+}
+
+.sucessoBox svg {
+    font-size: 2.2rem;
+}
+
+.sucessoBox p {
+    color: var(--theme-text-secondary);
+    font-size: .82rem;
+    line-height: 1.5;
+}
+
 .voltar:focus-visible,
 .botaoPrincipal:focus-visible,
+.botaoSecundario:focus-visible,
+.botaoPerigo:focus-visible,
+.botaoIcone:focus-visible,
+.botaoIconePerigo:focus-visible,
 .copiarLink:focus-visible,
 .linkAssinatura:focus-visible,
 .clausula summary:focus-visible,
-.clausulaExtra input:focus-visible,
 .cabecalhoExtras button:focus-visible {
     outline: 2px solid var(--theme-focus);
     outline-offset: 3px;

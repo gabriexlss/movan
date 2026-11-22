@@ -68,6 +68,50 @@
     cursor: pointer;
 }
 
+.salvar:disabled,
+.secundario:disabled,
+.perigo:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+.acoesDialog {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .65rem;
+    margin-top: .5rem;
+}
+
+.secundario,
+.perigo {
+    min-height: 2.6rem;
+    padding: .55rem 1rem;
+    border-radius: .3rem;
+    font-family: inherit;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secundario {
+    border: 1px solid var(--theme-accent-border);
+    background: var(--theme-panel);
+    color: var(--theme-accent);
+}
+
+.perigo {
+    border: 0;
+    background: var(--theme-action-danger);
+    color: var(--theme-on-action);
+}
+
+.secundario:focus-visible,
+.perigo:focus-visible {
+    outline: 2px solid var(--theme-focus);
+    outline-offset: 2px;
+}
+
 .campoClausula {
     position: relative;
     padding-top: .4rem;
