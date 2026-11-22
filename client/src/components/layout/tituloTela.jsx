@@ -8,7 +8,7 @@ import { FaBell } from "react-icons/fa";
 import { PiCaretRightBold } from 'react-icons/pi'
 import { Link } from 'react-router-dom'
 
-const TituloTela = ({ title, className='', subtitle, notificacoesAtivas = true }) => {
+const TituloTela = ({ title, className='', subtitle, notificacoesAtivas = true, acao }) => {
     const dataAtual = new Intl.DateTimeFormat("pt-BR", {
         weekday: "long",
         day: "numeric",
@@ -65,6 +65,7 @@ const TituloTela = ({ title, className='', subtitle, notificacoesAtivas = true }
                     </Link>
                 </DialogNotif>
             </div>
+            {acao}
         </div>
     )
 }

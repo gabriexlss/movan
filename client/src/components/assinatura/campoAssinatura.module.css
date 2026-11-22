@@ -4,9 +4,9 @@
     height: auto;
     aspect-ratio: 1.6;
     margin-top: .35rem;
-    border: 1px solid #c4c4c4;
+    border: 1px solid var(--theme-control-border);
     border-radius: .2rem;
-    background: #fff;
+    background: var(--theme-paper);
     touch-action: none;
     cursor: crosshair;
 }

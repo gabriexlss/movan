@@ -62,6 +62,7 @@
 
 html {
   scrollbar-width: none;
+  background-color: var(--theme-page);
 }
 
 html::-webkit-scrollbar{
@@ -69,7 +70,8 @@ html::-webkit-scrollbar{
 }
 
 body {
-  background-color: #FFFFFF;
+  background-color: var(--theme-page);
+  color: var(--theme-text);
   font-size: 1.0625rem;
 }
 
@@ -86,7 +88,7 @@ p {
   font-size: 0.8125rem;
   line-height: 1.5;
   font-weight: lighter;
-  color: #FFFFFF;
+  color: var(--theme-text);
 }
 
 main {
@@ -97,4 +99,45 @@ main {
   align-items: center;
   justify-content: start;
   gap: 1rem;
+}
+
+.app-navegacao {
+  display: contents;
+}
+
+@media (min-width: 64rem) {
+  html {
+    scrollbar-width: thin;
+  }
+
+  html::-webkit-scrollbar {
+    display: revert;
+  }
+
+  .app-com-navegacao {
+    --largura-menu-desktop: clamp(11.5rem, 18vw, 16rem);
+    --margem-conteudo-desktop: clamp(1.5rem, 3vw, 3rem);
+    --espaco-paineis-desktop: 1.25rem;
+    --altura-controle-desktop: 2.5rem;
+    --texto-apoio-desktop: .875rem;
+    padding-inline-start: var(--largura-menu-desktop);
+  }
+
+  .app-navegacao {
+    position: fixed;
+    z-index: 20;
+    inset: 0 auto 0 0;
+    display: flex;
+    flex-direction: column;
+    width: var(--largura-menu-desktop);
+    border-inline-end: 1px solid var(--theme-border);
+    background: var(--theme-surface);
+  }
+
+  .app-com-navegacao > main {
+    width: min(100%, var(--largura-conteudo-desktop, 88rem));
+    min-height: 100dvh;
+    margin-inline: auto;
+    padding: 1.75rem var(--margem-conteudo-desktop) 2.5rem;
+  }
 }

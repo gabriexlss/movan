@@ -26,6 +26,7 @@
 }
 
 .tituloMensalidade {
+    color: inherit;
     font-family: 'Poppins', sans-serif;
     font-size: 0.6125rem;
     font-weight: 500;
@@ -46,9 +47,44 @@
 
 .proximaMensa p{
     text-align: center;
-    color: #0D47A1;
+    color: var(--theme-accent);
 }
 
 .proximaMensa span{
-    color:#EE7B29;
+    color:var(--theme-orange);
+}
+
+@media (min-width: 64rem) {
+    .containerMensalidade {
+        gap: .65rem;
+        min-height: 4.75rem;
+    }
+
+    .mensalidadeItem {
+        flex: 1;
+        width: auto;
+        margin-inline: 0;
+        padding: .55rem .25rem;
+    }
+
+    .tituloMensalidade {
+        font-family: inherit;
+        font-size: var(--texto-apoio-desktop);
+    }
+
+    .quantidadeMensalidade {
+        font-size: 1.625rem;
+    }
+
+    .proximaMensa {
+        align-self: stretch;
+        width: 100%;
+        margin-block: .75rem;
+    }
+
+    .proximaMensa p {
+        font-family: 'Poppins', sans-serif;
+        font-size: var(--texto-apoio-desktop);
+        text-align: left;
+    }
 }

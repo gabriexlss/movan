@@ -19,7 +19,7 @@
 .formulario-login a {
     margin-top: 1rem;
     text-decoration: underline;
-    color: #0D47A1;
+    color: var(--theme-accent);
     font-weight: 500;
     font-family: 'Bree Serif', serif;
 }
@@ -36,12 +36,12 @@
     height: 3.5rem;
     padding: 0 1rem;
 
-    border: 2px solid #FFC33A;
+    border: 2px solid var(--theme-brand-yellow);
     border-radius: 1rem;
 
-    background-color: #FFFFFF;
+    background-color: var(--theme-panel);
 
-    color: #263238;
+    color: var(--theme-text);
     font-family: 'Bree Serif', sans-serif;
     font-size: 1.0625rem;
     outline: none;
@@ -58,9 +58,9 @@
     z-index: 1;
     padding: 0 0.35rem;
 
-    background-color: #FFFFFF;
+    background-color: var(--theme-panel);
     
-    color: #6B7280;
+    color: var(--theme-muted);
     font-family: 'Bree Serif', sans-serif;
     font-size: 1.0125rem;
 
@@ -71,8 +71,8 @@
 
 .inputEmailCNPJ input:focus,
 .inputSenha input:focus {
-    border-color: #0D47A1;
-    box-shadow: 0 0 0 3px rgb(13 71 161 / 12%);
+    border-color: var(--theme-focus);
+    box-shadow: 0 0 0 3px var(--theme-focus-ring);
 }
 
 .inputEmailCNPJ input:focus + label,
@@ -82,7 +82,7 @@
 .inputSenha input:not(:placeholder-shown) + label,
 .inputSenha input:-webkit-autofill + label {
     top: 0;
-    color: #0D47A1;
+    color: var(--theme-accent);
     font-size: 0.8125rem;
 }
 
@@ -98,18 +98,18 @@
     justify-content: center;
     align-self: center;
 
-    background-color: #0D47A1;
+    background-color: var(--theme-action);
     border-radius: 10px;
     border: none;
     
     font-family: 'Bree Serif', serif;
-    color: #FFFFFF;
+    color: var(--theme-on-action);
     font-size: 1.5625rem;
     cursor: pointer;
 }
 
 .formulario-login .ou{
     font-size: 1.4625rem;
-    color: #C0C0C0;
+    color: var(--theme-muted);
     margin: 2%;
 }

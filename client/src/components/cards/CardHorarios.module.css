@@ -27,14 +27,14 @@
     justify-content: center;
     align-items: center;
     
-    background-color: #EAEAEA;
+    background-color: var(--theme-surface-muted);
     width: 45px;
     height: 45px;
     border-radius: 10%;
 }
 
 .tituloHorario{
-    color: #0D47A1;
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7625rem;
     font-weight: 500;
@@ -43,12 +43,44 @@
 }
 
 .hora{
-    color: #7A7A7A;
+    color: var(--theme-muted);
     align-self: center;
     font-family: 'Poppins', sans-serif;
     font-size: 0.6125rem;
     
     margin-left: 0.5rem;
+}
+
+@media (min-width: 64rem) {
+    .containerHorarios {
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr);
+        grid-auto-rows: minmax(min-content, 1fr);
+        align-items: stretch;
+        gap: .55rem;
+        max-width: none;
+        margin: 0;
+    }
+
+    .horario {
+        justify-content: flex-start;
+        gap: .8rem;
+        padding: .6rem .75rem;
+        border-radius: .5rem;
+        background: var(--theme-panel);
+    }
+
+    .tituloHorario {
+        margin-left: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .hora {
+        margin-left: 0;
+        font-size: var(--texto-apoio-desktop);
+        text-align: left;
+    }
 }
 
 @media (max-width: 480px) {

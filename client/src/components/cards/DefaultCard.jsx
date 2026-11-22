@@ -10,9 +10,10 @@ const DefaultCard = ({
     headerContent,
     titleClassName = '',
     headerContentClassName = '',
+    className = '',
 }) => {
     return (
-        <section className={styles.card}>
+        <section className={`${styles.card} ${className}`}>
             {headerContent ? (
                 <div className={styles['card-header-container']}>
                     <h1 className={`${styles['card-header']} ${compactTitle ? styles.compact : ''} ${titleClassName}`}>

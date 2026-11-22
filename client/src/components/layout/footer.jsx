@@ -6,8 +6,12 @@ import { MdAltRoute, MdOutlineAccountBalanceWallet } from 'react-icons/md';
 import { BsFillPeopleFill } from 'react-icons/bs';
 import { CgProfile } from 'react-icons/cg';
 import { LuScrollText } from 'react-icons/lu';
+import { IoMdExit } from 'react-icons/io';
+import { useAuth } from '../../context/useAuth';
+import ThemeToggle from '../../theme/ThemeToggle';
 
-const footer = () => {
+const Footer = ({ ocultoNoCelular }) => {
+    const { user, logout } = useAuth();
 
     const navFooter = [
         {to: '/', label: 'Home', icon: GoHome},
@@ -19,8 +23,8 @@ const footer = () => {
     ];
 
     return (
-        <footer className={styles.footer}>
-            <nav>
+        <div className={`${styles.footer} ${ocultoNoCelular ? styles.ocultoNoCelular : ''}`}>
+            <nav aria-label="Navegação principal">
                 {navFooter.map((item) => {
                     const Icon = item.icon;
                     
@@ -36,8 +40,21 @@ const footer = () => {
                     );
                 })}
             </nav>
-        </footer>
+            {user && (
+                <div className={styles.conta}>
+                    <div className={styles.usuario}>
+                        <CgProfile aria-hidden="true" />
+                        <span>{user.nome || 'Motorista'}</span>
+                    </div>
+                    <ThemeToggle comTexto />
+                    <button type="button" className={styles.sair} onClick={logout}>
+                        <IoMdExit aria-hidden="true" />
+                        Sair
+                    </button>
+                </div>
+            )}
+        </div>
     )
 }
 
-export default footer
+export default Footer

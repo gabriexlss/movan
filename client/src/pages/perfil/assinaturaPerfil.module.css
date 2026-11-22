@@ -2,7 +2,7 @@
 .status,
 .erro {
     margin: .65rem 0;
-    color: #555;
+    color: var(--theme-text-secondary);
     font-family: 'Poppins', sans-serif;
     font-size: .8rem;
     line-height: 1.6;
@@ -14,9 +14,9 @@
     width: 100%;
     aspect-ratio: 1.6;
     object-fit: contain;
-    border: 1px solid #c4c4c4;
+    border: 1px solid var(--theme-control-border);
     border-radius: .3rem;
-    background: #fff;
+    background: var(--theme-paper);
 }
 
 .status {
@@ -24,16 +24,16 @@
     align-items: center;
     justify-content: center;
     gap: .4rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
 }
 
 .erro {
-    color: #b42318;
+    color: var(--theme-danger);
 }
 
 .confirmacao > header p {
     margin-top: .75rem;
-    color: #555;
+    color: var(--theme-text-secondary);
     font-family: inherit;
     font-size: .85rem;
     line-height: 1.6;
@@ -55,7 +55,7 @@
     gap: .4rem;
     min-height: 2.75rem;
     padding: .6rem .85rem;
-    border: 1px solid #0d47a1;
+    border: 1px solid var(--theme-accent-border);
     border-radius: .3rem;
     font-family: 'Poppins', sans-serif;
     font-size: .8rem;
@@ -63,13 +63,14 @@
 }
 
 .primario {
-    background: #0d47a1;
-    color: #fff;
+    border-color: var(--theme-action);
+    background: var(--theme-action);
+    color: var(--theme-on-action);
 }
 
 .secundario {
-    background: #fff;
-    color: #0d47a1;
+    background: var(--theme-panel);
+    color: var(--theme-accent);
 }
 
 .primario:disabled,
@@ -80,7 +81,7 @@
 
 .primario:focus-visible,
 .secundario:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 3px;
 }
 

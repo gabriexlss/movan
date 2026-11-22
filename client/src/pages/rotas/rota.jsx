@@ -378,7 +378,7 @@ const Rotas = () => {
                             </div>
                         )}
 
-                        <section aria-labelledby="titulo-paradas">
+                        <section className={styles.secaoParadas} aria-labelledby="titulo-paradas">
                             <div className={styles.cabecalhoLista}>
                                 <h2 id="titulo-paradas">
                                     Ordem de paradas ({pontosOrdenados.length})
@@ -460,7 +460,7 @@ const Rotas = () => {
                             )}
                         </section>
 
-                        <section aria-labelledby="titulo-escolas">
+                        <section className={styles.secaoEscolas} aria-labelledby="titulo-escolas">
                             <div className={styles.cabecalhoLista}>
                                 <h2 id="titulo-escolas">
                                     Escolas da rota atual ({escolasDaRota.length})

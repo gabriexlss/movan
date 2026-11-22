@@ -120,10 +120,12 @@ const Financeiro = () => {
                 </button>
             </div>
 
-            <ResumoFinanc />
-            <Comparativo />
-            <UltimasEntradas />
-            <MensalidadesAlunos />
+            <div className={styles.paineis}>
+                <ResumoFinanc className={styles.resumo} />
+                <Comparativo className={styles.comparativo} />
+                <UltimasEntradas />
+                <MensalidadesAlunos />
+            </div>
         </main>
     )
 }

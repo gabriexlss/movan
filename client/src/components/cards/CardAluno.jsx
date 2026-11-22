@@ -4,14 +4,14 @@ import styles from './CardAluno.module.css'
 import { PiStudentBold } from "react-icons/pi";
 import { BiSolidUserX } from "react-icons/bi";
 
-const CardAluno = () => {
+const CardAluno = ({ className }) => {
     const alunos = [
-        {titulo: "Alunos cadastrados", qntd: "36", icon: <PiStudentBold />, cor: "#FFC33A"},
-        {titulo: "Alunos ausentes", qntd: "5", icon: <BiSolidUserX />, cor: "#E55723"}
+        {titulo: "Alunos cadastrados", qntd: "36", icon: <PiStudentBold />, cor: 'var(--theme-warning)'},
+        {titulo: "Alunos ausentes", qntd: "5", icon: <BiSolidUserX />, cor: 'var(--theme-orange)'}
     ];
 
     return(
-        <DefaultCard title="Alunos" link="/clientes">
+        <DefaultCard title="Alunos" link="/clientes" className={className}>
             <div className={styles['aluno-container']}>
                 {alunos.map((alunos, index) => (
                     <div className={styles.statusAluno} key={index}>

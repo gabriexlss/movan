@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Movan</title>
+    <script>
+      // Aplica o tema salvo antes da primeira renderização.
+      let theme
+      try {
+        theme = localStorage.getItem('movan:theme')
+      } catch {
+        // Usa a preferência do sistema quando o armazenamento está bloqueado.
+      }
+      document.documentElement.dataset.theme = theme === 'dark' || theme === 'light'
+        ? theme
+        : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    </script>
   </head>
   <body>
     <div id="root"></div>

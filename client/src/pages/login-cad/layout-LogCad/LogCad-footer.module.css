@@ -5,7 +5,7 @@
     line-height: 1.5;
     margin-top: 2vh;
 
-    color: #C0C0C0;
+    color: var(--theme-muted);
     font-size: 0.7625rem;
 
     text-align: center;
@@ -13,4 +13,11 @@
 
 .logcad-footer-container a{
     text-align: center;
+}
+
+@media (min-width: 64rem) {
+    .logcad-footer-container {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
 }
