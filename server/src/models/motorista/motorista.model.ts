@@ -17,7 +17,8 @@ export const MotoristaSchema = z.object({
         .regex(/[^\w\s]/, "PASSWORD_SPECIAL_REQUIRED"),
     email_verificado: z.boolean("NOT_BOOLEAN"),
     excluido_em: z.string("NOT_STRING").datetime("INVALID_DATE").nullish(),
-    login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG")
+    login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG"),
+    capacidade_van: z.number().positive()
 });
 export const CriarMotoristaSchema = MotoristaSchema.pick({
     nome: true,

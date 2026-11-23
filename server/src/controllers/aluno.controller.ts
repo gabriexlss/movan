@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { database } from "../db/postgre.js";
 import { ParamsSchema } from "../models/utils.model.js";
-import { CriarAlunoSchema, EditarAlunoSchema } from "../models/aluno.model.js";
+import { Aluno, CriarAlunoSchema, EditarAlunoSchema } from "../models/aluno.model.js";
 import { possuiCodigoPostgres } from "../utils/erroBanco.js";
+import { controllerRotas } from "./rotas.controller.js";
 
 export const controllerAluno = {
     // controller para criar um novo aluno
@@ -22,8 +23,12 @@ export const controllerAluno = {
         // realizar desestruturação dos dados
         const { nome, data_nasc, ano_escolar, observacao, responsavel_id, escola_id, latitude, longitude, endereco, escola_turno_id } = dadosBrutos.data
 
+        const cliente = await database.connect()
+
         // Iniciando Operação.
         try {
+            await cliente.query('BEGIN')
+
             const query = `INSERT INTO aluno 
             (nome, data_nasc, ano_escolar, responsavel_id, escola_id, escola_turno_id, latitude, longitude, motorista_id, endereco${observacao ? ', observacao' : ''}) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10${observacao ? ', $11' : ''})
@@ -31,13 +36,18 @@ export const controllerAluno = {
             const valores = [nome, data_nasc, ano_escolar, responsavel_id, escola_id, escola_turno_id, latitude, longitude, motoristaId, endereco]
             if (observacao) valores.push(observacao)
 
-            const aluno = await database.query(query, valores)
+            const { rows: [aluno] } = await cliente.query<Aluno>(query, valores)
+
+            await controllerRotas.adicionarAluno(aluno!.id, cliente, req)
+
+            await cliente.query('COMMIT')
 
             return res.status(201).json({
                 msg: "Aluno criado com sucesso.",
-                aluno: aluno.rows[0]
+                aluno
             })
         } catch (erro) {
+            await cliente.query('ROLLBACK')
             console.error("Erro no endpoint de criar aluno, erro: ", erro)
             if (possuiCodigoPostgres(erro, "23503")) {
                 // pode ser escola/responsável inexistente OU turno que não pertence à escola do aluno (fk_aluno_escola_turno)
@@ -60,6 +70,8 @@ export const controllerAluno = {
             return res.status(500).json({
                 msg: "Erro interno do servidor."
             })
+        }finally{
+            cliente.release()
         }
     },
     editarAluno: async (req: Request, res: Response) => {

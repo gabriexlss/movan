@@ -26,14 +26,16 @@ const Cliente = () => {
         <main className={styles.container}>
             <TituloTela title="Veja seus clientes." />
 
-            <Pais responsaveis={responsaveis} onResponsaveisChange={setResponsaveis} />
-            <Alunos responsaveis={responsaveis} escolas={escolas} turnos={turnos} />
-            <Escolas
-                escolas={escolas}
-                onEscolasChange={setEscolas}
-                turnos={turnos}
-                onTurnosChange={setTurnos}
-            />
+            <div className={styles.listas}>
+                <Pais responsaveis={responsaveis} onResponsaveisChange={setResponsaveis} />
+                <Alunos responsaveis={responsaveis} escolas={escolas} turnos={turnos} />
+                <Escolas
+                    escolas={escolas}
+                    onEscolasChange={setEscolas}
+                    turnos={turnos}
+                    onTurnosChange={setTurnos}
+                />
+            </div>
         </main>
     )
 }

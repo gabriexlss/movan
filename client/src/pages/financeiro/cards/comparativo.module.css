@@ -3,3 +3,9 @@
     width: 100%;
     height: 220px;
 }
+
+@media (min-width: 64rem) {
+    .grafico {
+        height: clamp(16rem, 33vh, 23rem);
+    }
+}

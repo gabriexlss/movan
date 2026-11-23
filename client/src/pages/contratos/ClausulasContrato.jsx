@@ -277,6 +277,7 @@ const ClausulasContrato = ({ gerado = false }) => {
     return (
         <ContratoLayout subtitle={modoContrato ? 'Detalhes do contrato' : 'Cláusulas padrão'} voltar>
             <AvisoContrato
+                destaque={!modoContrato}
                 title={modoContrato
                     ? (isRascunho
                         ? 'Rascunho de contrato'

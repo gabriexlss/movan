@@ -1,7 +1,7 @@
 .card {
     width: 90%;
     min-height: 15vh;
-    background-color: #F8F5F5;
+    background-color: var(--theme-surface);
     border-radius: 10px;
     box-shadow: 0px 8px 5px rgba(0, 0, 0, 0.3);
 
@@ -14,9 +14,9 @@
 }
 
 .card-header{
-    color: #0D47A1;
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
-    font-size: 0.7rem;
+    font-size: var(--tamanho-titulo-card, .7rem);
     font-weight: 600;
     margin-left: 0.7rem;
     margin-bottom: 0.5rem;
@@ -58,8 +58,8 @@
     width: 90%;
     min-height: 1.75rem;
     padding: .25rem .5rem;
-    background-color: #0D47A1;
-    color: #F8F5F5;
+    background-color: var(--theme-action);
+    color: var(--theme-on-action);
 
     font-family: 'Poppins', sans-serif;
     font-size: 0.6625rem;
@@ -86,7 +86,7 @@
     height: 40px;
     border-radius: 50%;
     overflow: hidden;
-    background-color: #083075b7;
+    background-color: var(--theme-action-hover);
     transform: translate(-50%, -50%) scale(0);
     transition: transform 0.3s ease, opacity 0.3s ease;
     opacity: 1;
@@ -96,4 +96,49 @@
     transform: translate(-50%, -50%) scale(20);
     opacity: 0;
     transition: .2s;
+}
+
+@media (min-width: 64rem) {
+    .card {
+        --tamanho-titulo-card: 1.125rem;
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+        padding: clamp(1rem, 1.35vw, 1.375rem);
+    }
+
+    .card .card-header {
+        margin: 0 0 .875rem;
+        line-height: 1.3;
+    }
+
+    .card .card-header-container .card-header {
+        margin: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .card-header-container {
+        gap: .65rem;
+        margin-bottom: .875rem;
+    }
+
+    .BtnVerMensalidade {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        min-height: var(--altura-controle-desktop);
+        padding: .5rem .75rem;
+        font-size: var(--texto-apoio-desktop);
+        font-weight: 600;
+    }
+
+    .BtnVerMensalidade:hover {
+        background-color: var(--theme-action-hover);
+    }
+
+    .BtnVerMensalidade:focus-visible {
+        outline: 2px solid var(--theme-focus);
+        outline-offset: 2px;
+    }
 }

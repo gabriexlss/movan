@@ -54,7 +54,7 @@ const LinkContrato = () => {
 
     return (
         <ContratoLayout subtitle="Link de assinatura" voltar>
-            <AvisoContrato title="Link gerado com sucesso!" icon={<FaRegCheckCircle aria-hidden="true" />}>
+            <AvisoContrato destaque title="Link gerado com sucesso!" icon={<FaRegCheckCircle aria-hidden="true" />}>
                 Copie o link abaixo e envie ao responsável para que ele visualize o contrato e assine. O link é válido por 15 dias.
             </AvisoContrato>
 

@@ -16,13 +16,13 @@
 }
 
 .lucro {
-    color: #15720C;
-    background-color: #d8eddd;
+    color: var(--theme-success);
+    background-color: var(--theme-success-soft);
 }
 
 .despesa {
-    color: #720C0C;
-    background-color: #f0dada;
+    color: var(--theme-danger);
+    background-color: var(--theme-danger-soft);
 }
 
 .icone {
@@ -40,7 +40,7 @@
 
 .label {
     overflow: hidden;
-    color: #686868;
+    color: var(--theme-text-secondary);
     font-size: 0.6825rem;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -50,6 +50,33 @@
     overflow-wrap: anywhere;
     font-size: 0.7425rem;
     font-weight: 600;
+}
+
+@media (min-width: 64rem) {
+    .resumo-container {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .75rem;
+    }
+
+    .item {
+        gap: .65rem;
+        min-height: 4.5rem;
+        padding: .65rem;
+    }
+
+    .icone {
+        font-size: 1.5rem;
+    }
+
+    .label {
+        font-size: var(--texto-apoio-desktop);
+        white-space: normal;
+    }
+
+    .valor {
+        font-size: clamp(1rem, 1.3vw, 1.3125rem);
+        font-variant-numeric: tabular-nums;
+    }
 }
 
 @media (max-width: 340px) {

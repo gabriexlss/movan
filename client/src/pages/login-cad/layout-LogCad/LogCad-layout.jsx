@@ -14,13 +14,16 @@ const LogCadLayout = () => {
     return (
         <div className={styles['logcad-layout']}>
             <LogCadHeader modo={modo} />
-            {telaPrincipal && <LogCadToggleSwitch />}
 
-            <div className={styles['logcad-conteudo']}>
-                <Outlet />
+            <div className={styles['logcad-painel']}>
+                {telaPrincipal && <LogCadToggleSwitch />}
+
+                <div className={styles['logcad-conteudo']}>
+                    <Outlet />
+                </div>
+
+                <LogCadFooter />
             </div>
-
-            <LogCadFooter />
         </div>
     )
 }

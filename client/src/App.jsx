@@ -24,7 +24,6 @@ import Cliente from './pages/clientes/cliente'
 import ClienteDetalhes from './pages/clientes/detalhes/ClienteDetalhes'
 import Perfil from './pages/perfil/perfil'
 import AssinaturaPerfil from './pages/perfil/AssinaturaPerfil'
-import Notificacoes from './pages/notificacoes/notificacoes'
 import Contratos from './pages/contratos/contratos'
 import ClausulasContrato from './pages/contratos/ClausulasContrato'
 import LinkContrato from './pages/contratos/LinkContrato'
@@ -47,14 +46,20 @@ function App() {
     ]
 
     const logCad = rotasLogCad.includes(location.pathname)
+    const ehAssinaturaPublica = location.pathname.startsWith('/assinar/')
     const fluxoContrato = location.pathname.startsWith('/contratos/')
-        || location.pathname.startsWith('/assinar/')
+        || ehAssinaturaPublica
         || location.pathname === '/perfil/assinatura'
 
     return (
-        <div className='app'>
+        <div className={logCad || ehAssinaturaPublica ? 'app' : 'app app-com-navegacao'}>
             <ScrollToTop />
-            {!logCad && <Header />}
+            {!logCad && (
+                <div className="app-navegacao">
+                    <Header />
+                    {!ehAssinaturaPublica && <Footer ocultoNoCelular={fluxoContrato} />}
+                </div>
+            )}
 
             <Routes>
                 <Route path='/error' element={<ErrorPage />} />
@@ -72,7 +77,6 @@ function App() {
                     <Route path='/contratos/clausulas' element={<ClausulasContrato />} />
                     <Route path='/contratos/link' element={<LinkContrato />} />
                     <Route path='/contratos/:id' element={<ClausulasContrato gerado />} />
-                    <Route path='/notificacoes' element={<Notificacoes />} />
                 </Route>
 
                 <Route element={<PublicRoute />}>
@@ -94,8 +98,6 @@ function App() {
                     </Route>
                 </Route>
             </Routes>
-
-            {!logCad && !fluxoContrato && <Footer />}
         </div>
 )
 }
