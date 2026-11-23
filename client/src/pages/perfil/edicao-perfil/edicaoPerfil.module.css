@@ -1,7 +1,7 @@
 .dialog {
     max-width: 25rem;
     padding: 3.25rem 1.4rem 1.4rem;
-    border: 1px solid #eeeeee;
+    border: 1px solid var(--theme-border);
     border-radius: .75rem;
     box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
 }
@@ -24,7 +24,7 @@
 .dialog > header p {
     max-width: 18rem;
     margin: .4rem auto 0;
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-family: 'Poppins', sans-serif;
     font-size: 0.8125rem;
     font-weight: 400;
@@ -50,8 +50,8 @@
     z-index: 1;
     max-width: calc(100% - 3.5rem);
     padding: 0 .35rem;
-    background: #fff;
-    color: #0d47a1;
+    background: var(--theme-panel);
+    color: var(--theme-accent);
     font-size: 0.7125rem;
     line-height: 1.4;
 }
@@ -60,15 +60,15 @@
     display: flex;
     align-items: center;
     min-height: 2.5rem;
-    border: 1px solid #b8b8b8;
+    border: 1px solid var(--theme-control-border);
     border-radius: 999px;
-    background: #fff;
+    background: var(--theme-panel);
     transition: border-color .2s ease, box-shadow .2s ease;
 }
 
 .inputWrapper:focus-within {
-    border-color: #0d47a1;
-    box-shadow: 0 0 0 3px rgb(13 71 161 / 10%);
+    border-color: var(--theme-focus);
+    box-shadow: 0 0 0 3px var(--theme-focus-ring);
 }
 
 .fieldIcon {
@@ -77,7 +77,7 @@
     place-items: center;
     width: 2rem;
     padding-left: .4rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
 }
 
 .inputWrapper input {
@@ -88,14 +88,14 @@
     border-radius: 999px;
     outline: 0;
     background: transparent;
-    color: #454545;
+    color: var(--theme-text);
     font-family: 'Poppins', sans-serif;
     font-size: 0.9125rem;
 }
 
 .inputWrapper input::placeholder,
 .inputWrapper input[readonly] {
-    color: #888;
+    color: var(--theme-placeholder);
     opacity: 1;
 }
 
@@ -109,7 +109,7 @@
     border: 0;
     border-radius: 50%;
     background: transparent;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 1rem;
     cursor: pointer;
 }
@@ -120,7 +120,7 @@
     align-items: center;
     gap: .25rem;
     padding-right: .65rem;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-size: 0.7625rem;
 }
 
@@ -128,7 +128,7 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: #0d47a1;
+    color: var(--theme-accent);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7625rem;
     font-weight: 700;
@@ -145,7 +145,7 @@
     gap: .3rem;
     padding: .2rem .35rem;
     list-style: none;
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-size: 0.7125rem;
 }
 
@@ -162,7 +162,7 @@
 }
 
 .requirements .requirementMet {
-    color: #398e43;
+    color: var(--theme-success);
 }
 
 .primaryButton {
@@ -172,8 +172,8 @@
     padding: .6rem 1rem;
     border: 0;
     border-radius: .3rem;
-    background: #0d47a1;
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-family: 'Poppins', sans-serif;
     font-size: 0.8625rem;
     font-weight: 700;
@@ -188,7 +188,7 @@
 .primaryButton:focus-visible,
 .visibilityButton:focus-visible,
 .cancelButton:focus-visible {
-    outline: 2px solid #0d47a1;
+    outline: 2px solid var(--theme-focus);
     outline-offset: 3px;
 }
 
@@ -201,13 +201,13 @@
     width: 4.1rem;
     height: 4.1rem;
     margin-bottom: .6rem;
-    border-color: #c72c2c;
-    color: #c72c2c;
+    border-color: var(--theme-danger);
+    color: var(--theme-danger);
     font-size: 3rem;
 }
 
 .deleteDialog > header h2 {
-    color: #c72c2c;
+    color: var(--theme-danger);
     font-size: 1.05rem;
 }
 
@@ -228,7 +228,7 @@
 
 .deletedData h3,
 .deleteConfirmation h3 {
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-size: .85rem;
     font-weight: 600;
     line-height: 1.5;
@@ -245,7 +245,7 @@
     display: flex;
     align-items: flex-start;
     gap: .4rem;
-    color: #7a7a7a;
+    color: var(--theme-muted);
     font-size: 0.7625rem;
     line-height: 1.5;
 }
@@ -253,7 +253,7 @@
 .deletedData svg {
     flex-shrink: 0;
     margin-top: .1rem;
-    color: #c72c2c;
+    color: var(--theme-danger);
     font-size: .9rem;
 }
 
@@ -281,8 +281,8 @@
     width: 1.6rem;
     height: 1.6rem;
     border-radius: 50%;
-    background: #0d47a1;
-    color: #fff;
+    background: var(--theme-action);
+    color: var(--theme-on-action);
     font-size: 0.8625rem;
 }
 
@@ -302,7 +302,7 @@
 }
 
 .confirmationSteps > li:nth-child(2) .fieldIcon {
-    color: #c72c2c;
+    color: var(--theme-danger);
 }
 
 .cancellationNotice {
@@ -311,10 +311,10 @@
     gap: .5rem;
     margin-top: .4rem;
     padding: .75rem;
-    border: 1px solid #0d47a1;
+    border: 1px solid var(--theme-focus);
     border-radius: .7rem;
-    background: #f2f5fa;
-    color: #0d47a1;
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
 }
 
 .cancellationNotice svg {
@@ -351,9 +351,9 @@
 }
 
 .cancelButton {
-    border: 1px solid #0d47a1;
-    background: #fff;
-    color: #0d47a1;
+    border: 1px solid var(--theme-focus);
+    background: var(--theme-panel);
+    color: var(--theme-accent);
     cursor: pointer;
 }
 
@@ -362,7 +362,7 @@
     align-items: flex-start;
     justify-content: center;
     gap: .25rem;
-    color: #c72c2c;
+    color: var(--theme-danger);
     font-family: 'Poppins', sans-serif;
     font-size: 0.7125rem;
     font-weight: 400;
@@ -381,7 +381,7 @@
     justify-content: center;
     gap: .4rem;
     margin-top: 0;
-    background: #c72c2c;
+    background: var(--theme-action-danger);
 }
 
 .deleteButton svg {

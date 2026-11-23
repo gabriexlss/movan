@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 
-import { PiNotePencilBold } from 'react-icons/pi'
+import { PiNotePencilBold, PiPenNibBold } from 'react-icons/pi'
 import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
 import { MdPersonOutline } from "react-icons/md";
@@ -18,6 +19,8 @@ import DialogEmail from './edicao-perfil/DialogEmail'
 import DialogExluConta from './edicao-perfil/DialogExluConta'
 
 import { useAuth } from '../../context/useAuth'
+import ThemeToggle from '../../theme/ThemeToggle'
+import { useTheme } from '../../theme/theme-context'
 import api from '../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../services/toastManager'
 
@@ -40,6 +43,7 @@ const formatarCredencial = (credencial = '') => {
 }
 
 const Perfil = () => {
+    const { theme } = useTheme()
     const { user, refreshSession, logout } = useAuth()
     const [camposEditaveis, setCamposEditaveis] = useState({})
     const [campoSelect, setCampoSelect] = useState(null)
@@ -177,7 +181,11 @@ const Perfil = () => {
 
     return (
         <main className={styles['perfil-container']}>
-            <TituloTela title="Este é o seu perfil" className={styles['titulo-tela']} />
+            <TituloTela
+                title="Este é o seu perfil"
+                className={styles['titulo-tela']}
+                acao={<ThemeToggle className={styles['acao-movel']} />}
+            />
 
             <div className={styles['conteudos-perfil']}>
                 <img
@@ -253,6 +261,9 @@ const Perfil = () => {
                             {campo.id === 'email' && user?.email_verificado === true && user?.google_verificado === false && (
                                 <div className={styles['linkGoogle']}>
                                     <GoogleLogin
+                                        theme={theme === 'dark' ? 'filled_black' : 'outline'}
+                                        // Evita o fundo branco do iframe quando a página usa color-scheme: dark.
+                                        containerProps={{ style: { colorScheme: 'light' } }}
                                         onSuccess={vincularGoogle}
                                         onError={() => errorToast('GOOGLE_OPEN_FAILED')}
                                         text="signup_with"
@@ -279,6 +290,12 @@ const Perfil = () => {
 
             {dialogExluContaAberto && <DialogExluConta onClose={fecharDialogExluConta} />}
 
+            <button type="button" className={`${styles['BtnExclu-conta']} ${styles['BtnSair-conta']}`} onClick={logout}>
+                <IoMdExit aria-hidden="true" style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair
+            </button>
+            <Link to="/perfil/assinatura" className={`${styles['BtnExclu-conta']} ${styles['BtnAssinatura']}`}>
+                <PiPenNibBold aria-hidden="true" style={{ fontSize: '1.7rem' }} /> Minha assinatura
+            </Link>
             <button
                 type="button"
                 className={styles['BtnExclu-conta']}
@@ -288,7 +305,6 @@ const Perfil = () => {
                 <CgTrash aria-hidden="true" style={{ strokeWidth: '.6', fontSize: '1.7rem' }} />
                 Excluir conta
             </button>
-            <button className={`${styles['BtnExclu-conta']}  ${styles['BtnSair-conta']}` } onClick={logout}><IoMdExit style={{ strokeWidth: '8', fontSize: '1.7rem' }} /> Sair</button>
         </main>
     )
 }

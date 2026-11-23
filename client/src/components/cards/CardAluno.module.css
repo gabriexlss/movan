@@ -40,7 +40,7 @@
     font-size: 2.0625rem;
     font-weight: 900;
     margin-left: auto;
-    color: #7A7A7A;
+    color: var(--theme-muted);
 }
 
 .iconAluno{
@@ -55,4 +55,43 @@
     font-size: 0.7625rem;
     font-weight: 900;
     line-height: 1.4;
+}
+
+@media (min-width: 64rem) {
+    .aluno-container {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        gap: .75rem;
+        margin-bottom: 1rem;
+    }
+
+    .statusAluno {
+        align-items: flex-start;
+        gap: .4rem;
+        padding: .75rem;
+        border-radius: .55rem;
+        background: var(--theme-panel);
+        text-align: left;
+    }
+
+    .tituloAluno {
+        font-size: var(--texto-apoio-desktop);
+        font-weight: 600;
+    }
+
+    .containerTexto {
+        gap: .6rem;
+    }
+
+    .iconAluno {
+        font-size: 2rem;
+    }
+
+    .quantidadeAluno {
+        margin-left: 0;
+        color: var(--theme-text);
+        font-size: 2.125rem;
+        line-height: 1.2;
+    }
 }

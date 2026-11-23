@@ -2,22 +2,22 @@ import { useEffect, useState } from 'react'
 import { FaChevronRight, FaFileContract, FaInfoCircle, FaMapMarkerAlt, FaUserGraduate } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { listarAluno } from '../../../services/aluno'
+import { listarContratos } from '../../../services/contrato'
+import { adaptarContrato, formatarData, formatarMoeda, situacoesContrato } from '../../contratos/contratos-data'
 import SecaoDetalhes, { CampoDetalhe } from './SecaoDetalhes'
 import styles from './clienteDetalhes.module.css'
 
-const nomesSituacao = {
-    ativo: 'Ativo',
-    pendente: 'Pendente',
-    atrasado: 'Atrasado',
-}
 const DetalhesResponsavel = ({ cliente: responsavel }) => {
     const [alunos, setAlunos] = useState([])
+    const [contratosApi, setContratosApi] = useState([])
 
     useEffect(() => {
         let ativo = true
 
-        listarAluno().then((dados) => {
-            if (ativo) setAlunos(dados)
+        Promise.allSettled([listarAluno(), listarContratos()]).then(([resAlunos, resContratos]) => {
+            if (!ativo) return
+            if (resAlunos.status === 'fulfilled') setAlunos(resAlunos.value)
+            if (resContratos.status === 'fulfilled') setContratosApi(resContratos.value.map(adaptarContrato))
         })
 
         return () => {
@@ -29,7 +29,14 @@ const DetalhesResponsavel = ({ cliente: responsavel }) => {
         String(aluno.responsavel_id ?? aluno.responsavelId) === String(responsavel.id)
         || aluno.responsavel === responsavel.nome
     ))
-    const contratos = responsavel.contratos || []
+
+    const idsAlunosVinculados = new Set(alunosVinculados.map((aluno) => String(aluno.id)))
+
+    const contratos = contratosApi.filter((contrato) => (
+        (contrato.responsavel_id !== undefined && String(contrato.responsavel_id) === String(responsavel.id))
+        || (contrato.aluno_id !== undefined && idsAlunosVinculados.has(String(contrato.aluno_id)))
+        || (responsavel.nome && contrato.cliente === responsavel.nome)
+    ))
 
     return (
         <>
@@ -77,15 +84,23 @@ const DetalhesResponsavel = ({ cliente: responsavel }) => {
                 {contratos.length > 0 ? (
                     <ul className={styles.listaContratos}>
                         {contratos.map((contrato) => (
-                            <li className={styles.contrato} key={contrato.id}>
-                                <div className={styles.contratoCabecalho}>
-                                    <strong>{contrato.nome}</strong>
-                                    <span className={`${styles.status} ${styles[`status-${contrato.situacao}`]}`}>
-                                        {nomesSituacao[contrato.situacao] || contrato.situacao}
-                                    </span>
-                                </div>
-                                <span>{contrato.id}</span>
-                                <span>{contrato.valor} · Vencimento: {contrato.vencimento}</span>
+                            <li key={contrato.id}>
+                                <Link to={`/contratos/${contrato.id}`} className={styles.contrato}>
+                                    <div className={styles.contratoCabecalho}>
+                                        <strong>{contrato.titulo}</strong>
+                                        <span className={`${styles.status} ${styles[`status-${contrato.situacao}`] || ''}`}>
+                                            {situacoesContrato[contrato.situacao] || contrato.situacao}
+                                        </span>
+                                    </div>
+                                    <span>#{contrato.id} · {formatarData(contrato.inicio)} a {formatarData(contrato.termino)}</span>
+                                    {(contrato.valor_mensal !== undefined || contrato.dia_vencimento) && (
+                                        <span>
+                                            {contrato.valor_mensal !== undefined ? formatarMoeda(contrato.valor_mensal) : ''}
+                                            {contrato.valor_mensal !== undefined && contrato.dia_vencimento ? ' · ' : ''}
+                                            {contrato.dia_vencimento ? `Vencimento: dia ${contrato.dia_vencimento}` : ''}
+                                        </span>
+                                    )}
+                                </Link>
                             </li>
                         ))}
                     </ul>

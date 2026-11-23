@@ -1,0 +1,35 @@
+.toggle {
+    display: grid;
+    flex: 0 0 auto;
+    align-self: center;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--theme-control-border);
+    border-radius: .65rem;
+    background: var(--theme-panel);
+    color: var(--theme-accent);
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.toggle:hover {
+    background: var(--theme-accent-soft);
+}
+
+.toggle:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -5px;
+}
+
+.comTexto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    width: 100%;
+    height: auto;
+    min-height: 2.3rem;
+    border-radius: .35rem;
+    font: inherit;
+}

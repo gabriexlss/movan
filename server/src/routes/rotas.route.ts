@@ -8,6 +8,10 @@ router.get('/', controllerRotas.obterRotas)
 router.get('/:id/pontos', controllerRotas.obterPontosRota)
 router.get('/:id/polyline', controllerRotas.obterPolylineRota)
 
+// rotas para adicionar ou remover pontos específicos de uma rota
+router.post('/:id/pontos', controllerRotas.adicionarPontoRota)
+router.delete('/:id/pontos/:ponto_id', controllerRotas.excluirPontoRota)
+
 // rota post pra otimizar uma rota.
 router.post('/:id/otimizar', controllerRotas.otimizarRota)
 

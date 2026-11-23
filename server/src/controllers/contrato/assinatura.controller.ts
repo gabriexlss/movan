@@ -15,6 +15,29 @@ import { assinarContratoPdf } from "../../services/assinaturaPDF.js";
 import { controllerMensalide } from "../financeiro/mensalidade.controller.js";
 
 export const controllerAssinatura = {
+    // obter a assinatura cadastrada do motorista.
+    obterAssinaturaMotorista: async (req: Request, res: Response) => {
+        const motoristaID = req.userId
+
+        try {
+            const query = `
+            SELECT id, caminho_arquivo, criado_em, atualizado_em
+            FROM assinatura_motorista
+            WHERE motorista_id = $1
+            `
+            const { rows } = await database.query<Pick<AssinaturaMotorista, 'id' | 'caminho_arquivo' | 'criado_em' | 'atualizado_em'>>(query, [motoristaID])
+
+            return res.status(200).json({
+                msg: "Dados obtidos com sucesso.",
+                assinatura: rows[0] ?? null
+            })
+        } catch (erro) {
+            console.error("erro no endpoint de obterAssinaturaMotorista, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
     // adicionar assinatura do motorista.
     assinarMotorista: async (req: Request, res: Response) => {
         // recebe a imagem webp da assinatura.
@@ -58,11 +81,13 @@ export const controllerAssinatura = {
                 UPDATE assinatura_motorista
                 SET caminho_arquivo = $1, atualizado_em = now()
                 WHERE motorista_id = $2
+                RETURNING id, caminho_arquivo, criado_em, atualizado_em
                 `
             } else {
                 query = `
                 INSERT INTO assinatura_motorista (caminho_arquivo, motorista_id)
                 VALUES ($1, $2)
+                RETURNING id, caminho_arquivo, criado_em, atualizado_em
                 `
             }
             // definindo o caminho da imagem.
@@ -81,11 +106,12 @@ export const controllerAssinatura = {
             const localizacaoImagem = `${CDN_URL}/${caminho_imagem}`
 
             // salvando no banco de dados ou fazendo o update
-            await database.query(query, [localizacaoImagem, motoristaID])
+            const { rows: [assinaturaSalva] } = await database.query<Pick<AssinaturaMotorista, 'id' | 'caminho_arquivo' | 'criado_em' | 'atualizado_em'>>(query, [localizacaoImagem, motoristaID])
 
             // retornando usuario
             return res.status(201).json({
-                msg: `Assinatura ${possuiAssinatura ? "Atualizada" : "Criada"} com sucesso.`
+                msg: `Assinatura ${possuiAssinatura ? "Atualizada" : "Criada"} com sucesso.`,
+                assinatura: assinaturaSalva ?? { caminho_arquivo: localizacaoImagem }
             })
         } catch (erro) {
             console.error("erro no endpoint de assinarMotorista ao adicionar assinatura do motorista, erro: ", erro)

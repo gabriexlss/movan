@@ -17,7 +17,10 @@ export const criarAluno = async (valores) => {
         longitude: Number(valores.longitude),
     }
 
-    const response = await api.post('/aluno', aluno, {skipGlobalErrorToast: true}) //mando pro backend para ele criar
+    const response = await api.post('/aluno', aluno, {
+        skipGlobalErrorToast: true,
+        timeout: 30000, // tempo estendido para inserção das rotas e pontos
+    }) //mando pro backend para ele criar
     return response.data.aluno //devolvo a resposta do backend
 }
 

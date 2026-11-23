@@ -6,7 +6,7 @@
     width: min(85%, 22rem);
     padding: 0.25rem;
     border-radius: 15px;
-    background-color: #eeeeeeb4;
+    background-color: var(--theme-surface-muted);
 
     font-family: 'Bree Serif', serif;
     font-size: 1.2625rem;
@@ -24,7 +24,7 @@
 
     text-align: center;
     text-decoration: none;
-    color: #0D47A1;
+    color: var(--theme-accent);
 }
 
 .toggle-indicador {
@@ -41,23 +41,26 @@
 
 .logcad-toggle.login .toggle-indicador {
     transform: translateX(0);
-    background-color: #FFC33A;
+    background-color: var(--theme-brand-yellow);
 }
 
 .logcad-toggle.cadastro .toggle-indicador {
     transform: translateX(100%);
-    background-color: #0D47A1;
+    background-color: var(--theme-action);
 }
 
 .logcad-toggle.login {
-    border: 1px solid #FFC33A;
+    border: 1px solid var(--theme-brand-yellow);
 }
 
 .logcad-toggle.cadastro {
-    border: 1px solid #0D47A1;
+    border: 1px solid var(--theme-focus);
 }
 
-.logcad-toggle.login a:first-of-type,
+.logcad-toggle.login a:first-of-type {
+    color: var(--theme-on-yellow);
+}
+
 .logcad-toggle.cadastro a:last-of-type {
-    color: white;
+    color: var(--theme-on-action);
 }

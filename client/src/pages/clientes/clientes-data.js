@@ -20,7 +20,7 @@ export const responsaveis = [
         email: 'thiago@email.com',
         cpf: '234.567.890-12',
         telefone: '(11) 98888-0000',
-        endereco: 'Rua das Palmeiras, 84 · Jardim Ângela',
+        endereco: 'Rua das Palmeras, 84 · Jardim Ângela',
         informacoesGerais: 'Prefere receber avisos e cobranças por e-mail.',
         situacaoContrato: 'pendente',
         detalhes: ['(11) 98888-0000', 'thiago@email.com', 'Jardim Ângela'],
@@ -96,7 +96,7 @@ export const alunos = [
     { id: 'aluno-2', nome: 'Beatriz Nogueira', dataNascimento: '2023-06-08', turno: 'Tarde', anoEscolar: 'Infantil 1', informacoesGerais: 'Utiliza cadeirinha infantil durante o transporte.', responsavelId: 'responsavel-1', responsavel: 'Bianca Nogueira', escolaId: 'escola-1', detalhes: ['Responsável: Bianca Nogueira', '3 anos · Infantil 1'] },
     { id: 'aluno-3', nome: 'João Teixeira', dataNascimento: '2019-01-22', turno: 'Manhã', anoEscolar: '2º ano', informacoesGerais: '', responsavelId: 'responsavel-2', responsavel: 'Thiago Teixeira', escolaId: 'escola-2', detalhes: ['Responsável: Thiago Teixeira', '7 anos · 2º ano'] },
     { id: 'aluno-4', nome: 'Mariana Teixeira', dataNascimento: '2017-09-11', turno: 'Tarde', anoEscolar: '4º ano', informacoesGerais: '', responsavelId: 'responsavel-2', responsavel: 'Thiago Teixeira', escolaId: 'escola-2', detalhes: ['Responsável: Thiago Teixeira', '9 anos · 4º ano'] },
-    { id: 'aluno-5', nome: 'Lucas Fabrício', dataNascimento: '2020-05-17', turno: 'Integral', anoEscolar: '1º ano', informacoesGerais: 'Possui alergia alimentar informada pelo responsável.', responsavelId: 'responsavel-3', responsavel: 'Carlos Fabrício', escolaId: 'escola-3', detalhes: ['Responsável: Carlos Fabrício', '6 anos · 1º ano'] },
+    { id: 'aluno-5', nome: 'Lucas Fabrício', dataNascimento: '2020-05-17', turno: 'Manhã', anoEscolar: '1º ano', informacoesGerais: 'Possui alergia alimentar informada pelo responsável.', responsavelId: 'responsavel-3', responsavel: 'Carlos Fabrício', escolaId: 'escola-3', detalhes: ['Responsável: Carlos Fabrício', '6 anos · 1º ano'] },
     { id: 'aluno-6', nome: 'Ana Manuel', dataNascimento: '2018-12-03', turno: 'Manhã', anoEscolar: '3º ano', informacoesGerais: '', responsavelId: 'responsavel-4', responsavel: 'Ricardo Manuel', escolaId: 'escola-3', detalhes: ['Responsável: Ricardo Manuel', '8 anos · 3º ano'] },
 ]
 

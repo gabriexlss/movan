@@ -1,15 +1,15 @@
 import DefaultCard from './DefaultCard';
 import styles from './CardFinanc.module.css';
 
-const CardFinanc = () => {
+const CardFinanc = ({ className }) => {
     const financeiro =[
-        {titulo: "Receitas", valor: "6.890,00", cor: "#15720C"},
-        {titulo: "Despesas", valor: "2.450,00", cor: "#720C0C"},
-        {titulo: "Lucro líquido", valor: "4.440,00", cor: "#07368A"}
+        {titulo: "Receitas", valor: "6.890,00", cor: 'var(--theme-success)'},
+        {titulo: "Despesas", valor: "2.450,00", cor: 'var(--theme-danger)'},
+        {titulo: "Lucro líquido", valor: "4.440,00", cor: 'var(--theme-title)'}
     ];
 
     return(
-        <DefaultCard title="Resumo financeiro" link="/financeiro" compactTitle>
+        <DefaultCard title="Resumo financeiro" link="/financeiro" compactTitle className={className}>
             <div className={styles['financeiro-container']}>
                 <div className={styles['texto-financ']}>
                     {financeiro.map((item, index) => (
