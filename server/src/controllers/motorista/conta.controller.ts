@@ -192,10 +192,10 @@ export const controllerConta = {
             })
         }
         // determina se tal dado veio ou não e coloca a clausula dele
-        const { nome, email, credencial, senha, cod, senhaAtual } = dadosBrutos.data
+        const { nome, email, credencial, senha, cod, senhaAtual, endereco, capacidade_van } = dadosBrutos.data
         // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
         const campos: string[] = []
-        const valores: (string | number)[] = []
+        const valores: (string | number | null)[] = []
         let idCodigoEmail: number | undefined
 
         if (nome) {
@@ -283,6 +283,15 @@ export const controllerConta = {
             }
         }
 
+        if (endereco !== undefined) {
+            campos.push(`endereco = $${valores.length + 1}`)
+            valores.push(endereco)
+        }
+        if (capacidade_van !== undefined) {
+            campos.push(`capacidade_van = $${valores.length + 1}`)
+            valores.push(capacidade_van)
+        }
+
         // se nenhum campo tiver sido enviado, manda embora
         if (campos.length < 1) {
             return res.status(400).json({
@@ -302,7 +311,7 @@ export const controllerConta = {
             }
 
             //se chegou aqui, tudo ocorreu bem. hora de retornar.
-            const camposEditados = [nome, email, credencial, senha].filter((valor) => valor !== undefined).length
+            const camposEditados = [nome, email, credencial, senha, endereco, capacidade_van].filter((valor) => valor !== undefined).length
             return res.status(200).json({
                 'msg-code': camposEditados === 1
                     ? "ACCOUNT_EDITED_ONE_FIELD"
@@ -325,7 +334,7 @@ export const controllerConta = {
 
         // pega os dados do motorista e envia de volta
         try {
-            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado, google_id FROM motorista WHERE id = $1"
+            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado, google_id, endereco, capacidade_van FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 

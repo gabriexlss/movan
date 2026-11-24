@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import Select from '../../../components/forms/Select'
 
 import styles from './dialogsClientes.module.css'
 
@@ -11,7 +12,7 @@ const CampoCliente = ({
     ...fieldProps
 }) => {
     const fieldId = useId()
-    const Field = as
+    const Field = as === 'select' ? Select : as
 
     return (
         <div className={`${styles.field} ${as === 'textarea' ? styles.textareaField : ''}`}>
@@ -20,6 +21,7 @@ const CampoCliente = ({
                 <span className={styles.fieldIcon} aria-hidden="true">{icon}</span>
                 <Field
                     {...fieldProps}
+                    {...(as === 'select' ? { bare: true, 'aria-label': label } : {})}
                     id={fieldId}
                     data-autofocus={autoFocus ? 'true' : undefined}
                 >

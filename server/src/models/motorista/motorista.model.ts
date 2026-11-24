@@ -18,7 +18,8 @@ export const MotoristaSchema = z.object({
     email_verificado: z.boolean("NOT_BOOLEAN"),
     excluido_em: z.string("NOT_STRING").datetime("INVALID_DATE").nullish(),
     login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG"),
-    capacidade_van: z.number().positive()
+    endereco: z.string("NOT_STRING").trim().max(500, "ADDRESS_TOO_LONG").nullable(),
+    capacidade_van: z.number("NOT_NUMBER").int("VAN_CAPACITY_INVALID").positive("VAN_CAPACITY_INVALID").max(2147483647, "VAN_CAPACITY_INVALID")
 });
 export const CriarMotoristaSchema = MotoristaSchema.pick({
     nome: true,
@@ -31,6 +32,8 @@ export const LoginMotoristaSchema = MotoristaSchema.pick({
     senha: true
 })
 export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
+    endereco: MotoristaSchema.shape.endereco.optional(),
+    capacidade_van: MotoristaSchema.shape.capacidade_van.optional(),
     cod: validarCodigoSchema.shape.cod.optional(),
     senhaAtual: CriarMotoristaSchema.shape.senha.optional()
 }).refine((dados) => !dados.email || !!dados.cod, {

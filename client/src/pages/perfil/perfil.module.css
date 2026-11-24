@@ -30,10 +30,20 @@
 }
 
 .foto-perfil {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
     width: clamp(5rem, 24vw, 7rem);
     aspect-ratio: 1;
-    object-fit: cover;
     border-radius: 50%;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
+}
+
+.foto-perfil svg {
+    width: 62%;
+    height: 62%;
 }
 
 .info-container {
@@ -163,6 +173,11 @@
 
 .botao-editar:active {
     transform: scale(.94);
+}
+
+.botao-editar:disabled {
+    opacity: .6;
+    cursor: default;
 }
 
 .botao-editar:focus-visible {
