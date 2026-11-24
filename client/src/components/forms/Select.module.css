@@ -1,0 +1,127 @@
+.root {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+.trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    width: 100%;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding: .55rem .7rem;
+    border: 1px solid var(--theme-control-border);
+    border-radius: 999px;
+    background: var(--theme-panel);
+    color: var(--theme-text);
+    font-family: 'Poppins', sans-serif;
+    font-size: .9425rem;
+    line-height: 1.5;
+    text-align: left;
+    cursor: pointer;
+}
+
+.trigger > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trigger svg,
+.option svg {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+}
+
+.trigger:focus-visible {
+    outline: 2px solid var(--theme-focus);
+    outline-offset: 2px;
+}
+
+.bare {
+    padding-left: 0;
+    border: 0;
+    background: transparent;
+}
+
+.bare:focus-visible {
+    outline: none;
+}
+
+.trigger:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+.list {
+    position: fixed;
+    z-index: 1100;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0;
+    padding: .25rem;
+    border: 1px solid var(--theme-control-border);
+    border-radius: .65rem;
+    background: var(--theme-panel);
+    color: var(--theme-text);
+    box-shadow: 0 .5rem 1.25rem rgb(0 0 0 / 20%);
+    font-family: 'Poppins', sans-serif;
+    font-size: .9425rem;
+    list-style: none;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    min-height: 2.75rem;
+    padding: .6rem .75rem;
+    border-radius: .4rem;
+    background: var(--theme-panel);
+    color: var(--theme-text);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.option[aria-selected='true'] {
+    background: var(--theme-accent-selected);
+    color: var(--theme-text);
+}
+
+.option.active {
+    background: var(--theme-accent-soft);
+    color: var(--theme-text);
+    outline: 2px solid var(--theme-focus);
+    outline-offset: -2px;
+}
+
+.option[aria-disabled='true'] {
+    color: var(--theme-muted);
+    cursor: not-allowed;
+}
+
+.error {
+    display: block;
+    margin-top: .3rem;
+    color: var(--theme-danger);
+    font-size: .8rem;
+}
+
+@media (forced-colors: active) {
+    .list,
+    .option,
+    .trigger {
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    .option.active {
+        outline-color: Highlight;
+    }
+}

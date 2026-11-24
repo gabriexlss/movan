@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { LuArrowDown, LuArrowUp, LuPlus, LuSparkles, LuTrash2, LuUserRound } from 'react-icons/lu'
+import { LuArrowDown, LuArrowUp, LuPlus, LuTrash2, LuUserRound } from 'react-icons/lu'
 import { TbArrowsExchange2, TbSunFilled, TbSunset2Filled } from 'react-icons/tb'
 import { IoMoon } from 'react-icons/io5'
 import { RiGraduationCapLine } from 'react-icons/ri'
@@ -349,7 +349,6 @@ const Rotas = () => {
                                 disabled={!rotaAtualId || !temAlunosNaRota || otimizando || carregandoRota}
                                 onClick={executarOtimizacao}
                             >
-                                <LuSparkles aria-hidden="true" />
                                 {otimizando ? 'Otimizando...' : 'Otimizar rota'}
                             </button>
                         </div>

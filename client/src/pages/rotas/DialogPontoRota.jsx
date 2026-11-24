@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { LuPlus, LuTrash2 } from 'react-icons/lu'
 
 import DefaultDialog from '../../components/dialog/dialogDefault'
+import Select from '../../components/forms/Select'
 import styles from './rota.module.css'
 
 const DialogPontoRota = ({
@@ -66,7 +67,8 @@ const DialogPontoRota = ({
                         {alunosDisponiveis.length > 0 ? (
                             <label className={styles.campoSelect}>
                                 Aluno
-                                <select
+                                <Select
+                                    aria-label="Aluno"
                                     value={alunoSelecionadoId}
                                     onChange={(event) => setAlunoSelecionadoId(event.target.value)}
                                     required
@@ -82,7 +84,7 @@ const DialogPontoRota = ({
                                             </option>
                                         )
                                     })}
-                                </select>
+                                </Select>
                             </label>
                         ) : (
                             <p className={styles.mensagemVazia}>
