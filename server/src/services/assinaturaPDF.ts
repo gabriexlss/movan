@@ -3,7 +3,7 @@ import sharp from "sharp";
 
 export const CAMPO_ASSINATURA_RESPONSAVEL = "assinatura_responsavel"
 
-// O PDF aceita PNG, enquanto as assinaturas são recebidas em WebP.
+// O PDF aceita PNG, enquanto as assinaturas são recebidas em WebP ou PNG.
 export const converterAssinaturaPng = async (imagem: Buffer): Promise<Buffer> => {
     return sharp(imagem, { limitInputPixels: 16000000 })
         .rotate()

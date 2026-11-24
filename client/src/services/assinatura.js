@@ -1,5 +1,9 @@
 import api from './api'
 
+const nomeArquivoAssinatura = (imagem) => (
+    imagem?.type === 'image/png' ? 'assinatura.png' : 'assinatura.webp'
+)
+
 export const obterAssinaturaMotorista = async (signal) => {
     const response = await api.get('/contrato/assinatura-motorista', {
         signal,
@@ -11,7 +15,7 @@ export const obterAssinaturaMotorista = async (signal) => {
 
 export const salvarAssinaturaMotorista = async (imagem) => {
     const dados = new FormData()
-    dados.append('assinatura', imagem, 'assinatura.webp')
+    dados.append('assinatura', imagem, nomeArquivoAssinatura(imagem))
     const response = await api.post('/contrato/assinatura-motorista', dados, {
         headers: { 'Content-Type': undefined },
         skipGlobalErrorToast: true,
@@ -32,7 +36,7 @@ export const obterContratoParaAssinatura = async (token, signal) => {
 
 export const assinarContratoResponsavel = async (token, imagem) => {
     const dados = new FormData()
-    dados.append('assinatura', imagem, 'assinatura.webp')
+    dados.append('assinatura', imagem, nomeArquivoAssinatura(imagem))
     const response = await api.post(`/contrato/assinar/${encodeURIComponent(token)}`, dados, {
         headers: { 'Content-Type': undefined },
         skipAuthExpired: true,
