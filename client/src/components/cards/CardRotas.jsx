@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { RiGraduationCapLine } from 'react-icons/ri'
 
@@ -6,6 +6,7 @@ import DefaultCard from './DefaultCard'
 import { listarRotas, obterPontosRota } from '../../services/rotas'
 import { listarEscola } from '../../services/escola'
 import { listarTurnosEscola } from '../../services/turnosEscola'
+import { obterDiaSemanaAtual } from '../../utils/periodoRota'
 import styles from './CardRotas.module.css'
 
 const ITENS_POR_PAGINA = 3
@@ -16,18 +17,56 @@ const nomesTurnoAmigaveis = {
     NOITE: 'noite',
 }
 
-const obterDiaSemanaAtual = () => {
-    const dia = new Date().getDay()
-    const mapa = { 1: 'SEGUNDA', 2: 'TERÇA', 3: 'QUARTA', 4: 'QUINTA', 5: 'SEXTA' }
-    return mapa[dia] || 'SEGUNDA'
+const montarEscolasRotas = (rotasDoDia = [], pontosPorRotaId = {}, todasEscolas = [], todosTurnos = []) => {
+    const itensEncontrados = []
+    const chavesVistas = new Set()
+
+    rotasDoDia.forEach((rota) => {
+        const pontos = pontosPorRotaId?.[rota.id] || pontosPorRotaId?.[String(rota.id)] || []
+        const pontosComEscola = pontos.filter((p) => p.escola_id != null)
+
+        pontosComEscola.forEach((p) => {
+            const chave = `${p.escola_id}-${rota.turno}`
+            if (!chavesVistas.has(chave)) {
+                chavesVistas.add(chave)
+                const escola = todasEscolas.find((e) => String(e.id) === String(p.escola_id))
+                if (escola) {
+                    // Tenta obter o horário pelo escola_turno_id do ponto ou pelo turno da escola
+                    const turnoInfo = (p.escola_turno_id
+                        && todosTurnos.find((t) => String(t.id) === String(p.escola_turno_id)))
+                        || todosTurnos.find(
+                            (t) => String(t.escola_id) === String(escola.id)
+                                && String(t.turno).toUpperCase() === String(rota.turno).toUpperCase(),
+                        )
+
+                    const horarioBruto = rota.sentido === 'VOLTA'
+                        ? (turnoInfo?.hora_saida || turnoInfo?.hora_entrada)
+                        : turnoInfo?.hora_entrada
+                    const horarioTexto = horarioBruto
+                        ? String(horarioBruto).slice(0, 5)
+                        : nomesTurnoAmigaveis[rota.turno] || rota.turno.toLowerCase()
+
+                    itensEncontrados.push({
+                        nome: escola.nome,
+                        horario: horarioTexto,
+                    })
+                }
+            }
+        })
+    })
+
+    return itensEncontrados
 }
 
-const CardRotas = () => {
+const CardRotas = ({ dadosHome }) => {
     const [pagina, setPagina] = useState(0)
-    const [escolasRotas, setEscolasRotas] = useState([])
-    const [carregando, setCarregando] = useState(true)
+    const [estadoInterno, setEstadoInterno] = useState({
+        escolasRotas: [],
+        carregando: true,
+    })
 
     useEffect(() => {
+        if (dadosHome) return undefined
         let montado = true
         const carregar = async () => {
             try {
@@ -39,56 +78,24 @@ const CardRotas = () => {
                 ])
 
                 // Buscar pontos de cada rota do dia para descobrir quais escolas são atendidas hoje
-                const pontosPromises = rotasDoDia.map((r) => obterPontosRota(r.id))
-                const resultadosPontos = await Promise.all(pontosPromises)
-
-                const itensEncontrados = []
-                const chavesVistas = new Set()
-
-                rotasDoDia.forEach((rota, idx) => {
-                    const pontos = resultadosPontos[idx] || []
-                    const pontosComEscola = pontos.filter((p) => p.escola_id != null)
-
-                    pontosComEscola.forEach((p) => {
-                        const chave = `${p.escola_id}-${rota.turno}`
-                        if (!chavesVistas.has(chave)) {
-                            chavesVistas.add(chave)
-                            const escola = todasEscolas.find((e) => String(e.id) === String(p.escola_id))
-                            if (escola) {
-                                // Tenta obter o horário pelo escola_turno_id do ponto ou pelo turno da escola
-                                const turnoInfo = (p.escola_turno_id
-                                    && todosTurnos.find((t) => String(t.id) === String(p.escola_turno_id)))
-                                    || todosTurnos.find(
-                                        (t) => String(t.escola_id) === String(escola.id)
-                                            && String(t.turno).toUpperCase() === String(rota.turno).toUpperCase(),
-                                    )
-
-                                const horarioBruto = rota.sentido === 'VOLTA'
-                                    ? (turnoInfo?.hora_saida || turnoInfo?.hora_entrada)
-                                    : turnoInfo?.hora_entrada
-                                const horarioTexto = horarioBruto
-                                    ? String(horarioBruto).slice(0, 5)
-                                    : nomesTurnoAmigaveis[rota.turno] || rota.turno.toLowerCase()
-
-                                itensEncontrados.push({
-                                    nome: escola.nome,
-                                    horario: horarioTexto,
-                                })
-                            }
-                        }
-                    })
-                })
+                const paresPontos = await Promise.all(
+                    rotasDoDia.map(async (r) => [r.id, await obterPontosRota(r.id)]),
+                )
+                const pontosPorRotaId = Object.fromEntries(paresPontos)
+                const itensEncontrados = montarEscolasRotas(rotasDoDia, pontosPorRotaId, todasEscolas, todosTurnos)
 
                 if (montado) {
-                    setEscolasRotas(itensEncontrados)
+                    setEstadoInterno({
+                        escolasRotas: itensEncontrados,
+                        carregando: false,
+                    })
                 }
             } catch {
                 if (montado) {
-                    setEscolasRotas([])
-                }
-            } finally {
-                if (montado) {
-                    setCarregando(false)
+                    setEstadoInterno({
+                        escolasRotas: [],
+                        carregando: false,
+                    })
                 }
             }
         }
@@ -98,7 +105,20 @@ const CardRotas = () => {
         return () => {
             montado = false
         }
-    }, [])
+    }, [dadosHome])
+
+    const carregando = dadosHome ? dadosHome.carregando : estadoInterno.carregando
+
+    const escolasRotas = useMemo(() => {
+        if (!dadosHome) return estadoInterno.escolasRotas
+        if (dadosHome.carregando || dadosHome.erroRotas || dadosHome.erroEscolas || dadosHome.erroTurnos) return []
+        return montarEscolasRotas(
+            dadosHome.rotasDoDia,
+            dadosHome.pontosPorRotaId,
+            dadosHome.escolas,
+            dadosHome.turnosEscola,
+        )
+    }, [dadosHome, estadoInterno.escolasRotas])
 
     const totalPaginas = Math.max(1, Math.ceil(escolasRotas.length / ITENS_POR_PAGINA))
     const inicio = pagina * ITENS_POR_PAGINA
