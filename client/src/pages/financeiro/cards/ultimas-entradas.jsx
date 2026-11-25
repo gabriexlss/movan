@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
     FaBus,
     FaGasPump,
@@ -10,33 +10,30 @@ import {
 import DialogExcluirEntrada from '../dialogs/DialogExcluirEntrada'
 import DialogFormularioEntrada from '../dialogs/DialogFormularioEntrada'
 import PainelLista from './PainelLista'
+import {
+    listarRegistros,
+    criarRegistro,
+    alterarRegistro,
+    excluirRegistro,
+} from '../../../services/financeiro'
 import styles from './ultimas-entradas.module.css'
-
-const entradas = [
-    { id: 'entrada-1', titulo: 'Mensalidade - Aluno João', descricao: 'Mensalidade escolar', valor: 450, data: '2026-06-13', tipo: 'Receita' },
-    { id: 'entrada-2', titulo: 'Combustível', descricao: 'Abastecimento do veículo', valor: 250, data: '2026-06-13', tipo: 'Despesa' },
-    { id: 'entrada-3', titulo: 'Mensalidade - Aluno Maria', descricao: 'Mensalidade escolar', valor: 450, data: '2026-06-12', tipo: 'Receita' },
-    { id: 'entrada-4', titulo: 'Manutenção', descricao: 'Revisão do veículo', valor: 250, data: '2026-06-11', tipo: 'Despesa' },
-    { id: 'entrada-5', titulo: 'Mensalidade - Aluno Caio', descricao: 'Mensalidade escolar', valor: 450, data: '2026-06-10', tipo: 'Receita' },
-    { id: 'entrada-6', titulo: 'Seguro do veículo', descricao: 'Parcela mensal', valor: 380, data: '2026-06-09', tipo: 'Despesa' },
-    { id: 'entrada-7', titulo: 'Mensalidade - Aluno Bia', descricao: 'Mensalidade escolar', valor: 450, data: '2026-06-08', tipo: 'Receita' },
-    { id: 'entrada-8', titulo: 'Combustível', descricao: 'Abastecimento', valor: 220, data: '2026-06-07', tipo: 'Despesa' },
-]
 
 const ITENS_POR_PAGINA = 4
 
 const formatarValor = (valor) => new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-}).format(valor)
+}).format(Number(valor) || 0)
 
 const formatarData = (data) => {
-    const [ano, mes, dia] = data.split('-')
+    if (!data) return ''
+
+    const [ano, mes, dia] = data.substring(0, 10).split('-')
     return ano && mes && dia ? `${dia}/${mes}/${ano}` : data
 }
 
 const obterIcone = (entrada) => {
-    const assunto = entrada.titulo.toLocaleLowerCase('pt-BR')
+    const assunto = String(entrada.titulo || '').toLocaleLowerCase('pt-BR')
 
     if (entrada.tipo === 'Receita') return FaMoneyBillWave
     if (assunto.includes('combustível')) return FaGasPump
@@ -44,37 +41,87 @@ const obterIcone = (entrada) => {
     return FaBus
 }
 
-const UltimasEntradas = () => {
-    const [itens, setItens] = useState(entradas)
+const UltimasEntradas = ({ onFinanceiroAtualizado }) => {
+    const [itens, setItens] = useState([])
     const [pagina, setPagina] = useState(0)
     const [dialog, setDialog] = useState(null)
 
+    const buscarEntradas = useCallback(async () => {
+        try {
+            const registros = await listarRegistros()
+
+            const registrosFormatados = registros.map(registro => ({
+                id: registro.id,
+                titulo: registro.titulo,
+                descricao: registro.descricao,
+                valor: Number(registro.valor),
+                data: registro.data_lancamento,
+                tipo: registro.tipo === 'ENTRADA' ? 'Receita' : 'Despesa',
+            }))
+
+            registrosFormatados.sort((a, b) =>
+                new Date(b.data) - new Date(a.data)
+            )
+
+            setItens(registrosFormatados)
+
+            return true
+        } catch (error) {
+            console.error('Erro ao buscar entradas financeiras:', error)
+            return false
+        }
+    }, [])
+
+    useEffect(() => {
+        buscarEntradas()
+    }, [buscarEntradas])
+
     const fecharDialog = useCallback(() => setDialog(null), [])
 
-    const salvarEntrada = (valores) => {
-        const entradaAtualizada = {
-            ...dialog.registro,
-            ...valores,
-            id: dialog.registro?.id || `entrada-${Date.now()}`,
-            descricao: valores.tipo === 'Receita' ? 'Receita financeira' : 'Despesa financeira',
-        }
+    const salvarEntrada = async (valores) => {
+        try {
+            const dados = {
+                ...dialog.registro,
+                ...valores,
+                descricao: dialog.registro?.descricao ||
+                    (valores.tipo === 'Receita'
+                        ? 'Receita financeira'
+                        : 'Despesa financeira'),
+            }
 
-        setItens((estadoAtual) => (
-            dialog.acao === 'editar'
-                ? estadoAtual.map((item) => (item.id === entradaAtualizada.id ? entradaAtualizada : item))
-                : [entradaAtualizada, ...estadoAtual]
-        ))
-        setPagina(0)
-        fecharDialog()
+            if (dialog.acao === 'editar') {
+                await alterarRegistro(dialog.registro.id, dados)
+            } else {
+                await criarRegistro(dados)
+            }
+
+            await buscarEntradas()
+            onfinanceiroAtualizado()
+            setPagina(0)
+            fecharDialog()
+
+        } catch (error) {
+            console.error('Erro ao salvar registro financeiro:', error)
+        }
     }
 
-    const excluirEntrada = () => {
-        setItens((estadoAtual) => estadoAtual.filter((item) => item.id !== dialog.registro.id))
-        fecharDialog()
+    const confirmarExclusao = async () => {
+        try {
+            await excluirRegistro(dialog.registro.id)
+
+            await buscarEntradas()
+            onFinanceiroAtualizado()
+            setPagina(0)
+            fecharDialog()
+
+        } catch (error) {
+            console.error('Erro ao excluir registro financeiro:', error)
+        }
     }
 
     const totalPaginas = Math.max(1, Math.ceil(itens.length / ITENS_POR_PAGINA))
     const paginaAtual = Math.min(pagina, totalPaginas - 1)
+
     const entradasDaPagina = itens.slice(
         paginaAtual * ITENS_POR_PAGINA,
         (paginaAtual + 1) * ITENS_POR_PAGINA,
@@ -156,7 +203,7 @@ const UltimasEntradas = () => {
                 <DialogExcluirEntrada
                     registro={dialog.registro}
                     onClose={fecharDialog}
-                    onConfirm={excluirEntrada}
+                    onConfirm={confirmarExclusao}
                 />
             )}
         </>

@@ -1,11 +1,32 @@
 import DefaultCard from './DefaultCard';
 import styles from './CardFinanc.module.css';
+import { useEffect, useState } from 'react';
+import { obterSumarioFinanceiro } from '../../services/financeiro';
 
 const CardFinanc = ({ className }) => {
+    const [lucroTotal, setLucroTotal] = useState(0);
+    const [despesaTotal, setDespesaTotal] = useState(0);
+
+    useEffect(( ) => {
+        const buscarResumo = async () => {
+            try {
+                const lucro = await obterSumarioFinanceiro({ tipo: 'ENTRADA' });
+                const despesa = await obterSumarioFinanceiro({ tipo: 'SAIDA' });
+
+                setLucroTotal(lucro);
+                setDespesaTotal(Math.abs(despesa));
+            } catch (error) {
+                console.error('Erro ao buscar resumo financeiro:', error);
+            }
+        }
+
+        buscarResumo();
+    }, []);
+    
     const financeiro =[
-        {titulo: "Receitas", valor: "6.890,00", cor: 'var(--theme-success)'},
-        {titulo: "Despesas", valor: "2.450,00", cor: 'var(--theme-danger)'},
-        {titulo: "Lucro líquido", valor: "4.440,00", cor: 'var(--theme-title)'}
+        {titulo: "Receitas", valor: lucroTotal.toFixed(2), cor: 'var(--theme-success)'},
+        {titulo: "Despesas", valor: despesaTotal.toFixed(2), cor: 'var(--theme-danger)'},
+        {titulo: "Lucro líquido", valor: (lucroTotal - despesaTotal).toFixed(2), cor: 'var(--theme-title)'}
     ];
 
     return(

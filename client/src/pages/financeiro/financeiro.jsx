@@ -11,6 +11,10 @@ import UltimasEntradas from './cards/ultimas-entradas'
 import MensalidadesAlunos from './cards/mensalidades-alunos'
 
 const Financeiro = () => {
+    const [atualizacaoFinanceira, setAtualizacaoFinanceira] = useState(0)
+    const atualizarFinanceiro = () => {
+    setAtualizacaoFinanceira(valor => valor + 1)
+}
     const [seletorAberto, setSeletorAberto] = useState(false)
     const [periodo, setPeriodo] = useState(() => {
         const hoje = new Date()
@@ -121,9 +125,9 @@ const Financeiro = () => {
             </div>
 
             <div className={styles.paineis}>
-                <ResumoFinanc className={styles.resumo} />
+                <ResumoFinanc className={styles.resumo} periodo={periodo} atualizacao={atualizacaoFinanceira} />
                 <Comparativo className={styles.comparativo} />
-                <UltimasEntradas />
+                <UltimasEntradas onFinanceiroAtualizado={atualizarFinanceiro} />
                 <MensalidadesAlunos />
             </div>
         </main>

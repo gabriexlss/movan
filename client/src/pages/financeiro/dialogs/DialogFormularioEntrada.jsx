@@ -43,6 +43,7 @@ const DialogFormularioEntrada = ({ acao, registro, onClose, onSave }) => {
             valor: Number(valores.valor),
         })
     }
+    
 
     return (
         <DefaultDialog
