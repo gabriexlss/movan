@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/useAuth'
 import api from '../../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import PasswordRequirements from '../../../components/auth/PasswordRequirements'
+import AceiteTermos from '../../../components/auth/AceiteTermos'
 import { senhaValida } from '../../../utils/password'
 import styles from './cad.module.css'
 
@@ -139,17 +140,7 @@ const Cad = () => {
 
                 <PasswordRequirements senha={senha} />
 
-                <div className={styles['campo-termos']}>
-                    <input
-                        type="checkbox"
-                        id="termos"
-                        name="termos"
-                        required
-                    />
-                    <label htmlFor="termos">
-                        Concordo com os <a href="/termos">termos de uso</a>
-                    </label>
-                </div>
+                <AceiteTermos />
 
                 <button className={styles['cadastrar']} type="submit" disabled={enviando || !senhaValida(senha) || senha !== confirmarSenha}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}
