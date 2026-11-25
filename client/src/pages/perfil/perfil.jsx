@@ -7,7 +7,7 @@ import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
 import { MdPersonOutline } from "react-icons/md";
 import { LuMails } from "react-icons/lu";
-import { LuMapPin, LuUserRound, LuUsersRound } from 'react-icons/lu'
+import { LuBookOpen, LuMapPin, LuUserRound, LuUsersRound } from 'react-icons/lu'
 import { BiSolidBuildings } from "react-icons/bi";
 import { HiOutlineKey } from "react-icons/hi";
 
@@ -346,6 +346,15 @@ const Perfil = () => {
             <Link to="/perfil/assinatura" className={`${styles['BtnExclu-conta']} ${styles['BtnAssinatura']}`}>
                 <PiPenNibBold aria-hidden="true" style={{ fontSize: '1.7rem' }} /> Minha assinatura
             </Link>
+            <a
+                href="/manual-do-usuario.pdf"
+                className={`${styles['BtnExclu-conta']} ${styles.BtnManual}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Abrir manual de instruções em PDF"
+            >
+                <LuBookOpen aria-hidden="true" style={{ fontSize: '1.7rem' }} /> Manual de instruções
+            </a>
             <button
                 type="button"
                 className={styles['BtnExclu-conta']}

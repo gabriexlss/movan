@@ -234,11 +234,16 @@
     cursor: pointer;
 }
 
-.BtnSair-conta{
+.BtnSair-conta,
+.BtnManual {
     margin-top: 0;
 
     border-color: var(--theme-focus);
     color: var(--theme-accent);
+}
+
+.BtnManual {
+    text-decoration: none;
 }
 
 .BtnAssinatura {
@@ -337,7 +342,8 @@
     }
 
     .acao-movel.acao-movel,
-    .BtnSair-conta {
+    .BtnSair-conta,
+    .BtnManual {
         display: none;
     }
 }
