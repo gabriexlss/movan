@@ -69,6 +69,7 @@ const MESSAGES = {
     SIGNATURE_REQUIRED: 'Desenhe sua assinatura antes de concluir.',
     CONTRACT_CREATED: 'Contrato criado com sucesso.',
     CONTRACT_CREATE_FAILED: 'Não foi possível criar o contrato.',
+    CONTRACT_ALREADY_ACTIVE: 'Este aluno já possui um contrato ativo ou em andamento.',
     CONTRACT_UPDATED: 'Contrato atualizado com sucesso.',
     CONTRACT_UPDATE_FAILED: 'Não foi possível atualizar o contrato.',
     CONTRACT_DELETED: 'Contrato excluído com sucesso.',
