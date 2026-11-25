@@ -45,4 +45,7 @@ export const QuerysObterMensalidadeSchema = z.object({
     )
 }).partial()
 
+export const AlterarStatusMensalidadeSchema = z.strictObject({
+    status: MensalidadeSchema.shape.status
+})
 export type Mensalidade = z.infer<typeof MensalidadeSchema>

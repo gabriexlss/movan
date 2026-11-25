@@ -4,6 +4,10 @@
     list-style: none;
 }
 
+.linha {
+    display: flex;
+}
+
 .item {
     display: grid;
     grid-template-columns: 1.45rem minmax(0, 1fr) auto;
@@ -11,8 +15,23 @@
     gap: .35rem;
     min-height: 2.15rem;
     padding: .22rem .1rem;
+    width: 100%;
+    border: 0;
     border-top: 1px solid var(--theme-border);
     border-left: 2px solid transparent;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.item:hover {
+    background: var(--theme-accent-soft);
+}
+
+.item:focus-visible {
+    outline: 2px solid var(--theme-focus);
+    outline-offset: -2px;
 }
 
 .pago {
@@ -23,7 +42,7 @@
     border-left-color: var(--theme-warning);
 }
 
-.atrasado {
+.cancelada {
     border-left-color: var(--theme-danger);
 }
 
@@ -63,7 +82,7 @@
     color: var(--theme-warning);
 }
 
-.atrasado .descricao strong {
+.cancelada .descricao strong {
     color: var(--theme-danger);
 }
 
@@ -91,9 +110,28 @@
     color: var(--theme-warning);
 }
 
-.status-atrasado {
+.status-cancelada {
     background: var(--theme-danger-soft);
     color: var(--theme-danger);
+}
+
+.mensagem {
+    padding: 1rem .5rem;
+    color: var(--theme-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: .8rem;
+    text-align: center;
+}
+
+.mensagem button {
+    margin-top: .5rem;
+    padding: .4rem .65rem;
+    border: 1px solid var(--theme-accent-border);
+    border-radius: .25rem;
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
+    font: inherit;
+    cursor: pointer;
 }
 
 @media (min-width: 64rem) {
@@ -101,8 +139,11 @@
         flex: 1;
     }
 
-    .item {
+    .linha {
         flex: 1;
+    }
+
+    .item {
         grid-template-columns: 1.875rem minmax(0, 1fr) auto;
         gap: .55rem;
         min-height: 3rem;

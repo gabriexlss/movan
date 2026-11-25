@@ -145,3 +145,9 @@ export const pagarMensalidade = async (id) => {
     const response = await api.patch(`/financeiro/mensalidade/${id}/pagar`, {}, {skipGlobalErrorToast: true}) //mando o id da mensalidade para o backend pagar
     return response.data.mensalidade //devolvo a resposta do backend
 }
+
+// Altera o status para PAGA, PENDENTE ou CANCELADA.
+export const alterarStatusMensalidade = async (id, status) => {
+    const response = await api.patch(`/financeiro/mensalidade/${id}/status`, { status }, { skipGlobalErrorToast: true })
+    return response.data.mensalidade
+}

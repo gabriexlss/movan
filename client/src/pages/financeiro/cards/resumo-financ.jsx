@@ -3,6 +3,7 @@ import { FaRegArrowAltCircleDown as SetaBaixo, FaRegArrowAltCircleUp as SetaCima
 import DefaultCard from '../../../components/cards/DefaultCard'
 import { useEffect, useState } from 'react'
 import { obterSumarioFinanceiro } from '../../../services/financeiro'
+import { formatarMoeda } from '../../../utils/financeiro'
 
 const ResumoFinanc = ({ className, periodo, atualizacao }) => {
     const [totalLucro, setTotalLucro] = useState(0)
@@ -54,7 +55,7 @@ const ResumoFinanc = ({ className, periodo, atualizacao }) => {
                         <Icone className={styles.icone} aria-hidden="true" />
                         <div className={styles.textos}>
                             <span className={styles.label}>{label}</span>
-                            <strong className={styles.valor}>{valor}</strong>
+                            <strong className={styles.valor}>{formatarMoeda(valor)}</strong>
                         </div>
                     </div>
                 ))}

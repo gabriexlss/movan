@@ -9,4 +9,6 @@ router.get('/', controllerMensalide.obterMensalidades)
 // rota patch pra pagar uma mensalidade passando o id nos params
 router.patch('/:id/pagar', controllerMensalide.pagarMensalidade)
 
+router.patch('/:id/status', controllerMensalide.alterarStatusMensalidade)
+
 export default router

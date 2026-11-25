@@ -2,6 +2,7 @@ import DefaultCard from './DefaultCard';
 import styles from './CardFinanc.module.css';
 import { useEffect, useState } from 'react';
 import { obterSumarioFinanceiro } from '../../services/financeiro';
+import { formatarMoeda } from '../../utils/financeiro';
 
 const CardFinanc = ({ className }) => {
     const [lucroTotal, setLucroTotal] = useState(0);
@@ -24,9 +25,9 @@ const CardFinanc = ({ className }) => {
     }, []);
     
     const financeiro =[
-        {titulo: "Receitas", valor: lucroTotal.toFixed(2), cor: 'var(--theme-success)'},
-        {titulo: "Despesas", valor: despesaTotal.toFixed(2), cor: 'var(--theme-danger)'},
-        {titulo: "Lucro líquido", valor: (lucroTotal - despesaTotal).toFixed(2), cor: 'var(--theme-title)'}
+        {titulo: "Receitas", valor: lucroTotal, cor: 'var(--theme-success)'},
+        {titulo: "Despesas", valor: despesaTotal, cor: 'var(--theme-danger)'},
+        {titulo: "Lucro líquido", valor: lucroTotal - despesaTotal, cor: 'var(--theme-title)'}
     ];
 
     return(
@@ -36,7 +37,7 @@ const CardFinanc = ({ className }) => {
                     {financeiro.map((item, index) => (
                         <div key={index}>
                             <h1 style={{ color: item.cor }}>{item.titulo}</h1>
-                            <p>{"R$ " + item.valor}</p>
+                            <p>{formatarMoeda(item.valor)}</p>
                         </div>
                     ))}
                 </div>
