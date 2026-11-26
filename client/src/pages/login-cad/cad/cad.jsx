@@ -10,6 +10,7 @@ import styles from './cad.module.css'
 
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
+import CampoEnderecoAutocomplete from '../../clientes/components/CampoEnderecoAutocomplete'
 
 const Cad = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
@@ -19,6 +20,9 @@ const Cad = () => {
     const [credencial, setCredencial] = useState('') //guarda o CPF ou CNPJ do usuario
     const [senha, setSenha] = useState('') //guarda a senha do usuario
     const [confirmarSenha, setConfirmarSenha] = useState('') //guarda a confirmação da senha do usuario
+    const [endereco, setEndereco] = useState('')
+    const [coordenadas, setCoordenadas] = useState({ latitude: null, longitude: null })
+    const [capacidadeVan, setCapacidadeVan] = useState('')
     const [enviando, setEnviando] = useState(false) //uso para falar que o formulario esta sendo enviado
 
     //==========================
@@ -46,6 +50,10 @@ const Cad = () => {
                 email, //mando o email do usuario
                 credencial: credencial.replace(/[^a-z0-9]/gi, '').toUpperCase(), //mando o CPF ou CNPJ sem os caracteres especiais
                 senha, //mando a senha do usuario (não to encriptando a senha pq o backend vai fazer isso)
+                endereco,
+                latitude: coordenadas.latitude,
+                longitude: coordenadas.longitude,
+                capacidade_van: Number(capacidadeVan),
             }, {
                 skipGlobalErrorToast: true, //eu recuso a mensagem de erro do backend que tratei no api.js, porque tratarei ele de forma diferente aqui
             })
@@ -137,6 +145,20 @@ const Cad = () => {
                     />
                     <label htmlFor="confirmarSenha">Confirmar senha</label>
                 </div>
+
+                <div className={styles['campo-cadastro']}>
+                    <input type="number" id="capacidadeVan" min="1" value={capacidadeVan} onChange={(event) => setCapacidadeVan(event.target.value)} placeholder=" " required />
+                    <label htmlFor="capacidadeVan">Vagas totais na van</label>
+                </div>
+
+                <CampoEnderecoAutocomplete
+                    labelPosition="floating"
+                    classNames={{ field: styles['campo-cadastro'] }}
+                    value={endereco}
+                    onChange={(valor) => { setEndereco(valor); setCoordenadas({ latitude: null, longitude: null }) }}
+                    onSelecionar={({ endereco: valor, latitude, longitude }) => { setEndereco(valor); setCoordenadas({ latitude, longitude }) }}
+                    coordenadasPendentes={endereco.length > 0 && !coordenadas.latitude}
+                />
 
                 <PasswordRequirements senha={senha} />
 

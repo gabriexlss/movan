@@ -3,6 +3,7 @@ import { Rota } from '../models/rotas/rota.js';
 import { PontoRota } from '../models/rotas/pontoRota.js';
 import { Aluno } from '../models/aluno.model.js';
 import { Escola } from '../models/escola/escola.model.js';
+import { Motorista } from '../models/motorista/motorista.model.js';
 import { validarCoordenadas } from '../models/utils.model.js';
 import { PoolClient } from 'pg';
 
@@ -54,6 +55,28 @@ export const gerarPolylineRota = async ({ rotaID, motoristaID, coordenadasMotori
             throw new Error('DRIVER_COORDINATES_INVALID', { cause: coordenadasValidas.error })
         }
         coordenadasIniciais = coordenadasValidas.data
+    } else {
+        // se não vieram coordenadas na query, tenta puxar as coordenadas iniciais do motorista direto do banco
+        const { rows: [motorista] } = await cliente.query<Motorista>(
+            `
+            SELECT * FROM motorista
+            WHERE id = $1
+            `,
+            [motoristaID]
+        )
+        if (!motorista) {
+            throw new Error('MOTORISTA_NOT_FOUND')
+        }
+        if (motorista.latitude !== null && motorista.latitude !== undefined && motorista.longitude !== null && motorista.longitude !== undefined) {
+            const coordenadasValidas = validarCoordenadas.safeParse({
+                latitude: Number(motorista.latitude),
+                longitude: Number(motorista.longitude)
+            })
+            if (!coordenadasValidas.success) {
+                throw new Error('DRIVER_COORDINATES_INVALID', { cause: coordenadasValidas.error })
+            }
+            coordenadasIniciais = coordenadasValidas.data
+        }
     }
 
     // verifica se a rota existe e pertence ao motorista
@@ -92,7 +115,7 @@ export const gerarPolylineRota = async ({ rotaID, motoristaID, coordenadasMotori
 
     const waypoints: RoutesWaypoint[] = []
 
-    // se as coordenadas do motorista foram enviadas, a rota começa na localização dele
+    // se houver coordenadas iniciais do motorista (da query ou do banco), a rota começa na localização dele
     if (coordenadasIniciais) {
         waypoints.push({
             location: {

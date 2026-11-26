@@ -15,7 +15,11 @@ export const CriarMotoristaGoogleSchema = z.object({
     nome: MotoristaSchema.shape.nome,
     credencial: MotoristaSchema.shape.credencial,
     senha: MotoristaSchema.shape.senha,
-    token: AuthGoogleSchema.shape.token
+    token: AuthGoogleSchema.shape.token,
+    capacidade_van: MotoristaSchema.shape.capacidade_van,
+    endereco: MotoristaSchema.shape.endereco.unwrap(),
+    latitude: MotoristaSchema.shape.latitude.unwrap(),
+    longitude: MotoristaSchema.shape.longitude.unwrap(),
 })
 export const GoogleTokenSchema = AuthGoogleSchema.pick({
     token: true

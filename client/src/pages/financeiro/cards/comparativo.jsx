@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
     BarElement,
     CategoryScale,
@@ -13,6 +13,7 @@ import styles from './comparativo.module.css'
 
 import DefaultCard from "../../../components/cards/DefaultCard"
 import { useTheme } from '../../../theme/theme-context'
+import { obterSumarioFinanceiro } from '../../../services/financeiro'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 ChartJS.defaults.font.family = 'Poppins, sans-serif'
@@ -27,24 +28,6 @@ const corDoTema = (token) => ({ chart }) => (
 )
 
 const corDosRotulos = corDoTema('text-secondary')
-
-const dados = {
-    labels: meses,
-    datasets: [
-        {
-            label: 'Lucros',
-            data: [1000, 3000, 1800, 6767, 7000, 3500, 3500, 3500, 3500, 0, 0, 0],
-            backgroundColor: corDoTema('success'),
-            borderRadius: 2,
-        },
-        {
-            label: 'Despesas',
-            data: [1200, 2000, 1400, 1800, 300, 3500, 3500, 3500, 3500, 0, 0, 0],
-            backgroundColor: corDoTema('danger'),
-            borderRadius: 2,
-        },
-    ],
-}
 
 const opcoes = {
     responsive: true,
@@ -73,9 +56,36 @@ const opcoes = {
     },
 }
 
-const Comparativo = ({ className }) => {
+const Comparativo = ({ className, ano, atualizacao }) => {
     const { theme } = useTheme()
     const graficoRef = useRef(null)
+    const [valores, setValores] = useState({ lucro: Array(12).fill(0), despesa: Array(12).fill(0) })
+
+    useEffect(() => {
+        let ativo = true
+        Promise.all(meses.map((_, indice) => {
+            const data = `${ano}-${String(indice + 1).padStart(2, '0')}`
+            return Promise.all([
+                obterSumarioFinanceiro({ data, tipo: 'ENTRADA' }),
+                obterSumarioFinanceiro({ data, tipo: 'SAIDA' }),
+            ])
+        })).then(resultados => {
+            if (!ativo) return
+            setValores({
+                lucro: resultados.map(([lucro]) => lucro),
+                despesa: resultados.map(([, despesa]) => Math.abs(despesa)),
+            })
+        }).catch(error => console.error('Erro ao buscar comparativo financeiro:', error))
+        return () => { ativo = false }
+    }, [ano, atualizacao])
+
+    const dados = useMemo(() => ({
+        labels: meses,
+        datasets: [
+            { label: 'Lucros', data: valores.lucro, backgroundColor: corDoTema('success'), borderRadius: 2 },
+            { label: 'Despesas', data: valores.despesa, backgroundColor: corDoTema('danger'), borderRadius: 2 },
+        ],
+    }), [valores])
 
     useEffect(() => {
         const chart = graficoRef.current

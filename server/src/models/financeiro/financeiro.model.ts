@@ -40,12 +40,12 @@ export const AdicionarFinanceiroSchema = FinanceiroSchema.pick({
 export const EditarFinanceiroSchema = AdicionarFinanceiroSchema.partial()
 
 export const QuerysObterFinanceiroSchema = z.object({
-    mes: z.stringFormat("mm-yyyy", /^(0[1-9]|1[0-2])\/\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY." }),
+    mes: z.stringFormat("mm-yyyy-ou-yyyy", /^((0[1-9]|1[0-2])\/)?\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY ou YYYY." }),
     id: ParamsSchema.shape.id
 }).partial()
 
 export const QuerysSumarioFinaceiroSchema = z.object({
-    mes: z.stringFormat("mm-yyyy", /^(0[1-9]|1[0-2])\/\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY." }),
+    mes: z.stringFormat("mm-yyyy-ou-yyyy", /^((0[1-9]|1[0-2])\/)?\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY ou YYYY." }),
     tipo: z.enum(['ENTRADA', 'SAIDA'])
 }).partial()
 

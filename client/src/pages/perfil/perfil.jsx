@@ -23,6 +23,7 @@ import ThemeToggle from '../../theme/ThemeToggle'
 import { useTheme } from '../../theme/theme-context'
 import api from '../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../services/toastManager'
+import CampoEnderecoAutocomplete from '../clientes/components/CampoEnderecoAutocomplete'
 
 import styles from './perfil.module.css'
 
@@ -54,7 +55,6 @@ const Perfil = () => {
         email: '',
         credencial: '',
         senha: '',
-        endereco: '',
         capacidade_van: '',
     })
     const inputRefs = useRef({})
@@ -88,15 +88,6 @@ const Perfil = () => {
             label: 'CNPJ',
             placeholder: formatarCredencial(user?.credencial) || 'CNPJ não informado',
             inputMode: 'text',
-        },
-        {
-            id: 'endereco',
-            Icone: LuMapPin,
-            label: 'Endereço',
-            placeholder: user?.endereco || 'Endereço não informado',
-            autoComplete: 'street-address',
-            minLength: 3,
-            maxLength: 500,
         },
         {
             id: 'capacidade_van',
@@ -177,8 +168,9 @@ const Perfil = () => {
         //ATUALIZAR CAMPO 
         //======================
         try {
-            const response = await api.patch('/motorista',{ [campo]: valor }, { skipGlobalErrorToast: true },
-            )
+            const response = campo === 'capacidade_van'
+                ? await api.patch('/motorista/capacidade-van', { capacidade_van: valor }, { skipGlobalErrorToast: true })
+                : await api.patch('/motorista', { [campo]: valor }, { skipGlobalErrorToast: true })
             await refreshSession()
             setCamposEditaveis((estadoAtual) => ({ ...estadoAtual, [campo]: false }))
             setValores((estadoAtual) => ({ ...estadoAtual, [campo]: '' }))
@@ -327,6 +319,30 @@ const Perfil = () => {
                         </div>
                     )
                 })}
+            </section>
+
+            <section className={styles['campos-perfil']} aria-label="Endereço da van">
+                <CampoEnderecoAutocomplete
+                    icon={<LuMapPin className={styles['icon-label']} aria-hidden="true" />}
+                    labelPosition="above"
+                    classNames={{
+                        field: styles['campo-grupo'],
+                        label: styles.label,
+                        inputWrapper: styles['input-container'],
+                    }}
+                    value={valores.endereco ?? user?.endereco ?? ''}
+                    onChange={(valor) => setValores((atuais) => ({ ...atuais, endereco: valor }))}
+                    onSelecionar={async ({ endereco, latitude, longitude }) => {
+                        try {
+                            const response = await api.patch('/motorista/endereco', { endereco, latitude, longitude }, { skipGlobalErrorToast: true })
+                            setValores((atuais) => ({ ...atuais, endereco }))
+                            await refreshSession()
+                            responseSuccessToast(response, 'FIELD_UPDATED')
+                        } catch (error) {
+                            apiErrorToast(error, 'FIELD_UPDATE_FAILED')
+                        }
+                    }}
+                />
             </section>
 
             {dialogEditAberto && DialogEdicao && (

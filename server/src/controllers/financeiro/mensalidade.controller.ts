@@ -3,7 +3,7 @@ import { Contrato } from "../../models/contrato/contrato.model.js";
 import { Request, Response } from "express";
 import { database } from "../../db/postgre.js";
 import { ParamsSchema } from "../../models/utils.model.js";
-import { Mensalidade, QuerysObterMensalidadeSchema } from "../../models/financeiro/mensalidade.model.js";
+import { AlterarStatusMensalidadeSchema, Mensalidade, QuerysObterMensalidadeSchema } from "../../models/financeiro/mensalidade.model.js";
 
 interface criarMensalidadeProps{
     contratoID: number,
@@ -139,6 +139,43 @@ export const controllerMensalide = {
             })
         }
     },
+    alterarStatusMensalidade: async (req: Request, res: Response) => {
+        const params = ParamsSchema.safeParse(req.params)
+        const dados = AlterarStatusMensalidadeSchema.safeParse(req.body)
+
+        if (!params.success || !dados.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para alterar o status da mensalidade.",
+                erro: !params.success ? params.error.format() : !dados.success ? dados.error.format() : undefined
+            })
+        }
+
+        try {
+            const { rows: [mensalidade] } = await database.query<Mensalidade>(
+                `
+                UPDATE mensalidade
+                SET status = $1,
+                    cancelada_em = CASE WHEN $1 = 'CANCELADA' THEN COALESCE(cancelada_em, now()) ELSE NULL END,
+                    motivo_cancelamento = CASE WHEN $1 = 'CANCELADA' THEN motivo_cancelamento ELSE NULL END
+                WHERE id = $2 AND motorista_id = $3
+                RETURNING *
+                `,
+                [dados.data.status, params.data.id, req.userId]
+            )
+
+            if (!mensalidade) {
+                return res.status(404).json({ msg: "Mensalidade não encontrada." })
+            }
+
+            return res.status(200).json({
+                msg: "Status da mensalidade atualizado com sucesso.",
+                mensalidade
+            })
+        } catch (erro) {
+            console.error("Erro ao alterar o status da mensalidade: ", erro)
+            return res.status(500).json({ msg: "Erro Interno do Servidor." })
+        }
+    },
     // endpoint pra listar as mensalidades com filtros opcionais de aluno_id, mes e status
     obterMensalidades: async (req: Request, res: Response) => {
         // pega as querys
@@ -158,8 +195,13 @@ export const controllerMensalide = {
 
         // monto a query base só com os dados da mensalidade
         let query = `
-        SELECT * FROM mensalidade
-        WHERE motorista_id = $1
+        SELECT mensalidade.*, aluno.nome AS nome_aluno
+        FROM mensalidade
+        LEFT JOIN contrato ON contrato.id = mensalidade.contrato_id
+            AND contrato.motorista_id = mensalidade.motorista_id
+        LEFT JOIN aluno ON aluno.id = contrato.aluno_id
+            AND aluno.motorista_id = mensalidade.motorista_id
+        WHERE mensalidade.motorista_id = $1
         `
         const valores: (string | number)[] = [motoristaID]
 
@@ -173,25 +215,31 @@ export const controllerMensalide = {
             valores.push(aluno_id)
         }
 
-        // se vier o mes na query (MM/YYYY), filtra as mensalidades que vencem dentro daquele mês
+        // se vier o mes na query (MM/YYYY ou YYYY), filtra as mensalidades que vencem dentro daquele mês ou ano
         if (mes) {
-            const [mesNumero, ano] = mes.split("/").map(Number)
-            const dataInicioMes = `${ano}-${String(mesNumero).padStart(2, "0")}-01`
-            query += ` AND data_vencimento >= $${valores.length + 1}::date AND data_vencimento < ($${valores.length + 1}::date + INTERVAL '1 month')`
-            valores.push(dataInicioMes)
+            if (mes.includes("/")) {
+                const [mesNumero, ano] = mes.split("/").map(Number)
+                const dataInicioMes = `${ano}-${String(mesNumero).padStart(2, "0")}-01`
+                query += ` AND data_vencimento >= $${valores.length + 1}::date AND data_vencimento < ($${valores.length + 1}::date + INTERVAL '1 month')`
+                valores.push(dataInicioMes)
+            } else {
+                const dataInicioAno = `${Number(mes)}-01-01`
+                query += ` AND data_vencimento >= $${valores.length + 1}::date AND data_vencimento < ($${valores.length + 1}::date + INTERVAL '1 year')`
+                valores.push(dataInicioAno)
+            }
         }
 
         // se vier o status, filtra por ele (atrasada é pendente com vencimento antes de hoje)
         if (status) {
             if (status === "ATRASADA") {
-                query += ` AND status = 'PENDENTE' AND data_vencimento < (now() AT TIME ZONE 'America/Sao_Paulo')::date`
+                query += ` AND mensalidade.status = 'PENDENTE' AND data_vencimento < (now() AT TIME ZONE 'America/Sao_Paulo')::date`
             } else {
-                query += ` AND status = $${valores.length + 1}`
+                query += ` AND mensalidade.status = $${valores.length + 1}`
                 valores.push(status)
             }
         }
 
-        query += ` ORDER BY data_vencimento ASC, id ASC`
+        query += ` ORDER BY data_vencimento ASC, mensalidade.id ASC`
 
         // operação
         try {

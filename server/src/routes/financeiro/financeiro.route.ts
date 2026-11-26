@@ -15,10 +15,10 @@ router.patch('/:id', controllerFinanceiro.editarRegistro)
 // rota delete para excluir um registro financeiro
 router.delete('/:id', controllerFinanceiro.excluirRegistro)
 
-// rota get para obter os dados do financeiro, com opçoes de query de mm/yyyy e id
+// rota get para obter os dados do financeiro, com opçoes de query de mm/yyyy ou yyyy e id
 router.get('/', controllerFinanceiro.obterRegistros)
 
-// rota get para obter o sumario do financeiro, com opções de query de mm/yyyy e tipo ENTRADA ou SAIDA
+// rota get para obter o sumario do financeiro, com opções de query de mm/yyyy ou yyyy e tipo ENTRADA ou SAIDA
 router.get('/sumario', controllerFinanceiro.obterValor)
 
 export default router

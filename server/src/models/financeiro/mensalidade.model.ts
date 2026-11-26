@@ -38,11 +38,14 @@ const normalizarStatusMensalidade = (valor: unknown) => {
 // querys opcionais pra filtrar as mensalidades no get
 export const QuerysObterMensalidadeSchema = z.object({
     aluno_id: ParamsSchema.shape.id,
-    mes: z.stringFormat("mm-yyyy", /^(0[1-9]|1[0-2])\/\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY." }),
+    mes: z.stringFormat("mm-yyyy-ou-yyyy", /^((0[1-9]|1[0-2])\/)?\d{4}$/, { error: "Data inválida. Use o formato MM/YYYY ou YYYY." }),
     status: z.preprocess(
         normalizarStatusMensalidade,
         z.enum(['PENDENTE', 'PAGA', 'CANCELADA', 'ATRASADA'], "Status da mensalidade inválido.")
     )
 }).partial()
 
+export const AlterarStatusMensalidadeSchema = z.strictObject({
+    status: MensalidadeSchema.shape.status
+})
 export type Mensalidade = z.infer<typeof MensalidadeSchema>

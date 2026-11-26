@@ -5,7 +5,8 @@ import DefaultDialog from '../../../components/dialog/dialogDefault'
 import styles from './dialogsFinanceiro.module.css'
 
 const DialogExcluirEntrada = ({ registro, onClose, onConfirm }) => {
-    const [segundos, setSegundos] = useState(10)
+    const [segundos, setSegundos] = useState(5)
+    const [excluindo, setExcluindo] = useState(false)
 
     useEffect(() => {
         if (segundos <= 0) return undefined
@@ -39,10 +40,20 @@ const DialogExcluirEntrada = ({ registro, onClose, onConfirm }) => {
                     type="button"
                     className={`${styles.primaryButton} ${styles.deleteButton}`}
                     disabled={segundos > 0}
-                    onClick={onConfirm}
+                    onClick={async () => {
+                        if (excluindo || segundos > 0) return
+                        setExcluindo(true)
+                        try {
+                            await onConfirm()
+                        } finally {
+                            setExcluindo(false)
+                        }
+                    }}
                     data-autofocus="true"
                 >
-                    {segundos > 0
+                    {excluindo
+                        ? 'Excluindo...'
+                        : segundos > 0
                         ? `${segundos}s`
                         : <><PiTrashBold aria-hidden="true" /> Confirmar exclusão</>}
                 </button>
