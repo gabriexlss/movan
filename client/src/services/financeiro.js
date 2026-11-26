@@ -5,7 +5,6 @@ const converterTipoAPI = (tipo) => {
     if (tipo === 'Despesa' || tipo === 'SAIDA') return 'SAIDA'
     return tipo
 }
-
 //======================
 //CRIAR REGISTRO
 //======================
@@ -66,7 +65,7 @@ export const alterarRegistro = async (id, entradas) => {
 //======================
 export const excluirRegistro = async (id) => {
     const response = await api.delete(`/financeiro/${id}`, {skipGlobalErrorToast: true})
-    return response.data.financeiro
+    return response.data
 }
 
 //======================
@@ -75,7 +74,9 @@ export const excluirRegistro = async (id) => {
 export const obterSumarioFinanceiro = async (entradas = {}) => {
     const params = {}
 
-    if (entradas.data) {
+    if (entradas.ano) {
+        params.mes = String(entradas.ano)
+    } else if (entradas.data) {
         const [ano, mes] = entradas.data.split('-')
         params.mes = `${mes}/${ano}`
     }
@@ -146,8 +147,3 @@ export const pagarMensalidade = async (id) => {
     return response.data.mensalidade //devolvo a resposta do backend
 }
 
-// Altera o status para PAGA, PENDENTE ou CANCELADA.
-export const alterarStatusMensalidade = async (id, status) => {
-    const response = await api.patch(`/financeiro/mensalidade/${id}/status`, { status }, { skipGlobalErrorToast: true })
-    return response.data.mensalidade
-}

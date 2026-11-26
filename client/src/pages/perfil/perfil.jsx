@@ -9,6 +9,7 @@ import { MdPersonOutline } from "react-icons/md";
 import { LuMails } from "react-icons/lu";
 import { BiSolidBuildings } from "react-icons/bi";
 import { HiOutlineKey } from "react-icons/hi";
+import { FaMapMarkerAlt } from 'react-icons/fa'
 import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
 
 
@@ -23,6 +24,7 @@ import ThemeToggle from '../../theme/ThemeToggle'
 import { useTheme } from '../../theme/theme-context'
 import api from '../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../services/toastManager'
+import CampoEnderecoAutocomplete from '../clientes/components/CampoEnderecoAutocomplete'
 
 import styles from './perfil.module.css'
 
@@ -52,6 +54,7 @@ const Perfil = () => {
         email: '',
         credencial: '',
         senha: '',
+        capacidade_van: '',
     })
     const inputRefs = useRef({})
     const [dialogEditAberto, setDialogEditAberto] = useState(false)
@@ -89,6 +92,14 @@ const Perfil = () => {
             placeholder: '********',
             type: 'password',
             autoComplete: 'new-password',
+        },
+        {
+            id: 'capacidade_van',
+            Icone: MdPersonOutline,
+            label: 'Máximo de crianças na van',
+            placeholder: user?.capacidade_van ? String(user.capacidade_van) : 'Não informado',
+            type: 'number',
+            inputMode: 'numeric',
         },
     ]
     let camposFiltrados
@@ -143,7 +154,9 @@ const Perfil = () => {
         //ATUALIZAR CAMPO 
         //======================
         try {
-            const response = await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
+            const response = campo === 'capacidade_van'
+                ? await api.patch('/motorista/capacidade-van', { capacidade_van: Number(valores[campo]) }, { skipGlobalErrorToast: true })
+                : await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
             )
             await refreshSession()
             responseSuccessToast(response, 'FIELD_UPDATED')
@@ -277,6 +290,24 @@ const Perfil = () => {
                         </div>
                     )
                 })}
+            </section>
+
+            <section className={styles['campos-perfil']} aria-label="Endereço da van">
+                <CampoEnderecoAutocomplete
+                    icon={<FaMapMarkerAlt />}
+                    value={valores.endereco ?? user?.endereco ?? ''}
+                    onChange={(valor) => setValores((atuais) => ({ ...atuais, endereco: valor }))}
+                    onSelecionar={async ({ endereco, latitude, longitude }) => {
+                        try {
+                            const response = await api.patch('/motorista/endereco', { endereco, latitude, longitude }, { skipGlobalErrorToast: true })
+                            setValores((atuais) => ({ ...atuais, endereco }))
+                            await refreshSession()
+                            responseSuccessToast(response, 'FIELD_UPDATED')
+                        } catch (error) {
+                            apiErrorToast(error, 'FIELD_UPDATE_FAILED')
+                        }
+                    }}
+                />
             </section>
 
             {dialogEditAberto && DialogEdicao && (

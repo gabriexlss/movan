@@ -126,7 +126,7 @@ const Financeiro = () => {
 
             <div className={styles.paineis}>
                 <ResumoFinanc className={styles.resumo} periodo={periodo} atualizacao={atualizacaoFinanceira} />
-                <Comparativo className={styles.comparativo} />
+                <Comparativo className={styles.comparativo} ano={periodo.getFullYear()} atualizacao={atualizacaoFinanceira} />
                 <UltimasEntradas onFinanceiroAtualizado={atualizarFinanceiro} />
                 <MensalidadesAlunos onFinanceiroAtualizado={atualizarFinanceiro} />
             </div>

@@ -158,7 +158,7 @@ export const controllerGoogle = {
         /* Edited by Carlos Vinicius
             +RESPECT */
         // separando os dados
-        const { nome, credencial, token, senha } = dadosBrutos.data
+        const { nome, credencial, token, senha, capacidade_van, endereco, latitude, longitude } = dadosBrutos.data
         const tipo = tipoCredencial(credencial)
         if (!tipo) {
             return res.status(400).json({ 'msg-code': "INVALID_DOCUMENT" })
@@ -203,8 +203,8 @@ export const controllerGoogle = {
         const senhaHash = await bcrypt.hash(senha, 10)
 
         try {
-            const query = `INSERT INTO motorista (nome, ${tipo}, email, senha, tipo_pessoa, google_id, email_verificado) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
-            const valores = [nome, credencial, email, senhaHash, tipo === "cpf" ? "PF" : "PJ", googleId, true]
+            const query = `INSERT INTO motorista (nome, ${tipo}, email, senha, tipo_pessoa, google_id, email_verificado, capacidade_van, endereco, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`
+            const valores = [nome, credencial, email, senhaHash, tipo === "cpf" ? "PF" : "PJ", googleId, true, capacidade_van, endereco, latitude, longitude]
             const { rows } = await database.query(query, valores)
             const id = rows[0].id
 

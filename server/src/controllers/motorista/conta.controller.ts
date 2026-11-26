@@ -22,7 +22,7 @@ export const controllerConta = {
             });
         }
         // separando os dados
-        const { nome, credencial, email, senha } = dadosBrutos.data
+        const { nome, credencial, email, senha, capacidade_van, endereco, latitude, longitude } = dadosBrutos.data
 
         // verifica se oq veio foi cpf ou cnpj
         let metodo: "cnpj" | "cpf"
@@ -79,8 +79,8 @@ export const controllerConta = {
 
         try {
             //salvando arquivos no banco de dados
-            const query = `INSERT INTO motorista (nome, ${metodo === "cnpj" ? 'cnpj' : 'cpf'}, email, senha, tipo_pessoa, email_verificado) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
-            const valores: (string | boolean)[] = [nome, credencial, email, senhaHash]
+            const query = `INSERT INTO motorista (nome, ${metodo === "cnpj" ? 'cnpj' : 'cpf'}, email, senha, tipo_pessoa, email_verificado, capacidade_van, endereco, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
+            const valores: (string | boolean | number | null)[] = [nome, credencial, email, senhaHash]
 
             if (metodo === 'cnpj') {
                 valores.push('PJ')
@@ -88,6 +88,7 @@ export const controllerConta = {
                 valores.push('PF')
             }
             valores.push(false)
+            valores.push(capacidade_van, endereco, latitude, longitude)
 
             // finalmente pega os dados e faz o insert no banco de dados
             const { rows } = await database.query(query, valores)

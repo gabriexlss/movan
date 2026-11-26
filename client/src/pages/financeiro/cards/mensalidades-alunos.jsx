@@ -87,9 +87,9 @@ const MensalidadesAlunos = ({ onFinanceiroAtualizado }) => {
                                 <button
                                     type="button"
                                     className={`${styles.item} ${styles[apresentacao?.classe] || ''}`}
-                                    aria-label={`Editar mensalidade de ${nome}, vencimento ${formatarDataFinanceira(data_vencimento)}, ${apresentacao?.label || status}`}
-                                    aria-haspopup="dialog"
-                                    onClick={() => setSelecionada(mensalidade)}
+                                    aria-label={`${status === 'PENDENTE' ? 'Confirmar pagamento da' : 'Mensalidade de'} ${nome}, vencimento ${formatarDataFinanceira(data_vencimento)}, ${apresentacao?.label || status}`}
+                                    aria-haspopup={status === 'PENDENTE' ? 'dialog' : undefined}
+                                    onClick={() => status === 'PENDENTE' && setSelecionada(mensalidade)}
                                 >
                                     <span className={styles.avatar}><FaUser aria-hidden="true" /></span>
                                     <span className={styles.descricao}>

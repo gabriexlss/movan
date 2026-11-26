@@ -1,14 +1,12 @@
 import { useCallback, useRef, useState } from 'react'
-import { PiCheckBold, PiNotePencilBold, PiTagBold } from 'react-icons/pi'
+import { PiCheckBold, PiWarningCircleBold } from 'react-icons/pi'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
-import { alterarStatusMensalidade } from '../../../services/financeiro'
+import { pagarMensalidade } from '../../../services/financeiro'
 import { getApiErrorMessage } from '../../../services/toastManager'
-import { formatarDataFinanceira, formatarMoeda, STATUS_MENSALIDADE } from '../../../utils/financeiro'
-import CampoEntrada from './CampoEntrada'
+import { formatarDataFinanceira, formatarMoeda } from '../../../utils/financeiro'
 import styles from './dialogsFinanceiro.module.css'
 
 const DialogStatusMensalidade = ({ mensalidade, onClose, onSave }) => {
-    const [status, setStatus] = useState(mensalidade.status)
     const [salvando, setSalvando] = useState(false)
     const [erro, setErro] = useState('')
     const envioEmAndamento = useRef(false)
@@ -19,14 +17,14 @@ const DialogStatusMensalidade = ({ mensalidade, onClose, onSave }) => {
 
     const salvar = async (event) => {
         event.preventDefault()
-        if (envioEmAndamento.current || status === mensalidade.status) return
+        if (envioEmAndamento.current) return
 
         envioEmAndamento.current = true
         setSalvando(true)
         setErro('')
 
         try {
-            const atualizada = await alterarStatusMensalidade(mensalidade.id, status)
+            const atualizada = await pagarMensalidade(mensalidade.id)
             onSave(atualizada)
         } catch (error) {
             setErro(getApiErrorMessage(error))
@@ -40,9 +38,9 @@ const DialogStatusMensalidade = ({ mensalidade, onClose, onSave }) => {
         <DefaultDialog
             isOpen
             onClose={fechar}
-            title="Editar mensalidade"
+            title="Confirmar pagamento"
             description={mensalidade.nome_aluno || `Contrato #${mensalidade.contrato_id}`}
-            icon={<PiNotePencilBold />}
+            icon={<PiWarningCircleBold />}
             className={styles.dialog}
         >
             <form className={styles.form} onSubmit={salvar} aria-busy={salvando}>
@@ -50,31 +48,15 @@ const DialogStatusMensalidade = ({ mensalidade, onClose, onSave }) => {
                     <div><dt>Vencimento</dt><dd>{formatarDataFinanceira(mensalidade.data_vencimento)}</dd></div>
                     <div><dt>Valor</dt><dd>{formatarMoeda(mensalidade.valor_cobrado)}</dd></div>
                 </dl>
-                <CampoEntrada
-                    label="Status da mensalidade"
-                    icon={<PiTagBold />}
-                    as="select"
-                    value={status}
-                    onChange={(event) => {
-                        setStatus(event.target.value)
-                        setErro('')
-                    }}
-                    disabled={salvando}
-                    autoFocus
-                    required
-                >
-                    {Object.entries(STATUS_MENSALIDADE).map(([valor, { label }]) => (
-                        <option key={valor} value={valor}>{label}</option>
-                    ))}
-                </CampoEntrada>
+                <p>Esta mensalidade foi paga?</p>
                 {erro && <p className={styles.erroFormulario} role="alert">{erro}</p>}
                 <button
                     type="submit"
                     className={styles.primaryButton}
-                    disabled={salvando || status === mensalidade.status}
+                    disabled={salvando}
                 >
                     <PiCheckBold aria-hidden="true" />
-                    {salvando ? 'Salvando...' : 'Salvar alterações'}
+                    {salvando ? 'Confirmando...' : 'Sim, foi paga'}
                 </button>
             </form>
         </DefaultDialog>

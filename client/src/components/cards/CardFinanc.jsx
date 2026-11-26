@@ -9,10 +9,12 @@ const CardFinanc = ({ className }) => {
     const [despesaTotal, setDespesaTotal] = useState(0);
 
     useEffect(( ) => {
+        const hoje = new Date();
+        const dataAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
         const buscarResumo = async () => {
             try {
-                const lucro = await obterSumarioFinanceiro({ tipo: 'ENTRADA' });
-                const despesa = await obterSumarioFinanceiro({ tipo: 'SAIDA' });
+                const lucro = await obterSumarioFinanceiro({ data: dataAtual, tipo: 'ENTRADA' });
+                const despesa = await obterSumarioFinanceiro({ data: dataAtual, tipo: 'SAIDA' });
 
                 setLucroTotal(lucro);
                 setDespesaTotal(Math.abs(despesa));

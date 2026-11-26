@@ -17,6 +17,7 @@ import {
     excluirRegistro,
 } from '../../../services/financeiro'
 import styles from './ultimas-entradas.module.css'
+import { apiErrorToast } from '../../../services/toastManager'
 
 const ITENS_POR_PAGINA = 4
 
@@ -45,6 +46,8 @@ const UltimasEntradas = ({ onFinanceiroAtualizado }) => {
     const [itens, setItens] = useState([])
     const [pagina, setPagina] = useState(0)
     const [dialog, setDialog] = useState(null)
+    const [salvando, setSalvando] = useState(false)
+    const [excluindo, setExcluindo] = useState(false)
 
     const buscarEntradas = useCallback(async () => {
         try {
@@ -79,6 +82,8 @@ const UltimasEntradas = ({ onFinanceiroAtualizado }) => {
     const fecharDialog = useCallback(() => setDialog(null), [])
 
     const salvarEntrada = async (valores) => {
+        if (salvando) return
+        setSalvando(true)
         try {
             const dados = {
                 ...dialog.registro,
@@ -96,26 +101,32 @@ const UltimasEntradas = ({ onFinanceiroAtualizado }) => {
             }
 
             await buscarEntradas()
-            onfinanceiroAtualizado()
+            onFinanceiroAtualizado?.()
             setPagina(0)
             fecharDialog()
 
         } catch (error) {
             console.error('Erro ao salvar registro financeiro:', error)
+        } finally {
+            setSalvando(false)
         }
     }
 
     const confirmarExclusao = async () => {
+        if (excluindo) return
+        setExcluindo(true)
         try {
             await excluirRegistro(dialog.registro.id)
 
-            await buscarEntradas()
-            onFinanceiroAtualizado()
+            setItens((atuais) => atuais.filter((entrada) => entrada.id !== dialog.registro.id))
+            onFinanceiroAtualizado?.()
             setPagina(0)
             fecharDialog()
 
         } catch (error) {
-            console.error('Erro ao excluir registro financeiro:', error)
+            apiErrorToast(error, 'UNEXPECTED_ERROR')
+        } finally {
+            setExcluindo(false)
         }
     }
 

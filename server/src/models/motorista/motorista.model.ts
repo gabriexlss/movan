@@ -37,7 +37,11 @@ export const CriarMotoristaSchema = MotoristaSchema.pick({
     credencial: true,
     email: true,
     senha: true,
-});
+    capacidade_van: true,
+    endereco: true,
+    latitude: true,
+    longitude: true,
+}).required({ capacidade_van: true, endereco: true, latitude: true, longitude: true });
 export const LoginMotoristaSchema = MotoristaSchema.pick({
     login: true,
     senha: true

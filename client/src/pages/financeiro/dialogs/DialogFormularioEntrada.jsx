@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
     PiCalendarBlankBold,
     PiCurrencyCircleDollarBold,
@@ -26,6 +26,8 @@ const DialogFormularioEntrada = ({ acao, registro, onClose, onSave }) => {
         valor: registro?.valor ?? '',
         data: registro?.data || dataLocalAtual(),
     })
+    const [salvando, setSalvando] = useState(false)
+    const envioEmAndamento = useRef(false)
 
     const alterarCampo = (campo, valor) => {
         setValores((estadoAtual) => ({ ...estadoAtual, [campo]: valor }))
@@ -36,12 +38,21 @@ const DialogFormularioEntrada = ({ acao, registro, onClose, onSave }) => {
         onChange: (event) => alterarCampo(campo, event.target.value),
     })
 
-    const salvar = (event) => {
+    const salvar = async (event) => {
         event.preventDefault()
-        onSave({
-            ...valores,
-            valor: Number(valores.valor),
-        })
+        if (envioEmAndamento.current) return
+
+        envioEmAndamento.current = true
+        setSalvando(true)
+        try {
+            await onSave({
+                ...valores,
+                valor: Number(valores.valor),
+            })
+        } finally {
+            envioEmAndamento.current = false
+            setSalvando(false)
+        }
     }
     
 
@@ -57,7 +68,7 @@ const DialogFormularioEntrada = ({ acao, registro, onClose, onSave }) => {
             size="medium"
             className={styles.dialog}
         >
-            <form className={styles.form} onSubmit={salvar}>
+            <form className={styles.form} onSubmit={salvar} aria-busy={salvando}>
                 <CampoEntrada
                     label="Tipo de entrada"
                     icon={<PiPiggyBankBold />}
@@ -99,11 +110,11 @@ const DialogFormularioEntrada = ({ acao, registro, onClose, onSave }) => {
                     />
                 </div>
 
-                <button type="submit" className={styles.primaryButton}>
+                <button type="submit" className={styles.primaryButton} disabled={salvando}>
                     {editando
                         ? <PiNotePencilBold aria-hidden="true" />
                         : <PiPlusBold aria-hidden="true" />}
-                    {editando ? 'Alterar entrada' : 'Adicionar entrada'}
+                    {salvando ? 'Salvando...' : editando ? 'Alterar entrada' : 'Adicionar entrada'}
                 </button>
             </form>
         </DefaultDialog>

@@ -232,12 +232,7 @@ export const controllerFinanceiro = {
                 ]
             )
 
-            // devolvendo o usuario
-            if (financeiro.length === 0) {
-                return res.status(404).json({
-                    msg: "Nenhum Registro Encontrado."
-                })
-            }
+            // Uma lista vazia é uma resposta válida para a tela financeira.
             return res.status(200).json({
                 msg: "Dados Obtidos com Sucesso.",
                 financeiro
