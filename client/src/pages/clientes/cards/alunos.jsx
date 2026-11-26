@@ -87,6 +87,9 @@ const Alunos = ({ responsaveis, escolas, turnos }) => {
             responsaveis={responsaveis}
             escolas={escolas}
             turnos={turnos}
+            motivoBloqueio={responsaveis.length === 0 || escolas.length === 0
+                ? 'Cadastre pelo menos um responsável e uma escola para acessar a lista de alunos.'
+                : ''}
             onCriar={salvarNovoAluno}
             onEditar={salvarAlunoAlterado}
             onExcluir={excluirAlunoDoBanco}

@@ -28,13 +28,13 @@ const Cliente = () => {
 
             <div className={styles.listas}>
                 <Pais responsaveis={responsaveis} onResponsaveisChange={setResponsaveis} />
-                <Alunos responsaveis={responsaveis} escolas={escolas} turnos={turnos} />
                 <Escolas
                     escolas={escolas}
                     onEscolasChange={setEscolas}
                     turnos={turnos}
                     onTurnosChange={setTurnos}
                 />
+                <Alunos responsaveis={responsaveis} escolas={escolas} turnos={turnos} />
             </div>
         </main>
     )
