@@ -4,7 +4,7 @@ A referência completa dos endpoints fica no repositório [movandocs](https://gi
 
 ## Contratos e arquivos
 
-A branch `contratos@19c32ed` implementa rascunhos, cláusulas, geração de PDF, assinatura reutilizável do motorista, assinatura do responsável por token de uso único válido por 15 dias, recriação de link e cancelamento. Os uploads usam o campo `assinatura` em `multipart/form-data`, MIME `image/webp` e limite de 1 MiB.
+A branch `contratos@19c32ed` implementa rascunhos, cláusulas, geração de PDF, assinatura reutilizável do motorista, assinatura do responsável por token de uso único válido por 15 dias, recriação de link e cancelamento. Os uploads usam o campo `assinatura` em `multipart/form-data`, MIMEs `image/webp` ou `image/png` e limite de 1 MiB.
 
 Configure todas as variáveis de R2 e `CDN_URL` de `.env.example`, além do PostgreSQL. O schema do banco deve conter as tabelas do módulo e as views `vw_resumo_contrato` e `vw_detalhes_contrato`; suas definições não estão versionadas.
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import PasswordRequirements from '../../../components/auth/PasswordRequirements'
+import AceiteTermos from '../../../components/auth/AceiteTermos'
 import { senhaValida } from '../../../utils/password'
 import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
@@ -147,6 +148,8 @@ const CadGoogle = () => {
                 />
 
                 <PasswordRequirements senha={senha} />
+
+                <AceiteTermos />
 
                 <button className={styles['auth-screens__botao']} type="submit" disabled={enviando || !senhaValida(senha) || senha !== confirmarSenha}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}

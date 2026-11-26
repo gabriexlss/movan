@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { LuArrowDown, LuArrowUp, LuPlus, LuSparkles, LuTrash2, LuUserRound } from 'react-icons/lu'
+import { LuArrowDown, LuArrowUp, LuPlus, LuTrash2, LuUserRound } from 'react-icons/lu'
 import { TbArrowsExchange2, TbSunFilled, TbSunset2Filled } from 'react-icons/tb'
 import { IoMoon } from 'react-icons/io5'
 import { RiGraduationCapLine } from 'react-icons/ri'
@@ -19,6 +19,7 @@ import { listarAluno } from '../../services/aluno'
 import { listarEscola } from '../../services/escola'
 import { listarTurnosEscola } from '../../services/turnosEscola'
 import { apiErrorToast, errorToast, successToast } from '../../services/toastManager'
+import { obterDiaSemanaAtual } from '../../utils/periodoRota'
 import styles from './rota.module.css'
 
 const DIAS_SEMANA = [
@@ -34,12 +35,6 @@ const TURNOS = [
     { id: 'TARDE', nome: 'Tarde', icone: TbSunset2Filled, cor: '#e7a01c' },
     { id: 'NOITE', nome: 'Noite', icone: IoMoon, cor: '#a6e7f3' },
 ]
-
-const obterDiaSemanaAtual = () => {
-    const dia = new Date().getDay()
-    const mapa = { 1: 'SEGUNDA', 2: 'TERÇA', 3: 'QUARTA', 4: 'QUINTA', 5: 'SEXTA' }
-    return mapa[dia] || 'SEGUNDA'
-}
 
 const formatarHora = (hora) => (hora ? String(hora).slice(0, 5) : '')
 
@@ -349,7 +344,6 @@ const Rotas = () => {
                                 disabled={!rotaAtualId || !temAlunosNaRota || otimizando || carregandoRota}
                                 onClick={executarOtimizacao}
                             >
-                                <LuSparkles aria-hidden="true" />
                                 {otimizando ? 'Otimizando...' : 'Otimizar rota'}
                             </button>
                         </div>

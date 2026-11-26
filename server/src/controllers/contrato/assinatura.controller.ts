@@ -14,6 +14,8 @@ import { obterArquivoR2, obterChaveR2 } from "../../utils/obterArquivoR2.js";
 import { assinarContratoPdf } from "../../services/assinaturaPDF.js";
 import { controllerMensalide } from "../financeiro/mensalidade.controller.js";
 
+const extensaoAssinatura = (mimetype: string): "png" | "webp" => (mimetype === "image/png" ? "png" : "webp");
+
 export const controllerAssinatura = {
     // obter a assinatura cadastrada do motorista.
     obterAssinaturaMotorista: async (req: Request, res: Response) => {
@@ -40,7 +42,7 @@ export const controllerAssinatura = {
     },
     // adicionar assinatura do motorista.
     assinarMotorista: async (req: Request, res: Response) => {
-        // recebe a imagem webp da assinatura.
+        // recebe a imagem da assinatura (WebP ou PNG).
         const assinatura = req.file
 
         // checa pra ver se a imagem da assinatura foi enviada.
@@ -91,7 +93,7 @@ export const controllerAssinatura = {
                 `
             }
             // definindo o caminho da imagem.
-            const caminho_imagem = `motoristas/${motoristaID}/assinaturas/${randomUUID()}.webp`
+            const caminho_imagem = `motoristas/${motoristaID}/assinaturas/${randomUUID()}.${extensaoAssinatura(assinatura.mimetype)}`
 
             // cria ou substitui a assinatura original
             await r2.send(
@@ -316,7 +318,7 @@ export const controllerAssinatura = {
             const hashDocumento = createHash('sha256').update(pdfAssinado).digest('hex')
 
             // criando o caminho da assinatura do responsavel
-            key = `motoristas/${Responsavel.motorista_id}/responsavel/${Responsavel.id}/assinatura/${randomUUID()}.webp`
+            key = `motoristas/${Responsavel.motorista_id}/responsavel/${Responsavel.id}/assinatura/${randomUUID()}.${extensaoAssinatura(assinatura.mimetype)}`
 
             // pegando IP do usuario
             const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress

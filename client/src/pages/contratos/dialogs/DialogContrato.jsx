@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { FaRegFileAlt } from 'react-icons/fa'
 import DefaultDialog from '../../../components/dialog/dialogDefault'
+import Select from '../../../components/forms/Select'
 import { listarAluno } from '../../../services/aluno'
 import { listarContratos, obterContrato } from '../../../services/contrato'
 import { apiErrorToast, errorToast } from '../../../services/toastManager'
@@ -157,14 +158,14 @@ const DialogContrato = ({ acao = 'criar', contratoInicial = null, contratosExist
                 {!editando && (
                     <label className={styles.campo}>
                         Aluno
-                        <select {...propsCampo('alunoId')} required disabled={salvando} data-autofocus="true">
+                        <Select aria-label="Aluno" {...propsCampo('alunoId')} required disabled={salvando} data-autofocus="true">
                             <option value="">
                                 {carregandoOpcoes ? 'Carregando alunos...' : 'Selecione um aluno'}
                             </option>
                             {!carregandoOpcoes && alunos.map((aluno) => (
                                 <option key={aluno.id} value={aluno.id}>{aluno.nome}</option>
                             ))}
-                        </select>
+                        </Select>
                     </label>
                 )}
                 <div className={styles.duasColunas}>

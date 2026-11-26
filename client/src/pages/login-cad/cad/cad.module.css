@@ -69,30 +69,6 @@
     font-size: 0.8125rem;
 }
 
-.campo-termos {
-    align-self: flex-start;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.65rem;
-    color: var(--theme-muted);
-    font-family: 'Bree Serif', serif;
-    font-size: 1.0125rem;
-    padding-left: 0.5rem;
-}
-
-.campo-termos input {
-    width: 1.1rem;
-    height: 1.1rem;
-    margin-top: 0.1rem;
-    flex: 0 0 auto;
-    accent-color: var(--theme-focus);
-}
-
-.campo-termos a {
-    color: var(--theme-accent);
-    font-weight: 500;
-}
-
 .cadastrar {
     width: 50%;
     min-width: min(100%, 10rem);

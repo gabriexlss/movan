@@ -7,10 +7,9 @@ import { IoMdExit } from "react-icons/io"
 import { CgTrash } from "react-icons/cg"
 import { MdPersonOutline } from "react-icons/md";
 import { LuMails } from "react-icons/lu";
+import { LuBookOpen, LuMapPin, LuUserRound, LuUsersRound } from 'react-icons/lu'
 import { BiSolidBuildings } from "react-icons/bi";
 import { HiOutlineKey } from "react-icons/hi";
-import { FaMapMarkerAlt } from 'react-icons/fa'
-import fotoPlaceholder from '../../assets/media/img/placeholders/placeholder.jpg'
 
 
 import TituloTela from '../../components/layout/tituloTela'
@@ -48,6 +47,8 @@ const Perfil = () => {
     const { theme } = useTheme()
     const { user, refreshSession, logout } = useAuth()
     const [camposEditaveis, setCamposEditaveis] = useState({})
+    const [camposSalvando, setCamposSalvando] = useState({})
+    const salvandoRef = useRef(new Set())
     const [campoSelect, setCampoSelect] = useState(null)
     const [valores, setValores] = useState({
         nome: '',
@@ -60,7 +61,7 @@ const Perfil = () => {
     const [dialogEditAberto, setDialogEditAberto] = useState(false)
     const [dialogExluContaAberto, setDialogExluContaAberto] = useState(false)
     const [vinculandoGoogle, setVinculandoGoogle] = useState(false)
-    const fecharDialogExluConta = useCallback(() => setDialogExluContaAberto(false), [])
+    const fecharDialogExluConta = useCallback(() => setDialogExluContaAberto(false), [setDialogExluContaAberto])
 
     const campos = [
         {
@@ -69,6 +70,9 @@ const Perfil = () => {
             label: 'Nome',
             placeholder: user?.nome || 'Nome não informado',
             autoComplete: 'name',
+            required: true,
+            minLength: 3,
+            maxLength: 200,
         },
         {
             id: 'email',
@@ -86,20 +90,24 @@ const Perfil = () => {
             inputMode: 'text',
         },
         {
+            id: 'capacidade_van',
+            Icone: LuUsersRound,
+            label: 'Vagas da van',
+            placeholder: user?.capacidade_van != null ? String(user.capacidade_van) : 'Capacidade não informada',
+            type: 'number',
+            inputMode: 'numeric',
+            min: 1,
+            max: 2147483647,
+            step: 1,
+            required: true,
+        },
+        {
             id: 'senha',
             Icone: HiOutlineKey,
             label: 'Senha',
             placeholder: '********',
             type: 'password',
             autoComplete: 'new-password',
-        },
-        {
-            id: 'capacidade_van',
-            Icone: MdPersonOutline,
-            label: 'Máximo de crianças na van',
-            placeholder: user?.capacidade_van ? String(user.capacidade_van) : 'Não informado',
-            type: 'number',
-            inputMode: 'numeric',
         },
     ]
     let camposFiltrados
@@ -123,6 +131,7 @@ const Perfil = () => {
             return //retorno aqui porque não quero que ele edite o input caso seja um campo de dialog
         }
 
+        setValores((estadoAtual) => ({ ...estadoAtual, [campo]: String(user?.[campo] ?? '') }))
         setCamposEditaveis((estadoAtual) => ({
             ...estadoAtual,
             [campo]: true,
@@ -139,29 +148,39 @@ const Perfil = () => {
     }
 
     const encerrarEdicao = async (campo) => {
-        if (!camposEditaveis[campo]) return
-
-        setCamposEditaveis((estadoAtual) => ({
-            ...estadoAtual,
-            [campo]: false,
-        }))
-
-        if (dialogsEdicao[campo]) {
-            setCampoSelect(campo)
-            setDialogEditAberto(true)
+        if (!camposEditaveis[campo] || salvandoRef.current.has(campo)) return
+        const input = inputRefs.current[campo]
+        if (input && !input.reportValidity()) {
+            requestAnimationFrame(() => input.focus())
+            return
         }
+
+        const valor = campo === 'capacidade_van' ? Number(valores[campo]) : valores[campo].trim()
+        if (String(valor) === String(user?.[campo] ?? '')) {
+            setCamposEditaveis((estadoAtual) => ({ ...estadoAtual, [campo]: false }))
+            setValores((estadoAtual) => ({ ...estadoAtual, [campo]: '' }))
+            return
+        }
+
+        salvandoRef.current.add(campo)
+        setCamposSalvando((estadoAtual) => ({ ...estadoAtual, [campo]: true }))
         //======================
         //ATUALIZAR CAMPO 
         //======================
         try {
             const response = campo === 'capacidade_van'
-                ? await api.patch('/motorista/capacidade-van', { capacidade_van: Number(valores[campo]) }, { skipGlobalErrorToast: true })
-                : await api.patch('/motorista',{ [campo]: valores[campo] }, { skipGlobalErrorToast: true },
-            )
+                ? await api.patch('/motorista/capacidade-van', { capacidade_van: valor }, { skipGlobalErrorToast: true })
+                : await api.patch('/motorista', { [campo]: valor }, { skipGlobalErrorToast: true })
             await refreshSession()
+            setCamposEditaveis((estadoAtual) => ({ ...estadoAtual, [campo]: false }))
+            setValores((estadoAtual) => ({ ...estadoAtual, [campo]: '' }))
             responseSuccessToast(response, 'FIELD_UPDATED')
         } catch (error) {
             apiErrorToast(error, 'FIELD_UPDATE_FAILED')
+            requestAnimationFrame(() => inputRefs.current[campo]?.focus())
+        } finally {
+            salvandoRef.current.delete(campo)
+            setCamposSalvando((estadoAtual) => ({ ...estadoAtual, [campo]: false }))
         }
     }
 
@@ -201,11 +220,9 @@ const Perfil = () => {
             />
 
             <div className={styles['conteudos-perfil']}>
-                <img
-                    src={fotoPlaceholder}
-                    alt="Foto de perfil"
-                    className={styles['foto-perfil']}
-                />
+                <div className={styles['foto-perfil']} role="img" aria-label="Avatar padrão do motorista">
+                    <LuUserRound aria-hidden="true" />
+                </div>
 
                 <div className={styles['info-container']}>
                     <h1 className={styles['nome-perfil']}>
@@ -220,6 +237,7 @@ const Perfil = () => {
             <section className={styles['campos-perfil']} aria-label="Dados do perfil">
                 {camposFiltrados.map((campo) => {
                     const editavel = Boolean(camposEditaveis[campo.id])
+                    const salvando = Boolean(camposSalvando[campo.id])
                     const Icone = campo.Icone
 
                     return (
@@ -231,6 +249,7 @@ const Perfil = () => {
                             </label>
 
                             <div
+                                aria-busy={salvando}
                                 className={`${styles['input-container']} ${
                                     editavel ? styles['input-container--editavel'] : ''
                                 }`}
@@ -244,10 +263,16 @@ const Perfil = () => {
                                     type={campo.type || 'text'}
                                     value={valores[campo.id]}
                                     placeholder={campo.placeholder}
-                                    readOnly={!editavel}
+                                    readOnly={!editavel || salvando}
                                     tabIndex={editavel ? 0 : -1}
                                     inputMode={campo.inputMode}
                                     autoComplete={campo.autoComplete}
+                                    required={editavel && campo.required}
+                                    minLength={campo.minLength}
+                                    maxLength={campo.maxLength}
+                                    min={campo.min}
+                                    max={campo.max}
+                                    step={campo.step}
                                     enterKeyHint="done"
                                     onChange={(event) => alterarValor(campo.id, event.target.value)}
                                     onBlur={() => encerrarEdicao(campo.id)}
@@ -255,6 +280,9 @@ const Perfil = () => {
                                         if (event.key === 'Enter') {
                                             event.preventDefault()
                                             event.currentTarget.blur()
+                                        } else if (event.key === 'Escape') {
+                                            setCamposEditaveis((estadoAtual) => ({ ...estadoAtual, [campo.id]: false }))
+                                            setValores((estadoAtual) => ({ ...estadoAtual, [campo.id]: '' }))
                                         }
                                     }}
                                 />
@@ -265,6 +293,7 @@ const Perfil = () => {
                                     aria-label={`Editar ${campo.label}`}
                                     aria-controls={`perfil-${campo.id}`}
                                     aria-pressed={editavel}
+                                    disabled={editavel || salvando}
                                     onClick={() => habilitarEdicao(campo.id)}
                                 >
                                     <PiNotePencilBold aria-hidden="true" />
@@ -294,7 +323,7 @@ const Perfil = () => {
 
             <section className={styles['campos-perfil']} aria-label="Endereço da van">
                 <CampoEnderecoAutocomplete
-                    icon={<FaMapMarkerAlt className={styles['icon-label']} aria-hidden="true" />}
+                    icon={<LuMapPin className={styles['icon-label']} aria-hidden="true" />}
                     labelPosition="above"
                     classNames={{
                         field: styles['campo-grupo'],
@@ -333,6 +362,15 @@ const Perfil = () => {
             <Link to="/perfil/assinatura" className={`${styles['BtnExclu-conta']} ${styles['BtnAssinatura']}`}>
                 <PiPenNibBold aria-hidden="true" style={{ fontSize: '1.7rem' }} /> Minha assinatura
             </Link>
+            <a
+                href="/manual-do-usuario.pdf"
+                className={`${styles['BtnExclu-conta']} ${styles.BtnManual}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Abrir manual de instruções em PDF"
+            >
+                <LuBookOpen aria-hidden="true" style={{ fontSize: '1.7rem' }} /> Manual de instruções
+            </a>
             <button
                 type="button"
                 className={styles['BtnExclu-conta']}

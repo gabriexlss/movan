@@ -19,15 +19,15 @@ export const MotoristaSchema = z.object({
     excluido_em: z.string("NOT_STRING").datetime("INVALID_DATE").nullish(),
     login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG"),
     capacidade_van: z.coerce
-        .number("Capacidade da van deve ser um número.")
-        .int("Capacidade da van deve ser um número inteiro.")
-        .positive("Capacidade da van deve ser maior que zero.")
-        .max(2147483647, "Capacidade da van excede o limite permitido."),
+        .number("NOT_NUMBER")
+        .int("VAN_CAPACITY_INVALID")
+        .positive("VAN_CAPACITY_INVALID")
+        .max(2147483647, "VAN_CAPACITY_INVALID"),
     endereco: z
-        .string("Endereço deve ser uma string.")
+        .string("NOT_STRING")
         .trim()
         .min(5, "Endereço deve ter pelo menos 5 caracteres.")
-        .max(500, "Endereço deve ter no máximo 500 caracteres.")
+        .max(500, "ADDRESS_TOO_LONG")
         .nullish(),
     latitude: UtilSchema.shape.latitude.nullish(),
     longitude: UtilSchema.shape.longitude.nullish()
@@ -47,6 +47,8 @@ export const LoginMotoristaSchema = MotoristaSchema.pick({
     senha: true
 })
 export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
+    endereco: MotoristaSchema.shape.endereco.optional(),
+    capacidade_van: MotoristaSchema.shape.capacidade_van.optional(),
     cod: validarCodigoSchema.shape.cod.optional(),
     senhaAtual: CriarMotoristaSchema.shape.senha.optional()
 }).refine((dados) => !dados.email || !!dados.cod, {
@@ -65,10 +67,10 @@ export const compararSenhaSchema = MotoristaSchema.pick({
 // schema pra editar o endereço e as coordenadas iniciais do motorista
 export const EditarEnderecoMotoristaSchema = z.object({
     endereco: z
-        .string("Endereço deve ser uma string.")
+        .string("NOT_STRING")
         .trim()
         .min(5, "Endereço deve ter pelo menos 5 caracteres.")
-        .max(500, "Endereço deve ter no máximo 500 caracteres."),
+        .max(500, "ADDRESS_TOO_LONG"),
     latitude: UtilSchema.shape.latitude,
     longitude: UtilSchema.shape.longitude
 })
