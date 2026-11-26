@@ -16,15 +16,9 @@ type IOptimizeToursRequest = protos.google.maps.routeoptimization.v1.IOptimizeTo
 type IShipment = protos.google.maps.routeoptimization.v1.IShipment;
 type IVehicle = protos.google.maps.routeoptimization.v1.IVehicle;
 
-interface coordenadasMotorista {
-    latitude: number,
-    longitude: number
-}
-
 interface otimizarRotaProps {
     rotaID: number,
     req: Request,
-    coordenadasMotorista: coordenadasMotorista,
     cliente: PoolClient
 }
 
@@ -42,15 +36,8 @@ const routeClient = new v1.RouteOptimizationClient({
 });
 
 // função
-export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente }: otimizarRotaProps): Promise<void> => {
-    // valida se as coordenadas são válidas
-    const coordenadasValidas = validarCoordenadas.safeParse(coordenadasMotorista)
-
-    if (!coordenadasValidas.success) {
-        throw new Error('DRIVER_COORDINATES_INVALID', { cause: coordenadasValidas.error })
-    }
-
-    // primeiro pego os dados necessarios.
+export const otimizarRota = async ({ rotaID, req, cliente }: otimizarRotaProps): Promise<void> => {
+    // primeiro pego os dados necessarios do motorista no banco (incluindo latitude, longitude e capacidade_van)
     const motoristaID = req.userId
     const { rows: [motorista] } = await cliente.query<Motorista>(
         `
@@ -61,6 +48,21 @@ export const otimizarRota = async ({ rotaID, req, coordenadasMotorista, cliente 
     )
     if (!motorista) {
         throw new Error('MOTORISTA_NOT_FOUND')
+    }
+
+    // verifica se o motorista já tem o endereço/coordenadas iniciais cadastrados no banco
+    if (motorista.latitude === null || motorista.latitude === undefined || motorista.longitude === null || motorista.longitude === undefined) {
+        throw new Error('DRIVER_COORDINATES_NOT_FOUND')
+    }
+
+    // valida se as coordenadas do motorista salvas no banco são válidas
+    const coordenadasValidas = validarCoordenadas.safeParse({
+        latitude: Number(motorista.latitude),
+        longitude: Number(motorista.longitude)
+    })
+
+    if (!coordenadasValidas.success) {
+        throw new Error('DRIVER_COORDINATES_INVALID', { cause: coordenadasValidas.error })
     }
     // pegando as infos da rota e garantindo que pertence ao motorista autenticado
     const { rows: [rota] } = await cliente.query<Rota>(

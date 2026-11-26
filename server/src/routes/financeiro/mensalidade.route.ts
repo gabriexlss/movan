@@ -3,7 +3,7 @@ import { controllerMensalide } from '../../controllers/financeiro/mensalidade.co
 
 const router = Router()
 
-// rota get pra pegar as mensalidades, podendo filtrar por aluno_id, mes (mm/yyyy) e status
+// rota get pra pegar as mensalidades, podendo filtrar por aluno_id, mes (mm/yyyy ou yyyy) e status
 router.get('/', controllerMensalide.obterMensalidades)
 
 // rota patch pra pagar uma mensalidade passando o id nos params

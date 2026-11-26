@@ -215,12 +215,18 @@ export const controllerMensalide = {
             valores.push(aluno_id)
         }
 
-        // se vier o mes na query (MM/YYYY), filtra as mensalidades que vencem dentro daquele mês
+        // se vier o mes na query (MM/YYYY ou YYYY), filtra as mensalidades que vencem dentro daquele mês ou ano
         if (mes) {
-            const [mesNumero, ano] = mes.split("/").map(Number)
-            const dataInicioMes = `${ano}-${String(mesNumero).padStart(2, "0")}-01`
-            query += ` AND data_vencimento >= $${valores.length + 1}::date AND data_vencimento < ($${valores.length + 1}::date + INTERVAL '1 month')`
-            valores.push(dataInicioMes)
+            if (mes.includes("/")) {
+                const [mesNumero, ano] = mes.split("/").map(Number)
+                const dataInicioMes = `${ano}-${String(mesNumero).padStart(2, "0")}-01`
+                query += ` AND data_vencimento >= $${valores.length + 1}::date AND data_vencimento < ($${valores.length + 1}::date + INTERVAL '1 month')`
+                valores.push(dataInicioMes)
+            } else {
+                const dataInicioAno = `${Number(mes)}-01-01`
+                query += ` AND data_vencimento >= $${valores.length + 1}::date AND data_vencimento < ($${valores.length + 1}::date + INTERVAL '1 year')`
+                valores.push(dataInicioAno)
+            }
         }
 
         // se vier o status, filtra por ele (atrasada é pendente com vencimento antes de hoje)

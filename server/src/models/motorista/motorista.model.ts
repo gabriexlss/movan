@@ -18,7 +18,19 @@ export const MotoristaSchema = z.object({
     email_verificado: z.boolean("NOT_BOOLEAN"),
     excluido_em: z.string("NOT_STRING").datetime("INVALID_DATE").nullish(),
     login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG"),
-    capacidade_van: z.number().positive()
+    capacidade_van: z.coerce
+        .number("Capacidade da van deve ser um número.")
+        .int("Capacidade da van deve ser um número inteiro.")
+        .positive("Capacidade da van deve ser maior que zero.")
+        .max(2147483647, "Capacidade da van excede o limite permitido."),
+    endereco: z
+        .string("Endereço deve ser uma string.")
+        .trim()
+        .min(5, "Endereço deve ter pelo menos 5 caracteres.")
+        .max(500, "Endereço deve ter no máximo 500 caracteres.")
+        .nullish(),
+    latitude: UtilSchema.shape.latitude.nullish(),
+    longitude: UtilSchema.shape.longitude.nullish()
 });
 export const CriarMotoristaSchema = MotoristaSchema.pick({
     nome: true,
@@ -46,9 +58,25 @@ export const DeletarMotoristaSchema = MotoristaSchema.pick({
 export const compararSenhaSchema = MotoristaSchema.pick({
     senha: true
 })
+// schema pra editar o endereço e as coordenadas iniciais do motorista
+export const EditarEnderecoMotoristaSchema = z.object({
+    endereco: z
+        .string("Endereço deve ser uma string.")
+        .trim()
+        .min(5, "Endereço deve ter pelo menos 5 caracteres.")
+        .max(500, "Endereço deve ter no máximo 500 caracteres."),
+    latitude: UtilSchema.shape.latitude,
+    longitude: UtilSchema.shape.longitude
+})
+// schema pra editar a capacidade da van do motorista
+export const EditarCapacidadeVanSchema = MotoristaSchema.pick({
+    capacidade_van: true
+})
 export type Motorista = z.infer<typeof MotoristaSchema>
 export type compararSenha = z.infer<typeof compararSenhaSchema>
 export type DeletarMotorista = z.infer<typeof DeletarMotoristaSchema>
 export type LoginMotorista = z.infer<typeof LoginMotoristaSchema>
 export type CriarMotorista = z.infer<typeof CriarMotoristaSchema>
 export type EditarMotorista = z.infer<typeof EditarMotoristaSchema>
+export type EditarEnderecoMotorista = z.infer<typeof EditarEnderecoMotoristaSchema>
+export type EditarCapacidadeVan = z.infer<typeof EditarCapacidadeVanSchema>

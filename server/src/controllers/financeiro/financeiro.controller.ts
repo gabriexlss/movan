@@ -192,11 +192,18 @@ export const controllerFinanceiro = {
         const { mes: data, id } = dadosBrutos.data
         const motoristaID = req.userId
 
-        // se vier a data na query, filtramos ela
-        let dataISO: Date | undefined = undefined
+        // se vier a data na query (MM/YYYY ou YYYY), filtramos pelo mês ou pelo ano todo
+        let dataInicio: string | undefined = undefined
+        let intervalo: '1 month' | '1 year' = '1 month'
         if (data) {
-            const [mes, ano] = data.split("/").map(Number)
-            dataISO = new Date(`${ano}-${String(mes).padStart(2, "0")}-01T00:00:00.000Z`)
+            if (data.includes("/")) {
+                const [mes, ano] = data.split("/").map(Number)
+                dataInicio = `${ano}-${String(mes).padStart(2, "0")}-01`
+                intervalo = '1 month'
+            } else {
+                dataInicio = `${Number(data)}-01-01`
+                intervalo = '1 year'
+            }
         }
 
         // operação
@@ -207,8 +214,8 @@ export const controllerFinanceiro = {
                 WHERE motorista_id = $1 
                 `
             let parametros = 2
-            if (dataISO) {
-                query += `AND data_lancamento >= $${parametros} AND data_lancamento < $${parametros} + INTERVAL '1 month' `
+            if (dataInicio) {
+                query += `AND data_lancamento >= $${parametros}::date AND data_lancamento < ($${parametros}::date + INTERVAL '${intervalo}') `
                 parametros++
             }
             if (id) {
@@ -220,7 +227,7 @@ export const controllerFinanceiro = {
                 query,
                 [
                     motoristaID,
-                    ...dataISO ? [dataISO] : [],
+                    ...dataInicio ? [dataInicio] : [],
                     ...id ? [id] : []
                 ]
             )
@@ -257,11 +264,18 @@ export const controllerFinanceiro = {
         const { mes: data, tipo } = dadosBrutos.data
         const motoristaID = req.userId
 
-        // se vier a data na query, filtramos ela
-        let dataISO: Date | undefined = undefined
+        // se vier a data na query (MM/YYYY ou YYYY), filtramos pelo mês ou pelo ano todo
+        let dataInicio: string | undefined = undefined
+        let intervalo: '1 month' | '1 year' = '1 month'
         if (data) {
-            const [mes, ano] = data.split("/").map(Number)
-            dataISO = new Date(`${ano}-${String(mes).padStart(2, "0")}-01T00:00:00.000Z`)
+            if (data.includes("/")) {
+                const [mes, ano] = data.split("/").map(Number)
+                dataInicio = `${ano}-${String(mes).padStart(2, "0")}-01`
+                intervalo = '1 month'
+            } else {
+                dataInicio = `${Number(data)}-01-01`
+                intervalo = '1 year'
+            }
         }
 
         // operação
@@ -279,9 +293,9 @@ export const controllerFinanceiro = {
                     AND status = $2 
                     `
             let parametros = 2
-            if (dataISO) {
-                queryFinanceiro += `AND data_lancamento >= $${parametros} AND data_lancamento < $${parametros} + INTERVAL '1 month' `
-                queryMensalidade += `AND competencia >= $${parametros + 1} AND competencia < $${parametros + 1} + INTERVAL '1 month' `
+            if (dataInicio) {
+                queryFinanceiro += `AND data_lancamento >= $${parametros}::date AND data_lancamento < ($${parametros}::date + INTERVAL '${intervalo}') `
+                queryMensalidade += `AND competencia >= $${parametros + 1}::date AND competencia < ($${parametros + 1}::date + INTERVAL '${intervalo}') `
                 parametros++
             }
             if (tipo) {
@@ -295,7 +309,7 @@ export const controllerFinanceiro = {
                     queryFinanceiro,
                     [
                         motoristaID,
-                        ...dataISO ? [dataISO] : [],
+                        ...dataInicio ? [dataInicio] : [],
                         ...tipo ? [tipo] : []
                 ]),
                 tipo === 'ENTRADA' || tipo === undefined ? database.query<Pick<Mensalidade, 'valor_cobrado'>>(
@@ -303,7 +317,7 @@ export const controllerFinanceiro = {
                     [
                     motoristaID,
                     'PAGA',
-                    ...dataISO ? [dataISO] : []
+                    ...dataInicio ? [dataInicio] : []
                 ]) : { rows: [] }
             ]);
 
@@ -325,7 +339,6 @@ export const controllerFinanceiro = {
             for (const mensalidade of mensalidades) {
                 valor += Number(mensalidade.valor_cobrado)
             }
-            console.log(financeiros, mensalidades)
             const valorFinal = Number(valor.toFixed(2))
 
             return res.status(200).json({

@@ -15,6 +15,12 @@ router.delete('/', limitarRequisicoes.login(), middlewareAutenticar, controllerC
 // rota patch para realizar a edição de nome, email, CPF/CNPJ e senha
 router.patch('/', limitarRequisicoes.login(), middlewareAutenticar, middlewareVerificado, controllerConta.editarConta)
 
+// rota patch para editar o endereço e as coordenadas iniciais do motorista
+router.patch('/endereco', limitarRequisicoes.login(), middlewareAutenticar, middlewareVerificado, controllerConta.editarEndereco)
+
+// rota patch para editar a capacidade da van do motorista
+router.patch('/capacidade-van', limitarRequisicoes.login(), middlewareAutenticar, middlewareVerificado, controllerConta.editarCapacidadeVan)
+
 // rota get para obter todos os dados do motorista
 router.get('/', limitarRequisicoes.get(), middlewareAutenticar, controllerConta.obterDados)
 

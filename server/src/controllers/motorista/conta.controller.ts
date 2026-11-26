@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, DeletarMotoristaSchema, EditarMotoristaSchema, compararSenhaSchema } from "../../models/motorista/motorista.model.js"
+import { CriarMotoristaSchema, DeletarMotoristaSchema, EditarCapacidadeVanSchema, EditarEnderecoMotoristaSchema, EditarMotoristaSchema, Motorista, compararSenhaSchema } from "../../models/motorista/motorista.model.js"
 import { database } from "../../db/postgre.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
@@ -325,20 +325,25 @@ export const controllerConta = {
 
         // pega os dados do motorista e envia de volta
         try {
-            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado, google_id FROM motorista WHERE id = $1"
+            const query = "SELECT * FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 
             const motorista = rows[0]
 
-            // se o google id existir coloca que é google verificado, se não, coloca que não é
+            // monta a credencial (cpf ou cnpj) e se o google id existir coloca que é google verificado, se não, coloca que não é
+            motorista.credencial = motorista.cpf ?? motorista.cnpj
             if (!motorista.google_id) {
                 motorista.google_verificado = false
             } else {
                 motorista.google_verificado = true
             }
-            // deleta o google id do objeto
+            // deleta os dados sensiveis e internos do objeto antes de devolver
+            delete motorista.senha
             delete motorista.google_id
+            delete motorista.cpf
+            delete motorista.cnpj
+            delete motorista.criado_em
 
             return res.status(200).json({
                 'msg-code': "ACCOUNT_DATA_RECEIVED",
@@ -382,6 +387,102 @@ export const controllerConta = {
             console.error("Erro ao pegar senha hash do motorista no endpoint de compararSenha, erro: ", erro)
             return res.status(500).json({
                 'msg-code': "INTERNAL_SERVER_ERROR"
+            })
+        }
+    },
+    // endpoint pra editar o endereço e as coordenadas iniciais do motorista
+    editarEndereco: async (req: Request, res: Response) => {
+        // recebendo os dados do body
+        const dadosBrutos = EditarEnderecoMotoristaSchema.safeParse(req.body)
+
+        // validação de sempre
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para editar o endereço do motorista.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        // desestruturação
+        const { endereco, latitude, longitude } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // operação
+        try {
+            const { rows: [motorista] } = await database.query<Pick<Motorista, "id" | "endereco" | "latitude" | "longitude">>(
+                `
+                UPDATE motorista
+                SET endereco = $1, latitude = $2, longitude = $3
+                WHERE id = $4
+                RETURNING id, endereco, latitude, longitude
+                `,
+                [endereco, latitude, longitude, motoristaID]
+            )
+
+            // se não encontrou o motorista no banco
+            if (!motorista) {
+                return res.status(404).json({
+                    msg: "Motorista não encontrado."
+                })
+            }
+
+            // devolvendo pro usuario
+            return res.status(200).json({
+                msg: "Endereço do motorista atualizado com sucesso.",
+                motorista
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de editar endereço do motorista, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // endpoint pra editar a capacidade da van do motorista
+    editarCapacidadeVan: async (req: Request, res: Response) => {
+        // recebendo os dados do body
+        const dadosBrutos = EditarCapacidadeVanSchema.safeParse(req.body)
+
+        // validação de sempre
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para editar a capacidade da van.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        // desestruturação
+        const { capacidade_van } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // operação
+        try {
+            const { rows: [motorista] } = await database.query<Pick<Motorista, "id" | "capacidade_van">>(
+                `
+                UPDATE motorista
+                SET capacidade_van = $1
+                WHERE id = $2
+                RETURNING id, capacidade_van
+                `,
+                [capacidade_van, motoristaID]
+            )
+
+            // se não encontrou o motorista no banco
+            if (!motorista) {
+                return res.status(404).json({
+                    msg: "Motorista não encontrado."
+                })
+            }
+
+            // devolvendo pro usuario
+            return res.status(200).json({
+                msg: "Capacidade da van atualizada com sucesso.",
+                motorista
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de editar capacidade da van, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         }
     }
