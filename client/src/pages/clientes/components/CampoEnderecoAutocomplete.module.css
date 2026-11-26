@@ -1,8 +1,17 @@
-.autocompleteField {
+.autocompleteRoot {
     position: relative;
     z-index: 2;
+    width: 100%;
     min-width: 0;
+}
+
+.autocompleteField {
     padding-top: .35rem;
+}
+
+.inputArea {
+    position: relative;
+    min-width: 0;
 }
 
 .autocompleteField > label {

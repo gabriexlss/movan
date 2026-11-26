@@ -294,7 +294,13 @@ const Perfil = () => {
 
             <section className={styles['campos-perfil']} aria-label="Endereço da van">
                 <CampoEnderecoAutocomplete
-                    icon={<FaMapMarkerAlt />}
+                    icon={<FaMapMarkerAlt className={styles['icon-label']} aria-hidden="true" />}
+                    labelPosition="above"
+                    classNames={{
+                        field: styles['campo-grupo'],
+                        label: styles.label,
+                        inputWrapper: styles['input-container'],
+                    }}
                     value={valores.endereco ?? user?.endereco ?? ''}
                     onChange={(valor) => setValores((atuais) => ({ ...atuais, endereco: valor }))}
                     onSelecionar={async ({ endereco, latitude, longitude }) => {

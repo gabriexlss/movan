@@ -8,7 +8,6 @@ import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 import CampoEnderecoAutocomplete from '../../clientes/components/CampoEnderecoAutocomplete'
-import { FaMapMarkerAlt } from 'react-icons/fa'
 
 const CadGoogle = () => {
     const navigate = useNavigate() //me deixa mandar o usuario para outra pagina
@@ -119,19 +118,6 @@ const CadGoogle = () => {
                     <label htmlFor="senhaGoogle">Senha</label>
                 </div>
 
-                <CampoEnderecoAutocomplete
-                    icon={<FaMapMarkerAlt />}
-                    value={endereco}
-                    onChange={(valor) => { setEndereco(valor); setCoordenadas({ latitude: null, longitude: null }) }}
-                    onSelecionar={({ endereco: valor, latitude, longitude }) => { setEndereco(valor); setCoordenadas({ latitude, longitude }) }}
-                    coordenadasPendentes={endereco.length > 0 && !coordenadas.latitude}
-                />
-
-                <div className={styles['auth-screens__campo']}>
-                    <input type="number" id="capacidadeVanGoogle" min="1" value={capacidadeVan} onChange={(event) => setCapacidadeVan(event.target.value)} placeholder=" " required />
-                    <label htmlFor="capacidadeVanGoogle">Número máximo de crianças na van</label>
-                </div>
-
                 <div className={styles['auth-screens__campo']}>
                     <input
                         type="password"
@@ -145,6 +131,20 @@ const CadGoogle = () => {
                     />
                     <label htmlFor="confirmarSenhaGoogle">Confirmar senha</label>
                 </div>
+
+                <div className={styles['auth-screens__campo']}>
+                    <input type="number" id="capacidadeVanGoogle" min="1" value={capacidadeVan} onChange={(event) => setCapacidadeVan(event.target.value)} placeholder=" " required />
+                    <label htmlFor="capacidadeVanGoogle">Vagas totais na van</label>
+                </div>
+
+                <CampoEnderecoAutocomplete
+                    labelPosition="floating"
+                    classNames={{ field: styles['auth-screens__campo'] }}
+                    value={endereco}
+                    onChange={(valor) => { setEndereco(valor); setCoordenadas({ latitude: null, longitude: null }) }}
+                    onSelecionar={({ endereco: valor, latitude, longitude }) => { setEndereco(valor); setCoordenadas({ latitude, longitude }) }}
+                    coordenadasPendentes={endereco.length > 0 && !coordenadas.latitude}
+                />
 
                 <PasswordRequirements senha={senha} />
 

@@ -10,7 +10,6 @@ import styles from './cad.module.css'
 import ButtonGoogle from '../layout-LogCad/ButtonGoogle'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
 import CampoEnderecoAutocomplete from '../../clientes/components/CampoEnderecoAutocomplete'
-import { FaMapMarkerAlt } from 'react-icons/fa'
 
 const Cad = () => {
     const navigate = useNavigate() //manda o usuário para a pagina que quiser
@@ -131,19 +130,6 @@ const Cad = () => {
                     <label htmlFor="senhaCadastro">Senha</label>
                 </div>
 
-                <CampoEnderecoAutocomplete
-                    icon={<FaMapMarkerAlt />}
-                    value={endereco}
-                    onChange={(valor) => { setEndereco(valor); setCoordenadas({ latitude: null, longitude: null }) }}
-                    onSelecionar={({ endereco: valor, latitude, longitude }) => { setEndereco(valor); setCoordenadas({ latitude, longitude }) }}
-                    coordenadasPendentes={endereco.length > 0 && !coordenadas.latitude}
-                />
-
-                <div className={styles['campo-cadastro']}>
-                    <input type="number" id="capacidadeVan" min="1" value={capacidadeVan} onChange={(event) => setCapacidadeVan(event.target.value)} placeholder=" " required />
-                    <label htmlFor="capacidadeVan">Número máximo de crianças na van</label>
-                </div>
-
                 <div className={styles['campo-cadastro']}>
                     <input
                         type="password"
@@ -158,6 +144,20 @@ const Cad = () => {
                     />
                     <label htmlFor="confirmarSenha">Confirmar senha</label>
                 </div>
+
+                <div className={styles['campo-cadastro']}>
+                    <input type="number" id="capacidadeVan" min="1" value={capacidadeVan} onChange={(event) => setCapacidadeVan(event.target.value)} placeholder=" " required />
+                    <label htmlFor="capacidadeVan">Vagas totais na van</label>
+                </div>
+
+                <CampoEnderecoAutocomplete
+                    labelPosition="floating"
+                    classNames={{ field: styles['campo-cadastro'] }}
+                    value={endereco}
+                    onChange={(valor) => { setEndereco(valor); setCoordenadas({ latitude: null, longitude: null }) }}
+                    onSelecionar={({ endereco: valor, latitude, longitude }) => { setEndereco(valor); setCoordenadas({ latitude, longitude }) }}
+                    coordenadasPendentes={endereco.length > 0 && !coordenadas.latitude}
+                />
 
                 <PasswordRequirements senha={senha} />
 
