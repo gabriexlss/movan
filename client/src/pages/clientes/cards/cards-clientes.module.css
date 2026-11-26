@@ -7,6 +7,30 @@
     font-size: var(--tamanho-titulo-card, .82rem);
 }
 
+.cardBloqueado {
+    outline: 1px dashed var(--theme-control-border);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.cardBloqueado .tituloCard {
+    color: var(--theme-muted);
+}
+
+.listaClientes[aria-disabled='true'] {
+    opacity: .5;
+    filter: grayscale(1);
+}
+
+.avisoBloqueio {
+    margin-bottom: .75rem;
+    color: var(--theme-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: .8125rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
 .toolbar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;

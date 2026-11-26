@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useEffect } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { FaChevronLeft, FaChevronRight, FaPencilAlt, FaPlus, FaSearch, FaTrash } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import DefaultCard from '../../../components/cards/DefaultCard'
@@ -59,15 +59,18 @@ const montarDetalhes = (tipo, registro) => {
     ].filter(Boolean)
 }
 
-const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = [], turnos = [], onTurnosChange, onCriar, onEditar, onExcluir }) => {
+const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = [], turnos = [], motivoBloqueio = '', onTurnosChange, onCriar, onEditar, onExcluir }) => {
     const [itens, setItens] = useState(registros)
+    const [registrosAnteriores, setRegistrosAnteriores] = useState(registros)
     const [busca, setBusca] = useState('')
     const [pagina, setPagina] = useState(0)
     const [dialog, setDialog] = useState(null)
+    const bloqueada = Boolean(motivoBloqueio)
 
-    useEffect(() => { //quando os registros mudarem
-        setItens(registros) //atualiza os itens com os novos registros
-    }, [registros]) //depende dos registros, ou seja, quando eles mudarem, o efeito será executado
+    if (registros !== registrosAnteriores) {
+        setRegistrosAnteriores(registros)
+        setItens(registros)
+    }
 
     const resultados = useMemo(() => {
         const termo = busca.trim().toLocaleLowerCase('pt-BR')
@@ -80,11 +83,12 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                 .toLocaleLowerCase('pt-BR')
                 .includes(termo),
         )
-    }, [busca, itens])
+    }, [busca, itens, tipo])
 
     const fecharDialog = useCallback(() => setDialog(null), [])
 
     const abrirFormulario = (acao, registro = null) => {
+        if (bloqueada) return
         setDialog({ acao, registro }) //abro o formulario com a acao e o registro selecionado
     }
 
@@ -163,14 +167,18 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
     const ultimoItem = Math.min((paginaAtual + 1) * ITENS_POR_PAGINA, resultados.length)
 
     return (
-        <DefaultCard title={title} titleClassName={styles.tituloCard}>
-            <div className={styles.listaClientes}>
+        <DefaultCard title={title} titleClassName={styles.tituloCard} className={bloqueada ? styles.cardBloqueado : ''}>
+            {bloqueada && (
+                <p className={styles.avisoBloqueio} role="status">{motivoBloqueio}</p>
+            )}
+            <div className={styles.listaClientes} inert={bloqueada} aria-disabled={bloqueada}>
                 <div className={styles.toolbar}>
                     <label className={styles.busca}>
                         <FaSearch aria-hidden="true" />
                         <span className={styles.somenteLeitor}>Buscar {nomesPlural[tipo]}</span>
                         <input
                             type="search"
+                            disabled={bloqueada}
                             value={busca}
                             onChange={(event) => {
                                 setBusca(event.target.value)
@@ -182,6 +190,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                     <button
                         type="button"
                         className={styles.novo}
+                        disabled={bloqueada}
                         onClick={() => abrirFormulario('adicionar')}
                         aria-haspopup="dialog"
                     >
@@ -212,6 +221,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                                     <button
                                         type="button"
                                         className={styles.editar}
+                                        disabled={bloqueada}
                                         aria-label={`Editar ${registro.nome}`}
                                         title={`Editar ${registro.nome}`}
                                         aria-haspopup="dialog"
@@ -222,6 +232,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                                     <button
                                         type="button"
                                         className={styles.excluir}
+                                        disabled={bloqueada}
                                         aria-label={`Excluir ${registro.nome}`}
                                         title={`Excluir ${registro.nome}`}
                                         aria-haspopup="dialog"
@@ -246,7 +257,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                             type="button"
                             aria-label="Página anterior"
                             onClick={() => setPagina(paginaAtual - 1)}
-                            disabled={paginaAtual === 0}
+                            disabled={bloqueada || paginaAtual === 0}
                         >
                             <FaChevronLeft aria-hidden="true" />
                         </button>
@@ -255,7 +266,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                             type="button"
                             aria-label="Próxima página"
                             onClick={() => setPagina(paginaAtual + 1)}
-                            disabled={paginaAtual + 1 >= totalPaginas}
+                            disabled={bloqueada || paginaAtual + 1 >= totalPaginas}
                         >
                             <FaChevronRight aria-hidden="true" />
                         </button>
@@ -263,7 +274,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                 </footer>
             </div>
 
-            {dialog && dialog.acao !== 'excluir' && (
+            {!bloqueada && dialog && dialog.acao !== 'excluir' && (
                 <DialogFormularioCliente
                     acao={dialog.acao}
                     tipo={tipo}
@@ -277,7 +288,7 @@ const ListaClientes = ({ title, tipo, registros, responsaveis = [], escolas = []
                 />
             )}
 
-            {dialog?.acao === 'excluir' && (
+            {!bloqueada && dialog?.acao === 'excluir' && (
                 <DialogExcluirCliente
                     tipo={tipo}
                     registro={dialog.registro}

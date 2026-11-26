@@ -319,9 +319,6 @@ const Perfil = () => {
                         </div>
                     )
                 })}
-            </section>
-
-            <section className={styles['campos-perfil']} aria-label="Endereço da van">
                 <CampoEnderecoAutocomplete
                     icon={<LuMapPin className={styles['icon-label']} aria-hidden="true" />}
                     labelPosition="above"
