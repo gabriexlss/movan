@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../../services/api'
 import { apiErrorToast, errorToast, responseSuccessToast } from '../../../services/toastManager'
 import PasswordRequirements from '../../../components/auth/PasswordRequirements'
+import AceiteTermos from '../../../components/auth/AceiteTermos'
 import { senhaValida } from '../../../utils/password'
 import { useAuth } from '../../../context/useAuth'
 import styles from './AuthScreens.module.css'
 import LoadingSpinner from '../../../animations/loading-spin/loading-spin';
+import CampoEnderecoAutocomplete from '../../clientes/components/CampoEnderecoAutocomplete'
 
 const CadGoogle = () => {
     const navigate = useNavigate() //me deixa mandar o usuario para outra pagina
@@ -23,6 +25,9 @@ const CadGoogle = () => {
     const [senha, setSenha] = useState('') //senha do usuário
     const [confirmarSenha, setConfirmarSenha] = useState('') //senha de confirmação do usuário
     const [enviando, setEnviando] = useState(false) //essa variavel fala se o formulario esta no processo de envio
+    const [endereco, setEndereco] = useState('')
+    const [coordenadas, setCoordenadas] = useState({ latitude: null, longitude: null })
+    const [capacidadeVan, setCapacidadeVan] = useState('')
 
     //=======================
     //CADASTRO COM GOOGLE
@@ -55,6 +60,10 @@ const CadGoogle = () => {
                 credencial: credencial.replace(/[^a-z0-9]/gi, '').toUpperCase(), //mando o CPF ou CNPJ sem os caracteres especiais
                 senha, //a senha do usuario
                 token: dadosGoogle.token, //o token do google
+                endereco,
+                latitude: coordenadas.latitude,
+                longitude: coordenadas.longitude,
+                capacidade_van: Number(capacidadeVan),
             }, {
                 skipAuthExpired: true,
                 skipGlobalErrorToast: true, //tratarei erros aqui então impeço que o toast global de erro seja chamado
@@ -124,7 +133,23 @@ const CadGoogle = () => {
                     <label htmlFor="confirmarSenhaGoogle">Confirmar senha</label>
                 </div>
 
+                <div className={styles['auth-screens__campo']}>
+                    <input type="number" id="capacidadeVanGoogle" min="1" value={capacidadeVan} onChange={(event) => setCapacidadeVan(event.target.value)} placeholder=" " required />
+                    <label htmlFor="capacidadeVanGoogle">Vagas totais na van</label>
+                </div>
+
+                <CampoEnderecoAutocomplete
+                    labelPosition="floating"
+                    classNames={{ field: styles['auth-screens__campo'] }}
+                    value={endereco}
+                    onChange={(valor) => { setEndereco(valor); setCoordenadas({ latitude: null, longitude: null }) }}
+                    onSelecionar={({ endereco: valor, latitude, longitude }) => { setEndereco(valor); setCoordenadas({ latitude, longitude }) }}
+                    coordenadasPendentes={endereco.length > 0 && !coordenadas.latitude}
+                />
+
                 <PasswordRequirements senha={senha} />
+
+                <AceiteTermos />
 
                 <button className={styles['auth-screens__botao']} type="submit" disabled={enviando || !senhaValida(senha) || senha !== confirmarSenha}>
                     {enviando ? <LoadingSpinner /> : 'Cadastrar'}

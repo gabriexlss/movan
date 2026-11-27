@@ -22,6 +22,7 @@ import toast from 'react-hot-toast'
 import CampoCliente from './CampoCliente'
 import CampoEnderecoAutocomplete from '../components/CampoEnderecoAutocomplete'
 import { nomesTurnos } from '../turnos-escola'
+import { formatarTelefone } from '../../../utils/telefone'
 import styles from './dialogsClientes.module.css'
 
 const valoresIniciais = {
@@ -131,8 +132,10 @@ const DialogFormularioCliente = ({
     }
 
     const propsCampo = (campo) => ({
-        value: valores[campo],
-        onChange: (event) => alterarCampo(campo, event.target.value),
+        value: campo === 'telefone' ? formatarTelefone(valores[campo]) : valores[campo],
+        onChange: (event) => alterarCampo(campo, campo === 'telefone'
+            ? formatarTelefone(event.target.value)
+            : event.target.value),
     })
 
     const atualizarTurnos = (proximosTurnos) => {
@@ -232,6 +235,10 @@ const DialogFormularioCliente = ({
                             label="Telefone de contato"
                             icon={<PiPhoneBold />}
                             type="tel"
+                            inputMode="tel"
+                            maxLength={15}
+                            pattern="\(\d{2}\) \d{4,5}-\d{4}"
+                            title="Informe o DDD e um telefone com 8 ou 9 dígitos."
                             {...propsCampo('telefone')}
                             placeholder="(00) 00000-0000"
                             autoComplete="tel"
@@ -403,7 +410,8 @@ const DialogFormularioCliente = ({
                                 {valores.escolaId ? 'Selecione um turno' : 'Selecione primeiro uma escola'}
                             </option>
                             {turnosDisponiveis
-                                .filter((turno) => String(turno.escola_id) === String(valores.escolaId))
+                                .filter((turno) => String(turno.escola_id) === String(valores.escolaId)
+                                    && Object.hasOwn(nomesTurnos, turno.turno))
                                 .map((turno) => (
                                     <option key={turno.id} value={turno.id}>
                                         {turno.turno} ({turno.hora_entrada} - {turno.hora_saida})
@@ -472,6 +480,10 @@ const DialogFormularioCliente = ({
                             label="Telefone"
                             icon={<PiPhoneBold />}
                             type="tel"
+                            inputMode="tel"
+                            maxLength={15}
+                            pattern="\(\d{2}\) \d{4,5}-\d{4}"
+                            title="Informe o DDD e um telefone com 8 ou 9 dígitos."
                             {...propsCampo('telefone')}
                             placeholder="(00) 00000-0000"
                             autoComplete="tel"

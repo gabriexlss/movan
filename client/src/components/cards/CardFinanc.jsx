@@ -1,11 +1,35 @@
 import DefaultCard from './DefaultCard';
 import styles from './CardFinanc.module.css';
+import { useEffect, useState } from 'react';
+import { obterSumarioFinanceiro } from '../../services/financeiro';
+import { formatarMoeda } from '../../utils/financeiro';
 
 const CardFinanc = ({ className }) => {
+    const [lucroTotal, setLucroTotal] = useState(0);
+    const [despesaTotal, setDespesaTotal] = useState(0);
+
+    useEffect(( ) => {
+        const hoje = new Date();
+        const dataAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+        const buscarResumo = async () => {
+            try {
+                const lucro = await obterSumarioFinanceiro({ data: dataAtual, tipo: 'ENTRADA' });
+                const despesa = await obterSumarioFinanceiro({ data: dataAtual, tipo: 'SAIDA' });
+
+                setLucroTotal(lucro);
+                setDespesaTotal(Math.abs(despesa));
+            } catch (error) {
+                console.error('Erro ao buscar resumo financeiro:', error);
+            }
+        }
+
+        buscarResumo();
+    }, []);
+    
     const financeiro =[
-        {titulo: "Receitas", valor: "6.890,00", cor: 'var(--theme-success)'},
-        {titulo: "Despesas", valor: "2.450,00", cor: 'var(--theme-danger)'},
-        {titulo: "Lucro líquido", valor: "4.440,00", cor: 'var(--theme-title)'}
+        {titulo: "Receitas", valor: lucroTotal, cor: 'var(--theme-success)'},
+        {titulo: "Despesas", valor: despesaTotal, cor: 'var(--theme-danger)'},
+        {titulo: "Lucro líquido", valor: lucroTotal - despesaTotal, cor: 'var(--theme-title)'}
     ];
 
     return(
@@ -15,7 +39,7 @@ const CardFinanc = ({ className }) => {
                     {financeiro.map((item, index) => (
                         <div key={index}>
                             <h1 style={{ color: item.cor }}>{item.titulo}</h1>
-                            <p>{"R$ " + item.valor}</p>
+                            <p>{formatarMoeda(item.valor)}</p>
                         </div>
                     ))}
                 </div>

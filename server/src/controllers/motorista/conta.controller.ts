@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { CriarMotoristaSchema, DeletarMotoristaSchema, EditarMotoristaSchema, compararSenhaSchema } from "../../models/motorista/motorista.model.js"
+import { CriarMotoristaSchema, DeletarMotoristaSchema, EditarCapacidadeVanSchema, EditarEnderecoMotoristaSchema, EditarMotoristaSchema, Motorista, compararSenhaSchema } from "../../models/motorista/motorista.model.js"
 import { database } from "../../db/postgre.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
@@ -22,7 +22,7 @@ export const controllerConta = {
             });
         }
         // separando os dados
-        const { nome, credencial, email, senha } = dadosBrutos.data
+        const { nome, credencial, email, senha, capacidade_van, endereco, latitude, longitude } = dadosBrutos.data
 
         // verifica se oq veio foi cpf ou cnpj
         let metodo: "cnpj" | "cpf"
@@ -79,8 +79,8 @@ export const controllerConta = {
 
         try {
             //salvando arquivos no banco de dados
-            const query = `INSERT INTO motorista (nome, ${metodo === "cnpj" ? 'cnpj' : 'cpf'}, email, senha, tipo_pessoa, email_verificado) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
-            const valores: (string | boolean)[] = [nome, credencial, email, senhaHash]
+            const query = `INSERT INTO motorista (nome, ${metodo === "cnpj" ? 'cnpj' : 'cpf'}, email, senha, tipo_pessoa, email_verificado, capacidade_van, endereco, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
+            const valores: (string | boolean | number | null)[] = [nome, credencial, email, senhaHash]
 
             if (metodo === 'cnpj') {
                 valores.push('PJ')
@@ -88,6 +88,7 @@ export const controllerConta = {
                 valores.push('PF')
             }
             valores.push(false)
+            valores.push(capacidade_van, endereco, latitude, longitude)
 
             // finalmente pega os dados e faz o insert no banco de dados
             const { rows } = await database.query(query, valores)
@@ -192,10 +193,10 @@ export const controllerConta = {
             })
         }
         // determina se tal dado veio ou não e coloca a clausula dele
-        const { nome, email, credencial, senha, cod, senhaAtual } = dadosBrutos.data
+        const { nome, email, credencial, senha, cod, senhaAtual, endereco, capacidade_van } = dadosBrutos.data
         // Inicialização de arrays para conter os campos a serem modificados e seus valores correspondentes
         const campos: string[] = []
-        const valores: (string | number)[] = []
+        const valores: (string | number | null)[] = []
         let idCodigoEmail: number | undefined
 
         if (nome) {
@@ -283,6 +284,15 @@ export const controllerConta = {
             }
         }
 
+        if (endereco !== undefined) {
+            campos.push(`endereco = $${valores.length + 1}`)
+            valores.push(endereco)
+        }
+        if (capacidade_van !== undefined) {
+            campos.push(`capacidade_van = $${valores.length + 1}`)
+            valores.push(capacidade_van)
+        }
+
         // se nenhum campo tiver sido enviado, manda embora
         if (campos.length < 1) {
             return res.status(400).json({
@@ -302,7 +312,7 @@ export const controllerConta = {
             }
 
             //se chegou aqui, tudo ocorreu bem. hora de retornar.
-            const camposEditados = [nome, email, credencial, senha].filter((valor) => valor !== undefined).length
+            const camposEditados = [nome, email, credencial, senha, endereco, capacidade_van].filter((valor) => valor !== undefined).length
             return res.status(200).json({
                 'msg-code': camposEditados === 1
                     ? "ACCOUNT_EDITED_ONE_FIELD"
@@ -325,20 +335,24 @@ export const controllerConta = {
 
         // pega os dados do motorista e envia de volta
         try {
-            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado, google_id FROM motorista WHERE id = $1"
+            const query = "SELECT id, nome, email, COALESCE(cpf, cnpj) AS credencial, tipo_pessoa, excluido_em, email_verificado, google_id, endereco, capacidade_van, latitude, longitude FROM motorista WHERE id = $1"
             const { rows } = await database.query(query, [id])
             if (rows.length < 1) throw new Error("Nenhum dado retornado.")
 
             const motorista = rows[0]
 
-            // se o google id existir coloca que é google verificado, se não, coloca que não é
+            // identifica se a conta está vinculada ao Google
             if (!motorista.google_id) {
                 motorista.google_verificado = false
             } else {
                 motorista.google_verificado = true
             }
-            // deleta o google id do objeto
+            // deleta os dados sensiveis e internos do objeto antes de devolver
+            delete motorista.senha
             delete motorista.google_id
+            delete motorista.cpf
+            delete motorista.cnpj
+            delete motorista.criado_em
 
             return res.status(200).json({
                 'msg-code': "ACCOUNT_DATA_RECEIVED",
@@ -382,6 +396,102 @@ export const controllerConta = {
             console.error("Erro ao pegar senha hash do motorista no endpoint de compararSenha, erro: ", erro)
             return res.status(500).json({
                 'msg-code': "INTERNAL_SERVER_ERROR"
+            })
+        }
+    },
+    // endpoint pra editar o endereço e as coordenadas iniciais do motorista
+    editarEndereco: async (req: Request, res: Response) => {
+        // recebendo os dados do body
+        const dadosBrutos = EditarEnderecoMotoristaSchema.safeParse(req.body)
+
+        // validação de sempre
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para editar o endereço do motorista.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        // desestruturação
+        const { endereco, latitude, longitude } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // operação
+        try {
+            const { rows: [motorista] } = await database.query<Pick<Motorista, "id" | "endereco" | "latitude" | "longitude">>(
+                `
+                UPDATE motorista
+                SET endereco = $1, latitude = $2, longitude = $3
+                WHERE id = $4
+                RETURNING id, endereco, latitude, longitude
+                `,
+                [endereco, latitude, longitude, motoristaID]
+            )
+
+            // se não encontrou o motorista no banco
+            if (!motorista) {
+                return res.status(404).json({
+                    msg: "Motorista não encontrado."
+                })
+            }
+
+            // devolvendo pro usuario
+            return res.status(200).json({
+                msg: "Endereço do motorista atualizado com sucesso.",
+                motorista
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de editar endereço do motorista, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
+            })
+        }
+    },
+    // endpoint pra editar a capacidade da van do motorista
+    editarCapacidadeVan: async (req: Request, res: Response) => {
+        // recebendo os dados do body
+        const dadosBrutos = EditarCapacidadeVanSchema.safeParse(req.body)
+
+        // validação de sempre
+        if (!dadosBrutos.success) {
+            return res.status(400).json({
+                msg: "Dados inválidos para editar a capacidade da van.",
+                erro: dadosBrutos.error.format()
+            })
+        }
+
+        // desestruturação
+        const { capacidade_van } = dadosBrutos.data
+        const motoristaID = req.userId
+
+        // operação
+        try {
+            const { rows: [motorista] } = await database.query<Pick<Motorista, "id" | "capacidade_van">>(
+                `
+                UPDATE motorista
+                SET capacidade_van = $1
+                WHERE id = $2
+                RETURNING id, capacidade_van
+                `,
+                [capacidade_van, motoristaID]
+            )
+
+            // se não encontrou o motorista no banco
+            if (!motorista) {
+                return res.status(404).json({
+                    msg: "Motorista não encontrado."
+                })
+            }
+
+            // devolvendo pro usuario
+            return res.status(200).json({
+                msg: "Capacidade da van atualizada com sucesso.",
+                motorista
+            })
+        } catch (erro) {
+            console.error("Erro no endpoint de editar capacidade da van, erro: ", erro)
+            return res.status(500).json({
+                msg: "Erro Interno do Servidor."
             })
         }
     }

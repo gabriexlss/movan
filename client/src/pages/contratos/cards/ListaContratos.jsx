@@ -248,6 +248,7 @@ const ListaContratos = () => {
 
             {formularioAberto && (
                 <DialogContrato
+                    contratosExistentes={contratos}
                     onClose={() => setFormularioAberto(false)}
                     onSave={salvarContrato}
                 />

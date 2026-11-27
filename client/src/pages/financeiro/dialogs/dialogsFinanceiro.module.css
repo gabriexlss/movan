@@ -37,6 +37,35 @@
     gap: .75rem;
 }
 
+.detalhesMensalidade {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem;
+    border-radius: .4rem;
+    background: var(--theme-surface-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: .875rem;
+}
+
+.detalhesMensalidade dt {
+    color: var(--theme-muted);
+    font-size: .75rem;
+}
+
+.detalhesMensalidade dd {
+    color: var(--theme-text);
+    font-weight: 600;
+}
+
+.erroFormulario {
+    color: var(--theme-danger);
+    font-family: 'Poppins', sans-serif;
+    font-size: .875rem;
+    text-align: left;
+}
+
 .field {
     position: relative;
     min-width: 0;

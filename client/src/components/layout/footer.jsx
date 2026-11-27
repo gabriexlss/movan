@@ -5,7 +5,7 @@ import { GoHome } from 'react-icons/go';
 import { MdAltRoute, MdOutlineAccountBalanceWallet } from 'react-icons/md';
 import { BsFillPeopleFill } from 'react-icons/bs';
 import { CgProfile } from 'react-icons/cg';
-import { LuScrollText } from 'react-icons/lu';
+import { LuBookOpen, LuScrollText } from 'react-icons/lu';
 import { IoMdExit } from 'react-icons/io';
 import { useAuth } from '../../context/useAuth';
 import ThemeToggle from '../../theme/ThemeToggle';
@@ -39,6 +39,15 @@ const Footer = ({ ocultoNoCelular }) => {
                         </NavLink>
                     );
                 })}
+                <a
+                    href="/manual-do-usuario.pdf"
+                    className={`${styles['footer-link']} ${styles.manual}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <LuBookOpen className={styles['footer-icon']} aria-hidden="true" />
+                    <span>Manual de instruções</span>
+                </a>
             </nav>
             {user && (
                 <div className={styles.conta}>

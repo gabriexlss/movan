@@ -3,7 +3,15 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { carregarGooglePlaces } from '../../../services/googlePlaces'
 import styles from './CampoEnderecoAutocomplete.module.css'
 
-const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar, coordenadasPendentes = false }) => {
+const CampoEnderecoAutocomplete = ({
+    icon,
+    value,
+    onChange,
+    onSelecionar,
+    coordenadasPendentes = false,
+    labelPosition = 'border',
+    classNames = {},
+}) => {
     const fieldId = useId()
     const [sugestoes, setSugestoes] = useState([])
     const [erro, setErro] = useState('')
@@ -117,12 +125,21 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar, coorde
         }
     }
 
+    const label = (
+        <label htmlFor={fieldId} className={classNames.label}>
+            {labelPosition === 'above' && icon}
+            Endereço
+        </label>
+    )
+
     return ( //aqui é o retorno do componente, que é o que vai ser renderizado na tela
-        <>
-            <div className={styles.autocompleteField}>
-                <label htmlFor={fieldId}>Endereço</label>
-                <div className={styles.inputWrapper}>
-                    <span className={styles.fieldIcon} aria-hidden="true">{icon}</span>
+        <div className={`${styles.autocompleteRoot} ${classNames.field ?? styles.autocompleteField}`}>
+            {labelPosition !== 'floating' && label}
+            <div className={styles.inputArea}>
+                <div className={classNames.inputWrapper ?? (labelPosition === 'floating' ? undefined : styles.inputWrapper)}>
+                    {labelPosition === 'border' && (
+                        <span className={styles.fieldIcon} aria-hidden="true">{icon}</span>
+                    )}
                     <input
                         id={fieldId}
                         value={value}
@@ -133,7 +150,7 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar, coorde
                             requisicaoAtual.current += 1
                             setSugestoes([])
                         }}
-                        placeholder="Digite e escolha um endereço"
+                        placeholder={labelPosition === 'floating' ? ' ' : 'Digite e escolha um endereço'}
                         autoComplete="off"
                         role="combobox"
                         aria-autocomplete="list"
@@ -142,6 +159,7 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar, coorde
                         aria-activedescendant={sugestoes[sugestaoAtiva] ? `${fieldId}-sugestao-${sugestaoAtiva}` : undefined}
                         required
                     />
+                    {labelPosition === 'floating' && label}
                 </div>
 
                 {sugestoes.length > 0 && (
@@ -156,13 +174,12 @@ const CampoEnderecoAutocomplete = ({ icon, value, onChange, onSelecionar, coorde
                         ))}
                     </ul>
                 )}
-
-                {erro && <p className={styles.autocompleteError} role="alert">{erro}</p>}
             </div>
+            {erro && <p className={styles.autocompleteError} role="alert">{erro}</p>}
             {coordenadasPendentes && (
                 <p className={styles.coordenadasPendentes}>Escolha uma sugestão para registrar as coordenadas.</p>
             )}
-        </>
+        </div>
     )
 }
 

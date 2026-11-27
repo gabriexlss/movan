@@ -2,6 +2,20 @@ import { useEffect, useImperativeHandle, useRef } from 'react'
 import Atrament, { MODE_DISABLED, MODE_DRAW } from 'atrament'
 import styles from './campoAssinatura.module.css'
 
+let cacheSuportaWebp = null
+const suportaExportacaoWebp = () => {
+    if (cacheSuportaWebp !== null) return cacheSuportaWebp
+    try {
+        const canvas = document.createElement('canvas')
+        canvas.width = 1
+        canvas.height = 1
+        cacheSuportaWebp = canvas.toDataURL('image/webp').startsWith('data:image/webp')
+    } catch {
+        cacheSuportaWebp = false
+    }
+    return cacheSuportaWebp
+}
+
 const CampoAssinatura = ({ ref, bloqueado = false, onChange, label }) => {
     const canvasRef = useRef(null)
     const desenhoRef = useRef(null)
@@ -84,13 +98,15 @@ const CampoAssinatura = ({ ref, bloqueado = false, onChange, label }) => {
                     reject(new Error('Desenhe sua assinatura antes de concluir.'))
                     return
                 }
+                const formato = suportaExportacaoWebp() ? 'image/webp' : 'image/png'
+                const qualidade = formato === 'image/webp' ? 0.95 : undefined
                 canvasRef.current.toBlob((imagem) => {
-                    if (!imagem || imagem.type !== 'image/webp' || imagem.size > 1024 * 1024) {
+                    if (!imagem || !['image/webp', 'image/png'].includes(imagem.type) || imagem.size > 1024 * 1024) {
                         reject(new Error('Não foi possível preparar a assinatura. Tente novamente.'))
                         return
                     }
                     resolve(imagem)
-                }, 'image/webp', 0.95)
+                }, formato, qualidade)
             })
         },
     }), [bloqueado, onChange])

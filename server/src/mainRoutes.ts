@@ -7,6 +7,7 @@ import rotasAluno from "./routes/aluno.route.js"
 import rotasContrato from "./routes/contrato/contrato.route.js"
 import { middlewareAutenticar } from './middlewares/autenticacao.middleware.js';
 import rotasRota from './routes/rotas.route.js'
+import rotasFinanceiro from './routes/financeiro/financeiro.route.js'
 
 const router = Router();
 
@@ -35,5 +36,8 @@ router.use('/contrato', rotasContrato)
 
 // rota para os endpoints relacionados as rotas. (puts, os dois são rotas)
 router.use('/rota', middlewareAutenticar, rotasRota)
+
+// rota para os endpoints relacionados ao financeiro
+router.use('/financeiro', middlewareAutenticar, rotasFinanceiro)
 
 export default router;

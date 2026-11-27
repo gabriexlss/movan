@@ -84,11 +84,16 @@
 }
 
 .ocultoNoCelular,
-.conta {
+.conta,
+.manual {
     display: none;
 }
 
 @media (min-width: 64rem) {
+    .manual {
+        display: flex;
+    }
+
     .footer {
         position: static;
         display: flex;

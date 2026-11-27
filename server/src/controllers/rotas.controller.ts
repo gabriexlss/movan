@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { database } from "../db/postgre.js";
-import { CriarRota, FiltrosRotaSchema, OtimizarRotaSchema, Rota } from "../models/rotas/rota.js";
+import { CriarRota, FiltrosRotaSchema, Rota } from "../models/rotas/rota.js";
 import { PoolClient } from "pg";
 import { Aluno } from "../models/aluno.model.js";
 import { Escola } from "../models/escola/escola.model.js";
@@ -352,18 +352,18 @@ export const controllerRotas = {
         }
     },
     otimizarRota: async (req: Request, res: Response) => {
-        // recebe o id via params e as coordenadas do motorista via body ou query
-        const dadosBrutos = OtimizarRotaSchema.safeParse({ ...req.params, ...req.query, ...req.body })
+        // pega o id da rota pelos params
+        const idBruto = ParamsSchema.safeParse(req.params)
 
-        // validação
-        if (!dadosBrutos.success) {
+        // validação de sempre
+        if (!idBruto.success) {
             return res.status(400).json({
-                msg: "ID Inválido",
-                erro: dadosBrutos.error.format()
+                msg: "ID da rota inválido.",
+                erro: idBruto.error.format()
             })
         }
         // desestruturação
-        const { id: rotaID, latitude: latitudeMotorista, longitude: longitudeMotorista } = dadosBrutos.data
+        const { id: rotaID } = idBruto.data
 
         // começa a operação
         const cliente = await database.connect()
@@ -371,8 +371,8 @@ export const controllerRotas = {
             // inicia a operação
             await cliente.query('BEGIN')
 
-            // chama o service pra otimizar
-            await otimizarRota({ rotaID, req, coordenadasMotorista: { latitude: latitudeMotorista, longitude: longitudeMotorista }, cliente })
+            // chama o service pra otimizar (já busca as coordenadas iniciais do motorista direto no banco)
+            await otimizarRota({ rotaID, req, cliente })
 
             // se não teve nenhum erro, dá commit
             await cliente.query('COMMIT')
@@ -388,6 +388,10 @@ export const controllerRotas = {
             if (erro instanceof Error) {
                 // aq tem um switch com os possiveis tipos de erro
                 switch (erro.message) {
+                    case 'DRIVER_COORDINATES_NOT_FOUND':
+                        return res.status(400).json({
+                            msg: "Endereço do motorista não cadastrado. Cadastre seu endereço antes de otimizar a rota."
+                        })
                     case 'DRIVER_COORDINATES_INVALID':
                         return res.status(400).json({
                             msg: "Coordenadas do motorista inválidas."
@@ -560,7 +564,7 @@ export const controllerRotas = {
         const { id: rotaID } = idBruto.data
         const motoristaID = req.userId
 
-        // coordenadas opcionais do motorista (via query ou body) caso queira incluir a saída inicial da van
+        // coordenadas opcionais do motorista via query (gps atual); se não vierem, o service usa as coordenadas salvas no banco
         const latBruta = req.query['latitude']
         const lngBruta = req.query['longitude']
         const coordenadasMotorista = (latBruta !== undefined && lngBruta !== undefined)
@@ -586,6 +590,10 @@ export const controllerRotas = {
                     case 'DRIVER_COORDINATES_INVALID':
                         return res.status(400).json({
                             msg: "Coordenadas do motorista inválidas."
+                        })
+                    case 'MOTORISTA_NOT_FOUND':
+                        return res.status(404).json({
+                            msg: "Motorista não encontrado."
                         })
                     case 'ALUNO_COORDINATES_INVALID':
                         return res.status(400).json({

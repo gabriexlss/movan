@@ -18,19 +18,37 @@ export const MotoristaSchema = z.object({
     email_verificado: z.boolean("NOT_BOOLEAN"),
     excluido_em: z.string("NOT_STRING").datetime("INVALID_DATE").nullish(),
     login: z.string("NOT_STRING").min(3, "LOGIN_TOO_SHORT").max(255, "LOGIN_TOO_LONG"),
-    capacidade_van: z.number().positive()
+    capacidade_van: z.coerce
+        .number("NOT_NUMBER")
+        .int("VAN_CAPACITY_INVALID")
+        .positive("VAN_CAPACITY_INVALID")
+        .max(2147483647, "VAN_CAPACITY_INVALID"),
+    endereco: z
+        .string("NOT_STRING")
+        .trim()
+        .min(5, "Endereço deve ter pelo menos 5 caracteres.")
+        .max(500, "ADDRESS_TOO_LONG")
+        .nullish(),
+    latitude: UtilSchema.shape.latitude.nullish(),
+    longitude: UtilSchema.shape.longitude.nullish()
 });
 export const CriarMotoristaSchema = MotoristaSchema.pick({
     nome: true,
     credencial: true,
     email: true,
     senha: true,
-});
+    capacidade_van: true,
+    endereco: true,
+    latitude: true,
+    longitude: true,
+}).required({ capacidade_van: true, endereco: true, latitude: true, longitude: true });
 export const LoginMotoristaSchema = MotoristaSchema.pick({
     login: true,
     senha: true
 })
 export const EditarMotoristaSchema = CriarMotoristaSchema.partial().extend({
+    endereco: MotoristaSchema.shape.endereco.optional(),
+    capacidade_van: MotoristaSchema.shape.capacidade_van.optional(),
     cod: validarCodigoSchema.shape.cod.optional(),
     senhaAtual: CriarMotoristaSchema.shape.senha.optional()
 }).refine((dados) => !dados.email || !!dados.cod, {
@@ -46,9 +64,25 @@ export const DeletarMotoristaSchema = MotoristaSchema.pick({
 export const compararSenhaSchema = MotoristaSchema.pick({
     senha: true
 })
+// schema pra editar o endereço e as coordenadas iniciais do motorista
+export const EditarEnderecoMotoristaSchema = z.object({
+    endereco: z
+        .string("NOT_STRING")
+        .trim()
+        .min(5, "Endereço deve ter pelo menos 5 caracteres.")
+        .max(500, "ADDRESS_TOO_LONG"),
+    latitude: UtilSchema.shape.latitude,
+    longitude: UtilSchema.shape.longitude
+})
+// schema pra editar a capacidade da van do motorista
+export const EditarCapacidadeVanSchema = MotoristaSchema.pick({
+    capacidade_van: true
+})
 export type Motorista = z.infer<typeof MotoristaSchema>
 export type compararSenha = z.infer<typeof compararSenhaSchema>
 export type DeletarMotorista = z.infer<typeof DeletarMotoristaSchema>
 export type LoginMotorista = z.infer<typeof LoginMotoristaSchema>
 export type CriarMotorista = z.infer<typeof CriarMotoristaSchema>
 export type EditarMotorista = z.infer<typeof EditarMotoristaSchema>
+export type EditarEnderecoMotorista = z.infer<typeof EditarEnderecoMotoristaSchema>
+export type EditarCapacidadeVan = z.infer<typeof EditarCapacidadeVanSchema>

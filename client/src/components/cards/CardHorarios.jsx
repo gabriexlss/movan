@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import DefaultCard from './DefaultCard';
 import styles from './CardHorarios.module.css';
 
@@ -6,21 +6,57 @@ import { TbSunFilled, TbSunset2Filled } from "react-icons/tb";
 import { IoMoon } from "react-icons/io5";
 import { listarTurnosEscola } from '../../services/turnosEscola';
 import { listarRotas, obterPontosRota } from '../../services/rotas';
+import { obterDiaSemanaAtual } from '../../utils/periodoRota';
 
-const obterDiaSemanaAtual = () => {
-    const dia = new Date().getDay()
-    const mapa = { 1: 'SEGUNDA', 2: 'TERÇA', 3: 'QUARTA', 4: 'QUINTA', 5: 'SEXTA' }
-    return mapa[dia] || 'SEGUNDA'
+const calcularHorariosPorTurno = (rotasDoDia = [], pontosPorRotaId = {}, todosTurnos = []) => {
+    const escolasPorTurno = { MANHA: new Set(), TARDE: new Set(), NOITE: new Set() }
+    const turnoIdsPorTurno = { MANHA: new Set(), TARDE: new Set(), NOITE: new Set() }
+
+    rotasDoDia.forEach((rota) => {
+        const pontos = pontosPorRotaId?.[rota.id] || pontosPorRotaId?.[String(rota.id)] || []
+        pontos.forEach((p) => {
+            if (p.escola_id && escolasPorTurno[rota.turno]) {
+                escolasPorTurno[rota.turno].add(String(p.escola_id))
+                if (p.escola_turno_id) {
+                    turnoIdsPorTurno[rota.turno].add(String(p.escola_turno_id))
+                }
+            }
+        })
+    })
+
+    const resultadoCalculado = {}
+
+    ;['MANHA', 'TARDE', 'NOITE'].forEach((t) => {
+        const idsEscolas = escolasPorTurno[t]
+        const idsTurnos = turnoIdsPorTurno[t]
+        if (idsEscolas && idsEscolas.size > 0) {
+            const turnosRelevantes = todosTurnos.filter((turno) => (
+                idsTurnos.has(String(turno.id))
+                || (idsEscolas.has(String(turno.escola_id)) && String(turno.turno).toUpperCase() === t)
+            ))
+
+            if (turnosRelevantes.length > 0) {
+                const entradas = turnosRelevantes.map((tr) => String(tr.hora_entrada).slice(0, 5)).sort()
+                const saidas = turnosRelevantes.map((tr) => String(tr.hora_saida).slice(0, 5)).sort()
+                const menorEntrada = entradas[0]
+                const maiorSaida = saidas[saidas.length - 1]
+                resultadoCalculado[t] = `${menorEntrada} - ${maiorSaida}`
+            }
+        }
+    })
+
+    return resultadoCalculado
 }
 
-const CardHorarios = () => {
-    const [horariosPorTurno, setHorariosPorTurno] = useState({
+const CardHorarios = ({ dadosHome }) => {
+    const [horariosInternos, setHorariosInternos] = useState({
         MANHA: null,
         TARDE: null,
         NOITE: null,
     })
 
     useEffect(() => {
+        if (dadosHome) return undefined
         let montado = true
 
         const carregar = async () => {
@@ -31,48 +67,14 @@ const CardHorarios = () => {
                     listarTurnosEscola(),
                 ])
 
-                const pontosPromises = rotasDoDia.map((r) => obterPontosRota(r.id))
-                const resultadosPontos = await Promise.all(pontosPromises)
-
-                // Agrupa escolas e turnos atendidos por turno da rota
-                const escolasPorTurno = { MANHA: new Set(), TARDE: new Set(), NOITE: new Set() }
-                const turnoIdsPorTurno = { MANHA: new Set(), TARDE: new Set(), NOITE: new Set() }
-
-                rotasDoDia.forEach((rota, idx) => {
-                    const pontos = resultadosPontos[idx] || []
-                    pontos.forEach((p) => {
-                        if (p.escola_id && escolasPorTurno[rota.turno]) {
-                            escolasPorTurno[rota.turno].add(String(p.escola_id))
-                            if (p.escola_turno_id) {
-                                turnoIdsPorTurno[rota.turno].add(String(p.escola_turno_id))
-                            }
-                        }
-                    })
-                })
-
-                const resultadoCalculado = {}
-
-                ;['MANHA', 'TARDE', 'NOITE'].forEach((t) => {
-                    const idsEscolas = escolasPorTurno[t]
-                    const idsTurnos = turnoIdsPorTurno[t]
-                    if (idsEscolas && idsEscolas.size > 0) {
-                        const turnosRelevantes = todosTurnos.filter((turno) => (
-                            idsTurnos.has(String(turno.id))
-                            || (idsEscolas.has(String(turno.escola_id)) && String(turno.turno).toUpperCase() === t)
-                        ))
-
-                        if (turnosRelevantes.length > 0) {
-                            const entradas = turnosRelevantes.map((tr) => String(tr.hora_entrada).slice(0, 5)).sort()
-                            const saidas = turnosRelevantes.map((tr) => String(tr.hora_saida).slice(0, 5)).sort()
-                            const menorEntrada = entradas[0]
-                            const maiorSaida = saidas[saidas.length - 1]
-                            resultadoCalculado[t] = `${menorEntrada} - ${maiorSaida}`
-                        }
-                    }
-                })
+                const paresPontos = await Promise.all(
+                    rotasDoDia.map(async (r) => [r.id, await obterPontosRota(r.id)]),
+                )
+                const pontosPorRotaId = Object.fromEntries(paresPontos)
+                const resultadoCalculado = calcularHorariosPorTurno(rotasDoDia, pontosPorRotaId, todosTurnos)
 
                 if (montado) {
-                    setHorariosPorTurno(resultadoCalculado)
+                    setHorariosInternos(resultadoCalculado)
                 }
             } catch {
                 // Mantém valores padrão em caso de falha
@@ -84,7 +86,13 @@ const CardHorarios = () => {
         return () => {
             montado = false
         }
-    }, [])
+    }, [dadosHome])
+
+    const horariosPorTurno = useMemo(() => {
+        if (!dadosHome) return horariosInternos
+        if (dadosHome.carregando || dadosHome.erroRotas || dadosHome.erroTurnos) return {}
+        return calcularHorariosPorTurno(dadosHome.rotasDoDia, dadosHome.pontosPorRotaId, dadosHome.turnosEscola)
+    }, [dadosHome, horariosInternos])
 
     const horarios = [
         {
