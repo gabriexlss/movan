@@ -19,8 +19,8 @@ const ResumoFinanc = ({ className, periodo, atualizacao }) => {
                 const data = `${ano}-${mes}`
 
                 const [lucro, despesa, lucroMes, despesaMes] = await Promise.all([
-                    obterSumarioFinanceiro({ data, tipo: 'ENTRADA' }),
-                    obterSumarioFinanceiro({ data, tipo: 'SAIDA' }),
+                    obterSumarioFinanceiro({ tipo: 'ENTRADA' }),
+                    obterSumarioFinanceiro({ tipo: 'SAIDA' }),
                     obterSumarioFinanceiro({ data, tipo: 'ENTRADA' }),
                     obterSumarioFinanceiro({ data, tipo: 'SAIDA' })
                 ])
